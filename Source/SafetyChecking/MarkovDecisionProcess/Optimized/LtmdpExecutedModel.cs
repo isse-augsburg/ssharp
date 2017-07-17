@@ -89,6 +89,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// </summary>
 		public override unsafe int TransitionSize => sizeof(LtmdpTransition);
 
+		public override Formula[] Formulas => RuntimeModel.Formulas;
+
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>

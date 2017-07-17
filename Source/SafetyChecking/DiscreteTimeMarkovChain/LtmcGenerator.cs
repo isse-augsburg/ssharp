@@ -32,7 +32,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	/// <summary>
 	///   Generates a <see cref="LabeledTransitionMarkovChain" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class LtmcGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal class LtmcGenerator : ModelTraverser
 	{
 		private readonly LabeledTransitionMarkovChain _markovChain;
 
@@ -43,19 +43,19 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmcGenerator(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
+		internal LtmcGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration, LabeledTransitionMarkovChain.TransitionSize)
 		{
 			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates,Context.ModelCapacity.NumberOfTransitions);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 			
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder<TExecutableModel>(_markovChain));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
 			if (terminateEarlyCondition != null)
 			{
 				_markovChain.CreateStutteringState(Context.StutteringStateIndex);
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
-				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier<TExecutableModel>(terminalteEarlyFunc));
+				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
 			}
 		}
 

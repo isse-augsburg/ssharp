@@ -56,8 +56,8 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var result = SafetySharpModelChecker.CheckInvariant(model, !(model.Train.Position < Model.CrossingPosition && model.Train.Speed == 0));
 			result.FormulaHolds.Should().BeFalse();
-			result.CounterExample.Should().NotBeNull();
-			result.CounterExample.Save("counter examples/railroad crossing/train can stop before crossing");
+			result.ExecutableCounterExample.Should().NotBeNull();
+			result.ExecutableCounterExample.Save("counter examples/railroad crossing/train can stop before crossing");
 		}
 
 		[Test]
@@ -67,8 +67,8 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var result = SafetySharpModelChecker.CheckInvariant(model, !(model.TrainIsAtCrossing && model.CrossingIsSecured));
 			result.FormulaHolds.Should().BeFalse();
-			result.CounterExample.Should().NotBeNull();
-			result.CounterExample.Save("counter examples/railroad crossing/train can pass secured crossing");
+			result.ExecutableCounterExample.Should().NotBeNull();
+			result.ExecutableCounterExample.Save("counter examples/railroad crossing/train can pass secured crossing");
 		}
 
 		[Test]
@@ -78,8 +78,8 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var result = SafetySharpModelChecker.CheckInvariant(model, !(model.TrainIsAtCrossing && !model.CrossingIsSecured));
 			result.FormulaHolds.Should().BeFalse();
-			result.CounterExample.Should().NotBeNull();
-			result.CounterExample.Save("counter examples/railroad crossing/train can pass unsecured crossing");
+			result.ExecutableCounterExample.Should().NotBeNull();
+			result.ExecutableCounterExample.Save("counter examples/railroad crossing/train can pass unsecured crossing");
 		}
 	}
 }

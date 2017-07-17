@@ -23,20 +23,21 @@
 namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
 	using System;
+	using AnalysisModel;
 	using ExecutableModel;
 	using Utilities;
 
 	/// <summary>
 	///   Provides details about an unhandled exception that was thrown during model checking.
 	/// </summary>
-	public class AnalysisException<TExecutableModel> : Exception where TExecutableModel : ExecutableModel<TExecutableModel>
+	public class AnalysisException : Exception
 	{
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="exception">The unhandled exception that was thrown during model checkinig.</param>
 		/// <param name="counterExample">The path through the model that leads to the <paramref name="exception" /> being thrown.</param>
-		public AnalysisException(Exception exception, CounterExample<TExecutableModel> counterExample)
+		public AnalysisException(Exception exception, CounterExample counterExample)
 			: base($"Error: An unhandled exception of type '{exception.GetType().FullName}' was " +
 				   $"thrown during model checking: {exception.Message}", exception)
 		{
@@ -47,6 +48,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   Gets the path through the model that leads to the <see cref="Exception.InnerException" /> being thrown, if any.
 		/// </summary>
-		public CounterExample<TExecutableModel> CounterExample { get; }
+		public CounterExample CounterExample { get; }
 	}
 }

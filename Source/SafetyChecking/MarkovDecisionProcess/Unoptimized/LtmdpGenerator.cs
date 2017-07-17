@@ -31,7 +31,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	/// <summary>
 	///   Generates a <see cref="LabeledTransitionMarkovDecisionProcessOld" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class LtmdpGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal class LtmdpGenerator<TExecutableModel> : ModelTraverser
 	{
 		private readonly LabeledTransitionMarkovDecisionProcess _mdp;
 
@@ -42,19 +42,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal LtmdpGenerator(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
+		internal LtmdpGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
 		{
 			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<TExecutableModel>(_mdp, configuration));
+			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(_mdp, configuration));
 			if (terminateEarlyCondition != null)
 			{
 				_mdp.CreateStutteringState(Context.StutteringStateIndex);
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_mdp.StateFormulaLabels, terminateEarlyCondition);
-				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier<TExecutableModel>(terminalteEarlyFunc));
+				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
 			}
 		}
 

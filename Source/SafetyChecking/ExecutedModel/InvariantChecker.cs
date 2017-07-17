@@ -30,11 +30,12 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	using FaultMinimalKripkeStructure;
 	using Utilities;
 	using Formula;
+	using StateGraphModel;
 
 	/// <summary>
 	///   Checks whether an invariant holds for all states of an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class InvariantChecker<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class InvariantChecker<TExecutableModel> : ModelTraverser where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Initializes a new instance.
@@ -43,10 +44,10 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
-		internal InvariantChecker(AnalysisModelCreator<TExecutableModel> createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
+		internal InvariantChecker(AnalysisModelCreator createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
 			: base(createModel, output, configuration, 0)
 		{
-			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationByIndexAction<TExecutableModel>(formulaIndex));
+			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationByIndexAction(formulaIndex));
 		}
 
 		/// <summary>
@@ -56,30 +57,51 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateFormula">The analyzed stateFormula.</param>
-		internal InvariantChecker(AnalysisModelCreator<TExecutableModel> createModel, Action<string> output, AnalysisConfiguration configuration, Formula stateFormula)
+		internal InvariantChecker(AnalysisModelCreator createModel, Action<string> output, AnalysisConfiguration configuration, Formula stateFormula)
 			: base(createModel, output, configuration,0)
 		{
-			var formulasToCheck = AnalyzedModels.First().RuntimeModel.Formulas;
+			var formulasToCheck = AnalyzedModels.First().Formulas;
 
-			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction<TExecutableModel>(formulasToCheck,stateFormula));
+			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction(formulasToCheck,stateFormula));
 		}
 
 		/// <summary>
 		///   Checks whether the model's invariant holds for all states.
 		/// </summary>
-		internal AnalysisResult<TExecutableModel> Check()
+		internal InvariantAnalysisResult<TExecutableModel> Check()
 		{
 			Context.Output($"Performing invariant check.");
-			TraverseModelAndReport();
+			var analyzedModel = AnalyzedModels.First();
+			TExecutableModel executableModel;
+			if (analyzedModel is ExecutedModel<TExecutableModel>)
+			{
+				executableModel = ((ExecutedModel<TExecutableModel>)analyzedModel).RuntimeModel;
+			}
+			else if (analyzedModel is StateGraphModel<TExecutableModel>)
+			{
+				executableModel = ((StateGraphModel<TExecutableModel>)analyzedModel).RuntimeModel;
+			}
+			else
+			{
+				throw new NotImplementedException();
+			}
 			
+			
+			TraverseModelAndReport();
+
+			var executableCounterExample = Context.CounterExample!=null
+				? new ExecutableCounterExample<TExecutableModel>(executableModel, Context.CounterExample)
+				: null;
 
 			if (!Context.FormulaIsValid && !Context.Configuration.ProgressReportsOnly)
 				Context.Output("Invariant violation detected.");
 
-			return new AnalysisResult<TExecutableModel>
+			return new InvariantAnalysisResult<TExecutableModel>
 			{
 				FormulaHolds = Context.FormulaIsValid,
+				ExecutableModel = executableModel,
 				CounterExample = Context.CounterExample,
+				ExecutableCounterExample = executableCounterExample,
 				StateCount = Context.StateCount,
 				TransitionCount = Context.TransitionCount,
 				ComputedTransitionCount = Context.ComputedTransitionCount,

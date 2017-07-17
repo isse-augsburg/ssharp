@@ -48,14 +48,14 @@ namespace Tests.DiscreteTimeMarkovChain
 
 
 		internal LabeledTransitionMarkovChain Ltmc { get; }
-		internal LabeledTransitionMarkovChain.LtmcBuilder<SimpleExecutableModel> LtmcBuilder { get; }
+		internal LabeledTransitionMarkovChain.LtmcBuilder LtmcBuilder { get; }
 
 		public LtmcTestBuilder()
 		{
 			_transitionBuffer.Resize(TransitionCapacity * sizeof(LtmcTransition), zeroMemory: false);
 			_transitions = (LtmcTransition*)_transitionBuffer.Pointer;
 			Ltmc = new LabeledTransitionMarkovChain(StateCapacity, TransitionCapacity);
-			LtmcBuilder = new LabeledTransitionMarkovChain.LtmcBuilder<SimpleExecutableModel>(Ltmc);
+			LtmcBuilder = new LabeledTransitionMarkovChain.LtmcBuilder(Ltmc);
 		}
 
 		internal void CreateTransition(bool isFormulaSatisfied, int targetStateIndex, double p)

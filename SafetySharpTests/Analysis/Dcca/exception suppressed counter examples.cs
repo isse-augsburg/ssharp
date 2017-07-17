@@ -40,7 +40,7 @@ namespace Tests.Analysis.Dcca
 
 			if ((SafetyAnalysisBackend)Arguments[0] == SafetyAnalysisBackend.FaultOptimizedStateGraph)
 			{
-				var exception = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => Dcca(true, new C()));
+				var exception = Should.Throw<AnalysisException>(() => Dcca(true, new C()));
 				exception.CounterExample.ShouldBeNull();
 			}
 			else

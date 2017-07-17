@@ -42,11 +42,11 @@ namespace Tests
 	{
 		public abstract void CreateModelChecker(bool suppressCounterExampleGeneration,Action<string> logAction);
 
-		public abstract AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants);
+		public abstract InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants);
 
-		public abstract AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
+		public abstract InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
 
-		public abstract AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
+		public abstract InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
 	}
 
 	public class AnalysisTestsWithLtsMin: AnalysisTestsVariant
@@ -61,17 +61,17 @@ namespace Tests
 			modelChecker.OutputWritten += logAction;
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			return modelChecker.Check(createModel, formula);
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			return modelChecker.CheckInvariant(createModel, formula);
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
 			throw new NotImplementedException();
 		}
@@ -92,17 +92,17 @@ namespace Tests
 			modelChecker.Configuration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel,Formula formula)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel,Formula formula)
 		{
 			return modelChecker.CheckInvariant(createModel, formula);
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
 			return modelChecker.CheckInvariants(createModel, invariants);
 		}
@@ -123,12 +123,12 @@ namespace Tests
 			modelChecker.Configuration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			var formulaIndex = Array.FindIndex(createModel.StateFormulasToCheckInBaseModel, stateFormula =>
 				{
@@ -142,7 +142,7 @@ namespace Tests
 			return modelChecker.CheckInvariant(createModel, formulaIndex);
 		}
 
-		public override AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
+		public override InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
 			return modelChecker.CheckInvariants(createModel, invariants);
 		}

@@ -20,18 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.AnalysisModel
-{
-	using System;
-	using ExecutableModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-	internal class AnalysisModelCreator
+namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
+{
+	using System.Linq.Expressions;
+	using AnalysisModel;
+	using ExecutableModel;
+	using Formula;
+
+	internal unsafe class LtmcReexecuteExecutableModel 
 	{
-		public Func<AnalysisModel> Create { get; }
-		
-		public AnalysisModelCreator(Func<AnalysisModel> creator)
-		{
-			Create = creator;
-		}
 	}
 }

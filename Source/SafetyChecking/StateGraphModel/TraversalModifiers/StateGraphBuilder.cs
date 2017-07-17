@@ -31,7 +31,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 	/// <summary>
 	///   Builds up a <see cref="StateGraph" /> instance during model traversal.
 	/// </summary>
-	internal sealed class StateGraphBuilder<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class StateGraphBuilder<TExecutableModel> : IBatchedTransitionAction where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly StateGraph<TExecutableModel> _stateGraph;
 
@@ -58,7 +58,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="areInitialTransitions">
 		///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 		/// </param>
-		public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
+		public void ProcessTransitions(TraversalContext context, Worker worker, int sourceState,
 									   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
 		{
 			_stateGraph.AddStateInfo(sourceState, areInitialTransitions, transitions, transitionCount);

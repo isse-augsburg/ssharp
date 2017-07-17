@@ -34,15 +34,15 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// <summary>
 	///   Represents a thread that checks for invariant violations.
 	/// </summary>
-	internal sealed unsafe class Worker<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed unsafe class Worker : DisposableObject
 	{
-		private readonly TraversalContext<TExecutableModel> _context;
+		private readonly TraversalContext _context;
 		private readonly int _index;
 		private readonly StateStack _stateStack;
-		private IBatchedTransitionAction<TExecutableModel>[] _batchedTransitionActions;
-		private IStateAction<TExecutableModel>[] _stateActions;
-		private ITransitionAction<TExecutableModel>[] _transitionActions;
-		private ITransitionModifier<TExecutableModel>[] _transitionModifiers;
+		private IBatchedTransitionAction[] _batchedTransitionActions;
+		private IStateAction[] _stateActions;
+		private ITransitionAction[] _transitionActions;
+		private ITransitionModifier[] _transitionModifiers;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -51,7 +51,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="context">The context the model is traversed in.</param>
 		/// <param name="stateStack">The state stack that should be used by the worker.</param>
 		/// <param name="model">The model that the worker should analyze.</param>
-		public Worker(int index, TraversalContext<TExecutableModel> context, StateStack stateStack, AnalysisModel<TExecutableModel> model)
+		public Worker(int index, TraversalContext context, StateStack stateStack, AnalysisModel model)
 		{
 			Requires.NotNull(context, nameof(context));
 			Requires.NotNull(stateStack, nameof(stateStack));
@@ -67,7 +67,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   Gets the model that is analyzed by the worker.
 		/// </summary>
-		public AnalysisModel<TExecutableModel> Model { get; }
+		public AnalysisModel Model { get; }
 
 		/// <summary>
 		///   Computes the model's initial states.

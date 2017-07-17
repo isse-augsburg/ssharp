@@ -39,8 +39,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   Builds up a <see cref="LabeledTransitionMarkovChain" /> instance during model traversal.
 		///   Note: This only works single threaded
 		/// </summary>
-		internal class LtmcBuilder<TExecutableModel> : IBatchedTransitionAction<TExecutableModel>
-			where TExecutableModel : ExecutableModel<TExecutableModel>
+		internal class LtmcBuilder : IBatchedTransitionAction
 		{
 			private readonly LabeledTransitionMarkovChain _markovChain;
 
@@ -178,7 +177,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			/// <param name="areInitialTransitions">
 			///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 			/// </param>
-			public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
+			public void ProcessTransitions(TraversalContext context, Worker worker, int sourceState,
 										   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
 			{
 				// Note, other threads might access _markovChain at the same time

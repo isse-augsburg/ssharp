@@ -39,8 +39,8 @@ namespace Tests
 
 	public abstract class FaultActivationTestObject : TestObject
 	{
-		private AnalysisResult<SafetySharpRuntimeModel> _result;
-		protected CounterExample<SafetySharpRuntimeModel> CounterExample => _result.CounterExample;
+		private InvariantAnalysisResult<SafetySharpRuntimeModel> _result;
+		protected ExecutableCounterExample<SafetySharpRuntimeModel> CounterExample => _result.ExecutableCounterExample;
 		protected int StateCount => _result.StateCount;
 		protected long TransitionCount => _result.TransitionCount;
 		protected long ComputedTransitionCount => _result.ComputedTransitionCount;
@@ -54,7 +54,7 @@ namespace Tests
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
 
-			var analysisModelCreator=new AnalysisModelCreator<SafetySharpRuntimeModel>(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration));
+			var analysisModelCreator=new AnalysisModelCreator(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration));
 
 			var checker = new InvariantChecker<SafetySharpRuntimeModel>(analysisModelCreator,
 				s => Output.Log("{0}", s),

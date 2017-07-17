@@ -36,13 +36,13 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// <summary>
 	///   A base class for model traversers that travserse an <see cref="AnalysisModel" /> to carry out certain actions.
 	/// </summary>
-	internal abstract class ModelTraverser<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal abstract class ModelTraverser: DisposableObject
 	{
 		public const int DeriveTransitionSizeFromModel = -1;
 
 		private readonly LoadBalancer _loadBalancer;
 		private readonly StateStorage _states;
-		private readonly Worker<TExecutableModel>[] _workers;
+		private readonly Worker[] _workers;
 		private readonly TimeSpan _initializationTime;
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal ModelTraverser(AnalysisModelCreator<TExecutableModel> createModel, Action<string> output, AnalysisConfiguration configuration, int transitionSize)
+		internal ModelTraverser(AnalysisModelCreator createModel, Action<string> output, AnalysisConfiguration configuration, int transitionSize)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(output, nameof(output));
@@ -64,8 +64,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			var stacks = new StateStack[configuration.CpuCount];
 
 			_loadBalancer = new LoadBalancer(stacks);
-			Context = new TraversalContext<TExecutableModel>(_loadBalancer, configuration, output);
-			_workers = new Worker<TExecutableModel>[configuration.CpuCount];
+			Context = new TraversalContext(_loadBalancer, configuration, output);
+			_workers = new Worker[configuration.CpuCount];
 
 			for (var i = 0; i < configuration.CpuCount; ++i)
 			{
@@ -73,7 +73,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				tasks[i] = Task.Factory.StartNew(() =>
 				{
 					stacks[index] = new StateStack(configuration.StackCapacity);
-					_workers[index] = new Worker<TExecutableModel>(index, Context, stacks[index], createModel.Create());
+					_workers[index] = new Worker(index, Context, stacks[index], createModel.Create());
 				});
 			}
 
@@ -97,12 +97,12 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   Gets the context of the traversal.
 		/// </summary>
-		public TraversalContext<TExecutableModel> Context { get; }
+		public TraversalContext Context { get; }
 
 		/// <summary>
 		///   Gets the <see cref="AnalysisModel" /> instances analyzed by the checker's <see cref="Worker" /> instances.
 		/// </summary>
-		public IEnumerable<AnalysisModel<TExecutableModel>> AnalyzedModels => _workers.Select(worker => worker.Model);
+		public IEnumerable<AnalysisModel> AnalyzedModels => _workers.Select(worker => worker.Model);
 
 		/// <summary>
 		///   Traverses the model.
@@ -178,7 +178,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				return;
 
 			if (Context.Exception is ModelException)
-				throw new AnalysisException<TExecutableModel>(Context.Exception.InnerException, Context.CounterExample);
+				throw new AnalysisException(Context.Exception.InnerException, Context.CounterExample);
 			ExceptionDispatchInfo.Capture(Context.Exception).Throw();
 		}
 

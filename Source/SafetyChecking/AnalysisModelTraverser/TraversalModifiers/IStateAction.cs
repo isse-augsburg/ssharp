@@ -27,7 +27,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// <summary>
 	///   Represents an action that is executed when a new, reachable state is found during model traversal.
 	/// </summary>
-	internal unsafe interface IStateAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal unsafe interface IStateAction
 	{
 		/// <summary>
 		///   Processes the new <paramref name="state" /> discovered by the <paramref name="worker " /> within the traversal
@@ -38,6 +38,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="state">The new state that should be handled.</param>
 		/// <param name="stateIndex">The unique index of the new state.</param>
 		/// <param name="isInitial">Indicates whether the state is an initial state.</param>
-		void ProcessState(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, byte* state, int stateIndex, bool isInitial);
+		void ProcessState(TraversalContext context, Worker worker, byte* state, int stateIndex, bool isInitial);
 	}
 }

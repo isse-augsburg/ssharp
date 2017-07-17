@@ -44,13 +44,13 @@ namespace Tests
 
 	public abstract class AnalysisTestObject : TestObject
 	{
-		protected CounterExample<SafetySharpRuntimeModel> CounterExample { get; private set; }
-		protected CounterExample<SafetySharpRuntimeModel>[] CounterExamples { get; private set; }
+		protected ExecutableCounterExample<SafetySharpRuntimeModel> CounterExample { get; private set; }
+		protected ExecutableCounterExample<SafetySharpRuntimeModel>[] CounterExamples { get; private set; }
 		protected bool SuppressCounterExampleGeneration { get; set; }
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
-		protected AnalysisResult<SafetySharpRuntimeModel> Result { get; private set; }
+		protected InvariantAnalysisResult<SafetySharpRuntimeModel> Result { get; private set; }
 
-		protected void SimulateCounterExample(CounterExample<SafetySharpRuntimeModel> counterExample, Action<SafetySharpSimulator> action)
+		protected void SimulateCounterExample(ExecutableCounterExample<SafetySharpRuntimeModel> counterExample, Action<SafetySharpSimulator> action)
 		{
 			// Test directly
 			action(new SafetySharpSimulator(counterExample));
@@ -79,13 +79,13 @@ namespace Tests
 			{
 				var modelFromFormulasGenerator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 				var results = analysisTestsVariant.CheckInvariants(modelFromFormulasGenerator, invariant);
-				CounterExample = results[0].CounterExample;
+				CounterExample = results[0].ExecutableCounterExample;
 				return results[0].FormulaHolds;
 			}
 
 			var modelGenerator = SafetySharpRuntimeModel.CreateExecutedModelCreator(model,invariant);
 			Result = analysisTestsVariant.CheckInvariant(modelGenerator, invariant);
-			CounterExample = Result.CounterExample;
+			CounterExample = Result.ExecutableCounterExample;
 			return Result.FormulaHolds;
 		}
 
@@ -99,7 +99,7 @@ namespace Tests
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(component));
 
 			var results = analysisTestsVariant.CheckInvariants(modelCreator, invariants);
-			CounterExamples = results.Select(result => result.CounterExample).ToArray();
+			CounterExamples = results.Select(result => result.ExecutableCounterExample).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
 		}
 
@@ -113,7 +113,7 @@ namespace Tests
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components),formula);
 			var result = analysisTestsVariant.Check(modelCreator, formula);
 
-			CounterExample = result.CounterExample;
+			CounterExample = result.ExecutableCounterExample;
 			return result.FormulaHolds;
 		}
 

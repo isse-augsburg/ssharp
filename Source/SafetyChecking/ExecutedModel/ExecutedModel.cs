@@ -31,7 +31,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="Runtime.RuntimeModel" />.
 	/// </summary>
-	internal abstract unsafe class ExecutedModel<TExecutableModel> : AnalysisModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal abstract unsafe class ExecutedModel<TExecutableModel> : AnalysisModel where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		/// <summary>
 		///   Initializes a new instance.
@@ -47,17 +47,17 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			RuntimeModelCreator = createModel;
 			RuntimeModel = createModel.Create(stateHeaderBytes);
 		}
-		
+
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public sealed override TExecutableModel RuntimeModel { get; }
+		public virtual TExecutableModel RuntimeModel { get; }
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public sealed override CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; }
+		public virtual CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; }
 
 		/// <summary>
 		///   Gets or sets the choice resolver that is used to resolve choices within the model.
@@ -168,7 +168,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public override CounterExample<TExecutableModel> CreateCounterExample(byte[][] path, bool endsWithException)
+		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
 		{
 			if (RuntimeModelCreator == null)
 				throw new InvalidOperationException("Counter example generation is not supported in this context.");

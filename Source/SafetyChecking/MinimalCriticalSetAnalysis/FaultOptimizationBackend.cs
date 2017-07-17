@@ -57,9 +57,9 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="hazard">The hazard that should be analyzed.</param>
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
+			Func<AnalysisModel> createAnalysisModelFunc = () =>
 				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, _stateHeaderBytes, configuration);
-			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 
 			_invariantChecker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OnOutputWritten, configuration, invariant);
@@ -70,7 +70,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override AnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
+		internal override InvariantAnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
 		{
 			ChangeFaultActivations(faults, activation);
 			return _invariantChecker.Check();
@@ -85,7 +85,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal override AnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal override InvariantAnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
 			Assert.That(_stateHeaderBytes==4, "The first 4 bytes must be reserved for the FaultOrderModifier");
@@ -94,7 +94,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Clear();
 			// Note: The faultOrderModifier reserves the first 4 bytes of the state vector
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Add(
-				() => new FaultOrderModifier<TExecutableModel>(firstFault, secondFault, forceSimultaneous));
+				() => new FaultOrderModifier(firstFault, secondFault, forceSimultaneous));
 
 			return _invariantChecker.Check();
 		}

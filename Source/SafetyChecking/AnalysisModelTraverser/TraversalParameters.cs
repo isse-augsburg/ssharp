@@ -29,30 +29,30 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// <summary>
 	///   Provides parameters for the model traversal process.
 	/// </summary>
-	internal sealed class TraversalParameters<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class TraversalParameters
 	{
 		/// <summary>
-		///   Factory methods for <see cref="ITransitionAction{TExecutableModel}" /> instances that should be executed by all <see cref="Worker{TExecutableModel}" />
+		///   Factory methods for <see cref="ITransitionAction" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal readonly List<Func<ITransitionAction<TExecutableModel>>> TransitionActions = new List<Func<ITransitionAction<TExecutableModel>>>();
+		internal readonly List<Func<ITransitionAction>> TransitionActions = new List<Func<ITransitionAction>>();
 
 		/// <summary>
-		///   Factory methods for <see cref="IBatchedTransitionAction{TExecutableModel}" /> instances that should be executed by all
-		///   <see cref="Worker{TExecutableModel}" /> instances.
+		///   Factory methods for <see cref="IBatchedTransitionAction" /> instances that should be executed by all
+		///   <see cref="Worker" /> instances.
 		/// </summary>
-		internal readonly List<Func<IBatchedTransitionAction<TExecutableModel>>> BatchedTransitionActions = new List<Func<IBatchedTransitionAction<TExecutableModel>>>();
+		internal readonly List<Func<IBatchedTransitionAction>> BatchedTransitionActions = new List<Func<IBatchedTransitionAction>>();
 
 		/// <summary>
-		///   Factory methods for <see cref="ITransitionModifier{TExecutableModel}" /> instances that should be executed by all <see cref="Worker{TExecutableModel}" />
+		///   Factory methods for <see cref="ITransitionModifier" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal readonly List<Func<ITransitionModifier<TExecutableModel>>> TransitionModifiers = new List<Func<ITransitionModifier<TExecutableModel>>>();
+		internal readonly List<Func<ITransitionModifier>> TransitionModifiers = new List<Func<ITransitionModifier>>();
 
 		/// <summary>
-		///   Factory methods for <see cref="IStateAction{TExecutableModel}" /> instances that should be executed by all <see cref="Worker{TExecutableModel}" />
+		///   Factory methods for <see cref="IStateAction" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.
 		/// </summary>
-		internal readonly List<Func<IStateAction<TExecutableModel>>> StateActions = new List<Func<IStateAction<TExecutableModel>>>();
+		internal readonly List<Func<IStateAction>> StateActions = new List<Func<IStateAction>>();
 	}
 }

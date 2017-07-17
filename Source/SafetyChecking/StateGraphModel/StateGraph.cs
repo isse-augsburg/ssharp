@@ -60,7 +60,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		///   The factory function that should be used to create instances of the <see cref="RuntimeModel" />
 		///   the state graph is generated for.
 		/// </param>
-		internal StateGraph(TraversalContext<TExecutableModel> context, int transitionSizeInBytes,
+		internal StateGraph(TraversalContext context, int transitionSizeInBytes,
 							TExecutableModel model, CoupledExecutableModelCreator<TExecutableModel> createModel)
 		{
 			Requires.NotNull(context, nameof(context));

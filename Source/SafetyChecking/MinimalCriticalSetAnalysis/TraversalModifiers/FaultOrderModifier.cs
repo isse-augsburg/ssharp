@@ -32,7 +32,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	/// <summary>
 	///   Removes all candidate transition that activate one or more faults in an incorrect order.
 	/// </summary>
-	internal sealed unsafe class FaultOrderModifier<TExecutableModel> : ITransitionModifier<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed unsafe class FaultOrderModifier : ITransitionModifier
 	{
 		private readonly Fault _firstFault;
 		private readonly bool _forceSimultaneous;
@@ -63,7 +63,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="sourceState">The source state of the transitions.</param>
 		/// <param name="sourceStateIndex">The unique index of the transition's source state.</param>
 		/// <param name="isInitial">Indicates whether the transitions are initial transitions not starting in any valid source state.</param>
-		public void ModifyTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, TransitionCollection transitions, byte* sourceState,
+		public void ModifyTransitions(TraversalContext context, Worker worker, TransitionCollection transitions, byte* sourceState,
 									  int sourceStateIndex, bool isInitial)
 		{
 			// The fault order state is encoded into the first four bytes of the state vector (must be four bytes as required by 

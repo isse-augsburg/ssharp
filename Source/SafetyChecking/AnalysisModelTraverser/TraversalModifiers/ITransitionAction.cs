@@ -29,7 +29,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// <summary>
 	///   Represents an action that is executed when a new, valid transition is found during model traversal.
 	/// </summary>
-	internal unsafe interface ITransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal unsafe interface ITransitionAction
 	{
 		/// <summary>
 		///   Processes the new <paramref name="transition" /> discovered by the <paramref name="worker " /> within the traversal
@@ -41,6 +41,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="isInitialTransition">
 		///   Indicates whether the transition is an initial transition not starting in any valid source state.
 		/// </param>
-		void ProcessTransition(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, Transition* transition, bool isInitialTransition);
+		void ProcessTransition(TraversalContext context, Worker worker, Transition* transition, bool isInitialTransition);
 	}
 }

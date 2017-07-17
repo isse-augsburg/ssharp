@@ -28,16 +28,17 @@ namespace Tests.Analysis.Invariants.CounterExamples
 	using SafetySharp.Runtime;
 	using Shouldly;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
+	using ISSE.SafetyChecking.ExecutedModel;
 
 	internal class NonInitialStateException : AnalysisTestObject
 	{
 		protected override void Check()
 		{
 			var c = new C();
-			var e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, c));
+			var e = Should.Throw<InvariantAnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, c));
 			e.CounterExample.StepCount.ShouldBe(4);
 
-			SimulateCounterExample(e.CounterExample, simulator =>
+			SimulateCounterExample(e.ExecutableCounterExample, simulator =>
 			{
 				c = (C)simulator.Model.Roots[0];
 
@@ -53,10 +54,10 @@ namespace Tests.Analysis.Invariants.CounterExamples
 			});
 
 			var d = new D();
-			e = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, d));
+			e = Should.Throw<InvariantAnalysisException<SafetySharpRuntimeModel>>(() => CheckInvariant(true, d));
 			e.CounterExample.StepCount.ShouldBe(2);
 
-			SimulateCounterExample(e.CounterExample, simulator =>
+			SimulateCounterExample(e.ExecutableCounterExample, simulator =>
 			{
 				d = (D)simulator.Model.Roots[0];
 				Should.Throw<InvalidOperationException>(() => simulator.SimulateStep()).Message.ShouldBe("test");

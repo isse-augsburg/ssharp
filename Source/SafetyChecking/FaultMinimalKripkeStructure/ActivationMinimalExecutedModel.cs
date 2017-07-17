@@ -93,6 +93,8 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// </summary>
 		public override unsafe int TransitionSize => sizeof(CandidateTransition);
 
+		public override Formula[] Formulas => RuntimeModel.Formulas;
+
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>

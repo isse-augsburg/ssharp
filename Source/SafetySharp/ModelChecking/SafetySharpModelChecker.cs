@@ -49,7 +49,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public static AnalysisResult<SafetySharpRuntimeModel> Check(ModelBase model, Formula formula)
+		public static InvariantAnalysisResult<SafetySharpRuntimeModel> Check(ModelBase model, Formula formula)
 		{
 			return new LtsMin().Check(SafetySharpRuntimeModel.CreateExecutedModelCreator(model,formula), formula);
 		}
@@ -60,7 +60,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		public static AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(ModelBase model, Formula invariant)
+		public static InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(ModelBase model, Formula invariant)
 		{
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, invariant);
 			var qualitativeChecker = new QualitativeChecker<SafetySharpRuntimeModel> { Configuration = TraversalConfiguration };
@@ -73,7 +73,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="invariants">The invariants that should be checked.</param>
-		public static AnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ModelBase model, params Formula[] invariants)
+		public static InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ModelBase model, params Formula[] invariants)
 		{
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 			var qualitativeChecker = new QualitativeChecker<SafetySharpRuntimeModel> { Configuration = TraversalConfiguration };

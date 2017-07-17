@@ -30,7 +30,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 	/// <summary>
 	///   Checks for deadlock states, raising an exception if one is found.
 	/// </summary>
-	internal sealed class DeadlockChecker<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class DeadlockChecker : IBatchedTransitionAction
 	{
 		/// <summary>
 		///   Processes the new <paramref name="transitions" /> discovered by the <paramref name="worker " /> within the traversal
@@ -45,7 +45,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// <param name="areInitialTransitions">
 		///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 		/// </param>
-		public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState, TransitionCollection transitions,
+		public void ProcessTransitions(TraversalContext context, Worker worker, int sourceState, TransitionCollection transitions,
 									   int transitionCount, bool areInitialTransitions)
 		{
 			if (transitionCount == 0)

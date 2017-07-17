@@ -34,6 +34,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	using Utilities;
 	using Formula;
 	using StateGraphModel;
+	using ExecutedModel;
 
 	/// <summary>
 	///   Performs safety analyses on a model.
@@ -42,7 +43,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	{
 		private readonly HashSet<FaultSet> _checkedSets = new HashSet<FaultSet>();
 		private uint _checkedSetCount = 0;
-		private readonly Dictionary<FaultSet, CounterExample<TExecutableModel>> _counterExamples = new Dictionary<FaultSet, CounterExample<TExecutableModel>>();
+		private readonly Dictionary<FaultSet, ExecutableCounterExample<TExecutableModel>> _counterExamples = new Dictionary<FaultSet, ExecutableCounterExample<TExecutableModel>>();
 		private readonly Dictionary<FaultSet, Exception> _exceptions = new Dictionary<FaultSet, Exception>();
 		private AnalysisBackend<TExecutableModel> _backend;
 		private FaultSetCollection _criticalSets;
@@ -369,11 +370,14 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 				_checkedSetCount++;
 
 				if (result.CounterExample != null)
-					_counterExamples.Add(set, result.CounterExample);
+				{
+					var executableCounterExample = new ExecutableCounterExample<TExecutableModel>(result.ExecutableModel,result.CounterExample);
+					_counterExamples.Add(set, executableCounterExample);
+				}
 
 				return result.FormulaHolds;
 			}
-			catch (AnalysisException<TExecutableModel> e)
+			catch (InvariantAnalysisException<TExecutableModel> e)
 			{
 				var heuristic = isHeuristicSuggestion ? " [heuristic]" : string.Empty;
 				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} {heuristic} [exception thrown]", ConsoleColor.DarkRed);
@@ -388,7 +392,11 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 				_exceptions.Add(set, e.InnerException);
 
 				if (e.CounterExample != null)
-					_counterExamples.Add(set, e.CounterExample);
+				{
+					var executableCounterExample = new ExecutableCounterExample<TExecutableModel>(e.ExecutableModel, e.CounterExample);
+					_counterExamples.Add(set, executableCounterExample);
+				}
+
 				return false;
 			}
 		}

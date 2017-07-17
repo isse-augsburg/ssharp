@@ -23,13 +23,14 @@
 namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
 	using System;
+	using AnalysisModel;
 	using ExecutableModel;
 	using Utilities;
 	using ExecutedModel;
 	/// <summary>
 	///   Provides context information for the traversal of a model.
 	/// </summary>
-	internal sealed class TraversalContext<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class TraversalContext
 	{
 		/// <summary>
 		///   The number of states that have to be found between two progress reports.
@@ -59,7 +60,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   The parameters influencing the traversal process.
 		/// </summary>
-		public readonly TraversalParameters<TExecutableModel> TraversalParameters = new TraversalParameters<TExecutableModel>();
+		public readonly TraversalParameters TraversalParameters = new TraversalParameters();
 
 		/// <summary>
 		///   The number of computed transitions checked by the model checker.
@@ -69,7 +70,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   The counter example that has been generated for the traversal, if any.
 		/// </summary>
-		public CounterExample<TExecutableModel> CounterExample;
+		public CounterExample CounterExample;
 
 		/// <summary>
 		///   The exception that has been generated during the traversal, if any.

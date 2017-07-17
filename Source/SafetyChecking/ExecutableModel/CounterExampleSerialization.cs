@@ -47,13 +47,13 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		{
 		}
 
-		public abstract void WriteInternalStateStructure(CounterExample<TExecutableModel> counterExample, BinaryWriter writer);
+		public abstract void WriteInternalStateStructure(ExecutableCounterExample<TExecutableModel> counterExample, BinaryWriter writer);
 		
 		/// <summary>
 		///   Saves the counter example to the <paramref name="file" />.
 		/// </summary>
 		/// <param name="file">The file the counter example should be saved to.</param>
-		public virtual void Save(CounterExample<TExecutableModel> counterExample, string file)
+		public virtual void Save(ExecutableCounterExample<TExecutableModel> counterExample, string file)
 		{
 			Requires.NotNullOrWhitespace(file, nameof(file));
 
@@ -92,6 +92,6 @@ namespace ISSE.SafetyChecking.ExecutableModel
 			}
 		}
 
-		public abstract CounterExample<TExecutableModel> Load(string file);
+		public abstract ExecutableCounterExample<TExecutableModel> Load(string file);
 	}
 }

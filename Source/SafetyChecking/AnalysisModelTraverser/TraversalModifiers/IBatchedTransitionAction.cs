@@ -29,7 +29,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// <summary>
 	///   Represents an action that is executed when a batch of new, valid transitions is found during model traversal.
 	/// </summary>
-	internal interface IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal interface IBatchedTransitionAction
 	{
 		/// <summary>
 		///   Processes the new <paramref name="transitions" /> discovered by the <paramref name="worker " /> within the traversal
@@ -44,7 +44,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="areInitialTransitions">
 		///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 		/// </param>
-		void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
+		void ProcessTransitions(TraversalContext context, Worker worker, int sourceState,
 								TransitionCollection transitions, int transitionCount, bool areInitialTransitions);
 	}
 }

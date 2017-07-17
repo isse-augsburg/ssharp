@@ -152,7 +152,7 @@ namespace Tests.MarkovDecisionProcess.Optimized
 		public void OneReflexiveTransition()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp,AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp,AnalysisConfiguration.Default);
 
 			// add initial state
 			Clear();
@@ -183,7 +183,7 @@ namespace Tests.MarkovDecisionProcess.Optimized
 		public void ThreeReflexiveStatesFromInitialState()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			Clear();
@@ -228,7 +228,7 @@ namespace Tests.MarkovDecisionProcess.Optimized
 		public void ThreeReflexiveStatesFromNonInitialState()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			Clear();
@@ -278,7 +278,7 @@ namespace Tests.MarkovDecisionProcess.Optimized
 		public void StatesFromNonInitialStateWithMoreDistributions()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal<SimpleExecutableModel>(ltmdp, AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp, AnalysisConfiguration.Default);
 
 			// add initial state
 			Clear();

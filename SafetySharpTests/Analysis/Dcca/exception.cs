@@ -31,6 +31,7 @@ namespace Tests.Analysis.Dcca
 	using ISSE.SafetyChecking.Modeling;
 	using SafetySharp.Runtime;
 	using Shouldly;
+	using ISSE.SafetyChecking.ExecutedModel;
 
 	internal class Exception : AnalysisTestObject
 	{
@@ -38,10 +39,10 @@ namespace Tests.Analysis.Dcca
 		{
 			if ((SafetyAnalysisBackend)Arguments[0] == SafetyAnalysisBackend.FaultOptimizedStateGraph)
 			{
-				var exception = Should.Throw<AnalysisException<SafetySharpRuntimeModel>>(() => Dcca(true, new C()));
+				var exception = Should.Throw<InvariantAnalysisException<SafetySharpRuntimeModel>>(() => Dcca(true, new C()));
 				exception.CounterExample.ShouldNotBeNull();
 
-				SimulateCounterExample(exception.CounterExample,
+				SimulateCounterExample(exception.ExecutableCounterExample,
 					simulator => Should.Throw<ArgumentException>(() => simulator.FastForward(100)).Message.ShouldBe("arg"));
 			}
 			else

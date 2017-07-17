@@ -40,7 +40,7 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public class SafetySharpCounterExampleSerialization : CounterExampleSerialization<SafetySharpRuntimeModel>
 	{
-		public override void WriteInternalStateStructure(CounterExample<SafetySharpRuntimeModel> counterExample, BinaryWriter writer)
+		public override void WriteInternalStateStructure(ExecutableCounterExample<SafetySharpRuntimeModel> counterExample, BinaryWriter writer)
 		{
 			var formatter = new BinaryFormatter();
 			var memoryStream = new MemoryStream();
@@ -55,7 +55,7 @@ namespace SafetySharp.Analysis
 		///   Loads a counter example from the <paramref name="file" />.
 		/// </summary>
 		/// <param name="file">The path to the file the counter example should be loaded from.</param>
-		public override CounterExample<SafetySharpRuntimeModel> Load(string file)
+		public override ExecutableCounterExample<SafetySharpRuntimeModel> Load(string file)
 		{
 			Requires.NotNullOrWhitespace(file, nameof(file));
 
@@ -117,7 +117,7 @@ namespace SafetySharp.Analysis
 						replayInfo[i][j] = reader.ReadInt32();
 				}
 
-				return new CounterExample<SafetySharpRuntimeModel>(runtimeModel, counterExample, replayInfo, endsWithException);
+				return new ExecutableCounterExample<SafetySharpRuntimeModel>(runtimeModel, counterExample, replayInfo, endsWithException);
 			}
 		}
 	}

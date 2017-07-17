@@ -54,8 +54,8 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 			checker.OutputWritten += output => Output.Log(output);
 
 			var result = checker.CheckInvariant(m, formulaNotTwo);
-
-			var simulator = new Simulator<SimpleExecutableModel>(result.CounterExample);
+			
+			var simulator = new Simulator<SimpleExecutableModel>(result.ExecutableCounterExample);
 			var simulatedModel = simulator.RuntimeModel.Model;
 			simulatedModel.State.ShouldBe(0);
 			simulator.IsCompleted.ShouldBe(false);
@@ -84,7 +84,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 			// save and load counterexample
 			using (var file = new TemporaryFile(".ssharp"))
 			{
-				result.CounterExample.Save(file.FilePath);
+				result.ExecutableCounterExample.Save(file.FilePath);
 				var counterExampleSerialization = new SimpleExecutableModelCounterExampleSerialization();
 				var simulator = new Simulator<SimpleExecutableModel>(counterExampleSerialization.Load(file.FilePath));
 				var simulatedModel = simulator.RuntimeModel.Model;

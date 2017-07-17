@@ -65,7 +65,7 @@ namespace SafetySharp.ModelChecking
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		public AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(ModelBase model, Formula invariant)
+		public InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(ModelBase model, Formula invariant)
 		{
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, invariant);
 			return CheckInvariant(modelCreator, formulaIndex: 0);

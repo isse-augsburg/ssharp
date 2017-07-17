@@ -59,7 +59,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		internal AnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula invariant)
+		internal InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula invariant)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(invariant, nameof(invariant));
@@ -83,7 +83,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="formula">The formula that should be checked.</param>
-		public AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(formula, nameof(formula));
@@ -124,7 +124,7 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="checkArgument">The argument passed to LtsMin that indicates which kind of check to perform.</param>
-		private AnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, string checkArgument)
+		private InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, string checkArgument)
 		{
 			try
 			{
@@ -146,7 +146,7 @@ namespace SafetySharp.Analysis
 					}
 
 					var success = InterpretExitCode(_ltsMin.ExitCode);
-					return new AnalysisResult<SafetySharpRuntimeModel> { FormulaHolds = success };
+					return new InvariantAnalysisResult<SafetySharpRuntimeModel> { FormulaHolds = success };
 				}
 			}
 			finally

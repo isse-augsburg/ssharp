@@ -62,7 +62,7 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			result[0].FormulaHolds.Should().BeTrue();
 			result[1].FormulaHolds.Should().BeFalse();
 
-			result[1].CounterExample.Save("counter examples/pressure tank/pressure level below 40");
+			result[1].ExecutableCounterExample.Save("counter examples/pressure tank/pressure level below 40");
 		}
 
 		/// <summary>
@@ -133,8 +133,8 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
 
 			result.FormulaHolds.Should().BeFalse();
-			result.CounterExample.Should().NotBeNull();
-			result.CounterExample.Save("counter examples/pressure tank/tank rupture when sensor and timer fail");
+			result.ExecutableCounterExample.Should().NotBeNull();
+			result.ExecutableCounterExample.Save("counter examples/pressure tank/tank rupture when sensor and timer fail");
 		}
 
 		/// <summary>
@@ -148,8 +148,8 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Tank.IsRuptured);
 
 			result.FormulaHolds.Should().BeFalse();
-			result.CounterExample.Should().NotBeNull();
-			result.CounterExample.Save("counter examples/pressure tank/possible tank rupture");
+			result.ExecutableCounterExample.Should().NotBeNull();
+			result.ExecutableCounterExample.Save("counter examples/pressure tank/possible tank rupture");
 		}
 
 		/// <summary>
@@ -180,8 +180,8 @@ namespace SafetySharp.CaseStudies.PressureTank.Analysis
 			var result = SafetySharpModelChecker.CheckInvariant(model, !model.Timer.HasElapsed);
 
 			result.FormulaHolds.Should().BeFalse();
-			result.CounterExample.Should().NotBeNull();
-			result.CounterExample.Save("counter examples/pressure tank/possible timeout");
+			result.ExecutableCounterExample.Should().NotBeNull();
+			result.ExecutableCounterExample.Save("counter examples/pressure tank/possible timeout");
 		}
 	}
 }

@@ -27,12 +27,13 @@ namespace ISSE.SafetyChecking.StateGraphModel
 	using System.Runtime.InteropServices;
 	using ExecutableModel;
 	using AnalysisModel;
+	using Formula;
 	using Utilities;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> for <see cref="StateGraph" /> instances.
 	/// </summary>
-	internal sealed unsafe class StateGraphModel<TExecutableModel> : AnalysisModel<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed unsafe class StateGraphModel<TExecutableModel> : AnalysisModel where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly StateGraph<TExecutableModel> _stateGraph;
 		private readonly StateGraphTransitionSetBuilder _transitions;
@@ -60,16 +61,18 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// </summary>
 		public override int TransitionSize => _stateGraph.TransitionSize;
 
+		public override Formula[] Formulas => RuntimeModel.Formulas;
+
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
-		public override TExecutableModel RuntimeModel => _stateGraph.RuntimeModel;
+		public TExecutableModel RuntimeModel => _stateGraph.RuntimeModel;
 
 		/// <summary>
 		///   Gets the factory function that was used to create the runtime model that is directly or indirectly analyzed by this
 		///   <see cref="AnalysisModel" />.
 		/// </summary>
-		public override CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
+		public CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator => _stateGraph.RuntimeModelCreator;
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
@@ -126,7 +129,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public override CounterExample<TExecutableModel> CreateCounterExample(byte[][] path, bool endsWithException)
+		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
 		{
 			var modelPath = path?.Select(state =>
 			{

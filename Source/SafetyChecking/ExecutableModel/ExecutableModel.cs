@@ -218,7 +218,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		///   transitions could be generated for the model.
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public CounterExample<TExecutableModel> CreateCounterExample(CoupledExecutableModelCreator<TExecutableModel> createModel, byte[][] path, bool endsWithException)
+		public CounterExample CreateCounterExample(CoupledExecutableModelCreator<TExecutableModel> createModel, byte[][] path, bool endsWithException)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
@@ -243,7 +243,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 
 			path = new[] { ConstructionState }.Concat(path).ToArray();
 			var replayInfo = replayModel.GenerateReplayInformation(choiceResolver, path, endsWithException);
-			return new CounterExample<TExecutableModel>(counterExampleModel, path, replayInfo, endsWithException);
+			return new CounterExample( path, replayInfo, endsWithException);
 		}
 
 		public abstract void SetChoiceResolver(ChoiceResolver choiceResolver);

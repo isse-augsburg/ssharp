@@ -40,7 +40,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		///   Builds up a <see cref="LabeledTransitionMarkovDecisionProcess" /> instance during model traversal.
 		///   Note: This only works single threaded
 		/// </summary>
-		internal class LtmdpBuilderDuringTraversal<TExecutableModel> : IBatchedTransitionAction<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+		internal class LtmdpBuilderDuringTraversal : IBatchedTransitionAction
 		{
 			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
 
@@ -209,7 +209,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			/// <param name="areInitialTransitions">
 			///   Indicates whether the transitions are an initial transitions not starting in any valid source state.
 			/// </param>
-			public void ProcessTransitions(TraversalContext<TExecutableModel> context, Worker<TExecutableModel> worker, int sourceState,
+			public void ProcessTransitions(TraversalContext context, Worker worker, int sourceState,
 									   TransitionCollection transitions, int transitionCount, bool areInitialTransitions)
 			{
 				// Note, other threads might access _ltmdp at the same time

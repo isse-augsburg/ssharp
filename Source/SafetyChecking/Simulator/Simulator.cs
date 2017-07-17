@@ -26,6 +26,7 @@ namespace ISSE.SafetyChecking.Simulator
 	using System.Collections.Generic;
 	using System.Runtime.InteropServices;
 	using System.Text;
+	using AnalysisModel;
 	using ExecutableModel;
 	using Utilities;
 	using ExecutedModel;
@@ -35,8 +36,9 @@ namespace ISSE.SafetyChecking.Simulator
 	/// </summary>
 	public unsafe class Simulator<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly CounterExample<TExecutableModel> _counterExample;
+		private readonly ExecutableCounterExample<TExecutableModel> _counterExample;
 		public readonly TExecutableModel RuntimeModel;
+
 		private readonly List<byte[]> _states = new List<byte[]>();
 		private ChoiceResolver _choiceResolver;
 		private int _stateIndex;
@@ -53,17 +55,28 @@ namespace ISSE.SafetyChecking.Simulator
 			RuntimeModel = runtimeModel;
 			Reset();
 		}
+		
+
+		public Simulator(ExecutableCounterExample<TExecutableModel> counterExample)
+		{
+			Requires.NotNull(counterExample, nameof(counterExample));
+
+			RuntimeModel = counterExample.RuntimeModel;
+			_counterExample = counterExample;
+
+			Reset();
+		}
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="counterExample">The counter example that should be simulated.</param>
-		public Simulator(CounterExample<TExecutableModel> counterExample)
+		public Simulator(TExecutableModel runtimeModel, CounterExample counterExample)
 		{
 			Requires.NotNull(counterExample, nameof(counterExample));
 
-			_counterExample = counterExample;
-			RuntimeModel = counterExample.RuntimeModel;
+			RuntimeModel = runtimeModel;
+			_counterExample = new ExecutableCounterExample<TExecutableModel>(runtimeModel, counterExample);
 
 			Reset();
 		}

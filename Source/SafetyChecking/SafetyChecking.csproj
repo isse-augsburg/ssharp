@@ -49,11 +49,14 @@
     <Compile Include="AnalysisConfiguration.cs" />
     <Compile Include="AnalysisModelTraverser\CompactStateStorage.cs" />
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
+    <Compile Include="AnalysisModel\CounterExample.cs" />
     <Compile Include="AnalysisModel\TransitionFlags.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelCheckerWithoutDictionaries.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcModelNormalizer.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
+    <Compile Include="ExecutedModel\InvariantAnalysisException.cs" />
     <Compile Include="Formula\FaultFormula.cs" />
     <Compile Include="Formula\BoundedBinaryFormula.cs" />
     <Compile Include="Formula\BoundedUnaryFormula.cs" />
@@ -65,7 +68,7 @@
     <Compile Include="Formula\FormulaVisitors\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />
     <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
-    <Compile Include="AnalysisModel\AnalysisResult.cs" />
+    <Compile Include="ExecutedModel\InvariantAnalysisResult.cs" />
     <Compile Include="GenericDataStructures\AutoResizeBigVector.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\BuiltinNmdpModelChecker.cs" />
@@ -191,7 +194,7 @@
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="ExecutableModel\ChoiceResolver.cs" />
     <Compile Include="AnalysisModelTraverser\ChoiceStack.cs" />
-    <Compile Include="ExecutableModel\CounterExample.cs" />
+    <Compile Include="ExecutableModel\ExecutableCounterExample.cs" />
     <Compile Include="AnalysisModel\FaultSet.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\FaultSetCollection.cs" />
     <Compile Include="Formula\Formula.cs" />
@@ -248,6 +251,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="ModelNormalizer\" />
     <Folder Include="QualitativeChecker\" />
   </ItemGroup>
   <ItemGroup>

@@ -27,11 +27,12 @@ namespace ISSE.SafetyChecking.StateGraphModel
 	using AnalysisModel;
 	using AnalysisModelTraverser;
 	using System.Linq;
+	using ExecutedModel;
 
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class StateGraphGenerator<TExecutableModel> : ModelTraverser<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class StateGraphGenerator<TExecutableModel> : ModelTraverser where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly StateGraph<TExecutableModel> _stateGraph;
 
@@ -41,11 +42,11 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal StateGraphGenerator(AnalysisModelCreator<TExecutableModel> createModel, 
+		internal StateGraphGenerator(AnalysisModelCreator createModel, 
 									 Action<string> output, AnalysisConfiguration configuration)
 			: base(createModel, output, configuration, DeriveTransitionSizeFromModel)
 		{
-			var analyzedModel = AnalyzedModels.First();
+			var analyzedModel = AnalyzedModels.OfType<ExecutedModel<TExecutableModel>>().First();
 
 			_stateGraph = new StateGraph<TExecutableModel>(
 				Context, analyzedModel.TransitionSize,

@@ -49,14 +49,14 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		public AnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula formula)
+		public InvariantAnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, Formula formula)
 		{
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
+			Func<AnalysisModel> createAnalysisModelFunc = () =>
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration);
-			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formula))
 			{
@@ -68,14 +68,14 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// <summary>
 		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
 		/// </summary>
-		public AnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, int formulaIndex)
+		public InvariantAnalysisResult<TExecutableModel> CheckInvariant(CoupledExecutableModelCreator<TExecutableModel> createModel, int formulaIndex)
 		{
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
+			Func<AnalysisModel> createAnalysisModelFunc = () =>
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration);
-			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, formulaIndex))
 			{
@@ -93,9 +93,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
 			ExecutedModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
+			Func<AnalysisModel> createAnalysisModelFunc = () =>
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(createModel, 0, Configuration);
-			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
 			using (var checker = new StateGraphGenerator<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration))
 			{
@@ -110,7 +110,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// </summary>
 		/// <param name="createModel">The creator for the model that should be checked.</param>
 		/// <param name="invariants">The invariants that should be checked.</param>
-		public AnalysisResult<TExecutableModel>[] CheckInvariants(ExecutableModelCreator<TExecutableModel> createModel, params Formula[] invariants)
+		public InvariantAnalysisResult<TExecutableModel>[] CheckInvariants(ExecutableModelCreator<TExecutableModel> createModel, params Formula[] invariants)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(invariants, nameof(invariants));
@@ -119,7 +119,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			var modelGenerator = createModel.Create(invariants);
 
 			var stateGraph = GenerateStateGraph(modelGenerator);
-			var results = new AnalysisResult<TExecutableModel>[invariants.Length];
+			var results = new InvariantAnalysisResult<TExecutableModel>[invariants.Length];
 
 			for (var i = 0; i < invariants.Length; ++i)
 				results[i] = CheckInvariant(stateGraph, invariants[i]);
@@ -133,17 +133,17 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// </summary>
 		/// <param name="stateGraph">The state graph that should be checked.</param>
 		/// <param name="invariant">The invariant that should be checked.</param>
-		internal AnalysisResult<TExecutableModel> CheckInvariant(StateGraph<TExecutableModel> stateGraph, Formula invariant)
+		internal InvariantAnalysisResult<TExecutableModel> CheckInvariant(StateGraph<TExecutableModel> stateGraph, Formula invariant)
 		{
 			Requires.NotNull(stateGraph, nameof(stateGraph));
 			Requires.NotNull(invariant, nameof(invariant));
 			
 			// We have to track the state vector layout here; this will nondeterministically store some model instance of
 			// one of the workers; but since all state vectors are the same, we don't care
-			AnalysisModel<TExecutableModel> model = null;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
+			AnalysisModel model = null;
+			Func<AnalysisModel> createAnalysisModelFunc = () =>
 					model = new StateGraphModel<TExecutableModel>(stateGraph, Configuration.SuccessorCapacity);
-			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
 			using (var checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration, invariant))
 			{

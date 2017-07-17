@@ -54,7 +54,7 @@ namespace SafetySharp.Analysis
 		{
 		}
 
-		public SafetySharpSimulator(CounterExample<SafetySharpRuntimeModel> counterExample)
+		public SafetySharpSimulator(ExecutableCounterExample<SafetySharpRuntimeModel> counterExample)
 			: base(counterExample)
 		{
 		}

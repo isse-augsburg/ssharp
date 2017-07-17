@@ -74,9 +74,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   Generates a <see cref="DiscreteTimeMarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(AnalysisModelCreator<TExecutableModel> createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
+		private DiscreteTimeMarkovChain GenerateMarkovChain(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
-			using (var checker = new LtmcGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
+			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
 			{
 				PrintStateFormulas(executableStateFormulas);
 
@@ -124,9 +124,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () =>
+			Func<AnalysisModel> createAnalysisModelFunc = () =>
 				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, 0, Configuration);
-			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
 			return GenerateMarkovChain(createAnalysisModel,terminateEarlyCondition, stateFormulas);
 		}

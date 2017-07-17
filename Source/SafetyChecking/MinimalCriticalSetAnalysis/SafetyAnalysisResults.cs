@@ -100,7 +100,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <summary>
 		///   Gets the counter examples that were generated for the critical fault sets.
 		/// </summary>
-		public IDictionary<ISet<Fault>, CounterExample<TExecutableModel>> CounterExamples { get; private set; }
+		public IDictionary<ISet<Fault>, ExecutableCounterExample<TExecutableModel>> CounterExamples { get; private set; }
 
 		/// <summary>
 		///   Gets a value indicating whether the analysis might is complete, i.e., all fault sets have been checked for criticality.
@@ -155,7 +155,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="counterExamples">The counter examples that were generated for the critical fault sets.</param>
 		/// <param name="exceptions">The exceptions that have been thrown during the analysis.</param>
 		internal void SetResult(HashSet<FaultSet> criticalSets, uint checkedSetCount, HashSet<FaultSet> checkedSets,
-								Dictionary<FaultSet, CounterExample<TExecutableModel>> counterExamples, Dictionary<FaultSet, Exception> exceptions)
+								Dictionary<FaultSet, ExecutableCounterExample<TExecutableModel>> counterExamples, Dictionary<FaultSet, Exception> exceptions)
 		{
 			var knownFaultSets = new Dictionary<FaultSet, ISet<Fault>>();
 

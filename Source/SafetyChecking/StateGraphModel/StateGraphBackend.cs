@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.StateGraphModel
 {
 	using System;
+	using System.Linq;
 	using ExecutableModel;
 	using Modeling;
 	using AnalysisModel;
@@ -61,8 +62,8 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			var stateCapacity = Math.Max(1024, (int)(stateGraph.StateCount * 1.5));
 			var newModelCapacity = new ModelCapacityByModelDensity(stateCapacity, ModelDensityLimit.High);
 			configuration.ModelCapacity=newModelCapacity;
-			Func<AnalysisModel<TExecutableModel>> createAnalysisModelFunc = () => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity);
-			var createAnalysisModel = new AnalysisModelCreator<TExecutableModel>(createAnalysisModelFunc);
+			Func<AnalysisModel> createAnalysisModelFunc = () => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity);
+			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 			_checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OnOutputWritten, configuration, invariant);
 		}
 
@@ -71,7 +72,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override AnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
+		internal override InvariantAnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
 		{
 			var suppressedFaults = new FaultSet();
 			foreach (var fault in RuntimeModelCreator.FaultsInBaseModel)
@@ -81,7 +82,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			}
 
 			_checker.Context.TraversalParameters.TransitionModifiers.Clear();
-			_checker.Context.TraversalParameters.TransitionModifiers.Add(() => new FaultSuppressionModifier<TExecutableModel>(suppressedFaults));
+			_checker.Context.TraversalParameters.TransitionModifiers.Add(() => new FaultSuppressionModifier(suppressedFaults));
 
 			return _checker.Check();
 		}
@@ -95,7 +96,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal override AnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal override InvariantAnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
 			throw new NotImplementedException();

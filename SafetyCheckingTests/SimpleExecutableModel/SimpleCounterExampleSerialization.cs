@@ -12,7 +12,7 @@ namespace Tests.SimpleExecutableModel
 
 	public class SimpleExecutableModelCounterExampleSerialization : CounterExampleSerialization<SimpleExecutableModel>
 	{
-		public override void WriteInternalStateStructure(CounterExample<SimpleExecutableModel> counterExample, BinaryWriter writer)
+		public override void WriteInternalStateStructure(ExecutableCounterExample<SimpleExecutableModel> counterExample, BinaryWriter writer)
 		{
 			// write meta data to validate that the right model was loaded
 			writer.Write(counterExample.RuntimeModel.Model.Faults.Length);
@@ -24,7 +24,7 @@ namespace Tests.SimpleExecutableModel
 		///   Loads a counter example from the <paramref name="file" />.
 		/// </summary>
 		/// <param name="file">The path to the file the counter example should be loaded from.</param>
-		public override CounterExample<SimpleExecutableModel> Load(string file)
+		public override ExecutableCounterExample<SimpleExecutableModel> Load(string file)
 		{
 			Requires.NotNullOrWhitespace(file, nameof(file));
 
@@ -78,7 +78,7 @@ namespace Tests.SimpleExecutableModel
 						replayInfo[i][j] = reader.ReadInt32();
 				}
 
-				return new CounterExample<SimpleExecutableModel>(runtimeModel, counterExample, replayInfo, endsWithException);
+				return new ExecutableCounterExample<SimpleExecutableModel>(runtimeModel, counterExample, replayInfo, endsWithException);
 			}
 		}
 	}
