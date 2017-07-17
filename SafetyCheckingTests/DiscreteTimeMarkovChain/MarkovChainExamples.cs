@@ -283,33 +283,33 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 			markovChain.AddInitialTransition(0, 1.0);
 			markovChain.FinishInitialDistribution();
 
-			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
+			markovChain.SetStateLabeling(0, new StateFormulaSet(new[] { false, false })); // state 1(-) of LabeledTransitionMarkovChainExamples.Example4
 			markovChain.StartWithNewDistribution(0);
 			markovChain.AddTransition(1, 0.6);
 			markovChain.AddTransition(2, 0.3);
 			markovChain.AddTransition(4, 0.1);
 			markovChain.FinishDistribution();
 
-			markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { false, false }));
+			markovChain.SetStateLabeling(1, new StateFormulaSet(new[] { false, false })); // state 2(-) of LabeledTransitionMarkovChainExamples.Example4
 			markovChain.StartWithNewDistribution(1);
 			markovChain.AddTransition(1, 0.9);
 			markovChain.AddTransition(3, 0.01);
 			markovChain.AddTransition(4, 0.09);
 			markovChain.FinishDistribution();
 
-			markovChain.SetStateLabeling(2, new StateFormulaSet(new[] { true, false }));
+			markovChain.SetStateLabeling(2, new StateFormulaSet(new[] { true, false })); // state 2(lab1) of LabeledTransitionMarkovChainExamples.Example4
 			markovChain.StartWithNewDistribution(2);
 			markovChain.AddTransition(1, 0.9);
 			markovChain.AddTransition(3, 0.01);
 			markovChain.AddTransition(4, 0.09);
 			markovChain.FinishDistribution();
 
-			markovChain.SetStateLabeling(3, new StateFormulaSet(new[] { false, false }));
+			markovChain.SetStateLabeling(3, new StateFormulaSet(new[] { false, false })); // state 3(-) of LabeledTransitionMarkovChainExamples.Example4
 			markovChain.StartWithNewDistribution(3);
 			markovChain.AddTransition(3, 1.0);
 			markovChain.FinishDistribution();
 
-			markovChain.SetStateLabeling(4, new StateFormulaSet(new[] { false, true }));
+			markovChain.SetStateLabeling(4, new StateFormulaSet(new[] { false, true })); // state 3(lab2) of LabeledTransitionMarkovChainExamples.Example4
 			markovChain.StartWithNewDistribution(4);
 			markovChain.AddTransition(3, 1.0);
 			markovChain.FinishDistribution();

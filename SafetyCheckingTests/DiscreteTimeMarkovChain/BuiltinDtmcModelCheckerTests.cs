@@ -30,6 +30,7 @@ namespace Tests.DiscreteTimeMarkovChain
 {
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Modeling;
 	using JetBrains.Annotations;
 	using MarkovChainExamples;
 	using Shouldly;
@@ -99,6 +100,64 @@ namespace Tests.DiscreteTimeMarkovChain
 			{
 				var result = prismChecker.CalculateProbability(label1UntilLabel2);
 				result.Is(example.ProbabilityLabel1UntilLabel2, 0.0001).ShouldBe(true);
+			}
+		}
+		
+		[Fact]
+		public void StepwiseProbablityOfLabel2ForExample4()
+		{
+			var example = new Example4();
+			var dtmc = example.MarkovChain;
+
+			var results = new List<Probability>();
+			
+			using (var prismChecker = new BuiltinDtmcModelChecker(dtmc, Output.TextWriterAdapter()))
+			{
+				for (var i = 0; i <= 10; i++)
+				{
+					var boundedStepi = new BoundedUnaryFormula(MarkovChainExample.Label2Formula, UnaryOperator.Finally, i);
+					var resultBoundedStepi = prismChecker.CalculateProbability(boundedStepi);
+					Output.Log($"Result {i}:\t{resultBoundedStepi}");
+					results.Add(resultBoundedStepi);
+				}
+
+				var boundedStep200 = new BoundedUnaryFormula(MarkovChainExample.Label2Formula, UnaryOperator.Finally, 200);
+				var resultBoundedStep200 = prismChecker.CalculateProbability(boundedStep200);
+				Output.Log($"Result {200}:\t{resultBoundedStep200}");
+
+				var inf = new UnaryFormula(MarkovChainExample.Label2Formula, UnaryOperator.Finally);
+				var resultInf = prismChecker.CalculateProbability(inf);
+				Output.Log($"Result inf:\t{resultInf}");
+			}
+		}
+
+		[Fact]
+		public void StepwiseProbablityOfNotLabel1UntilLabel2ForExample4()
+		{
+			var example = new Example4();
+			var dtmc = example.MarkovChain;
+
+			var results = new List<Probability>();
+
+			using (var prismChecker = new BuiltinDtmcModelChecker(dtmc, Output.TextWriterAdapter()))
+			{
+				for (var i = 0; i <= 10; i++)
+				{
+					var boundedStepi = new BoundedBinaryFormula(new UnaryFormula(MarkovChainExample.Label1Formula,UnaryOperator.Not), BinaryOperator.Until, MarkovChainExample.Label2Formula, i);
+					var resultBoundedStepi = prismChecker.CalculateProbability(boundedStepi);
+					Output.Log($"Result {i}:\t{resultBoundedStepi}");
+					results.Add(resultBoundedStepi);
+				}
+
+				var boundedStep200 = new BoundedBinaryFormula(new UnaryFormula(MarkovChainExample.Label1Formula, UnaryOperator.Not), BinaryOperator.Until, MarkovChainExample.Label2Formula, 200);
+				var resultBoundedStep200 = prismChecker.CalculateProbability(boundedStep200);
+				Output.Log($"Result {200}:\t{resultBoundedStep200}");
+
+				/*
+				var inf = new BinaryFormula(new UnaryFormula(MarkovChainExample.Label1Formula, UnaryOperator.Not), BinaryOperator.Until, MarkovChainExample.Label2Formula);
+				var resultInf = prismChecker.CalculateProbability(inf);
+				Output.Log($"Result inf:\t{resultInf}");
+				*/
 			}
 		}
 	}
