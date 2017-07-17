@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AnalysisConfiguration.cs" />
+    <Compile Include="AnalysisModelTraverser\CompactStateStorage.cs" />
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
     <Compile Include="AnalysisModel\TransitionFlags.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelCheckerWithoutDictionaries.cs" />
