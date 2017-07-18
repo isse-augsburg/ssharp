@@ -166,11 +166,11 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			var checker = new SafetySharpQualitativeChecker
+			var checker = new SafetySharpQualitativeChecker(model)
 			{
 				Configuration = { ModelCapacity = new ModelCapacityByModelDensity(1310720, ModelDensityLimit.High) }
 			};
-			checker.CheckInvariant(model, true);
+			checker.CheckInvariant(true);
 		}
 		
 		[Test]

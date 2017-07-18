@@ -54,14 +54,14 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 			var formula =
 				new BinaryFormula(new BinaryFormula(formulaFNot2, BinaryOperator.And, formulaFNot3), BinaryOperator.And, formulaGIs078);
 
-			var checker = new SimpleQualitativeChecker
+			var checker = new SimpleQualitativeChecker(m, formula)
 			{
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			checker.OutputWritten += output => Output.Log(output);
 
-			var result = checker.CheckInvariant(m, formula);
+			var result = checker.CheckInvariant(formula);
 			result.FormulaHolds.ShouldBe(true);
 		}
 

@@ -62,13 +62,10 @@ namespace SafetySharp.ModelChecking
 
 	public sealed class SafetySharpQualitativeChecker : QualitativeChecker<SafetySharpRuntimeModel>
 	{
-		/// <summary>
-		///   Checks the invariant encoded into the model created by <paramref name="createModel" />.
-		/// </summary>
-		public InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(ModelBase model, Formula invariant)
+		public SafetySharpQualitativeChecker(ModelBase model, params Formula[] formulas)
+			: base(SafetySharpRuntimeModel.CreateExecutedModelCreator(model, formulas))
 		{
-			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(model, invariant);
-			return CheckInvariant(modelCreator, formulaIndex: 0);
+
 		}
 	}
 

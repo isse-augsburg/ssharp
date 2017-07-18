@@ -45,9 +45,9 @@ namespace Tests.End2End.Files
 		public static int Main(string[] args)
 		{
 			var s = new S1();
-			var modelChecker = new SafetySharpQualitativeChecker();
+			var modelChecker = new SafetySharpQualitativeChecker(s);
 
-			return modelChecker.CheckInvariant(s, s.C.X < 2).FormulaHolds ? -1 : 0; 
+			return modelChecker.CheckInvariant(s.C.X < 2).FormulaHolds ? -1 : 0; 
 		}
 	}
 }

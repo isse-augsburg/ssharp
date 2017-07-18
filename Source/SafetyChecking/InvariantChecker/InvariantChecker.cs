@@ -35,7 +35,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	/// <summary>
 	///   Checks whether an invariant holds for all states of an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class InvariantChecker<TExecutableModel> : ModelTraverser where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class InvariantChecker : ModelTraverser
 	{
 		/// <summary>
 		///   Initializes a new instance.
@@ -68,40 +68,19 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <summary>
 		///   Checks whether the model's invariant holds for all states.
 		/// </summary>
-		internal InvariantAnalysisResult<TExecutableModel> Check()
+		internal InvariantAnalysisResult Check()
 		{
 			Context.Output($"Performing invariant check.");
-			var analyzedModel = AnalyzedModels.First();
-			TExecutableModel executableModel;
-			if (analyzedModel is ExecutedModel<TExecutableModel>)
-			{
-				executableModel = ((ExecutedModel<TExecutableModel>)analyzedModel).RuntimeModel;
-			}
-			else if (analyzedModel is StateGraphModel<TExecutableModel>)
-			{
-				executableModel = ((StateGraphModel<TExecutableModel>)analyzedModel).RuntimeModel;
-			}
-			else
-			{
-				throw new NotImplementedException();
-			}
-			
 			
 			TraverseModelAndReport();
-
-			var executableCounterExample = Context.CounterExample!=null
-				? new ExecutableCounterExample<TExecutableModel>(executableModel, Context.CounterExample)
-				: null;
 
 			if (!Context.FormulaIsValid && !Context.Configuration.ProgressReportsOnly)
 				Context.Output("Invariant violation detected.");
 
-			return new InvariantAnalysisResult<TExecutableModel>
+			return new InvariantAnalysisResult
 			{
 				FormulaHolds = Context.FormulaIsValid,
-				ExecutableModel = executableModel,
 				CounterExample = Context.CounterExample,
-				ExecutableCounterExample = executableCounterExample,
 				StateCount = Context.StateCount,
 				TransitionCount = Context.TransitionCount,
 				ComputedTransitionCount = Context.ComputedTransitionCount,

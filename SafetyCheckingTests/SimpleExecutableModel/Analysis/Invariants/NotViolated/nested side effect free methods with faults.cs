@@ -46,14 +46,14 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 		{
 			var m = new Model();
 			var formulaNotTwo = new UnaryFormula(Model.StateIsTwo,UnaryOperator.Not);
-			var checker = new SimpleQualitativeChecker
+			var checker = new SimpleQualitativeChecker(m, formulaNotTwo)
 			{
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			checker.OutputWritten += output => Output.Log(output);
 
-			var result = checker.CheckInvariant(m, formulaNotTwo);
+			var result = checker.CheckInvariant(formulaNotTwo);
 			result.FormulaHolds.ShouldBe(true);
 		}
 

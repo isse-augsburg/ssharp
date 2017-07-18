@@ -34,7 +34,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
+
+
 	public class Formulas : AnalysisTest
 	{
 		public Formulas(ITestOutputHelper output = null) : base(output)
@@ -46,16 +48,17 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 		{
 			var m = new Model();
 			var formulaNotTwo = new UnaryFormula(Model.StateIsTwo,UnaryOperator.Not);
-			var checker = new SimpleQualitativeChecker
+			var checker = new SimpleQualitativeChecker(m,formulaNotTwo)
 			{
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			checker.OutputWritten += output => Output.Log(output);
 
-			var result = checker.CheckInvariant(m, formulaNotTwo);
+			var result = checker.CheckInvariant(formulaNotTwo);
 			
-			var simulator = new Simulator<SimpleExecutableModel>(result.ExecutableCounterExample);
+			
+			var simulator = new Simulator<SimpleExecutableModel>(checker.ModelCreator,result.CounterExample);
 			var simulatedModel = simulator.RuntimeModel.Model;
 			simulatedModel.State.ShouldBe(0);
 			simulator.IsCompleted.ShouldBe(false);
@@ -72,19 +75,19 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 		{
 			var m = new Model();
 			var formulaNotTwo = new UnaryFormula(Model.StateIsTwo, UnaryOperator.Not);
-			var checker = new SimpleQualitativeChecker
+			var checker = new SimpleQualitativeChecker(m, formulaNotTwo)
 			{
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			checker.OutputWritten += output => Output.Log(output);
 
-			var result = checker.CheckInvariant(m, formulaNotTwo);
+			var result = checker.CheckInvariant(formulaNotTwo);
 
 			// save and load counterexample
 			using (var file = new TemporaryFile(".ssharp"))
 			{
-				result.ExecutableCounterExample.Save(file.FilePath);
+				result.ExecutableCounterExample(checker.ModelCreator).Save(file.FilePath);
 				var counterExampleSerialization = new SimpleExecutableModelCounterExampleSerialization();
 				var simulator = new Simulator<SimpleExecutableModel>(counterExampleSerialization.Load(file.FilePath));
 				var simulatedModel = simulator.RuntimeModel.Model;

@@ -41,6 +41,7 @@ namespace Tests
 	using SafetySharp.Runtime;
 	using Utilities;
 	using Xunit.Abstractions;
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
 
 	public abstract class AnalysisTestObject : TestObject
 	{
@@ -48,7 +49,7 @@ namespace Tests
 		protected ExecutableCounterExample<SafetySharpRuntimeModel>[] CounterExamples { get; private set; }
 		protected bool SuppressCounterExampleGeneration { get; set; }
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
-		protected InvariantAnalysisResult<SafetySharpRuntimeModel> Result { get; private set; }
+		protected InvariantAnalysisResult Result { get; private set; }
 
 		protected void SimulateCounterExample(ExecutableCounterExample<SafetySharpRuntimeModel> counterExample, Action<SafetySharpSimulator> action)
 		{
@@ -69,23 +70,23 @@ namespace Tests
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
 			var logAction = (Action<string>)(message => Output.Log("{0}", message));
-			analysisTestsVariant.CreateModelChecker(SuppressCounterExampleGeneration,logAction);
-			
-			var model = TestModel.InitializeModel(components);
+
+			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, logAction);
+
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), invariant);
 
 			var useCheckInvariantsInsteadOfCheckInvariant = Arguments.Length > 1 && (bool)Arguments[1];
 
+
 			if (useCheckInvariantsInsteadOfCheckInvariant)
 			{
-				var modelFromFormulasGenerator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
-				var results = analysisTestsVariant.CheckInvariants(modelFromFormulasGenerator, invariant);
-				CounterExample = results[0].ExecutableCounterExample;
+				var results = analysisTestsVariant.CheckInvariants(modelCreator, invariant);
+				CounterExample = results[0].ExecutableCounterExample(modelCreator);
 				return results[0].FormulaHolds;
 			}
-
-			var modelGenerator = SafetySharpRuntimeModel.CreateExecutedModelCreator(model,invariant);
-			Result = analysisTestsVariant.CheckInvariant(modelGenerator, invariant);
-			CounterExample = Result.ExecutableCounterExample;
+			
+			Result = analysisTestsVariant.CheckInvariant(modelCreator, invariant);
+			CounterExample = Result.ExecutableCounterExample(modelCreator);
 			return Result.FormulaHolds;
 		}
 
@@ -94,12 +95,13 @@ namespace Tests
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
 			var logAction = (Action<string>)(message => Output.Log("{0}", message));
-			analysisTestsVariant.CreateModelChecker(SuppressCounterExampleGeneration, logAction);
 
-			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(TestModel.InitializeModel(component));
+			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
 
+			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, logAction);
+			
 			var results = analysisTestsVariant.CheckInvariants(modelCreator, invariants);
-			CounterExamples = results.Select(result => result.ExecutableCounterExample).ToArray();
+			CounterExamples = results.Select(result => result.ExecutableCounterExample(modelCreator)).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
 		}
 
@@ -108,12 +110,14 @@ namespace Tests
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
 			var logAction = (Action<string>)(message => Output.Log("{0}", message));
-			analysisTestsVariant.CreateModelChecker(SuppressCounterExampleGeneration, logAction);
 
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components),formula);
-			var result = analysisTestsVariant.Check(modelCreator, formula);
 
-			CounterExample = result.ExecutableCounterExample;
+			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, logAction);
+
+			var result = analysisTestsVariant.Check(modelCreator,formula);
+
+			CounterExample = result.ExecutableCounterExample(modelCreator);
 			return result.FormulaHolds;
 		}
 

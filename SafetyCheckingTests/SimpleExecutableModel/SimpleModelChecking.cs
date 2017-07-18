@@ -34,6 +34,7 @@ namespace Tests.SimpleExecutableModel
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using ISSE.SafetyChecking.Simulator;
 
+	
 	public sealed class SimpleSafetyAnalysis : SafetyAnalysis<SimpleExecutableModel>
 	{
 		public SafetyAnalysisResults<SimpleExecutableModel> ComputeMinimalCriticalSets(SimpleModelBase model, Formula collision, int maxCardinality = Int32.MaxValue)
@@ -61,10 +62,10 @@ namespace Tests.SimpleExecutableModel
 
 	public sealed class SimpleQualitativeChecker : QualitativeChecker<SimpleExecutableModel>
 	{
-		public InvariantAnalysisResult<SimpleExecutableModel> CheckInvariant(SimpleModelBase model, Formula invariant)
+		public SimpleQualitativeChecker(SimpleModelBase model, params Formula[] formulas)
+			: base(SimpleExecutableModel.CreateExecutedModelCreator(model, formulas))
 		{
-			var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, invariant);
-			return CheckInvariant(modelCreator, formulaIndex: 0);
+			
 		}
 	}
 

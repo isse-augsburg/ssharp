@@ -371,13 +371,13 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 
 				if (result.CounterExample != null)
 				{
-					var executableCounterExample = new ExecutableCounterExample<TExecutableModel>(result.ExecutableModel,result.CounterExample);
+					var executableCounterExample = new ExecutableCounterExample<TExecutableModel>(_backend.RuntimeModelCreator.Create(0), result.CounterExample);
 					_counterExamples.Add(set, executableCounterExample);
 				}
 
 				return result.FormulaHolds;
 			}
-			catch (InvariantAnalysisException<TExecutableModel> e)
+			catch (AnalysisException e)
 			{
 				var heuristic = isHeuristicSuggestion ? " [heuristic]" : string.Empty;
 				ConsoleHelpers.WriteLine($"    critical:  {{ {set.ToString(allFaults)} }} {heuristic} [exception thrown]", ConsoleColor.DarkRed);
@@ -393,7 +393,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 
 				if (e.CounterExample != null)
 				{
-					var executableCounterExample = new ExecutableCounterExample<TExecutableModel>(e.ExecutableModel, e.CounterExample);
+					var executableCounterExample = new ExecutableCounterExample<TExecutableModel>(_backend.RuntimeModelCreator.Create(0), e.CounterExample);
 					_counterExamples.Add(set, executableCounterExample);
 				}
 

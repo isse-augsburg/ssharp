@@ -20,34 +20,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.End2End.Files
+namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
-	using SafetySharp.Analysis;
-	using SafetySharp.ModelChecking;
-	using SafetySharp.Modeling;
+	using AnalysisModel;
+	using ExecutableModel;
 
-	internal class C3 : Component
+	/// <summary>
+	///   Describes the result of a model checking based analysis.
+	/// </summary>
+	public static class InvariantAnalysisResultExtensions
 	{
-		[Range(0, 5, OverflowBehavior.Clamp)]
-		public int X;
-
-		public override void Update()
+		public static ExecutableCounterExample<TExecutableModel> ExecutableCounterExample<TExecutableModel>(this InvariantAnalysisResult result, CoupledExecutableModelCreator<TExecutableModel> modelCreator) where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
-			++X;
-		}
-	}
-
-	internal class S3 : ModelBase
-	{
-		[Root(RootKind.Controller)]
-		public C3 C { get; } = new C3();
-
-		public static int Main(string[] args)
-		{
-			var s = new S3();
-			var modelChecker = new SafetySharpQualitativeChecker(s);
-
-			return modelChecker.CheckInvariant(s.C.X < 10).FormulaHolds ? 0 : -1;
+			return new ExecutableCounterExample<TExecutableModel>(modelCreator.Create(0), result.CounterExample);
 		}
 	}
 }

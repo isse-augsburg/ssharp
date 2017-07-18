@@ -20,34 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.End2End.Files
+namespace ISSE.SafetyChecking.ExecutableModel
 {
-	using SafetySharp.Analysis;
-	using SafetySharp.ModelChecking;
-	using SafetySharp.Modeling;
-
-	internal class C3 : Component
+	public class ModelAware<TResult, TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		[Range(0, 5, OverflowBehavior.Clamp)]
-		public int X;
+		public ExecutableModelCreator<TExecutableModel> ModelCreator;
 
-		public override void Update()
-		{
-			++X;
-		}
-	}
-
-	internal class S3 : ModelBase
-	{
-		[Root(RootKind.Controller)]
-		public C3 C { get; } = new C3();
-
-		public static int Main(string[] args)
-		{
-			var s = new S3();
-			var modelChecker = new SafetySharpQualitativeChecker(s);
-
-			return modelChecker.CheckInvariant(s.C.X < 10).FormulaHolds ? 0 : -1;
-		}
+		public TResult Result;
 	}
 }

@@ -25,6 +25,7 @@ namespace Tests
 {
 	using System;
 	using System.Linq;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.ExecutableModel;
 	using SafetySharp.Analysis;
 	using SafetySharp.ModelChecking;
@@ -40,20 +41,20 @@ namespace Tests
 
 	public abstract class AnalysisTestsVariant
 	{
-		public abstract void CreateModelChecker(bool suppressCounterExampleGeneration,Action<string> logAction);
+		public abstract void SetModelCheckerParameter(bool suppressCounterExampleGeneration,Action<string> logAction);
 
-		public abstract InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants);
+		public abstract InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants);
 
-		public abstract InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
+		public abstract InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
 
-		public abstract InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
+		public abstract InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
 	}
 
 	public class AnalysisTestsWithLtsMin: AnalysisTestsVariant
 	{
 		private LtsMin modelChecker;
 
-		public override void CreateModelChecker(bool suppressCounterExampleGeneration, Action<string> logAction)
+		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, Action<string> logAction)
 		{
 			// QualitativeChecker<SafetySharpRuntimeModel>
 			// LtsMin
@@ -61,17 +62,17 @@ namespace Tests
 			modelChecker.OutputWritten += logAction;
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			return modelChecker.Check(createModel, formula);
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			return modelChecker.CheckInvariant(createModel, formula);
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
+		public override InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
 			throw new NotImplementedException();
 		}
@@ -79,57 +80,61 @@ namespace Tests
 
 	public class AnalysisTestsWithQualitative : AnalysisTestsVariant
 	{
-		private QualitativeChecker<SafetySharpRuntimeModel> modelChecker;
-		
-		public override void CreateModelChecker(bool suppressCounterExampleGeneration, Action<string> logAction)
+		private bool _suppressCounterExampleGeneration;
+		private AnalysisConfiguration _analysisConfiguration;
+		private Action<string> _logAction;
+
+
+		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, Action<string> logAction)
 		{
-			// QualitativeChecker<SafetySharpRuntimeModel>
-			// LtsMin
-			modelChecker = new SafetySharpQualitativeChecker();
-			modelChecker.OutputWritten += logAction;
-			
-			modelChecker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			modelChecker.Configuration.GenerateCounterExample = !suppressCounterExampleGeneration;
+			_suppressCounterExampleGeneration = suppressCounterExampleGeneration;
+			_analysisConfiguration = AnalysisConfiguration.Default;
+			_logAction = logAction;
+			_analysisConfiguration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			_analysisConfiguration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel,Formula formula)
+		public override InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel,Formula formula)
 		{
-			return modelChecker.CheckInvariant(createModel, formula);
+			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
+			return checker.CheckInvariant(formula);
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
+		public override InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
-			return modelChecker.CheckInvariants(createModel, invariants);
+			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
+			return checker.CheckInvariants(invariants);
 		}
 	}
 
 	public class AnalysisTestsWithQualitativeWithIndex : AnalysisTestsVariant
 	{
-		private QualitativeChecker<SafetySharpRuntimeModel> modelChecker;
+		private bool _suppressCounterExampleGeneration;
+		private AnalysisConfiguration _analysisConfiguration;
+		private Action<string> _logAction;
 
-		public override void CreateModelChecker(bool suppressCounterExampleGeneration, Action<string> logAction)
+		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, Action<string> logAction)
 		{
-			// QualitativeChecker<SafetySharpRuntimeModel>
-			// LtsMin
-			modelChecker = new SafetySharpQualitativeChecker();
-			modelChecker.OutputWritten += logAction;
-
-			modelChecker.Configuration.ModelCapacity=ModelCapacityByMemorySize.Small;
-			modelChecker.Configuration.GenerateCounterExample = !suppressCounterExampleGeneration;
+			_suppressCounterExampleGeneration = suppressCounterExampleGeneration;
+			_analysisConfiguration = AnalysisConfiguration.Default;
+			_logAction = logAction;
+			_analysisConfiguration.ModelCapacity=ModelCapacityByMemorySize.Small;
+			_analysisConfiguration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel> Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			throw new NotImplementedException();
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel> CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
+		public override InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
+			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
 			var formulaIndex = Array.FindIndex(createModel.StateFormulasToCheckInBaseModel, stateFormula =>
 				{
 					var isEqual=IsFormulasStructurallyEquivalentVisitor.Compare(stateFormula, formula);
@@ -139,12 +144,13 @@ namespace Tests
 			if (formulaIndex==-1)
 				throw new Exception($"Input formula is not checked directly. Use {nameof(AnalysisTestsWithQualitative)} instead");
 
-			return modelChecker.CheckInvariant(createModel, formulaIndex);
+			return checker.CheckInvariant(formulaIndex);
 		}
 
-		public override InvariantAnalysisResult<SafetySharpRuntimeModel>[] CheckInvariants(ExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
+		public override InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
-			return modelChecker.CheckInvariants(createModel, invariants);
+			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
+			return checker.CheckInvariants(invariants);
 		}
 	}
 }

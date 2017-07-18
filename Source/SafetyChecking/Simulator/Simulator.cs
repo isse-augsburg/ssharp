@@ -71,12 +71,12 @@ namespace ISSE.SafetyChecking.Simulator
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="counterExample">The counter example that should be simulated.</param>
-		public Simulator(TExecutableModel runtimeModel, CounterExample counterExample)
+		public Simulator(CoupledExecutableModelCreator<TExecutableModel> modelCreator, CounterExample counterExample)
 		{
 			Requires.NotNull(counterExample, nameof(counterExample));
 
-			RuntimeModel = runtimeModel;
-			_counterExample = new ExecutableCounterExample<TExecutableModel>(runtimeModel, counterExample);
+			RuntimeModel = modelCreator.Create(0);
+			_counterExample = new ExecutableCounterExample<TExecutableModel>(RuntimeModel, counterExample);
 
 			Reset();
 		}

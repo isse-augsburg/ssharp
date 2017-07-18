@@ -54,9 +54,10 @@
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelCheckerWithoutDictionaries.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcModelNormalizer.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
+    <Compile Include="ExecutableModel\ModelAware.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
-    <Compile Include="ExecutedModel\InvariantAnalysisException.cs" />
+    <Compile Include="FaultMinimalKripkeStructure\InvariantAnalysisResult.cs" />
     <Compile Include="Formula\FaultFormula.cs" />
     <Compile Include="Formula\BoundedBinaryFormula.cs" />
     <Compile Include="Formula\BoundedUnaryFormula.cs" />
@@ -68,7 +69,7 @@
     <Compile Include="Formula\FormulaVisitors\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />
     <Compile Include="Formula\FormulaVisitors\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
-    <Compile Include="ExecutedModel\InvariantAnalysisResult.cs" />
+    <Compile Include="InvariantChecker\InvariantAnalysisResult.cs" />
     <Compile Include="GenericDataStructures\AutoResizeBigVector.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\BuiltinNmdpModelChecker.cs" />
@@ -115,7 +116,7 @@
     <Compile Include="Formula\FormulaVisitors\FormulaCompilationVisitor.cs" />
     <Compile Include="ExecutedModel\ModelCapacity.cs" />
     <Compile Include="FaultMinimalKripkeStructure\ActivationMinimalExecutedModel.cs" />
-    <Compile Include="ExecutedModel\InvariantChecker.cs" />
+    <Compile Include="InvariantChecker\InvariantChecker.cs" />
     <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\DeadlockChecker.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\TraversalModifiers\FaultOrderModifier.cs" />
     <Compile Include="FaultMinimalKripkeStructure\TraversalModifiers\FaultSuppressionModifier.cs" />
@@ -194,7 +195,7 @@
     <Compile Include="Modeling\Choice.cs" />
     <Compile Include="ExecutableModel\ChoiceResolver.cs" />
     <Compile Include="AnalysisModelTraverser\ChoiceStack.cs" />
-    <Compile Include="ExecutableModel\ExecutableCounterExample.cs" />
+    <Compile Include="ExecutedModel\ExecutableCounterExample.cs" />
     <Compile Include="AnalysisModel\FaultSet.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\FaultSetCollection.cs" />
     <Compile Include="Formula\Formula.cs" />
@@ -218,7 +219,7 @@
     <Compile Include="ExecutableModel\ExecutableModel.cs" />
     <Compile Include="ExecutedModel\ExecutedModel.cs" />
     <Compile Include="AnalysisModelTraverser\NondeterminismException.cs" />
-    <Compile Include="ExecutedModel\NondeterministicChoiceResolver.cs" />
+    <Compile Include="InvariantChecker\NondeterministicChoiceResolver.cs" />
     <Compile Include="ExecutableModel\SerializationDelegate.cs" />
     <Compile Include="AnalysisModel\StateFormulaSet.cs" />
     <Compile Include="AnalysisModel\CandidateTransition.cs" />

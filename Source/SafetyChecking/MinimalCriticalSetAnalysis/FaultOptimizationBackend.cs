@@ -39,7 +39,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	internal class FaultOptimizationBackend<TExecutableModel> : AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly int _stateHeaderBytes;
-		private InvariantChecker<TExecutableModel> _invariantChecker;
+		private InvariantChecker _invariantChecker;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -62,7 +62,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 
-			_invariantChecker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OnOutputWritten, configuration, invariant);
+			_invariantChecker = new InvariantChecker(createAnalysisModel, OnOutputWritten, configuration, invariant);
 		}
 
 		/// <summary>
@@ -70,7 +70,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override InvariantAnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
+		internal override InvariantAnalysisResult CheckCriticality(FaultSet faults, Activation activation)
 		{
 			ChangeFaultActivations(faults, activation);
 			return _invariantChecker.Check();
@@ -85,7 +85,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal override InvariantAnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal override InvariantAnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
 			Assert.That(_stateHeaderBytes==4, "The first 4 bytes must be reserved for the FaultOrderModifier");

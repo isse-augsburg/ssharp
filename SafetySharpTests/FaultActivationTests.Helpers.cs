@@ -39,24 +39,26 @@ namespace Tests
 
 	public abstract class FaultActivationTestObject : TestObject
 	{
-		private InvariantAnalysisResult<SafetySharpRuntimeModel> _result;
-		protected ExecutableCounterExample<SafetySharpRuntimeModel> CounterExample => _result.ExecutableCounterExample;
+		private InvariantAnalysisResult _result;
+		private CoupledExecutableModelCreator<SafetySharpRuntimeModel> _modelCreator;
+
+		protected ExecutableCounterExample<SafetySharpRuntimeModel> CounterExample => _result.ExecutableCounterExample(_modelCreator);
 		protected int StateCount => _result.StateCount;
 		protected long TransitionCount => _result.TransitionCount;
 		protected long ComputedTransitionCount => _result.ComputedTransitionCount;
 
 		protected void GenerateStateSpace(params IComponent[] components)
 		{
-			var modelCreator=SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), new ExecutableStateFormula(() => true));
+			_modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), new ExecutableStateFormula(() => true));
 
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
 
-			var analysisModelCreator=new AnalysisModelCreator(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(modelCreator, 0, configuration));
+			var analysisModelCreator=new AnalysisModelCreator(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(_modelCreator, 0, configuration));
 
-			var checker = new InvariantChecker<SafetySharpRuntimeModel>(analysisModelCreator,
+			var checker = new InvariantChecker(analysisModelCreator,
 				s => Output.Log("{0}", s),
 				configuration,
 				formulaIndex: 0);

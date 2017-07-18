@@ -60,7 +60,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="firstFault">The fault that must be activated first.</param>
 		/// <param name="secondFault">The fault that must be activated subsequently.</param>
 		/// <param name="kind">Determines the kind of the order relationship.</param>
-		internal OrderRelationship(InvariantAnalysisResult<TExecutableModel> result, Fault firstFault, Fault secondFault, OrderRelationshipKind kind)
+		internal OrderRelationship(InvariantAnalysisResult result, Fault firstFault, Fault secondFault, OrderRelationshipKind kind)
 		{
 			Requires.NotNull(result, nameof(result));
 			Requires.NotNull(firstFault, nameof(firstFault));

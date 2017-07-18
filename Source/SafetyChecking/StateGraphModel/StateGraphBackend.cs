@@ -38,7 +38,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 	/// </summary>
 	internal class StateGraphBackend<TExecutableModel> : AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private InvariantChecker<TExecutableModel> _checker;
+		private InvariantChecker _checker;
 
 		/// <summary>
 		///   Initializes the model that should be analyzed.
@@ -47,16 +47,15 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="hazard">The hazard that should be analyzed.</param>
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
-			var checker = new QualitativeChecker<TExecutableModel> { Configuration = configuration };
+			var invariant = new UnaryFormula(hazard, UnaryOperator.Not);
+
+			var checker = new QualitativeChecker<TExecutableModel>(RuntimeModelCreator) { Configuration = configuration };
 			checker.Configuration.ProgressReportsOnly = false;
 			checker.OutputWritten += OnOutputWritten;
 
-			var invariant = new UnaryFormula(hazard, UnaryOperator.Not);
 
-			var stateGraph = checker.GenerateStateGraph(RuntimeModelCreator);
-
-			var oldStateCapacity = configuration.ModelCapacity;
-			
+			var stateGraph = checker.GenerateStateGraph();
+						
 
 
 			var stateCapacity = Math.Max(1024, (int)(stateGraph.StateCount * 1.5));
@@ -64,7 +63,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			configuration.ModelCapacity=newModelCapacity;
 			Func<AnalysisModel> createAnalysisModelFunc = () => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
-			_checker = new InvariantChecker<TExecutableModel>(createAnalysisModel, OnOutputWritten, configuration, invariant);
+			_checker = new InvariantChecker(createAnalysisModel, OnOutputWritten, configuration, invariant);
 		}
 
 		/// <summary>
@@ -72,7 +71,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal override InvariantAnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation)
+		internal override InvariantAnalysisResult CheckCriticality(FaultSet faults, Activation activation)
 		{
 			var suppressedFaults = new FaultSet();
 			foreach (var fault in RuntimeModelCreator.FaultsInBaseModel)
@@ -96,7 +95,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal override InvariantAnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal override InvariantAnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
 			throw new NotImplementedException();

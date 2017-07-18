@@ -38,7 +38,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	internal abstract class AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		protected FaultSet ForcedFaults { get; private set; }
-		protected CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; private set; }
+		public CoupledExecutableModelCreator<TExecutableModel> RuntimeModelCreator { get; private set; }
 		protected FaultSet SuppressedFaults { get; private set; }
 
 		/// <summary>
@@ -68,7 +68,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// </summary>
 		/// <param name="faults">The fault set that should be checked for criticality.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
-		internal abstract InvariantAnalysisResult<TExecutableModel> CheckCriticality(FaultSet faults, Activation activation);
+		internal abstract InvariantAnalysisResult CheckCriticality(FaultSet faults, Activation activation);
 
 		/// <summary>
 		///   Checks the order of <see cref="firstFault" /> and <see cref="secondFault" /> for the
@@ -79,7 +79,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <param name="minimalCriticalFaultSet">The minimal critical fault set that should be checked.</param>
 		/// <param name="activation">The activation mode of the fault set.</param>
 		/// <param name="forceSimultaneous">Indicates whether both faults must occur simultaneously.</param>
-		internal abstract InvariantAnalysisResult<TExecutableModel> CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
+		internal abstract InvariantAnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous);
 
 		/// <summary>

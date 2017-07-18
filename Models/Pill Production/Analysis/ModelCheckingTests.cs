@@ -207,10 +207,10 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			var model = new ModelSetupParser().Parse("Analysis/medium_setup.model");
 			model.Faults.SuppressActivations();
 
-			var checker = new SafetySharpQualitativeChecker { Configuration = {
+			var checker = new SafetySharpQualitativeChecker(model) { Configuration = {
 					ModelCapacity = new ModelCapacityByModelDensity(1 << 18, ModelDensityLimit.Medium)}
 			};
-			var result = checker.CheckInvariant(model, true);
+			var result = checker.CheckInvariant(true);
 			
 			Console.WriteLine(result);
 		}
