@@ -77,8 +77,10 @@ namespace Tests.SimpleExecutableModel
 					for (var j = 0; j < replayInfo[i].Length; ++j)
 						replayInfo[i][j] = reader.ReadInt32();
 				}
+				
+				var faultActivations = runtimeModel.Faults.Select(fault => fault.Activation).ToArray();
 
-				return new ExecutableCounterExample<SimpleExecutableModel>(runtimeModel, counterExample, replayInfo, endsWithException);
+				return new ExecutableCounterExample<SimpleExecutableModel>(runtimeModel, counterExample, replayInfo, endsWithException, faultActivations);
 			}
 		}
 	}

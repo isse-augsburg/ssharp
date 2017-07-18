@@ -24,6 +24,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 {
 	using System;
 	using AnalysisModel;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -44,6 +45,8 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		public int[][] ReplayInfo { get; }
 		public byte[][] States { get; }
 
+		public Activation[] FaultActivations;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -51,7 +54,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// <param name="states">The serialized counter example.</param>
 		/// <param name="replayInfo">The replay information of the counter example.</param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public ExecutableCounterExample(TExecutableModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException)
+		public ExecutableCounterExample(TExecutableModel runtimeModel, byte[][] states, int[][] replayInfo, bool endsWithException, Activation[] faultActivations)
 		{
 			Requires.NotNull(runtimeModel, nameof(runtimeModel));
 			Requires.NotNull(states, nameof(states));
@@ -63,6 +66,13 @@ namespace ISSE.SafetyChecking.ExecutableModel
 
 			States = states;
 			ReplayInfo = replayInfo;
+
+			FaultActivations = faultActivations;
+			for (var i = 0; i < runtimeModel.Faults.Length; i++)
+			{
+				runtimeModel.Faults[i].Activation = faultActivations[i];
+			}
+			runtimeModel.UpdateFaultSets();
 		}
 
 
@@ -70,7 +80,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		///   Initializes a new instance.
 		/// </summary>
 		public ExecutableCounterExample(TExecutableModel runtimeModel, CounterExample counterExample)
-			: this(runtimeModel,counterExample.States,counterExample.ReplayInfo,counterExample.EndsWithException)
+			: this(runtimeModel,counterExample.States,counterExample.ReplayInfo,counterExample.EndsWithException,counterExample.FaultActivations)
 		{
 		}
 

@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.AnalysisModel
 {
 	using System;
+	using Modeling;
 	using Utilities;
 
 	/// <summary>
@@ -43,13 +44,15 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		public int[][] ReplayInfo { get; }
 		public byte[][] States { get; }
 
+		public Activation[] FaultActivations;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="states">The serialized counter example.</param>
 		/// <param name="replayInfo">The replay information of the counter example.</param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
-		public CounterExample(byte[][] states, int[][] replayInfo, bool endsWithException)
+		public CounterExample(byte[][] states, int[][] replayInfo, bool endsWithException, Activation[] faultActivations)
 		{
 			Requires.NotNull(states, nameof(states));
 			Requires.NotNull(replayInfo, nameof(replayInfo));
@@ -59,6 +62,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 
 			States = states;
 			ReplayInfo = replayInfo;
+			FaultActivations = faultActivations;
 		}
 
 		/// <summary>

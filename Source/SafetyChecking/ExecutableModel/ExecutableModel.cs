@@ -225,13 +225,12 @@ namespace ISSE.SafetyChecking.ExecutableModel
 			// We have to create new model instances to generate and initialize the counter example, otherwise hidden
 			// state variables might prevent us from doing so if they somehow influence the state
 			var replayModel = createModel.Create(StateHeaderBytes);
-			var counterExampleModel = createModel.Create(StateHeaderBytes);
 			var choiceResolver = new NondeterministicChoiceResolver(true);
 
 			replayModel.SetChoiceResolver(choiceResolver);
 			
 			CopyFaultActivationStates(replayModel);
-			CopyFaultActivationStates(counterExampleModel);
+			var faultActivations=Faults.Select(fault => fault.Activation).ToArray();
 
 			// Prepend the construction state to the path; if the path is null, at least one further state must be added
 			// to enable counter example debugging.
@@ -243,7 +242,7 @@ namespace ISSE.SafetyChecking.ExecutableModel
 
 			path = new[] { ConstructionState }.Concat(path).ToArray();
 			var replayInfo = replayModel.GenerateReplayInformation(choiceResolver, path, endsWithException);
-			return new CounterExample( path, replayInfo, endsWithException);
+			return new CounterExample( path, replayInfo, endsWithException, faultActivations);
 		}
 
 		public abstract void SetChoiceResolver(ChoiceResolver choiceResolver);

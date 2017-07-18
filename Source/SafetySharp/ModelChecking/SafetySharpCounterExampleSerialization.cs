@@ -117,7 +117,9 @@ namespace SafetySharp.Analysis
 						replayInfo[i][j] = reader.ReadInt32();
 				}
 
-				return new ExecutableCounterExample<SafetySharpRuntimeModel>(runtimeModel, counterExample, replayInfo, endsWithException);
+				var faultActivations = runtimeModel.Faults.Select(fault => fault.Activation).ToArray();
+
+				return new ExecutableCounterExample<SafetySharpRuntimeModel>(runtimeModel, counterExample, replayInfo, endsWithException, faultActivations);
 			}
 		}
 	}
