@@ -102,12 +102,16 @@ namespace Tests
 		public override InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel,Formula formula)
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
+			checker.Configuration = _analysisConfiguration;
+			checker.OutputWritten += _logAction;
 			return checker.CheckInvariant(formula);
 		}
 
 		public override InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
+			checker.Configuration = _analysisConfiguration;
+			checker.OutputWritten += _logAction;
 			return checker.CheckInvariants(invariants);
 		}
 	}
@@ -135,6 +139,8 @@ namespace Tests
 		public override InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
+			checker.Configuration = _analysisConfiguration;
+			checker.OutputWritten += _logAction;
 			var formulaIndex = Array.FindIndex(createModel.StateFormulasToCheckInBaseModel, stateFormula =>
 				{
 					var isEqual=IsFormulasStructurallyEquivalentVisitor.Compare(stateFormula, formula);
@@ -150,6 +156,8 @@ namespace Tests
 		public override InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
+			checker.Configuration = _analysisConfiguration;
+			checker.OutputWritten += _logAction;
 			return checker.CheckInvariants(invariants);
 		}
 	}

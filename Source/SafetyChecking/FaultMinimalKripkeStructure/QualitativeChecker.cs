@@ -122,6 +122,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			Requires.That(invariants.Length > 0, nameof(invariants), "Expected at least one invariant.");
 			
 			var qualitativeChecker = new QualitativeChecker<TExecutableModel>(ModelCreator);
+			qualitativeChecker.Configuration = Configuration;
 
 			var stateGraph = qualitativeChecker.GenerateStateGraph();
 			var results = new InvariantAnalysisResult[invariants.Length];

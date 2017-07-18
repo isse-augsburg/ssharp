@@ -32,7 +32,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 	{
 		public static ExecutableCounterExample<TExecutableModel> ExecutableCounterExample<TExecutableModel>(this InvariantAnalysisResult result, CoupledExecutableModelCreator<TExecutableModel> modelCreator) where TExecutableModel : ExecutableModel<TExecutableModel>
 		{
-			return new ExecutableCounterExample<TExecutableModel>(modelCreator.Create(0), result.CounterExample);
+			if (result.CounterExample!=null)
+				return new ExecutableCounterExample<TExecutableModel>(modelCreator.Create(0), result.CounterExample);
+			return null;
 		}
 	}
 }
