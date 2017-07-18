@@ -25,6 +25,7 @@ namespace Tests.End2End.Files
 	using SafetySharp.Analysis;
 	using SafetySharp.ModelChecking;
 	using SafetySharp.Modeling;
+	using ISSE.SafetyChecking.Formula;
 
 	internal class C3 : Component
 	{
@@ -45,9 +46,10 @@ namespace Tests.End2End.Files
 		public static int Main(string[] args)
 		{
 			var s = new S3();
-			var modelChecker = new SafetySharpQualitativeChecker(s);
+			Formula formula = s.C.X < 10;
+			var modelChecker = new SafetySharpQualitativeChecker(s, formula);
 
-			return modelChecker.CheckInvariant(s.C.X < 10).FormulaHolds ? 0 : -1;
+			return modelChecker.CheckInvariant(formula).FormulaHolds ? 0 : -1;
 		}
 	}
 }
