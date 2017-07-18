@@ -30,6 +30,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 	using FluentAssertions;
 	using FluentAssertions.Common;
 	using ISSE.SafetyChecking.ExecutedModel;
+	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.Modeling;
 	using ModelChecking;
@@ -163,14 +164,15 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			var model = specification;
 			var faults = model.Faults;
 
+			Formula formula = true;
 			for (var i = 0; i < faults.Length; ++i)
 				faults[i].Activation = Activation.Nondeterministic;
 
-			var checker = new SafetySharpQualitativeChecker(model)
+			var checker = new SafetySharpQualitativeChecker(model, formula)
 			{
 				Configuration = { ModelCapacity = new ModelCapacityByModelDensity(1310720, ModelDensityLimit.High) }
 			};
-			checker.CheckInvariant(true);
+			checker.CheckInvariant(formula);
 		}
 		
 		[Test]
