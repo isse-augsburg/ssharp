@@ -46,7 +46,7 @@ namespace SafetySharp.Analysis
 		public static SafetySharpInvariantAnalysisResult FromInvariantAnalysisResult(InvariantAnalysisResult result, CoupledExecutableModelCreator<SafetySharpRuntimeModel> modelCreator)
 		{
 			var executableModel = modelCreator?.Create(0);
-			var executableCounterExample = modelCreator != null
+			var executableCounterExample = executableModel!=null && result.CounterExample!=null
 				? new ExecutableCounterExample<SafetySharpRuntimeModel>(executableModel, result.CounterExample)
 				: null;
 			var enhancedResult = new SafetySharpInvariantAnalysisResult
