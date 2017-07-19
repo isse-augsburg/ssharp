@@ -111,12 +111,7 @@ namespace SafetySharp.Odp.Reconfiguration
 					to: State.GatherGlobalKnowledge,
 					action: () => {
 						foreach (var baseAgent in _functioningAgents)
-						{
-							var t = baseAgent.RequestReconfiguration(this, task);
-							// since baseAgent must use a ControllerReconfigurationAgent,
-							// RequestReconfiguration() is synchronous.
-							Debug.Assert(t.IsCompleted);
-						}
+							baseAgent.RequestReconfiguration(this, task); // The returned task represents the end of the reconfiguration -> don't await
 					}
 				);
 			}
