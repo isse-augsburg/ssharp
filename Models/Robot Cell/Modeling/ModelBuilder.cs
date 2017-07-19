@@ -211,6 +211,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
+	    public ModelBuilder UseControllerReconfigurationAgents()
+	    {
+	        foreach (var agent in Agents)
+                agent.ReconfigurationStrategy = new ReconfigurationAgentHandler(agent, (b, h, t) => new ControllerReconfigurationAgent(b, h, _model.Controller));
+	        return this;
+	    }
+
 	    public ModelBuilder UseCoalitionFormation()
 	    {
 	        ChooseController<CoalitionFormationController>();
