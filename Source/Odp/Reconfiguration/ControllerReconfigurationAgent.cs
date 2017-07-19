@@ -100,8 +100,8 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			public RoleCalculationAgent(IController controller)
 			{
-				_functioningAgents = _controller.Agents.Where(agent => agent.IsAlive).ToArray();
 				_controller = controller;
+				_functioningAgents = _controller.Agents.Where(agent => agent.IsAlive).ToArray();
 			}
 
 			public void StartCentralReconfiguration(ITask task, BaseAgent agent, object bastate)
