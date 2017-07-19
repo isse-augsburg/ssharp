@@ -28,35 +28,30 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
         public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan, long>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>>();
 
         [NonDiscoverable, Hidden]
-        private readonly Stopwatch _stopwatch;
-
+        private readonly Dictionary<BaseAgent, Stopwatch> _stopwatchs = new Dictionary<BaseAgent, Stopwatch>();
+        
         public PerformanceMeasurementController(IEnumerable<Agent> agents)
         {
             this._actingController = (IController)Activator.CreateInstance(typeof(T), agents.Cast<BaseAgent>());
             this.Agents = this._actingController.Agents;
-            _stopwatch = Stopwatch.StartNew();
             foreach (var agent in Agents)
             {
                 CollectedTimeValues.Add(agent.ID, new List<Tuple<TimeSpan, TimeSpan, long>>());
+                _stopwatchs.Add(agent, Stopwatch.StartNew());
             }
         }
 
         public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
         {
-            _stopwatch.Stop();
             MicrostepScheduler.StartPerformanceMeasurement(_actingController);
             var resultingTasks = await this._actingController.CalculateConfigurations(context, task);
             var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController);
-            using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\test.csv", true))
+            foreach (var agent in resultingTasks.InvolvedAgents)
             {
-                sw.WriteLine(_stopwatch.ElapsedMilliseconds.ToString() + "; " + reconfTime.ElapsedMilliseconds.ToString());
+                _stopwatchs[agent].Stop();
+                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatchs[agent].Elapsed-reconfTime.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
+                _stopwatchs[agent].Restart();
             }
-            foreach (var agent in Agents)
-            {
-                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatch.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
-
-            }
-            _stopwatch.Restart();
             return resultingTasks;
             
 

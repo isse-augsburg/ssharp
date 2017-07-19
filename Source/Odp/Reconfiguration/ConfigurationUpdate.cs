@@ -33,7 +33,9 @@ namespace SafetySharp.Odp.Reconfiguration
 		public BaseAgent[] AffectedAgents
 			=> _addedRoles.Keys.Concat(_removedRoles.Keys).Distinct().ToArray();
 
-		public bool Failed { get; private set; }
+	    public BaseAgent[] InvolvedAgents { get; private set; }
+
+	    public bool Failed { get; private set; }
 
 		public void RemoveAllRoles(ITask task, params BaseAgent[] agents)
 		{
