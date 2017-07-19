@@ -28,38 +28,38 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System.IO;
 	using System.Linq;
 	using System.Reflection;
+
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+
 	using Modeling;
 	using Modeling.Controllers;
 	using Modeling.Controllers.Reconfiguration;
 	using Modeling.Plants;
+
 	using NUnit.Framework;
-	using Odp.Reconfiguration;
 	using RDotNet;
-	using SafetySharp.Analysis;
-	using SafetySharp.Modeling;
-	using FastController = Modeling.Controllers.Reconfiguration.FastController;
 
     public class SimulationTests
 	{
-
-        internal class ProfileBasedSimulator<T> where T : IPerformanceMeasurementController
+        internal class ProfileBasedSimulator
         {
-            private Model model { get; set; }
+            private readonly Model _model;
             Tuple<Fault, ReliabilityAttribute, IComponent>[] faults;
-            private readonly Simulator Simulator;
+            private readonly Simulator _simulator;
             public int Throughput { get; set; } = 0;
 
             public ProfileBasedSimulator(Model model)
             {
-                Simulator = new Simulator(model);//ModellessSimulator(model.Components);
-                this.model = (Model)Simulator.Model;
+                _simulator = new Simulator(model);
+                _model = (Model)_simulator.Model;
                 CollectFaults();
             }
 
             private void CollectFaults()
             {
                 var faultInfo = new HashSet<Tuple<Fault, ReliabilityAttribute, IComponent>>();
-                model.VisitPostOrder(component =>
+                _model.VisitPostOrder(component =>
                 {
                     var faultFields =
                         from faultField in component.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
@@ -121,14 +121,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                             sw.WriteLine(currentRDFail + "; " + currentDistValueFail + "; " + currentRDRepair + "; " + currentDistValueRepair + "; " + failed + "; " + repaired);
                         }*/
                     }
-                    Simulator.SimulateStep();
-                    Throughput = model.Workpieces.Select(w => w.IsComplete).Count();
+                    _simulator.SimulateStep();
+                    Throughput = _model.Workpieces.Select(w => w.IsComplete).Count();
                 }
-                CreateStats(Throughput, (T)model.Controller);
+                CreateStats(Throughput, (IPerformanceMeasurementController)_model.Controller);
 
             }
 
-            private void CreateStats(int throughput, T modelController)
+            private void CreateStats(int throughput, IPerformanceMeasurementController modelController)
             {
                 Debug.Assert(Throughput!=0);
                 Debug.Assert(modelController.CollectedTimeValues != null);
@@ -189,7 +189,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             }
 
         }
-
 
         [Test]
 		public void Simulate()
