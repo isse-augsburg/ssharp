@@ -38,12 +38,6 @@ namespace SafetySharp.Odp.Reconfiguration
 			Agents = agents;
 		}
 
-		public virtual bool ReconfigurationFailure
-		{
-			get;
-			protected set;
-		}
-
 	    protected virtual BaseAgent[] GetAvailableAgents()
 	    {
 	        return Array.FindAll(Agents, agent => agent.IsAlive);
