@@ -417,5 +417,7 @@ namespace SafetySharp.Odp
 	        return base.Equals((BaseAgent)a) && ID == a.ID;
 	    }
 
-	}
+	    public override int GetHashCode() => (int)(ID * 42);
+
+    }
 }
