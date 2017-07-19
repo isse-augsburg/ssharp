@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
@@ -201,14 +202,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             PrintTrace(simulator, model, steps: 120);
 		}
 
-        [Test]
-        public void SimulateProfileBased()
+        [Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
+        public void SimulateProfileBased(Model model)
         {
-            var model = SampleModels.PerformanceMeasurement1<PerformanceMeasurementController<FastController>>();
             model.Faults.SuppressActivations();
             var profileBasedSimulator = new ProfileBasedSimulator(model);
             profileBasedSimulator.Simulate(numberOfSteps: 1000);
         }
+
+	    private static IEnumerable PerformanceMeasurementConfigurations()
+	    {
+	        return SampleModels.CreatePerformanceEvaluationConfigurationsCentralized()
+	                           .Concat(SampleModels.CreatePerformanceEvaluationConfigurationsCoalition())
+	                           .Select(model => new TestCaseData(model).SetName(model.Name));
+	    }
 
         private static void PrintTrace(Simulator simulator, Model model, int steps)
 		{

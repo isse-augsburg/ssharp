@@ -27,7 +27,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
     using System.Linq;
     using Analysis;
     using Odp.Reconfiguration;
-    using SafetySharp.Modeling;
     using static ModelBuilderHelper;
 
     internal static class SampleModels
@@ -36,7 +35,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             { Ictss1, Ictss2, Ictss3, Ictss4, Ictss5, Ictss6, Ictss7 };
 
         private static readonly Func<ModelBuilder, ModelBuilder>[] _performanceEvaluationConfigurations =
-            { FewAgentsHighRedundancy, ManyAgentsLowRedundancy, ManyAgentsLowRedundancy };
+            { FewAgentsHighRedundancy /*, ManyAgentsLowRedundancy, ManyAgentsLowRedundancy*/ };
 
         public static Model DefaultInstance<T>(AnalysisMode mode = AnalysisMode.AllFaults)
             where T : IController
