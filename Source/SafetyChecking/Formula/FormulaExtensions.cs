@@ -20,20 +20,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+
+using ISSE.SafetyChecking.ExecutableModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
+namespace ISSE.SafetyChecking.Formula
 {
-	using System.Linq.Expressions;
-	using AnalysisModel;
-	using ExecutableModel;
-	using Formula;
-
-	internal unsafe class LtmcReexecuteExecutableModel 
+	public static class FormulaExtensions
 	{
+		public static bool IsStateFormula(this Formula formula)
+		{
+			var visitor = new IsStateFormulaVisitor();
+			visitor.Visit(formula);
+			return visitor.IsStateFormula;
+		}
 	}
 }

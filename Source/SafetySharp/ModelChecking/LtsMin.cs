@@ -63,11 +63,8 @@ namespace SafetySharp.Analysis
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			Requires.NotNull(invariant, nameof(invariant));
-
-			var visitor = new IsStateFormulaVisitor();
-			visitor.Visit(invariant);
-
-			if (!visitor.IsStateFormula)
+			
+			if (!invariant.IsStateFormula())
 				throw new InvalidOperationException("Invariants must be non-temporal state formulas.");
 
 			var transformationVisitor = new LtsMinLtlTransformer();

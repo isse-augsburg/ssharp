@@ -52,7 +52,7 @@
     <Compile Include="AnalysisModel\CounterExample.cs" />
     <Compile Include="AnalysisModel\TransitionFlags.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelCheckerWithoutDictionaries.cs" />
-    <Compile Include="DiscreteTimeMarkovChain\LtmcModelNormalizer.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcRetraverseModel.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
     <Compile Include="ExecutableModel\ModelAware.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
@@ -62,6 +62,7 @@
     <Compile Include="Formula\BoundedBinaryFormula.cs" />
     <Compile Include="Formula\BoundedUnaryFormula.cs" />
     <Compile Include="ExecutableModel\ModelException.cs" />
+    <Compile Include="Formula\FormulaExtensions.cs" />
     <Compile Include="Formula\FormulaVisitors\CollectStateFormulasVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\CollectMaximalCompilableFormulasVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulasStructurallyEquivalentVisitor.cs" />

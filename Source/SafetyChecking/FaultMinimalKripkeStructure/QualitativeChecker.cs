@@ -32,7 +32,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 	using StateGraphModel;
 
 	/// <summary>
-	///   Represents a model checker specifically created to check S# models.
+	///   Represents a model checker specifically created to check executable models.
 	/// </summary>
 	public class QualitativeChecker<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
