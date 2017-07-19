@@ -40,10 +40,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
     {
         private readonly IController _actingController;
 
-        [Hidden(HideElements = true)]
+        [NonDiscoverable, Hidden(HideElements = true)]
         public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan, long>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>>();
 
-        [Hidden(HideElements = true)]
+        [NonDiscoverable, Hidden(HideElements = true)]
         private readonly Dictionary<uint, Stopwatch> _stopwatchs = new Dictionary<uint, Stopwatch>();
         
         public PerformanceMeasurementController(IController actingController)
