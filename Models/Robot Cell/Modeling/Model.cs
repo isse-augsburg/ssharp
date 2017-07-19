@@ -33,7 +33,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 	using Resource = Controllers.Resource;
 
-	internal class Model : ModelBase
+	public class Model : ModelBase
 	{
 		public const int MaxAgentCount = 10;
 		public const int MaxResourceCount = 7;

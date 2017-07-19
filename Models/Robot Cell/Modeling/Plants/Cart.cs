@@ -25,7 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 	using System.Linq;
 	using SafetySharp.Modeling;
 
-	internal class Cart : Component
+	public class Cart : Component
 	{
 		[Hidden]
 		private string _name;
@@ -94,14 +94,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		}
 
 		[FaultEffect(Fault = nameof(Broken)), Priority(2)]
-		internal class BrokenEffect : Cart
+		public class BrokenEffect : Cart
 		{
 			public override bool MoveTo(Robot robot) => false;
 			public override bool CanMove(Robot robot) => false;
 		}
 
 		[FaultEffect(Fault = nameof(Lost)), Priority(1)]
-		internal class LostEffect : Cart
+		public class LostEffect : Cart
 		{
 			public override bool MoveTo(Robot robot)
 			{

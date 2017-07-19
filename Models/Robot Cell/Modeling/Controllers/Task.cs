@@ -24,7 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using Odp;
 
-	internal class Task : ITask
+	public class Task : ITask
 	{
 		public Task(params ICapability[] capabilities)
 		{

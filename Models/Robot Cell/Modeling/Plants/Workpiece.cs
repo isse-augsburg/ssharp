@@ -25,7 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 	using System;
 	using SafetySharp.Modeling;
 
-	internal class Workpiece : Component
+	public class Workpiece : Component
 	{
 		[Hidden(HideElements = true)]
 		private readonly ProductionAction[] _productionActions;

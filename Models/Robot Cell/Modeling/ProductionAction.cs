@@ -22,7 +22,7 @@
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
-	internal enum ProductionAction
+	public enum ProductionAction
 	{
 		None,
 		Drill,

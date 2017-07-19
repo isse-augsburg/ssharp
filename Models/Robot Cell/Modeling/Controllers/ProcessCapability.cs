@@ -26,7 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using Odp;
 
 	[DebuggerDisplay("Process: {ProductionAction}")]
-	internal class ProcessCapability : Capability<ProcessCapability>
+	public class ProcessCapability : Capability<ProcessCapability>
 	{
 		public ProcessCapability(ProductionAction productionAction)
 		{

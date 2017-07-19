@@ -24,7 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 {
 	using SafetySharp.Modeling;
 
-	internal class Tool : Component
+	public class Tool : Component
 	{
 		public Fault Broken = new TransientFault();
 
@@ -49,7 +49,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 		}
 
 		[FaultEffect(Fault = nameof(Broken))]
-		internal class BrokenEffect : Tool
+		public class BrokenEffect : Tool
 		{
 			public override bool Apply(Workpiece workpiece) => false;
 			public override bool CanApply() => false;
