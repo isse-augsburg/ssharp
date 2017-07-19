@@ -27,7 +27,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
     using Odp;
 	using Plants;
 
-	internal class CartAgent : Agent
+	public class CartAgent : Agent
 	{
 		public Fault Broken = new TransientFault();
 
