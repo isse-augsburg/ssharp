@@ -38,12 +38,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
     public class PerformanceMeasurementController : IController, IPerformanceMeasurementController
     {
-        [NonDiscoverable, Hidden]
         private readonly IController _actingController;
-        [NonDiscoverable, Hidden(HideElements = true)]
+
+        [Hidden(HideElements = true)]
         public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan, long>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>>();
-        [NonDiscoverable, Hidden]
-        private readonly Dictionary<BaseAgent, Stopwatch> _stopwatchs = new Dictionary<BaseAgent, Stopwatch>();
+
+        [Hidden(HideElements = true)]
+        private readonly Dictionary<uint, Stopwatch> _stopwatchs = new Dictionary<uint, Stopwatch>();
         
         public PerformanceMeasurementController(IController actingController)
         {
@@ -51,7 +52,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             foreach (var agent in Agents)
             {
                 CollectedTimeValues.Add(agent.ID, new List<Tuple<TimeSpan, TimeSpan, long>>());
-                _stopwatchs.Add(agent, Stopwatch.StartNew());
+                _stopwatchs.Add(agent.ID, Stopwatch.StartNew());
             }
         }
 
@@ -62,9 +63,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController);
             foreach (var agent in resultingTasks.InvolvedAgents)
             {
-                _stopwatchs[agent].Stop();
-                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatchs[agent].Elapsed-reconfTime.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
-                _stopwatchs[agent].Restart();
+                _stopwatchs[agent.ID].Stop();
+                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatchs[agent.ID].Elapsed-reconfTime.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
+                _stopwatchs[agent.ID].Restart();
             }
             return resultingTasks;
         }
