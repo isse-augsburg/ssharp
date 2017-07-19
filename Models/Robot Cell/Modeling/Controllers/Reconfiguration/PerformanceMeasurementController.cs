@@ -1,13 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
+    using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
-    using System.IO;
+    using System.Threading.Tasks;
+
     using Odp;
     using Odp.Reconfiguration;
     using SafetySharp.Modeling;
@@ -17,23 +36,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
         Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>> CollectedTimeValues { get; }
     }
 
-    class PerformanceMeasurementController<T> : IController, IPerformanceMeasurementController
-        where T : IController
+    public class PerformanceMeasurementController : IController, IPerformanceMeasurementController
     {
-        [NonDiscoverable, Hidden(HideElements = true)]
-        public BaseAgent[] Agents { get; }
         [NonDiscoverable, Hidden]
         private readonly IController _actingController;
         [NonDiscoverable, Hidden(HideElements = true)]
         public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan, long>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>>();
-
         [NonDiscoverable, Hidden]
         private readonly Dictionary<BaseAgent, Stopwatch> _stopwatchs = new Dictionary<BaseAgent, Stopwatch>();
         
-        public PerformanceMeasurementController(IEnumerable<Agent> agents)
+        public PerformanceMeasurementController(IController actingController)
         {
-            this._actingController = (IController)Activator.CreateInstance(typeof(T), agents.Cast<BaseAgent>());
-            this.Agents = this._actingController.Agents;
+            _actingController = actingController;
             foreach (var agent in Agents)
             {
                 CollectedTimeValues.Add(agent.ID, new List<Tuple<TimeSpan, TimeSpan, long>>());
@@ -44,7 +58,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
         public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
         {
             MicrostepScheduler.StartPerformanceMeasurement(_actingController);
-            var resultingTasks = await this._actingController.CalculateConfigurations(context, task);
+            var resultingTasks = await _actingController.CalculateConfigurations(context, task);
             var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController);
             foreach (var agent in resultingTasks.InvolvedAgents)
             {
@@ -53,9 +67,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
                 _stopwatchs[agent].Restart();
             }
             return resultingTasks;
-            
-
         }
+
+        public BaseAgent[] Agents => _actingController.Agents;
 
         public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated
         {

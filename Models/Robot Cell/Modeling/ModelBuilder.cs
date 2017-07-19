@@ -166,6 +166,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
+	    public ModelBuilder EnablePerformanceMeasurement()
+	    {
+	        _model.Controller = new PerformanceMeasurementController(_model.Controller);
+	        return this;
+	    }
+
 	    public ModelBuilder DisableIntolerableFaults()
 	    {
 	        _model.Faults.MakeNondeterministic();

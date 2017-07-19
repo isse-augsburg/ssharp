@@ -194,7 +194,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
 		public void Simulate()
 		{
-			var model = SampleModels.PerformanceMeasurement1<PerformanceMeasurementController<FastController>>();
+			var model = SampleModels.PerformanceMeasurement1<FastController>();
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);
@@ -207,7 +207,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         {
             var model = SampleModels.PerformanceMeasurement1<PerformanceMeasurementController<FastController>>();
             model.Faults.SuppressActivations();
-            var profileBasedSimulator = new ProfileBasedSimulator<PerformanceMeasurementController<FastController>>(model);
+            var profileBasedSimulator = new ProfileBasedSimulator(model);
             profileBasedSimulator.Simulate(numberOfSteps: 1000);
         }
 

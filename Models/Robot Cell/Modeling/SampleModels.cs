@@ -69,7 +69,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return CreateConfigurations(
                 _performanceEvaluationConfigurations,
                 b => b.DisablePlants(),
-                b => b.ChooseController<FastController>().UseControllerReconfigurationAgents().DisableIntolerableFaults()
+                b => b.ChooseController<FastController>().UseControllerReconfigurationAgents().EnablePerformanceMeasurement().DisableIntolerableFaults()
             );
         }
 
@@ -78,7 +78,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return CreateConfigurations(
                 _performanceEvaluationConfigurations,
                 b => b.DisablePlants(),
-                b => b.UseCoalitionFormation().DisableIntolerableFaults()
+                b => b.UseCoalitionFormation().EnablePerformanceMeasurement().DisableIntolerableFaults()
             );
         }
 
@@ -125,6 +125,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(5, 6))
 
                     .ChooseController<T>()
+                    .EnablePerformanceMeasurement()
                     .EnableControllerVerification(verify)
                     .CentralReconfiguration()
                 , mode).Build();
