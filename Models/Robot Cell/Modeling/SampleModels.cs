@@ -152,7 +152,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 .AddCart(Route(0, 1), Route(0, 2), Route(0, 3), Route(1, 2), Route(1, 3), Route(2, 3))
                 .AddCart(Route(2, 3), Route(2, 4), Route(2, 5), Route(3, 4), Route(3, 5), Route(4, 5))
                 .AddCart(Route(0, 2), Route(0, 4), Route(2, 4), Route(1, 3), Route(1, 5), Route(3, 5))
-                .AddCart(Route(3, 4), Route(4, 5), Route(1, 5), Route(5, 6));
+                .AddCart(Route(3, 4), Route(4, 5), Route(1, 5), Route(5, 3));
         }
 
         public static ModelBuilder ManyAgentsLowRedundancy(this ModelBuilder builder)
