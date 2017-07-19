@@ -44,6 +44,11 @@ namespace SafetySharp.Odp.Reconfiguration
 			protected set;
 		}
 
+	    protected virtual BaseAgent[] GetAvailableAgents()
+	    {
+	        return Array.FindAll(Agents, agent => agent.IsAlive);
+	    }
+
 		public abstract Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task);
 
 		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)

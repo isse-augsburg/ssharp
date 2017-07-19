@@ -46,6 +46,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			_availableAgents = GetAvailableAgents();
 			var configs = new ConfigurationUpdate();
+            configs.RecordInvolvement(_availableAgents); // central controller uses all agents!
 
 			CalculateShortestPaths();
 
@@ -61,11 +62,6 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		protected virtual bool PreferCapabilityAccumulation => true;
-
-		protected virtual BaseAgent[] GetAvailableAgents()
-		{
-			return Array.FindAll(Agents, agent => agent.IsAlive);
-		}
 
 		private void CalculateShortestPaths()
 		{

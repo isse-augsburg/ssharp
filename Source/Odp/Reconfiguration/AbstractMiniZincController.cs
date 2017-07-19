@@ -29,6 +29,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System.Threading.Tasks;
 	using Modeling;
 
+    // TODO: should ignore dead agents
 	public abstract class AbstractMiniZincController : AbstractController
 	{
 		private readonly string _constraintsModel;
@@ -49,6 +50,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
 		{
 			var configs = new ConfigurationUpdate();
+		    configs.RecordInvolvement(GetAvailableAgents()); // central controller uses all agents!
 			configs.RemoveAllRoles(task, Agents);
 			lock(MiniZinc)
 			{

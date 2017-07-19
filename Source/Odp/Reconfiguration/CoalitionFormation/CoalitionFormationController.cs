@@ -96,6 +96,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						if (resourceFlow != null)
 						{
 							config = ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray());
+                            config.RecordInvolvement(coalition.BaseAgents);
 							OnConfigurationsCalculated(coalition.Task, config);
 							return config;
 						}

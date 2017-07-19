@@ -33,7 +33,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		public BaseAgent[] AffectedAgents
 			=> _addedRoles.Keys.Concat(_removedRoles.Keys).Distinct().ToArray();
 
-	    public BaseAgent[] InvolvedAgents { get; private set; }
+        private readonly HashSet<BaseAgent> _involvedAgents = new HashSet<BaseAgent>();
+	    public IEnumerable<BaseAgent> InvolvedAgents => _involvedAgents;
 
 	    public bool Failed { get; private set; }
 
@@ -52,6 +53,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			if (!_removedRoles.ContainsKey(agent))
 				_removedRoles[agent] = new HashSet<Role>();
+		    if (!_involvedAgents.Contains(agent))
+		        _involvedAgents.Add(agent);
 			_removedRoles[agent].UnionWith(rolesToRemove);
 		}
 
@@ -59,8 +62,15 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			if (!_addedRoles.ContainsKey(agent))
 				_addedRoles[agent] = new HashSet<Role>();
-			_addedRoles[agent].UnionWith(rolesToAdd);
+		    if (!_involvedAgents.Contains(agent))
+		        _involvedAgents.Add(agent);
+            _addedRoles[agent].UnionWith(rolesToAdd);
 		}
+
+	    public void RecordInvolvement(IEnumerable<BaseAgent> involvedAgents)
+	    {
+	        _involvedAgents.UnionWith(involvedAgents);
+	    }
 
 		public void LockAddedRoles()
 		{
