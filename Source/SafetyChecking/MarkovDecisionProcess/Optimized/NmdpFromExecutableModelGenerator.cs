@@ -35,11 +35,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 
 	public class NmdpFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		/// <summary>
-		///   Raised when the model checker has written an output. The output is always written to the console by default.
-		/// </summary>
-		public event Action<string> OutputWritten = Console.WriteLine;
-
 		private readonly ExecutableModelCreator<TExecutableModel> _runtimeModelCreator;
 		private readonly List<Formula> _formulasToCheck = new List<Formula>();
 
@@ -67,7 +62,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// </summary>
 		private NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
-			using (var checker = new LtmdpGenerator(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
+			using (var checker = new LtmdpGenerator(createModel, terminateEarlyCondition, executableStateFormulas, Configuration))
 			{
 				var ltmdp = checker.GenerateStateGraph();
 				var ltmdpToNmdp = new LtmdpToNmdp(ltmdp);

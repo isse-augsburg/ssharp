@@ -55,11 +55,11 @@ namespace Tests
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
 			var analysisModelCreator=new AnalysisModelCreator(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(_modelCreator, 0, configuration));
 
 			var checker = new InvariantChecker(analysisModelCreator,
-				s => Output.Log("{0}", s),
 				configuration,
 				formulaIndex: 0);
 

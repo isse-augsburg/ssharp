@@ -44,8 +44,8 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
-		internal InvariantChecker(AnalysisModelCreator createModel, Action<string> output, AnalysisConfiguration configuration, int formulaIndex)
-			: base(createModel, output, configuration, 0)
+		internal InvariantChecker(AnalysisModelCreator createModel, AnalysisConfiguration configuration, int formulaIndex)
+			: base(createModel, configuration, 0)
 		{
 			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationByIndexAction(formulaIndex));
 		}
@@ -54,11 +54,10 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">Creates the model that should be checked.</param>
-		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateFormula">The analyzed stateFormula.</param>
-		internal InvariantChecker(AnalysisModelCreator createModel, Action<string> output, AnalysisConfiguration configuration, Formula stateFormula)
-			: base(createModel, output, configuration,0)
+		internal InvariantChecker(AnalysisModelCreator createModel, AnalysisConfiguration configuration, Formula stateFormula)
+			: base(createModel, configuration,0)
 		{
 			var formulasToCheck = AnalyzedModels.First().Formulas;
 
@@ -70,12 +69,12 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// </summary>
 		internal InvariantAnalysisResult Check()
 		{
-			Context.Output($"Performing invariant check.");
+			Context.Output.WriteLine("Performing invariant check.");
 			
 			TraverseModelAndReport();
 
 			if (!Context.FormulaIsValid && !Context.Configuration.ProgressReportsOnly)
-				Context.Output("Invariant violation detected.");
+				Context.Output.WriteLine("Invariant violation detected.");
 
 			return new InvariantAnalysisResult
 			{

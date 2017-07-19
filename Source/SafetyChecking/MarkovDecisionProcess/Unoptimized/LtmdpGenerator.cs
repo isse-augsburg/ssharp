@@ -40,11 +40,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// </summary>
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
-		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmdpGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
-									 Action<string> output, AnalysisConfiguration configuration)
-			: base(createModel, output, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
+									 AnalysisConfiguration configuration)
+			: base(createModel, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
 		{
 			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
@@ -63,7 +62,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// </summary>
 		internal LabeledTransitionMarkovDecisionProcess GenerateStateGraph()
 		{
-			Context.Output($"Generating labeled transition markov decision process.");
+			Context.Output.WriteLine("Generating labeled transition markov decision process.");
 			TraverseModelAndReport();
 
 			return _mdp;

@@ -55,8 +55,8 @@ namespace Tests.SimpleExecutableModel.Analysis.Dcca
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			checker.OutputWritten += output => Output.Log(output);
-			
+			checker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+
 			var result = checker.ComputeMinimalCriticalSets(m, Model.InvariantViolated);
 			result.MinimalCriticalSets.Count.ShouldBe(1);
 		}

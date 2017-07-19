@@ -65,15 +65,6 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		}
 
 		/// <summary>
-		///   Raised when the model checker has written an output.
-		/// </summary>
-		internal event Action<string> OutputWritten
-		{
-			add { _backend.OutputWritten += value; }
-			remove { _backend.OutputWritten -= value; }
-		}
-
-		/// <summary>
 		///   Computes the order relationships for all minimal critical fault sets contained in the
 		///   <paramref name="safetyAnalysisResults" />.
 		/// </summary>

@@ -40,8 +40,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			var retraverseModel = new LtmcRetraverseModel(model, Configuration);
 			var createModel = new AnalysisModelCreator(() => retraverseModel);
-			/*
-			using (var checker = new LtmcGenerator(createModel, null, retraverseModel.Formulas, OutputWritten, Configuration))
+
+			using (var checker = new LtmcGenerator(createModel, null, retraverseModel.Formulas, Configuration))
 			{
 				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
 
@@ -51,8 +51,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
 				}
 				return labeledTransitionMarkovChain;
-			}*/
-			return null;
+			}
 		}
 	}
 }

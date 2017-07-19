@@ -24,6 +24,7 @@
 namespace Tests
 {
 	using System;
+	using System.IO;
 	using System.Linq;
 	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.ExecutableModel;
@@ -41,7 +42,7 @@ namespace Tests
 
 	public abstract class AnalysisTestsVariant
 	{
-		public abstract void SetModelCheckerParameter(bool suppressCounterExampleGeneration,Action<string> logAction);
+		public abstract void SetModelCheckerParameter(bool suppressCounterExampleGeneration, TextWriter output);
 
 		public abstract InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants);
 
@@ -54,12 +55,12 @@ namespace Tests
 	{
 		private LtsMin modelChecker;
 
-		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, Action<string> logAction)
+		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, TextWriter output)
 		{
 			// QualitativeChecker<SafetySharpRuntimeModel>
 			// LtsMin
 			modelChecker = new LtsMin();
-			modelChecker.OutputWritten += logAction;
+			modelChecker.Output= output;
 		}
 
 		public override InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
@@ -82,14 +83,13 @@ namespace Tests
 	{
 		private bool _suppressCounterExampleGeneration;
 		private AnalysisConfiguration _analysisConfiguration;
-		private Action<string> _logAction;
 
 
-		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, Action<string> logAction)
+		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, TextWriter output)
 		{
 			_suppressCounterExampleGeneration = suppressCounterExampleGeneration;
 			_analysisConfiguration = AnalysisConfiguration.Default;
-			_logAction = logAction;
+			_analysisConfiguration.DefaultTraceOutput = output;
 			_analysisConfiguration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			_analysisConfiguration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
@@ -103,7 +103,6 @@ namespace Tests
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
 			checker.Configuration = _analysisConfiguration;
-			checker.OutputWritten += _logAction;
 			return checker.CheckInvariant(formula);
 		}
 
@@ -111,7 +110,6 @@ namespace Tests
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
 			checker.Configuration = _analysisConfiguration;
-			checker.OutputWritten += _logAction;
 			return checker.CheckInvariants(invariants);
 		}
 	}
@@ -120,13 +118,12 @@ namespace Tests
 	{
 		private bool _suppressCounterExampleGeneration;
 		private AnalysisConfiguration _analysisConfiguration;
-		private Action<string> _logAction;
 
-		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, Action<string> logAction)
+		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, TextWriter output)
 		{
 			_suppressCounterExampleGeneration = suppressCounterExampleGeneration;
 			_analysisConfiguration = AnalysisConfiguration.Default;
-			_logAction = logAction;
+			_analysisConfiguration.DefaultTraceOutput = output;
 			_analysisConfiguration.ModelCapacity=ModelCapacityByMemorySize.Small;
 			_analysisConfiguration.GenerateCounterExample = !suppressCounterExampleGeneration;
 		}
@@ -140,7 +137,6 @@ namespace Tests
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
 			checker.Configuration = _analysisConfiguration;
-			checker.OutputWritten += _logAction;
 			var formulaIndex = Array.FindIndex(createModel.StateFormulasToCheckInBaseModel, stateFormula =>
 				{
 					var isEqual=IsFormulasStructurallyEquivalentVisitor.Compare(stateFormula, formula);
@@ -157,7 +153,6 @@ namespace Tests
 		{
 			var checker = new QualitativeChecker<SafetySharpRuntimeModel>(createModel);
 			checker.Configuration = _analysisConfiguration;
-			checker.OutputWritten += _logAction;
 			return checker.CheckInvariants(invariants);
 		}
 	}

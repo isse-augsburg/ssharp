@@ -62,7 +62,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 
-			_invariantChecker = new InvariantChecker(createAnalysisModel, OnOutputWritten, configuration, invariant);
+			_invariantChecker = new InvariantChecker(createAnalysisModel, configuration, invariant);
 		}
 
 		/// <summary>

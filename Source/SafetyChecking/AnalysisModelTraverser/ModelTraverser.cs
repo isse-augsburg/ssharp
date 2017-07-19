@@ -51,10 +51,9 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal ModelTraverser(AnalysisModelCreator createModel, Action<string> output, AnalysisConfiguration configuration, int transitionSize)
+		internal ModelTraverser(AnalysisModelCreator createModel, AnalysisConfiguration configuration, int transitionSize)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
-			Requires.NotNull(output, nameof(output));
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
@@ -64,7 +63,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			var stacks = new StateStack[configuration.CpuCount];
 
 			_loadBalancer = new LoadBalancer(stacks);
-			Context = new TraversalContext(_loadBalancer, configuration, output);
+			Context = new TraversalContext(_loadBalancer, configuration);
 			_workers = new Worker[configuration.CpuCount];
 
 			for (var i = 0; i < configuration.CpuCount; ++i)
@@ -135,8 +134,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 			if (!Context.Configuration.ProgressReportsOnly)
 			{
-				Context.Output($"Traverse model using {AnalyzedModels.Count()} CPU cores.");
-				Context.Output($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
+				Context.Output?.WriteLine($"Traverse model using {AnalyzedModels.Count()} CPU cores.");
+				Context.Output?.WriteLine($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
 			}
 
 			try
@@ -153,16 +152,16 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 				if (!Context.Configuration.ProgressReportsOnly)
 				{
-					Context.Output?.Invoke(String.Empty);
-					Context.Output?.Invoke("===============================================");
-					Context.Output?.Invoke($"Initialization time: {_initializationTime}");
-					Context.Output?.Invoke($"Model traversal time: {stopwatch.Elapsed}");
+					Context.Output?.WriteLine(String.Empty);
+					Context.Output?.WriteLine("===============================================");
+					Context.Output?.WriteLine($"Initialization time: {_initializationTime}");
+					Context.Output?.WriteLine($"Model traversal time: {stopwatch.Elapsed}");
 					
-					Context.Output?.Invoke($"{(long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-					Context.Output?.Invoke($"{(long)(Context.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+					Context.Output?.WriteLine($"{(long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
+					Context.Output?.WriteLine($"{(long)(Context.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
 
-					Context.Output?.Invoke("===============================================");
-					Context.Output?.Invoke(String.Empty);
+					Context.Output?.WriteLine("===============================================");
+					Context.Output?.WriteLine(String.Empty);
 				}
 			}
 		}

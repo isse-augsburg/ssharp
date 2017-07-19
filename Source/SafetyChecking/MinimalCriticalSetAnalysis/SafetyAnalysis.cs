@@ -25,6 +25,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using ExecutableModel;
@@ -78,6 +79,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		public SafetyAnalysis()
 		{
 			Configuration.ProgressReportsOnly = true;
+			Output = Configuration.DefaultTraceOutput;
 		}
 
 		/// <summary>
@@ -88,7 +90,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <summary>
 		///   Raised when the model checker has written an output.
 		/// </summary>
-		public event Action<string> OutputWritten;
+		public TextWriter Output;
 
 		/// <summary>
 		///   Computes the minimal critical sets for the <paramref name="hazard" />.
@@ -162,7 +164,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 					throw new ArgumentOutOfRangeException();
 			}
 
-			_backend.OutputWritten += output => OutputWritten?.Invoke(output);
+			_backend.Output = Output;
 			_backend.InitializeModel(Configuration, createModel, hazard);
 			_results = new SafetyAnalysisResults<TExecutableModel>(createModel, hazard, suppressedFaults, forcedFaults, Heuristics, FaultActivationBehavior);
 

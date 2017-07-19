@@ -51,7 +51,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.NotViolated
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			checker.OutputWritten += output => Output.Log(output);
+			checker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
 			var result = checker.CheckInvariant(formulaNotTwo);
 			result.FormulaHolds.ShouldBe(true);

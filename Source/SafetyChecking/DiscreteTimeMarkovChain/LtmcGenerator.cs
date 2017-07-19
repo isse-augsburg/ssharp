@@ -44,8 +44,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmcGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
-									 Action<string> output, AnalysisConfiguration configuration)
-			: base(createModel, output, configuration, LabeledTransitionMarkovChain.TransitionSize)
+									 AnalysisConfiguration configuration)
+			: base(createModel, configuration, LabeledTransitionMarkovChain.TransitionSize)
 		{
 			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates,Context.ModelCapacity.NumberOfTransitions);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
@@ -64,7 +64,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		internal LabeledTransitionMarkovChain GenerateStateGraph()
 		{
-			Context.Output($"Generating labeled transition markov chain.");
+			Context.Output.WriteLine($"Generating labeled transition markov chain.");
 			TraverseModelAndReport();
 			return _markovChain;
 		}

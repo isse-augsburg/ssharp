@@ -53,7 +53,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			checker.OutputWritten += output => Output.Log(output);
+			checker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
 			var result = checker.CheckInvariant(formulaNotTwo);
 			
@@ -80,7 +80,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Invariants.CounterExamples
 				Configuration = AnalysisConfiguration.Default
 			};
 			checker.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			checker.OutputWritten += output => Output.Log(output);
+			checker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
 			var result = checker.CheckInvariant(formulaNotTwo);
 

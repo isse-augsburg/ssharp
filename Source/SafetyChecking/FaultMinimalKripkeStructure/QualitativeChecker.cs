@@ -41,11 +41,6 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
-		/// <summary>
-		///   Raised when the model checker has written an output. The output is always written to the console by default.
-		/// </summary>
-		public event Action<string> OutputWritten = Console.WriteLine;
-
 		public CoupledExecutableModelCreator<TExecutableModel> ModelCreator { get; }
 
 		public QualitativeChecker(CoupledExecutableModelCreator<TExecutableModel> createModel)
@@ -65,7 +60,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(ModelCreator, 0, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
-			using (var checker = new InvariantChecker(createAnalysisModel, OutputWritten, Configuration, formula))
+			using (var checker = new InvariantChecker(createAnalysisModel, Configuration, formula))
 			{
 				var result = checker.Check();
 				return result;
@@ -84,7 +79,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(ModelCreator, 0, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
-			using (var checker = new InvariantChecker(createAnalysisModel, OutputWritten, Configuration, formulaIndex))
+			using (var checker = new InvariantChecker(createAnalysisModel, Configuration, formulaIndex))
 			{
 				var result = checker.Check();
 				return result;
@@ -104,7 +99,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 				model = new ActivationMinimalExecutedModel<TExecutableModel>(ModelCreator, 0, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
-			using (var checker = new StateGraphGenerator<TExecutableModel>(createAnalysisModel, OutputWritten, Configuration))
+			using (var checker = new StateGraphGenerator<TExecutableModel>(createAnalysisModel, Configuration))
 			{
 				var stateGraph = checker.GenerateStateGraph();
 				return stateGraph;
@@ -151,7 +146,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 					model = new StateGraphModel<TExecutableModel>(stateGraph, Configuration.SuccessorCapacity);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
-			using (var checker = new InvariantChecker(createAnalysisModel, OutputWritten, Configuration, invariant))
+			using (var checker = new InvariantChecker(createAnalysisModel, Configuration, invariant))
 			{
 				var result = checker.Check();
 				return result;

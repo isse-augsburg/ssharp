@@ -64,7 +64,7 @@ namespace ISSE.SafetyChecking
 		internal bool ProgressReportsOnly { get; set; }
 
 		/// <summary>
-		///   The TextWriter used to log the process (when the event is not used explicitly).
+		///   The TextWriter used to log the process.
 		/// </summary>
 		public System.IO.TextWriter DefaultTraceOutput { get; set; }
 

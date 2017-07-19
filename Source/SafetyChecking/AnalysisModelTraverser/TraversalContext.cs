@@ -53,9 +53,9 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		public readonly LoadBalancer LoadBalancer;
 
 		/// <summary>
-		///   The action that should be invoked when output is generated.
+		///   The TextWriter used to log the process.
 		/// </summary>
-		public readonly Action<string> Output;
+		public readonly System.IO.TextWriter Output;
 
 		/// <summary>
 		///   The parameters influencing the traversal process.
@@ -122,16 +122,14 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		/// <param name="loadBalancer">The load balancer that balances the work of multiple <see cref="Worker" /> instances.</param>
 		/// <param name="configuration">The configuration values for the analysis.</param>
-		/// <param name="output">The action that should be invoked when output is generated.</param>
 		/// <param name="modelCapacity">The necessary memory for the state space of a model.</param>
-		public TraversalContext(LoadBalancer loadBalancer, AnalysisConfiguration configuration, Action<string> output)
+		public TraversalContext(LoadBalancer loadBalancer, AnalysisConfiguration configuration)
 		{
 			Requires.NotNull(loadBalancer, nameof(loadBalancer));
-			Requires.NotNull(output, nameof(output));
 
 			LoadBalancer = loadBalancer;
 			Configuration = configuration;
-			Output = output;
+			Output = Configuration.DefaultTraceOutput;
 
 			Reset();
 		}
@@ -166,7 +164,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		public void Report()
 		{
-			Output.Invoke($"Discovered {StateCount:n0} states, {TransitionCount:n0} transitions, {LevelCount} levels.");
+			Output.WriteLine($"Discovered {StateCount:n0} states, {TransitionCount:n0} transitions, {LevelCount} levels.");
 		}
 	}
 }

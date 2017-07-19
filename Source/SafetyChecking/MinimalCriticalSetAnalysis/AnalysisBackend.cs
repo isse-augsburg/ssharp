@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 {
 	using System;
+	using System.IO;
 	using System.Linq;
 	using ExecutableModel;
 	using Modeling;
@@ -85,16 +86,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// <summary>
 		///   Raised when output is generated during the analyses.
 		/// </summary>
-		internal event Action<string> OutputWritten;
-
-		/// <summary>
-		///   Raises the <see cref="OutputWritten" /> for the generated <paramref name="output" />.
-		/// </summary>
-		/// <param name="output">The output the event should be raised for.</param>
-		protected void OnOutputWritten(string output)
-		{
-			OutputWritten?.Invoke(output);
-		}
+		internal TextWriter Output;
 
 		/// <summary>
 		///   Determines the effective <see cref="Activation" /> of the <paramref name="fault" /> when <paramref name="faults" /> should

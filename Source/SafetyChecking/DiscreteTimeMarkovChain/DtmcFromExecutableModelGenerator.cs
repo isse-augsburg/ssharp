@@ -35,11 +35,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 	public class DtmcFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		/// <summary>
-		///   Raised when the model checker has written an output. The output is always written to the console by default.
-		/// </summary>
-		public event Action<string> OutputWritten = Console.WriteLine;
-		
 		private readonly ExecutableModelCreator<TExecutableModel> _runtimeModelCreator;
 		private readonly List<Formula> _formulasToCheck = new List<Formula>();
 
@@ -76,7 +71,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		private DiscreteTimeMarkovChain GenerateMarkovChain(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
-			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, OutputWritten, Configuration))
+			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, Configuration))
 			{
 				PrintStateFormulas(executableStateFormulas);
 

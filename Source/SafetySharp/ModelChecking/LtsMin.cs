@@ -52,7 +52,7 @@ namespace SafetySharp.Analysis
 		/// <summary>
 		///   Raised when the model checker has written an output. The output is always written to the console by default.
 		/// </summary>
-		public event Action<string> OutputWritten = Console.WriteLine;
+		public TextWriter Output = Console.Out;
 
 		/// <summary>
 		///   Checks whether the <paramref name="formula" /> holds in all states of the <paramref name="model" />.
@@ -166,7 +166,7 @@ namespace SafetySharp.Analysis
 			_ltsMin = new ExternalProcess(
 				fileName: "pins2lts-seq.exe",
 				commandLineArguments: $"--loader=\"{loaderAssembly}\" \"{modelFile}\" {checkArgument}",
-				outputCallback: output => OutputWritten?.Invoke(output))
+				outputCallback: output => Output?.WriteLine(output))
 			{
 				WorkingDirectory = Environment.CurrentDirectory
 			};
@@ -184,11 +184,11 @@ namespace SafetySharp.Analysis
 
 			stopwatch.Stop();
 
-			OutputWritten?.Invoke(String.Empty);
-			OutputWritten?.Invoke("=====================================");
-			OutputWritten?.Invoke($"Elapsed time: {stopwatch.Elapsed}");
-			OutputWritten?.Invoke("=====================================");
-			OutputWritten?.Invoke(String.Empty);
+			Output?.WriteLine(String.Empty);
+			Output?.WriteLine("=====================================");
+			Output?.WriteLine($"Elapsed time: {stopwatch.Elapsed}");
+			Output?.WriteLine("=====================================");
+			Output?.WriteLine(String.Empty);
 		}
 	}
 }

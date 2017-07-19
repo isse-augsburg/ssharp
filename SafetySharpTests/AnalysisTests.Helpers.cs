@@ -69,9 +69,7 @@ namespace Tests
 		{
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
-			var logAction = (Action<string>)(message => Output.Log("{0}", message));
-
-			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, logAction);
+			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, Output.TextWriterAdapter());
 
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), invariant);
 
@@ -94,11 +92,9 @@ namespace Tests
 		{
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
-			var logAction = (Action<string>)(message => Output.Log("{0}", message));
-
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
 
-			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, logAction);
+			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, Output.TextWriterAdapter());
 			
 			var results = analysisTestsVariant.CheckInvariants(modelCreator, invariants);
 			CounterExamples = results.Select(result => result.ExecutableCounterExample(modelCreator)).ToArray();
@@ -109,11 +105,9 @@ namespace Tests
 		{
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
-			var logAction = (Action<string>)(message => Output.Log("{0}", message));
-
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components),formula);
 
-			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, logAction);
+			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, Output.TextWriterAdapter());
 
 			var result = analysisTestsVariant.Check(modelCreator,formula);
 
@@ -143,9 +137,9 @@ namespace Tests
 			configuration.ModelCapacity=ModelCapacityByMemorySize.Tiny;
 			configuration.GenerateCounterExample = !SuppressCounterExampleGeneration;
 			configuration.ProgressReportsOnly = true;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
 			var analysis = new SafetySharpOrderAnalysis(DccaWithMaxCardinality(hazard, Int32.MaxValue, components), configuration);
-			analysis.OutputWritten += message => Output.Log("{0}", message);
 
 			var result = analysis.ComputeOrderRelationships();
 			Output.Log("{0}", result);
@@ -161,10 +155,10 @@ namespace Tests
 				Configuration =
 				{
 					ModelCapacity=capacity,
-					GenerateCounterExample = !SuppressCounterExampleGeneration
-				}
+					GenerateCounterExample = !SuppressCounterExampleGeneration,
+					DefaultTraceOutput = Output.TextWriterAdapter()
+		}
 			};
-			analysis.OutputWritten += message => Output.Log("{0}", message);
 
 			if (Heuristics != null)
 				analysis.Heuristics.AddRange(Heuristics);

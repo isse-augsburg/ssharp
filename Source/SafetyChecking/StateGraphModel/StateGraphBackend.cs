@@ -51,7 +51,6 @@ namespace ISSE.SafetyChecking.StateGraphModel
 
 			var checker = new QualitativeChecker<TExecutableModel>(RuntimeModelCreator) { Configuration = configuration };
 			checker.Configuration.ProgressReportsOnly = false;
-			checker.OutputWritten += OnOutputWritten;
 
 
 			var stateGraph = checker.GenerateStateGraph();
@@ -63,7 +62,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			configuration.ModelCapacity=newModelCapacity;
 			Func<AnalysisModel> createAnalysisModelFunc = () => new StateGraphModel<TExecutableModel>(stateGraph, configuration.SuccessorCapacity);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
-			_checker = new InvariantChecker(createAnalysisModel, OnOutputWritten, configuration, invariant);
+			_checker = new InvariantChecker(createAnalysisModel, configuration, invariant);
 		}
 
 		/// <summary>
