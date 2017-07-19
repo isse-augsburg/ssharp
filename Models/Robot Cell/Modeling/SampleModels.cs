@@ -137,7 +137,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
         public static ModelBuilder FewAgentsHighRedundancy(this ModelBuilder builder)
         {
-            return builder.DefineTask(100000, Produce, Drill, Insert, Tighten, Consume) // 5 capabilities in task
+            return builder.DefineTask(1000, Produce, Drill, Insert, Tighten, Consume) // 5 capabilities in task
 
                 // 6 robots, each capability ~ 5 times
                 .AddRobot(Produce, Drill, Insert, Tighten)
