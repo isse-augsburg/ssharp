@@ -131,24 +131,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 , mode).Build();
         }
 
-        public enum FaultMode { ToolFaults, CompleteFailures, IoFaults, AllFaults }
-
-        public static Model PerformanceMeasurementModel(FaultMode mode)
+        public static Model MediumSizePerformanceMeasurementModel()
         {
-            var model = new ModelBuilder(nameof(PerformanceMeasurementModel) + ": " + mode).MediumSizePerformanceMeasurementModel().Build();
-            switch (mode)
-            {
-                case FaultMode.ToolFaults:
-                    model.Faults.Except(model.RobotAgents.SelectMany(r => new [] { r.DrillBroken, r.InsertBroken, r.TightenBroken, r.PolishBroken })).SuppressActivations();
-                    break;
-                case FaultMode.IoFaults:
-                    model.Faults.Except(model.RobotAgents.Select(r => r.ResourceTransportFault)).SuppressActivations();
-                    break;
-                case FaultMode.CompleteFailures:
-                    model.Faults.SuppressActivations(); // TODO: except complete failures, once modeled
-                    break;
-            }
-            return model;
+            return new ModelBuilder(nameof(MediumSizePerformanceMeasurementModel)).MediumSizePerformanceMeasurementModel().Build();
         }
 
         public static ModelBuilder FewAgentsHighRedundancy(this ModelBuilder builder)
