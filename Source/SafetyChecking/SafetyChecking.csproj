@@ -64,6 +64,8 @@
     <Compile Include="Formula\BoundedUnaryFormula.cs" />
     <Compile Include="ExecutableModel\ModelException.cs" />
     <Compile Include="Formula\FormulaExtensions.cs" />
+    <Compile Include="Formula\FormulaVisitors\CollectDeepestOnceFormulasWithCompilableOperandVisitor.cs" />
+    <Compile Include="Formula\FormulaVisitors\CollectMaximalNormalizableFormulasVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\CollectStateFormulasVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\CollectMaximalCompilableFormulasVisitor.cs" />
     <Compile Include="Formula\FormulaVisitors\IsFormulasStructurallyEquivalentVisitor.cs" />

@@ -24,6 +24,7 @@
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using AnalysisModel;
+	using Formula;
 
 	internal class LtmcFromRetraverseModelGenerator
 	{
@@ -36,7 +37,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   Generates a <see cref="DiscreteTimeMarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		public LabeledTransitionMarkovChain Normalize(LabeledTransitionMarkovChain model)
+		public LabeledTransitionMarkovChain Normalize(LabeledTransitionMarkovChain model, Formula[] formulas)
 		{
 			var retraverseModel = new LtmcRetraverseModel(model, Configuration);
 			var createModel = new AnalysisModelCreator(() => retraverseModel);
