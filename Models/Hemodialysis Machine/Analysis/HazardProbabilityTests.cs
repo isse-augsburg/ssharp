@@ -28,7 +28,9 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 {
+	using System.IO;
 	using FluentAssertions;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using SafetySharp.Modeling;
@@ -37,16 +39,14 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 	class HazardProbabilityTests
 	{
-		private readonly Probability _prob1Eneg1 = new Probability(0.1);
-		private readonly Probability _prob1Eneg2 = new Probability(0.01);
-		private readonly Probability _prob1Eneg3 = new Probability(0.001);
-		private readonly Probability _prob1Eneg5 = new Probability(0.00001);
-		private readonly Probability _prob1Eneg7 = new Probability(0.0000001);
+		private static readonly Probability _prob1Eneg1 = new Probability(0.1);
+		private static readonly Probability _prob1Eneg2 = new Probability(0.01);
+		private static readonly Probability _prob1Eneg3 = new Probability(0.001);
+		private static readonly Probability _prob1Eneg5 = new Probability(0.00001);
+		private static readonly Probability _prob1Eneg7 = new Probability(0.0000001);
 
-		[Test]
-		public void IncomingBloodIsContaminated()
+		public static void SetProbabilities(Model model)
 		{
-			var model = new Model();
 
 			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
 			model.HdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
@@ -59,6 +59,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			model.HdMachine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose.ProbabilityOfOccurrence = _prob1Eneg5;
 
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = _prob1Eneg5;
+		}
+
+		[Test]
+		public void IncomingBloodIsContaminated()
+		{
+			var model = new Model();
+			SetProbabilities(model);
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.IncomingBloodWasNotOk);
 			Console.Write($"Probability of hazard: {result}");
@@ -68,21 +75,36 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void DialysisFinishedAndBloodNotCleaned()
 		{
 			var model = new Model();
-
-			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
-			model.HdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
-			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg3;
-			model.HdMachine.DialyzingFluidDeliverySystem.SafetyBypass.SafetyBypassFault.ProbabilityOfOccurrence = _prob1Eneg3;
-			model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence = _prob1Eneg2;
-
-			model.HdMachine.ExtracorporealBloodCircuit.ArterialBloodPump.BloodPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
-			model.HdMachine.ExtracorporealBloodCircuit.VenousSafetyDetector.SafetyDetectorDefect.ProbabilityOfOccurrence = _prob1Eneg7;
-			model.HdMachine.ExtracorporealBloodCircuit.VenousTubingValve.ValveDoesNotClose.ProbabilityOfOccurrence = _prob1Eneg5;
-
-			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = _prob1Eneg5;
+			SetProbabilities(model);
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.BloodNotCleanedAndDialyzingFinished);
 			Console.Write($"Probability of hazard: {result}");
+		}
+
+		[Test]
+		public void Parametric()
+		{
+			var model = new Model();
+			SetProbabilities(model);
+			var parameter = new QuantitativeParametricAnalysisParameter
+			{
+				StateFormula = model.IncomingBloodWasNotOk,
+				Bound = null,
+				From = 0.001,
+				To = 0.1,
+				Steps = 25,
+				UpdateParameterInModel = value => { model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence=new Probability(value); }
+			};
+			var result=SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
+			var fileWriterContamination = new StreamWriter("contamination.csv", append: false);
+			result.ToCsv(fileWriterContamination);
+			fileWriterContamination.Close();
+
+			parameter.StateFormula = model.BloodNotCleanedAndDialyzingFinished;
+			result=SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
+			var fileWriterUnsuccessful = new StreamWriter("unsuccessful.csv", append: false);
+			result.ToCsv(fileWriterUnsuccessful);
+			fileWriterUnsuccessful.Close();
 		}
 	}
 }

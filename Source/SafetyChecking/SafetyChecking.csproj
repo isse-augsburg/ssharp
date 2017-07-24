@@ -55,6 +55,7 @@
     <Compile Include="DiscreteTimeMarkovChain\LtmcFromRetraverseModelGenerator.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcRetraverseModel.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\QuantitativeParametricAnalysis.cs" />
     <Compile Include="ExecutableModel\ModelAware.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />

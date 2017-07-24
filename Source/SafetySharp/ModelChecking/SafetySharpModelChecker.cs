@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis
 {
+	using System.IO;
 	using System.Linq;
 	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
@@ -33,6 +34,7 @@ namespace SafetySharp.Analysis
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using ISSE.SafetyChecking.Modeling;
+	using ISSE.SafetyChecking.Utilities;
 	using Modeling;
 	using Runtime;
 
@@ -295,6 +297,46 @@ namespace SafetySharp.Analysis
 			var formula = new BoundedBinaryFormula(invariantFormula, BinaryOperator.Until, stateFormula, bound);
 
 			return CalculateProbabilityRangeOfFormulaBounded(model, formula, stateFormula, bound);
+		}
+
+
+		/// <summary>
+		///   Conduct a quantitative analysis where parameters may vary
+		/// </summary>
+		/// <param name="model">The model that should be checked.</param>
+		/// <param name="parameter">The parameters of the parametric analysis.</param>
+		public static QuantitativeParametricAnalysisResults ConductQuantitativeParametricAnalysis(ModelBase model, QuantitativeParametricAnalysisParameter parameter)
+		{
+			var stepSize = (parameter.To - parameter.From) / (parameter.Steps - 1);
+
+			var sourceValues = new double[parameter.Steps];
+			var resultValues = new double[parameter.Steps];
+
+			for (var i = 0; i < parameter.Steps; i++)
+			{
+				var currentValue = i * stepSize;
+				sourceValues[i] = currentValue;
+				parameter.UpdateParameterInModel(currentValue);
+
+				double currentResult;
+				if (parameter.Bound.HasValue)
+					currentResult=CalculateProbabilityToReachStateBounded(model, parameter.StateFormula, parameter.Bound.Value).Value;
+				else
+					currentResult = CalculateProbabilityToReachState(model, parameter.StateFormula).Value;
+				System.GC.Collect();
+				resultValues[i] = currentResult;
+
+			}
+
+			var result = new QuantitativeParametricAnalysisResults
+			{
+				From = parameter.From,
+				To = parameter.To,
+				Steps = parameter.Steps,
+				SourceValues = sourceValues,
+				ResultValues = resultValues
+			};
+			return result;
 		}
 	}
 }
