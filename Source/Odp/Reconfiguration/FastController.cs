@@ -73,7 +73,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				for (var j = 0; j < _availableAgents.Length; ++j)
 				{
 					// neighbours
-					if (_availableAgents[i].Outputs.Contains(_availableAgents[j]))
+					if (_availableAgents[i].Outputs.Contains(_availableAgents[j]) && _availableAgents[j].Inputs.Contains(_availableAgents[i]))
 					{
 						_pathMatrix[i, j] = j;
 						_costMatrix[i, j] = 1;
