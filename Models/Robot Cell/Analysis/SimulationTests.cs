@@ -75,7 +75,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
             public void Simulate(int numberOfSteps)
             {
-                var rd = new Random();
+	            var seed = Environment.TickCount;
+				Console.WriteLine("SEED: " + seed);
+                var rd = new Random(seed);
                 double currentRDFail;
                 double currentDistValueFail;
                 double currentRDRepair;
