@@ -212,9 +212,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	    private static IEnumerable PerformanceMeasurementConfigurations()
 	    {
-	        return SampleModels.CreatePerformanceEvaluationConfigurationsCentralized()
-	                           .Concat(SampleModels.CreatePerformanceEvaluationConfigurationsCoalition())
-	                           .Select(model => new TestCaseData(model).SetName(model.Name));
+		    return SampleModels.CreatePerformanceEvaluationConfigurationsCentralized()
+							   .Select(model => new TestCaseData(model).SetName(model.Name + " (Centralized)"))
+							   .Concat(SampleModels.CreatePerformanceEvaluationConfigurationsCoalition()
+												   .Select(model => new TestCaseData(model).SetName(model.Name + " (Coalition)")));
 	    }
 
         private static void PrintTrace(Simulator simulator, Model model, int steps)
