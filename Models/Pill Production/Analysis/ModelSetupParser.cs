@@ -52,9 +52,9 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 				{
 					var isTwoWay = ReadConnection(input, ref currentPosition);
 					var station = ReadStation(input, ref currentPosition);
-					Connect(lastStation, station);
+					lastStation.Connect(station);
 					if (isTwoWay)
-						Connect(station, lastStation);
+						station.Connect(lastStation);
 					lastStation = station;
 				}
 			}
@@ -140,12 +140,6 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 
 			ReadSpace(input, ref currentPosition);
 			return isTwoWay;
-		}
-
-		private void Connect(Station input, Station output)
-		{
-			input.Outputs.Add(output);
-			output.Inputs.Add(input);
 		}
 
 		private Ingredient ReadIngredient(string input, ref int currentPosition)

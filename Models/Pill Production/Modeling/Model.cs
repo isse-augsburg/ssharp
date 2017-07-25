@@ -81,8 +81,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			for (var i = 0; i < stations.Length; ++i)
 			{
 				var next = stations[(i + 1) % stations.Length];
-				stations[i].Outputs.Add(next);
-				next.Inputs.Add(stations[i]);
+				stations[i].Connect(next);
 			}
 
 			var model = new Model(stations, new FastController(stations));

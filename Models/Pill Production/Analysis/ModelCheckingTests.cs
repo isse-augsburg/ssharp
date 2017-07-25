@@ -60,19 +60,11 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			dispenserBottom.SetStoredAmount(IngredientType.RedParticulate, 100);
 
 			// create connections
-			producer.Outputs.Add(commonDispenser);
-			commonDispenser.Inputs.Add(producer);
-
-			commonDispenser.Outputs.Add(dispenserTop);
-			dispenserTop.Inputs.Add(commonDispenser);
-			commonDispenser.Outputs.Add(dispenserBottom);
-			dispenserBottom.Inputs.Add(commonDispenser);
-
-			dispenserTop.Outputs.Add(consumerTop);
-			consumerTop.Inputs.Add(dispenserTop);
-
-			dispenserBottom.Outputs.Add(consumerBottom);
-			consumerBottom.Inputs.Add(dispenserBottom);
+			producer.Connect(commonDispenser);
+			commonDispenser.Connect(dispenserTop);
+			commonDispenser.Connect(dispenserBottom);
+			dispenserTop.Connect(consumerTop);
+			dispenserBottom.Connect(consumerBottom);
 
 			var model = new Model(stations, new FastController(stations));
 			var recipe = new Recipe(new[] { new Ingredient(IngredientType.BlueParticulate, 30), new Ingredient(IngredientType.RedParticulate, 10) }, 1u);
