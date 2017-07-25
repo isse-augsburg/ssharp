@@ -169,10 +169,10 @@ namespace SafetySharp.Odp
 		private readonly List<BaseAgent> _inputs = new List<BaseAgent>(MaximumAgentCount);
 		private readonly List<BaseAgent> _outputs = new List<BaseAgent>(MaximumAgentCount);
 
-		public IEnumerable<BaseAgent> Inputs => _inputs;
-		public IEnumerable<BaseAgent> Outputs => _outputs;
+		public virtual IEnumerable<BaseAgent> Inputs => _inputs;
+		public virtual IEnumerable<BaseAgent> Outputs => _outputs;
 
-		public void Connect(BaseAgent successor)
+		public virtual void Connect(BaseAgent successor)
 		{
 			if (!_outputs.Contains(successor))
 				_outputs.Add(successor);
@@ -180,19 +180,19 @@ namespace SafetySharp.Odp
 				successor._inputs.Add(this);
 		}
 
-		public void BidirectionallyConnect(BaseAgent neighbor)
+		public virtual void BidirectionallyConnect(BaseAgent neighbor)
 		{
 			Connect(neighbor);
 			neighbor.Connect(this);
 		}
 
-		public void Disconnect(BaseAgent successor)
+		public virtual void Disconnect(BaseAgent successor)
 		{
 			_outputs.Remove(successor);
 			successor._inputs.Remove(this);
 		}
 
-		public void BidirectionallyDisconnect(BaseAgent neighbor)
+		public virtual void BidirectionallyDisconnect(BaseAgent neighbor)
 		{
 			Disconnect(neighbor);
 			neighbor.Disconnect(this);
