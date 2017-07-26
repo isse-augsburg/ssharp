@@ -33,6 +33,12 @@ namespace ISSE.SafetyChecking
 		OnFirstMethodWithUndo
 	}
 
+	public enum RetraversalNormalizations
+	{
+		None,
+		EmbedObserversIntoModel
+	}
+
 	/// <summary>
 	///   Configures S#'s model checker, determining the amount of CPU cores and memory to use.
 	/// </summary>
@@ -90,7 +96,8 @@ namespace ISSE.SafetyChecking
 			StateDetected = null,
 			UseAtomarPropositionsAsStateLabels = true,
 			MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithUndo,
-			LimitOfActiveFaults = null
+			LimitOfActiveFaults = null,
+			RetraversalNormalizations = RetraversalNormalizations.None
 		};
 
 		/// <summary>
@@ -156,5 +163,9 @@ namespace ISSE.SafetyChecking
 		/// <summary>
 		/// </summary>
 		public int? LimitOfActiveFaults{ get; set; }
+
+		/// <summary>
+		/// </summary>
+		public RetraversalNormalizations RetraversalNormalizations { get; set; }
 	}
 }

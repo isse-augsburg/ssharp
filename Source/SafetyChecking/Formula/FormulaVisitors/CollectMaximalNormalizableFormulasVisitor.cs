@@ -22,6 +22,7 @@
 
 namespace ISSE.SafetyChecking.Formula
 {
+	using System;
 	using System.Collections.Generic;
 
 	/// <summary>
@@ -36,8 +37,8 @@ namespace ISSE.SafetyChecking.Formula
 		public override IEnumerable<Formula> CollectedStateFormulas => MaximalNormalizableFormulas;
 
 		public bool IsNormalizable; //information propagated from children to parents
-
-		public bool NestedInsideOnce; //information propagated from children to parents
+		
+		public int MaximalNestedOnceInside; //information propagated from children to parents
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />
@@ -51,7 +52,7 @@ namespace ISSE.SafetyChecking.Formula
 					break;
 				case UnaryOperator.Once:
 					Visit(formula.Operand);
-					if (NestedInsideOnce)
+					if (MaximalNestedOnceInside>0)
 					{
 						// formula itself is not normalizable, because Once was used inside.
 						// so add child if possible
@@ -61,7 +62,7 @@ namespace ISSE.SafetyChecking.Formula
 						}
 						IsNormalizable = false;
 					}
-					NestedInsideOnce = true;
+					MaximalNestedOnceInside++;
 					break;
 				default:
 					// formula itself is not normalizable, so add child if possible
@@ -80,8 +81,8 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
-			var leftUsedNestedOnce = false;
-			var rightUsedNestedOnce = false;
+			int leftMaximalNestedOnceInside;
+			int rightMaximalNestedOnceInside;
 			switch (formula.Operator)
 			{
 				case BinaryOperator.And:
@@ -90,10 +91,10 @@ namespace ISSE.SafetyChecking.Formula
 				case BinaryOperator.Equivalence:
 					Visit(formula.LeftOperand);
 					var leftIsCompilable = IsNormalizable;
-					leftUsedNestedOnce = NestedInsideOnce;
+					leftMaximalNestedOnceInside = MaximalNestedOnceInside;
 					Visit(formula.RightOperand);
 					var rightIsCompilable = IsNormalizable;
-					rightUsedNestedOnce = NestedInsideOnce;
+					rightMaximalNestedOnceInside = MaximalNestedOnceInside;
 
 					if (leftIsCompilable && rightIsCompilable)
 					{
@@ -111,23 +112,23 @@ namespace ISSE.SafetyChecking.Formula
 						}
 						IsNormalizable = false;
 					}
-					NestedInsideOnce = leftUsedNestedOnce || rightUsedNestedOnce;
+					MaximalNestedOnceInside = Math.Max(leftMaximalNestedOnceInside, rightMaximalNestedOnceInside);
 					break;
 				case BinaryOperator.Until:
 					Visit(formula.LeftOperand);
-					leftUsedNestedOnce = NestedInsideOnce;
+					leftMaximalNestedOnceInside = MaximalNestedOnceInside;
 					if (IsNormalizable)
 					{
 						MaximalNormalizableFormulas.Add(formula.LeftOperand);
 					}
 					Visit(formula.RightOperand);
-					rightUsedNestedOnce = NestedInsideOnce;
+					rightMaximalNestedOnceInside = MaximalNestedOnceInside;
 					if (IsNormalizable)
 					{
 						MaximalNormalizableFormulas.Add(formula.RightOperand);
 					}
 					IsNormalizable = false;
-					NestedInsideOnce = leftUsedNestedOnce || rightUsedNestedOnce;
+					MaximalNestedOnceInside = Math.Max(leftMaximalNestedOnceInside, rightMaximalNestedOnceInside);
 					break;
 			}
 		}
@@ -138,7 +139,7 @@ namespace ISSE.SafetyChecking.Formula
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 			IsNormalizable = true;
-			NestedInsideOnce = false;
+			MaximalNestedOnceInside = 0;
 		}
 
 		/// <summary>
@@ -160,19 +161,19 @@ namespace ISSE.SafetyChecking.Formula
 		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
 		{
 			Visit(formula.LeftOperand);
-			var leftUsedNestedOnce = NestedInsideOnce;
+			var leftMaximalNestedOnceInside = MaximalNestedOnceInside;
 			if (IsNormalizable)
 			{
 				MaximalNormalizableFormulas.Add(formula.LeftOperand);
 			}
 			Visit(formula.RightOperand);
-			var rightUsedNestedOnce = NestedInsideOnce;
+			var rightMaximalNestedOnceInside = MaximalNestedOnceInside;
 			if (IsNormalizable)
 			{
 				MaximalNormalizableFormulas.Add(formula.RightOperand);
 			}
 			IsNormalizable = false;
-			NestedInsideOnce = leftUsedNestedOnce || rightUsedNestedOnce;
+			MaximalNestedOnceInside = Math.Max(leftMaximalNestedOnceInside, rightMaximalNestedOnceInside);
 		}
 
 		/// <summary>
@@ -181,6 +182,7 @@ namespace ISSE.SafetyChecking.Formula
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
 			IsNormalizable = false;
+			MaximalNestedOnceInside = 0;
 		}
 
 		/// <summary>

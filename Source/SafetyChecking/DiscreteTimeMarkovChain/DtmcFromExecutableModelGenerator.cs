@@ -69,7 +69,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   Generates a <see cref="DiscreteTimeMarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		private DiscreteTimeMarkovChain GenerateMarkovChain(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
+		private LabeledTransitionMarkovChain GenerateLtmc(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
 			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, Configuration))
 			{
@@ -82,16 +82,40 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");
 					labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
 				}
+				return labeledTransitionMarkovChain;
+			}
+		}
 
-				var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
-				var markovChain = ltmcToMc.MarkovChain;
+		private LabeledTransitionMarkovChain NormalizeLtmc(LabeledTransitionMarkovChain ltmc)
+		{
+			var retraverseModel = new LtmcRetraverseModel(ltmc, Configuration);
+			retraverseModel.AddFormulas(FormulasToCheck);
+
+			var createModel = new AnalysisModelCreator(() => retraverseModel);
+
+			using (var checker = new LtmcGenerator(createModel, null, retraverseModel.Formulas, Configuration))
+			{
+				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
+
 				if (Configuration.WriteGraphvizModels)
 				{
-					Configuration.DefaultTraceOutput.WriteLine("Dtmc Model");
-					markovChain.ExportToGv(Configuration.DefaultTraceOutput);
+					Configuration.DefaultTraceOutput.WriteLine("Ltmc Model normalized");
+					labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
 				}
-				return markovChain;
+				return labeledTransitionMarkovChain;
 			}
+		}
+
+		private DiscreteTimeMarkovChain ConvertToMarkovChain(LabeledTransitionMarkovChain labeledTransitionMarkovChain)
+		{
+			var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
+			var markovChain = ltmcToMc.MarkovChain;
+			if (Configuration.WriteGraphvizModels)
+			{
+				Configuration.DefaultTraceOutput.WriteLine("Dtmc Model");
+				markovChain.ExportToGv(Configuration.DefaultTraceOutput);
+			}
+			return markovChain;
 		}
 		
 
@@ -123,7 +147,12 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, 0, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
-			return GenerateMarkovChain(createAnalysisModel,terminateEarlyCondition, stateFormulas);
+			var ltmc =  GenerateLtmc(createAnalysisModel,terminateEarlyCondition, stateFormulas);
+			
+			if (Configuration.RetraversalNormalizations != RetraversalNormalizations.None)
+				ltmc = NormalizeLtmc(ltmc);
+
+			return ConvertToMarkovChain(ltmc);
 		}
 
 

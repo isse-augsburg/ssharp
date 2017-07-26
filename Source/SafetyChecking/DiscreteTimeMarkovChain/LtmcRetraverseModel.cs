@@ -60,7 +60,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_targetStateMemory = _targetStateBuffer.Pointer;
 		}
 
-		private byte* AddState(int originalState, int enrichments)
+		private byte* AddState(int originalState, int targetEnrichments)
 		{
 			// Try to find a matching state. If not found, then add a new one
 			byte* targetState;
@@ -69,7 +69,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				targetState = _targetStateMemory + i * _stateVectorSize;
 				targetStateAsInt = (int*)targetState;
-				if (targetStateAsInt[0] == originalState && targetStateAsInt[1] == enrichments)
+				if (targetStateAsInt[0] == originalState && targetStateAsInt[1] == targetEnrichments)
 				{
 					return targetState;
 				}
@@ -80,15 +80,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			targetStateAsInt = (int*)targetState;
 			// create new state
 			targetStateAsInt[0] = originalState;
-			targetStateAsInt[1] = enrichments;
+			targetStateAsInt[1] = targetEnrichments;
 			++_stateCount;
 			return targetState;
 		}
 		
-		public void AddTransition(int targetState, int enrichments, double probability, StateFormulaSet formulas)
+		public void AddTransition(int targetState, int targetEnrichments, double probability, StateFormulaSet formulas)
 		{
 			// Try to find a matching transition. If not found, then add a new one
-			var state = AddState(targetState, enrichments);
+			var state = AddState(targetState, targetEnrichments);
 
 			for (var i = 0; i < _transitionCount; i++)
 			{
@@ -141,13 +141,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	{
 		private Formula[] _formulas;
 
-		private Func<IntPtr, bool>[] formulaInStateTransitionEvaluator;
-
-		private Func<bool>[] formulaInInitialTransitionEvaluator;
+		// Formula evaluator needs to know the labeling on the transition and the enrichment the _current_ state.
+		// For an initial transition, the enrichment 0 should be provided
+		private Func<StateFormulaSet, int, bool>[] _formulaInStateTransitionEvaluators;
 
 		private readonly LtmcRetraverseTransitionSetBuilder _transitions;
 
 		public LabeledTransitionMarkovChain LabeledTransitionMarkovChain { get; }
+		
+		private Func<StateFormulaSet, bool>[] _enrichmentEvaluators = new Func<StateFormulaSet, bool>[0];
 
 		public LtmcRetraverseModel(LabeledTransitionMarkovChain ltmc, AnalysisConfiguration configuration)
 		{
@@ -155,12 +157,73 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_transitions = new LtmcRetraverseTransitionSetBuilder(InternalStateVectorSize, configuration.SuccessorCapacity);
 		}
 
-		public void AddFormula(Formula formula)
+		private readonly List<Formula> _collectedStateFormulas = new List<Formula>();
+		private readonly List<UnaryFormula> _collectedOnceFormulas = new List<UnaryFormula>();
+
+		private void AddFormula(Formula formula)
 		{
-			if (formula.IsStateFormula())
+			var alreadyCompilableCollector = new CollectMaximalCompilableFormulasVisitor();
+			alreadyCompilableCollector.VisitNewTopLevelFormula(formula);
+			var alreadyCompilableFormulas = alreadyCompilableCollector.CollectedStateFormulas;
+			foreach (var collectedStateFormula in alreadyCompilableFormulas)
 			{
-				_formulas = _formulas.Concat(new [] { formula } ).ToArray();
+				if (!_collectedStateFormulas.Contains(collectedStateFormula))
+					_collectedStateFormulas.Add(collectedStateFormula);
 			}
+
+			var onceFormulaCollector = new CollectDeepestOnceFormulasWithCompilableOperandVisitor();
+			onceFormulaCollector.VisitNewTopLevelFormula(formula);
+			var onceFormulas = onceFormulaCollector.DeepestOnceFormulasWithCompilableOperand;
+			foreach (var onceFormula in onceFormulas)
+			{
+				Assert.That(onceFormula.Operator == UnaryOperator.Once, "operator of OnceFormula must be Once");
+				Assert.That(alreadyCompilableFormulas.Contains(onceFormula.Operand),"operand of OnceFormula should already been included");
+				if (!_collectedOnceFormulas.Contains(onceFormula))
+					_collectedOnceFormulas.Add(onceFormula);
+			}
+		}
+
+		public void AddFormulas(IEnumerable<Formula> formulas)
+		{
+			foreach (var formula in formulas)
+			{
+				AddFormula(formula);
+			}
+
+			if (_collectedStateFormulas.Count + _collectedOnceFormulas.Count > 32)
+			{
+				throw new Exception("Too many Formulas");
+			}
+
+			// EmbedObserversIntoModel
+
+			var newFormulas = new List<Formula>();
+			var newFormulaEvaluators = new List<Func<StateFormulaSet, int, bool>>();
+			
+			foreach (var collectedStateFormula in _collectedStateFormulas)
+			{
+				newFormulas.Add(collectedStateFormula);
+				var oldEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(LabeledTransitionMarkovChain.StateFormulaLabels, collectedStateFormula);
+				Func<StateFormulaSet,int,bool> newFormulaEvaluator = (oldTargetStateFormulaSet, targetEnrichment) => oldEvaluator(oldTargetStateFormulaSet);
+				newFormulaEvaluators.Add(newFormulaEvaluator);
+			}
+
+			foreach (var onceFormula in _collectedOnceFormulas)
+			{
+				// onceFormulas have a compilable operand. Thus, we can directly rely on them
+				var operand = onceFormula.Operand;
+				var enrichmentEvaluator =
+					StateFormulaSetEvaluatorCompilationVisitor.Compile(LabeledTransitionMarkovChain.StateFormulaLabels, operand);
+				var indexOfEnrichmentEvaluator = _enrichmentEvaluators.Length;
+				_enrichmentEvaluators = _enrichmentEvaluators.Concat(new[] { enrichmentEvaluator }).ToArray();
+				
+				newFormulas.Add(onceFormula);
+				Func<StateFormulaSet, int, bool> newFormulaEvaluator = (oldTargetStateFormulaSet, targetEnrichment) => (targetEnrichment & (1 << indexOfEnrichmentEvaluator)) != 0;
+				newFormulaEvaluators.Add(newFormulaEvaluator);
+			}
+
+			_formulas = newFormulas.ToArray();
+			_formulaInStateTransitionEvaluators = newFormulaEvaluators.ToArray();
 		}
 
 		protected override void OnDisposing(bool disposing)
@@ -172,14 +235,43 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public override int TransitionSize { get; } = LabeledTransitionMarkovChain.TransitionSize;
 		public override Formula[] Formulas => _formulas;
 
-		private TransitionCollection ConvertTransitions(LabeledTransitionMarkovChain.LabeledTransitionEnumerator enumerator)
+		private int DeriveNewEnrichment(StateFormulaSet oldStateFormulaSet, int oldEnrichments)
+		{
+			int newEnrichment = 0;
+			for (var i = 0; i < _enrichmentEvaluators.Length; i++)
+			{
+				var isBitAlreadySet = (oldEnrichments & (1 << i)) != 0;
+				if (!isBitAlreadySet)
+				{
+					var setNewBit = _enrichmentEvaluators[i](oldStateFormulaSet);
+					if (setNewBit)
+					{
+						newEnrichment |= 1 << i;
+					}
+				}
+			}
+			return newEnrichment;
+		}
+
+		private StateFormulaSet DeriveNewStateFormulaSet(StateFormulaSet oldStateFormulaSet, int newEnrichment)
+		{
+			var evaluatedStateFormulas = new bool[_formulas.Length];
+			for (var i = 0; i < _formulas.Length; i++)
+			{
+				var setNewBit = _formulaInStateTransitionEvaluators[i](oldStateFormulaSet,newEnrichment);
+				evaluatedStateFormulas[i] = setNewBit;
+			}
+			return new StateFormulaSet(evaluatedStateFormulas);
+		}
+
+		private TransitionCollection ConvertTransitions(int currentEnrichment, LabeledTransitionMarkovChain.LabeledTransitionEnumerator enumerator)
 		{
 			_transitions.Clear();
 			while (enumerator.MoveNext())
 			{
-				var enrichment = 0;
-				var formulas = new StateFormulaSet();
-				_transitions.AddTransition(enumerator.CurrentTargetState, enrichment, enumerator.CurrentProbability, formulas);
+				var targetEnrichment= DeriveNewEnrichment(enumerator.CurrentFormulas,currentEnrichment);
+				var targetStateFormulaSet = DeriveNewStateFormulaSet(enumerator.CurrentFormulas, targetEnrichment);
+				_transitions.AddTransition(enumerator.CurrentTargetState, targetEnrichment, enumerator.CurrentProbability, targetStateFormulaSet);
 			}
 			return _transitions.ToCollection();
 		}
@@ -187,15 +279,17 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public override TransitionCollection GetInitialTransitions()
 		{
 			var enumerator = LabeledTransitionMarkovChain.GetInitialDistributionEnumerator();
-			return ConvertTransitions(enumerator);
+			var currentEnrichment = 0;
+			return ConvertTransitions(currentEnrichment,enumerator);
 		}
 
 		public override TransitionCollection GetSuccessorTransitions(byte* state)
 		{
 			var stateAsInt = (int*)state;
-			var originalState= stateAsInt[0];
+			var originalState = stateAsInt[0];
+			var currentEnrichment = stateAsInt[1];
 			var enumerator = LabeledTransitionMarkovChain.GetTransitionEnumerator(originalState);
-			return ConvertTransitions(enumerator);
+			return ConvertTransitions(currentEnrichment,enumerator);
 		}
 
 		public override void Reset()

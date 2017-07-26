@@ -22,20 +22,19 @@
 
 namespace ISSE.SafetyChecking.Formula
 {
+	using System;
 	using System.Collections.Generic;
 
 	/// <summary>
 	///   Determines whether a <see cref="Formula" /> is a formula that can be evaluted in a single state.
 	/// </summary>
-	public class CollectDeepestOnceFormulasWithCompilableOperandVisitor : CollectStateFormulasVisitor
+	public class CollectDeepestOnceFormulasWithCompilableOperandVisitor : FormulaVisitor
 	{
-		public HashSet<Formula> DeepestOnceFormulasWithCompilableOperand { get; } = new HashSet<Formula>();
-
-		public override IEnumerable<Formula> CollectedStateFormulas => DeepestOnceFormulasWithCompilableOperand;
+		public HashSet<UnaryFormula> DeepestOnceFormulasWithCompilableOperand { get; } = new HashSet<UnaryFormula>();
 
 		public bool IsCompilable; //information propagated from children to parents
 
-		public bool NestedInsideOnce; //information propagated from children to parents
+		public int MaximalNestedOnceInside; //information propagated from children to parents
 
 		/// <summary>
 		///   Visits the <paramref name="formula." />
@@ -49,15 +48,12 @@ namespace ISSE.SafetyChecking.Formula
 					break;
 				case UnaryOperator.Once:
 					Visit(formula.Operand);
-					if (!NestedInsideOnce && IsCompilable)
+					if (MaximalNestedOnceInside==0 && IsCompilable)
 					{
 						DeepestOnceFormulasWithCompilableOperand.Add(formula);
 					}
-					if (NestedInsideOnce)
-					{
-						IsCompilable = false;
-					}
-					NestedInsideOnce = true;
+					IsCompilable = false;
+					MaximalNestedOnceInside++;
 					break;
 				default:
 					// formula itself is not normalizable, so add child if possible
@@ -72,8 +68,8 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitBinaryFormula(BinaryFormula formula)
 		{
-			var leftUsedNestedOnce = false;
-			var rightUsedNestedOnce = false;
+			int leftMaximalNestedOnceInside;
+			int rightMaximalNestedOnceInside;
 			switch (formula.Operator)
 			{
 				case BinaryOperator.And:
@@ -82,10 +78,10 @@ namespace ISSE.SafetyChecking.Formula
 				case BinaryOperator.Equivalence:
 					Visit(formula.LeftOperand);
 					var leftIsCompilable = IsCompilable;
-					leftUsedNestedOnce = NestedInsideOnce;
+					leftMaximalNestedOnceInside = MaximalNestedOnceInside;
 					Visit(formula.RightOperand);
 					var rightIsCompilable = IsCompilable;
-					rightUsedNestedOnce = NestedInsideOnce;
+					rightMaximalNestedOnceInside = MaximalNestedOnceInside;
 
 					if (leftIsCompilable && rightIsCompilable)
 					{
@@ -95,15 +91,15 @@ namespace ISSE.SafetyChecking.Formula
 					{
 						IsCompilable = false;
 					}
-					NestedInsideOnce = leftUsedNestedOnce || rightUsedNestedOnce;
+					MaximalNestedOnceInside = Math.Max(leftMaximalNestedOnceInside, rightMaximalNestedOnceInside);
 					break;
 				case BinaryOperator.Until:
 					Visit(formula.LeftOperand);
-					leftUsedNestedOnce = NestedInsideOnce;
+					leftMaximalNestedOnceInside = MaximalNestedOnceInside;
 					Visit(formula.RightOperand);
-					rightUsedNestedOnce = NestedInsideOnce;
+					rightMaximalNestedOnceInside = MaximalNestedOnceInside;
 					IsCompilable = false;
-					NestedInsideOnce = leftUsedNestedOnce || rightUsedNestedOnce;
+					MaximalNestedOnceInside = Math.Max(leftMaximalNestedOnceInside, rightMaximalNestedOnceInside);
 					break;
 			}
 		}
@@ -114,7 +110,7 @@ namespace ISSE.SafetyChecking.Formula
 		public override void VisitAtomarPropositionFormula(AtomarPropositionFormula formula)
 		{
 			IsCompilable = true;
-			NestedInsideOnce = false;
+			MaximalNestedOnceInside = 0;
 		}
 
 		/// <summary>
@@ -132,11 +128,11 @@ namespace ISSE.SafetyChecking.Formula
 		public override void VisitBoundedBinaryFormula(BoundedBinaryFormula formula)
 		{
 			Visit(formula.LeftOperand);
-			var leftUsedNestedOnce = NestedInsideOnce;
+			var leftMaximalNestedOnceInside = MaximalNestedOnceInside;
 			Visit(formula.RightOperand);
-			var rightUsedNestedOnce = NestedInsideOnce;
+			var rightMaximalNestedOnceInside = MaximalNestedOnceInside;
 			IsCompilable = false;
-			NestedInsideOnce = leftUsedNestedOnce || rightUsedNestedOnce;
+			MaximalNestedOnceInside = Math.Max(leftMaximalNestedOnceInside,rightMaximalNestedOnceInside);
 		}
 
 		/// <summary>
@@ -144,6 +140,7 @@ namespace ISSE.SafetyChecking.Formula
 		/// </summary>
 		public override void VisitRewardFormula(RewardFormula formula)
 		{
+			MaximalNestedOnceInside = 0;
 			IsCompilable = false;
 		}
 
@@ -159,7 +156,7 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitNewTopLevelFormula(Formula formula)
+		public void VisitNewTopLevelFormula(Formula formula)
 		{
 			formula.Visit(this);
 		}
