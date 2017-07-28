@@ -29,6 +29,7 @@ using ISSE.SafetyChecking.Utilities;
 namespace Tests.SimpleExecutableModel
 {
 	using System.Linq;
+	using Formula = ISSE.SafetyChecking.Formula.Formula;
 
 	public unsafe class SimpleExecutableModel :  ExecutableModel<SimpleExecutableModel>
 	{

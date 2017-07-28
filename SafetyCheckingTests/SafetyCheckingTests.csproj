@@ -76,6 +76,7 @@
     </Compile>
     <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LabeledTransitionMarkovChainExamples.cs" />
+    <Compile Include="Formula\OnceFormulaTests.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelCheckerTests.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\LtmdpBuilderDuringTraversalTests.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\LtmdpChoiceResolverTests.cs" />
