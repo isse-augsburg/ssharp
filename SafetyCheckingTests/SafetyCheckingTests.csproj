@@ -121,6 +121,7 @@
     <Compile Include="SimpleExecutableModel\Analysis\ProbabilisticNondeterministic\undo fault activation of fault3.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\choose from range.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\custom probability of transient fault.cs" />
+    <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\state increases from 5 to 9.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\formula which is always false.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\make choice deterministic.cs" />
     <Compile Include="SimpleExecutableModel\Analysis\Probabilistic\choose from range with uniform distribution.cs" />
