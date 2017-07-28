@@ -237,10 +237,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		private int DeriveNewEnrichment(StateFormulaSet oldStateFormulaSet, int oldEnrichments)
 		{
-			int newEnrichment = 0;
+			int newEnrichment = oldEnrichments;
 			for (var i = 0; i < _enrichmentEvaluators.Length; i++)
 			{
-				var isBitAlreadySet = (oldEnrichments & (1 << i)) != 0;
+				var isBitAlreadySet = (newEnrichment & (1 << i)) != 0;
 				if (!isBitAlreadySet)
 				{
 					var setNewBit = _enrichmentEvaluators[i](oldStateFormulaSet);
