@@ -95,6 +95,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			using (var checker = new LtmcGenerator(createModel, null, retraverseModel.Formulas, Configuration))
 			{
+				PrintStateFormulas(retraverseModel.Formulas);
+
 				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
 
 				if (Configuration.WriteGraphvizModels)

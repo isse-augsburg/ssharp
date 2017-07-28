@@ -203,7 +203,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			// Pr[phi U psi]
 			// calculate P [true U<=steps psi]
-
+			
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
@@ -327,6 +327,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
+			_output.WriteLine($"Checking formula: {formulaToCheck}");
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 

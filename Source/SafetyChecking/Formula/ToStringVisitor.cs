@@ -79,6 +79,9 @@ namespace ISSE.SafetyChecking.Formula
 				case UnaryOperator.Exists:
 					_builder.Append(" E ");
 					break;
+				case UnaryOperator.Once:
+					_builder.Append(" Once ");
+					break;
 				default:
 					Assert.NotReached($"Unknown or unsupported unary operator '{formula.Operator}'.");
 					break;
