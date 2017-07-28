@@ -54,6 +54,12 @@ namespace ISSE.SafetyChecking
 		private long _successorStateCapacity;
 
 		/// <summary>
+		///   If set to true, the model checker uses a compact state storage, in which the found states are indexed by a continuous variable.
+		///   If set to false, the traditional sparse state storage is used, which requires a little less memory and is unnoticeable faster.
+		/// </summary>
+		public bool UseCompactStateStorage { get; set; }
+
+		/// <summary>
 		///   Gets or sets a value indicating whether a counter example should be generated when a formula violation is detected or an
 		///   unhandled exception occurred during model checking.
 		/// </summary>
@@ -91,6 +97,7 @@ namespace ISSE.SafetyChecking
 			ModelCapacity = _defaultModelCapacity,
 			StackCapacity = DefaultStackCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,
+			UseCompactStateStorage = false,
 			GenerateCounterExample = true,
 			CollectFaultSets = true,
 			StateDetected = null,

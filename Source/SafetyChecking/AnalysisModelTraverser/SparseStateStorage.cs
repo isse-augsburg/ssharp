@@ -30,12 +30,10 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	///   Stores the serialized states of an <see cref="AnalysisModel" />.
 	/// </summary>
 	/// <remarks>
-	///   We store states in a contiguous array, indexed by a continuous variable.
-	///   Therefore, we use state hashes like in <cref="SparseStateStorage" /> and one level of indirection.
-	///   The hashes are stored in a separate array, using open addressing,
-	///   see Laarman, "Scalable Multi-Core Model Checking", Algorithm 2.3.
+	///   We store states in a contiguous array, indexed by the state's hash. The hashes are stored in a separate array,
+	///   using open addressing, see Laarman, "Scalable Multi-Core Model Checking", Algorithm 2.3.
 	/// </remarks>
-	internal sealed unsafe class CompactStateStorage : StateStorage
+	internal sealed unsafe class SparseStateStorage : StateStorage
 	{
 		/// <summary>
 		///   The number of attempts that are made to find an empty bucket.
@@ -88,17 +86,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		private readonly byte* _stateMemory;
 
 		/// <summary>
-		///   The buffer that stores the mapping from the hashed-based state index to the compact state index.
-		/// </summary>
-		private readonly MemoryBuffer _indexMapperBuffer = new MemoryBuffer();
-
-		/// <summary>
-		///   The pointer to the underlying index mapper.
-		/// </summary>
-		private readonly int* _indexMapperMemory;
-
-
-		/// <summary>
 		///   The length in bytes of a state vector.
 		/// </summary>
 		private readonly int _stateVectorSize;
@@ -118,7 +105,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
 		/// <param name="capacity">The capacity of the cache, i.e., the number of states that can be stored in the cache.</param>
-		public CompactStateStorage(int stateVectorSize, long capacity)
+		/// <param name="compact">The returned indexes should be compact. For every stat.</param>
+		public SparseStateStorage(int stateVectorSize, long capacity)
 		{
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
@@ -128,10 +116,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 			_stateBuffer.Resize(_totalCapacity * _stateVectorSize, zeroMemory: false);
 			_stateMemory = _stateBuffer.Pointer;
-
-			_indexMapperBuffer.Resize(_totalCapacity * sizeof(int), zeroMemory: false);
-			_indexMapperMemory = (int*) _indexMapperBuffer.Pointer;
-
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
 			_hashBuffer.Resize(_totalCapacity * sizeof(int) + CacheLineSize, zeroMemory: false);
@@ -162,7 +146,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		internal override int ReserveStateIndex()
 		{
-			var freshCompactIndex = InterlockedExtensions.IncrementReturnOld(ref _savedStates);
+			Interlocked.Increment(ref _savedStates);
 			// Use the index pointing at the last possible element in the buffers and decrease the size.
 			_reservedStatesCapacity++;
 			_cachedStatesCapacity--;
@@ -170,13 +154,11 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			// Add BucketsPerCacheLine so returnIndex does not interfere with the maximal possible index returned by AddState
 			// which is _cachedStatesCapacity+BucketsPerCacheLine-1.
 			// returnIndex is in range of capacityToReserve, so this is save.
-			var hashBasedIndex = _cachedStatesCapacity + BucketsPerCacheLine;
+			var returnIndex = _cachedStatesCapacity + BucketsPerCacheLine;
 
-			Volatile.Write(ref _indexMapperMemory[hashBasedIndex], freshCompactIndex);
-
-			Assert.InRange(hashBasedIndex,0,Int32.MaxValue);
-			Assert.InRange(hashBasedIndex, 0, _totalCapacity + BucketsPerCacheLine);
-			return (int)freshCompactIndex;
+			Assert.InRange(returnIndex,0,Int32.MaxValue);
+			Assert.InRange(returnIndex, 0, _totalCapacity + BucketsPerCacheLine);
+			return (int)returnIndex;
 		}
 
 		/// <summary>
@@ -208,14 +190,12 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 					if (currentValue == 0 && Interlocked.CompareExchange(ref _hashMemory[offset], (int)memoizedHash | (1 << 30), 0) == 0)
 					{
-						var freshCompactIndex = InterlockedExtensions.IncrementReturnOld(ref _savedStates);
-						Volatile.Write(ref _indexMapperMemory[offset], freshCompactIndex);
-
-						MemoryBuffer.Copy(state, this[freshCompactIndex], _stateVectorSize);
+						MemoryBuffer.Copy(state, this[offset], _stateVectorSize);
 						Volatile.Write(ref _hashMemory[offset], (int)memoizedHash | (1 << 31));
 
+						Interlocked.Increment(ref _savedStates);
 
-						index = freshCompactIndex;
+						index = offset;
 						return true;
 					}
 
@@ -226,11 +206,9 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 						while ((currentValue & 1 << 31) == 0)
 							currentValue = Volatile.Read(ref _hashMemory[offset]);
 
-						var compactIndex = Volatile.Read(ref _indexMapperMemory[offset]);
-
-						if (compactIndex!=-1 && MemoryBuffer.AreEqual(state, this[compactIndex], _stateVectorSize))
+						if (MemoryBuffer.AreEqual(state, this[offset], _stateVectorSize))
 						{
-							index = compactIndex;
+							index = offset;
 							return false;
 						}
 					}
@@ -247,7 +225,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		internal override void Clear()
 		{
 			_hashBuffer.Clear();
-			MemoryBuffer.SetAllBitsMemoryWithInitblk.ClearWithMinus1(_indexMapperMemory, _totalCapacity);
 		}
 
 		/// <summary>

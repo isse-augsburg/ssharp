@@ -86,7 +86,10 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 			var modelCapacity = configuration.ModelCapacity.DeriveModelByteSize(firstModel.StateVectorSize, transitionSize);
 			Context.ModelCapacity = modelCapacity;
-			_states = new StateStorage(modelCapacity.SizeOfState, modelCapacity.NumberOfStates);
+			if (configuration.UseCompactStateStorage)
+				_states = new CompactStateStorage(modelCapacity.SizeOfState, modelCapacity.NumberOfStates);
+			else
+				_states = new SparseStateStorage(modelCapacity.SizeOfState, modelCapacity.NumberOfStates);
 			Context.States = _states;
 			Context.StutteringStateIndex = _states.ReserveStateIndex();
 			_initializationTime = stopwatch.Elapsed;
