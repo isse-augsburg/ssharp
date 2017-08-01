@@ -158,7 +158,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					var changedPositions = Enumerable.Range(0, newDistribution.Length)
 													 .Where(i => newDistribution[i] != coalition.RecoveredDistribution[i])
 													 .ToArray();
-					return changedPositions.Max() - changedPositions.Min();
+					return changedPositions.Any() ? changedPositions.Max() - changedPositions.Min() : 0;
 				});
 		}
 
