@@ -27,6 +27,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using Modeling;
 
 	public partial class Coalition
 	{
@@ -160,7 +161,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			// Invite the agent.
 			_invitations[agent] = new TaskCompletionSource<CoalitionReconfigurationAgent>();
-			agent.RequestReconfiguration(Leader, Task); // do NOT await; await invitation response (see below) instead (otherwise a deadlock occurs)
+
+			// Do NOT await this call. Await the invitation response instead (see below),
+			// otherwise a deadlock occurs. Don't ignore task either, or any exception would
+			// be swallowed. Thus, schedule the call. MicrostepScheduler handles swallowed
+			// exceptions.
+			MicrostepScheduler.Schedule(() => agent.RequestReconfiguration(Leader, Task));
+
 			var newMember = await _invitations[agent].Task; // wait for the invited agent to respond
 
 			// If the invited agent already belongs to a coalition, a merge was initiated.
