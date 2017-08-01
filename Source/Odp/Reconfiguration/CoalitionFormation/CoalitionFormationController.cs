@@ -78,6 +78,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
                 // merge minimal fragments from all strategies
                 var minTfr = fragments.Length > 0 ? TaskFragment.Merge(fragments) : TaskFragment.Identity(coalition.Task);
 
+				coalition.CTF.Prepend(minTfr.Start);
+				coalition.CTF.Append(minTfr.End);
 				await coalition.InviteCtfAgents();
 
 				do
