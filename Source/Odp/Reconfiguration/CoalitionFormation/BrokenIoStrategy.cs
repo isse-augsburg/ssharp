@@ -37,31 +37,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			var affectedRoles = await FindDisconnectedRoles(coalition);
 
-			foreach (var entry in affectedRoles)
-				await RecruitNecessaryAgents(coalition, entry.Item1, entry.Item2);
-
 			return TaskFragment.Merge(
-				affectedRoles.Select(entry => DetermineFragmentToReconfigure(entry.Item2))
+				await Task.WhenAll(
+					from entry in affectedRoles select RecruitNecessaryAgents(coalition, entry.Item1, entry.Item2)
+				)
 			);
-		}
-
-		/// <summary>
-		/// Determine the fragment that must be reconfigured because of the given <paramref name="affectedRole"/>.
-		/// The fragment might be empty (no capabilities changes needed), but its position within the task is important.
-		/// If both ports are defect, the fragment encompasses exactly the affected role.
-		/// </summary>
-		private static TaskFragment DetermineFragmentToReconfigure(Role affectedRole)
-		{
-			// Initial fragment boundaries to last capability before affected role and first capability after affected role (reversed).
-			var fragmentStart = affectedRole.PostCondition.StateLength; // StateLength is index of first capability to apply by next role
-			var fragmentEnd = affectedRole.PreCondition.StateLength - 1; // StateLength is index of first capability to apply by affected role
-
-			if (affectedRole.PreCondition.Port == null)
-				fragmentStart = affectedRole.PreCondition.StateLength; // include empty fragment preceeding role in fragment to reconfigure
-			if (affectedRole.PostCondition.Port == null)
-				fragmentEnd = affectedRole.PostCondition.StateLength - 1; // include empty fragment following role in fragment to reconfigure
-
-			return new TaskFragment(affectedRole.Task, fragmentStart, fragmentEnd);
 		}
 
 		/// <summary>
@@ -71,7 +51,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <param name="coalition">The coalition used for reconfiguration.</param>
 		/// <param name="agent">The agent to which the <paramref name="affectedRole"/> is allocated.</param>
 		/// <param name="affectedRole">The role whose output / input port is defect.</param>
-		private static async Task RecruitNecessaryAgents(Coalition coalition, BaseAgent agent, Role affectedRole)
+		/// <returns>A <see cref="TaskFragment"/> that must be included in the TFR because of this role.</returns>
+		private static async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition, BaseAgent agent, Role affectedRole)
 		{
 			// predecessor
 			var currentRole = affectedRole;
@@ -87,6 +68,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				currentAgent = previousAgent;
 				previousAgent = currentRole.PreCondition.Port;
 			}
+			var fragmentStart = currentRole.PreCondition.StateLength; // first capability to be applied by non-empty predecessor role
 
 			// successor
 			currentRole = affectedRole;
@@ -102,6 +84,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				currentAgent = nextAgent;
 				nextAgent = currentRole.PostCondition.Port;
 			}
+			var fragmentEnd = currentRole.PostCondition.StateLength - 1; // last capability to be applied by non-empty successor
+			// Note: subtraction is not a problem since there's never a role with PostCondition.StateLength = 0, as a resource is always produced before being transported.
+
+			return new TaskFragment(coalition.Task, fragmentStart, fragmentEnd);
 		}
 
 		/// <summary>
