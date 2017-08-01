@@ -76,6 +76,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
             Broken.Name = $"{Name}.{nameof(Broken)}";
 			ResourceTransportFault.Name = $"{Name}.{nameof(ResourceTransportFault)}";
+	        DrillBroken.Name = $"{Name}.{nameof(DrillBroken)}";
+	        InsertBroken.Name = $"{Name}.{nameof(InsertBroken)}";
+	        TightenBroken.Name = $"{Name}.{nameof(TightenBroken)}";
+	        PolishBroken.Name = $"{Name}.{nameof(PolishBroken)}";
 
 			AddTolerableFaultEffects();
 		}
