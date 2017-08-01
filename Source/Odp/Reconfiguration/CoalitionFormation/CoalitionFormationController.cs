@@ -278,7 +278,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			foreach (var agent in suggestion.CoreAgents)
 			{
 				// roles that intersect with TFR:
-				var obsoleteRoles = agent.AllocatedRoles.Where(role => suggestion.TFR.Start <= role.PostCondition.StateLength
+				var obsoleteRoles = agent.AllocatedRoles.Where(role => suggestion.TFR.Start <= role.PostCondition.StateLength - 1
 																	   && role.PreCondition.StateLength <= suggestion.TFR.End);
 				config.RemoveRoles(agent, obsoleteRoles.ToArray());
 			}
