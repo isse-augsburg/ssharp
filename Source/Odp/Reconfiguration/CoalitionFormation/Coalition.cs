@@ -113,16 +113,16 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				        }
 				        if (currentPos > CTF.End)
 				            break; // all further agents are dead
+						Debug.Assert(current != null && current.IsAlive);
 
                         // otherwise, go back as far as possible
 				        currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
 				        while (currentRole.PreCondition.Port != null && currentRole.PreCondition.Port.IsAlive)
 				        {
 				            current = currentRole.PreCondition.Port;
-				            currentPos = currentRole.PreCondition.StateLength;
-				            currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PostCondition.StateLength == currentPos);
+					        currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PostCondition.StateLength == currentPos);
+							currentPos = currentRole.PreCondition.StateLength;
 				        }
-				        currentPos = currentRole.PreCondition.StateLength;
                     }
 
                     if (!Contains(current))
