@@ -308,7 +308,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				// handle exit edge agent: set input port
 				var exitEdgeAgent = resourceFlow[resourceFlow.Length - 1];
 				var lastRole = exitEdgeAgent.AllocatedRoles
-											.Single(role => role.PreCondition.StateLength == suggestion.TFR.End);
+											.Single(role => role.PreCondition.StateLength == suggestion.TFR.End + 1);
 				config.RemoveRoles(exitEdgeAgent, lastRole); // remove old role
 				lastRole.PreCondition.Port = resourceFlow[resourceFlow.Length - 2];
 				config.AddRoles(exitEdgeAgent, lastRole); // re-add updated role
