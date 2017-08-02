@@ -47,7 +47,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			
 			var finally1 = new BoundedUnaryFormula(new SimpleStateInRangeFormula(1), UnaryOperator.Finally, 1);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;
 			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
@@ -73,7 +73,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			var finallyState1WithFault1 = new BoundedUnaryFormula(state1WithFault1, UnaryOperator.Finally,1);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.AtStepBeginning;
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;

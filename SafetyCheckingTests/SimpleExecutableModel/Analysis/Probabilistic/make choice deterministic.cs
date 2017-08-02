@@ -61,7 +61,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var final3 = new UnaryFormula(formula3, UnaryOperator.Finally);
 			var final4 = new UnaryFormula(formula4, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(final1);
 			markovChainGenerator.AddFormulaToCheck(final2);

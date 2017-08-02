@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using AnalysisModel;
 	using Formula;
 
-	internal unsafe partial class LabeledTransitionMarkovChain : DisposableObject
+	public unsafe partial class LabeledTransitionMarkovChain : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionChainElement);
 

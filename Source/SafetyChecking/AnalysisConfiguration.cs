@@ -39,6 +39,13 @@ namespace ISSE.SafetyChecking
 		EmbedObserversIntoModel
 	}
 
+	public enum LtmcModelChecker
+	{
+		BuiltInLtmc,
+		BuiltInDtmc,
+		ExternalMrmc
+	}
+
 	/// <summary>
 	///   Configures S#'s model checker, determining the amount of CPU cores and memory to use.
 	/// </summary>
@@ -104,7 +111,8 @@ namespace ISSE.SafetyChecking
 			UseAtomarPropositionsAsStateLabels = true,
 			MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithUndo,
 			LimitOfActiveFaults = null,
-			RetraversalNormalizations = RetraversalNormalizations.None
+			RetraversalNormalizations = RetraversalNormalizations.None,
+			LtmcModelChecker = LtmcModelChecker.BuiltInDtmc
 		};
 
 		/// <summary>
@@ -174,5 +182,9 @@ namespace ISSE.SafetyChecking
 		/// <summary>
 		/// </summary>
 		public RetraversalNormalizations RetraversalNormalizations { get; set; }
+
+		/// <summary>
+		/// </summary>
+		public LtmcModelChecker LtmcModelChecker { get; set; }
 	}
 }

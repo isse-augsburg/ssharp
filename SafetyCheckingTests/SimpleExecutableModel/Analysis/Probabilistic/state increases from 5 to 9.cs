@@ -50,7 +50,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var is9Once7Formula = new BinaryFormula(Model.IsInState9,BinaryOperator.And, once7Formula);
 			var final9Once7Formula = new UnaryFormula(is9Once7Formula, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.Configuration.RetraversalNormalizations = RetraversalNormalizations.EmbedObserversIntoModel;
 			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();

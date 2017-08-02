@@ -56,7 +56,7 @@ namespace Tests.Analysis.Probabilistic
 			
 			var final1Formula = new BoundedBinaryFormula(c.IsPhi(), BinaryOperator.Until, c.IsPsi(),10);
 
-			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new SafetySharpMarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(final1Formula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();

@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
 	using FluentAssertions;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using NUnit.Framework;
@@ -40,6 +41,10 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		[Test]
 		public void Calculate()
 		{
+			var tc = SafetySharpModelChecker.TraversalConfiguration;
+			tc.LtmcModelChecker = LtmcModelChecker.BuiltInLtmc;
+			SafetySharpModelChecker.TraversalConfiguration =tc;
+
 			var model = new Model();
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = new Probability(0.0001);
 			model.CrossingController.Motor.BarrierMotorStuck.ProbabilityOfOccurrence = new Probability(0.001);

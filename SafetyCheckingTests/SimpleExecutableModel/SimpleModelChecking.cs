@@ -69,9 +69,9 @@ namespace Tests.SimpleExecutableModel
 		}
 	}
 
-	public sealed class SimpleDtmcFromExecutableModelGenerator : DtmcFromExecutableModelGenerator<SimpleExecutableModel>
+	public sealed class SimpleMarkovChainFromExecutableModelGenerator : MarkovChainFromExecutableModelGenerator<SimpleExecutableModel>
 	{
-		public SimpleDtmcFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
+		public SimpleMarkovChainFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
 		{
 		}
 	}

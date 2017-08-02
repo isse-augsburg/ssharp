@@ -43,7 +43,7 @@ namespace Tests.Analysis.Probabilistic
 			Formula stateIs2 = c.F == 2;
 			var finally2 = new UnaryFormula(stateIs2, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new SafetySharpMarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finally2);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();

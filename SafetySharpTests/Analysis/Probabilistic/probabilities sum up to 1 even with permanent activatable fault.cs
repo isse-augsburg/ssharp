@@ -54,7 +54,7 @@ namespace Tests.Analysis.Probabilistic
 			var finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated = new UnaryFormula(formulaProbabilityOfStep11FrozenValue2AndInvariantNotViolated, UnaryOperator.Finally);
 			var finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated = new UnaryFormula(formulaProbabilityOfStep11FrozenValue3AndInvariantNotViolated, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new SafetySharpMarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue2AndInvariantViolated);
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue3AndInvariantViolated);

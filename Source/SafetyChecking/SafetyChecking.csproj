@@ -145,7 +145,7 @@
     <Compile Include="MarkovDecisionProcess\BoundsToCalculate.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\DiscreteTimeMarkovChain.cs" />
-    <Compile Include="DiscreteTimeMarkovChain\DtmcFromExecutableModelGenerator.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\MarkovChainFromExecutableModelGenerator.cs" />
     <Compile Include="DiscreteTimeMarkovChain\DtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\DtmcToGv.cs" />
     <Compile Include="DiscreteTimeMarkovChain\DtmcToMrmc.cs" />

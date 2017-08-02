@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.Linq;
 	using ExecutedModel;
 
-	public class DtmcFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
+	public class MarkovChainFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly ExecutableModelCreator<TExecutableModel> _runtimeModelCreator;
 		private readonly List<Formula> _formulasToCheck = new List<Formula>();
@@ -49,7 +49,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		// Create Tasks which make the checks (workers)
 		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
-		public DtmcFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
+		public MarkovChainFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
 		{
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));
 			_runtimeModelCreator = runtimeModelCreator;
@@ -119,9 +119,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 			return markovChain;
 		}
-		
 
-		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
+		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain(Formula terminateEarlyCondition = null)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 
@@ -149,10 +148,17 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, 0, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
-			var ltmc =  GenerateLtmc(createAnalysisModel,terminateEarlyCondition, stateFormulas);
-			
+			var ltmc = GenerateLtmc(createAnalysisModel, terminateEarlyCondition, stateFormulas);
+
 			if (Configuration.RetraversalNormalizations != RetraversalNormalizations.None)
 				ltmc = NormalizeLtmc(ltmc);
+
+			return ltmc;
+		}
+		
+		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
+		{
+			var ltmc = GenerateLabeledMarkovChain(terminateEarlyCondition);
 
 			return ConvertToMarkovChain(ltmc);
 		}

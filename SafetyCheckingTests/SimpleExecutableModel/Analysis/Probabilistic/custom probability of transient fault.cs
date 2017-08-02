@@ -46,7 +46,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			Formula invariantViolated = new SimpleLocalVarIsTrue(0);
 			var finallyInvariantViolated = new UnaryFormula(invariantViolated,UnaryOperator.Finally);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity=ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();

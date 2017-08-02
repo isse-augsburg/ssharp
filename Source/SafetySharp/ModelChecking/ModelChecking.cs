@@ -69,9 +69,9 @@ namespace SafetySharp.ModelChecking
 		}
 	}
 
-	public sealed class SafetySharpDtmcFromExecutableModelGenerator : DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>
+	public sealed class SafetySharpMarkovChainFromExecutableModelGenerator : MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>
 	{
-		public SafetySharpDtmcFromExecutableModelGenerator(ModelBase model) : base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model))
+		public SafetySharpMarkovChainFromExecutableModelGenerator(ModelBase model) : base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model))
 		{
 		}
 	}

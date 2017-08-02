@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 
 	//The LtmcBuilder is tightly coupled to LabeledTransitionMarkovChain, so we make it a nested class
-	internal unsafe partial class LabeledTransitionMarkovChain
+	public unsafe partial class LabeledTransitionMarkovChain
 	{
 		/// <summary>
 		///   Builds up a <see cref="LabeledTransitionMarkovChain" /> instance during model traversal.

@@ -28,7 +28,7 @@ namespace Tests.Analysis.Probabilistic
 			Formula falseFormula = false;
 			var finallyFalseFormula = new UnaryFormula(falseFormula, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new SafetySharpMarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finallyFalseFormula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();

@@ -47,7 +47,7 @@ namespace Tests.Analysis.Probabilistic
 			var final2 = new UnaryFormula(valueIs2, UnaryOperator.Finally);
 			var final3 = new UnaryFormula(valueIs3, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SafetySharpDtmcFromExecutableModelGenerator(TestModel.InitializeModel(c));
+			var markovChainGenerator = new SafetySharpMarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(final2);
 			markovChainGenerator.AddFormulaToCheck(final3);

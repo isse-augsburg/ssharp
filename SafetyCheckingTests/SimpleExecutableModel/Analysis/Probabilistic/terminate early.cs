@@ -46,7 +46,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var stateIs3 = new SimpleStateInRangeFormula(3);
 			var finally3 = new UnaryFormula(stateIs3, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finally3);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
@@ -70,7 +70,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var stateIs3 = new SimpleStateInRangeFormula(3);
 			var finally3 = new UnaryFormula(stateIs3, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finally3);
 			var dtmc = markovChainGenerator.GenerateMarkovChain(stateIs3);

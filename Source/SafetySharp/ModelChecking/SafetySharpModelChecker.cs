@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Analysis
 {
+	using System;
 	using System.IO;
 	using System.Linq;
 	using ISSE.SafetyChecking;
@@ -37,6 +38,7 @@ namespace SafetySharp.Analysis
 	using ISSE.SafetyChecking.Utilities;
 	using Modeling;
 	using Runtime;
+	using LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker;
 
 	public class SafetySharpInvariantAnalysisResult : InvariantAnalysisResult
 	{
@@ -125,20 +127,9 @@ namespace SafetySharp.Analysis
 		/// <param name="stateFormula">The state formula to be checked.</param>
 		public static Probability CalculateProbabilityToReachState(ModelBase model, Formula stateFormula)
 		{
-			Probability probabilityToReachState;
-
-			var probabilityToReachStateFormula = new UnaryFormula(stateFormula,UnaryOperator.Finally);
-
-			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+			var finallyStateFormula = new UnaryFormula(stateFormula,UnaryOperator.Finally);
 			
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
-			markovChainGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
-			var markovChain=markovChainGenerator.GenerateMarkovChain(stateFormula);
-			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))
-			{
-				probabilityToReachState = modelChecker.CalculateProbability(probabilityToReachStateFormula);
-			}
-			return probabilityToReachState;
+			return CalculateProbabilityOfFormula(model, finallyStateFormula, stateFormula);
 		}
 
 		/// <summary>
@@ -147,20 +138,46 @@ namespace SafetySharp.Analysis
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The state formula to be checked.</param>
 		/// <param name="terminateEarlyFormula">When terminateEarlyFormula is satisfied stop building the state space.</param>
-		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
-		public static Probability CalculateProbabilityOfFormulaBounded(ModelBase model, Formula formula, Formula terminateEarlyFormula, int bound)
+		public static Probability CalculateProbabilityOfFormula(ModelBase model, Formula formula, Formula terminateEarlyFormula)
 		{
 			Probability probability;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var markovChainGenerator = new DtmcFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.AddFormulaToCheck(formula);
-			var markovChain = markovChainGenerator.GenerateMarkovChain(terminateEarlyFormula);
-			using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, System.Console.Out))
+			if (TraversalConfiguration.LtmcModelChecker == LtmcModelChecker.BuiltInLtmc)
 			{
-				probability = modelChecker.CalculateProbability(formula);
+				markovChainGenerator.Configuration.UseCompactStateStorage = true;
+
+				var markovChain = markovChainGenerator.GenerateLabeledMarkovChain(terminateEarlyFormula);
+				using (var modelChecker = new BuiltinLtmcModelChecker(markovChain, TraversalConfiguration.DefaultTraceOutput))
+				{
+					probability = modelChecker.CalculateProbability(formula);
+				}
+			}
+			else
+			{
+				var markovChain = markovChainGenerator.GenerateMarkovChain(terminateEarlyFormula);
+				if (TraversalConfiguration.LtmcModelChecker == LtmcModelChecker.BuiltInDtmc)
+				{
+					using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, TraversalConfiguration.DefaultTraceOutput))
+					{
+						probability = modelChecker.CalculateProbability(formula);
+					}
+				}
+				else if (TraversalConfiguration.LtmcModelChecker == LtmcModelChecker.ExternalMrmc)
+				{
+					using (var modelChecker = new ExternalDtmcModelCheckerMrmc(markovChain, TraversalConfiguration.DefaultTraceOutput))
+					{
+						probability = modelChecker.CalculateProbability(formula);
+					}
+				}
+				else
+				{
+					throw new NotImplementedException();
+				}
 			}
 			return probability;
 		}
@@ -175,7 +192,7 @@ namespace SafetySharp.Analysis
 		{
 			var formula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
 
-			return CalculateProbabilityOfFormulaBounded(model, formula, stateFormula, bound);
+			return CalculateProbabilityOfFormula(model, formula, stateFormula);
 		}
 
 		/// <summary>
@@ -190,7 +207,7 @@ namespace SafetySharp.Analysis
 		{
 			var formula = new BoundedBinaryFormula(invariantFormula, BinaryOperator.Until, stateFormula, bound);
 			
-			return CalculateProbabilityOfFormulaBounded(model, formula, stateFormula, bound);
+			return CalculateProbabilityOfFormula(model, formula, stateFormula);
 		}
 
 		/// <summary>
@@ -200,35 +217,9 @@ namespace SafetySharp.Analysis
 		/// <param name="stateFormula">The state formula which _must_ finally be true.</param>
 		public static ProbabilityRange CalculateProbabilityRangeToReachState(ModelBase model, Formula stateFormula)
 		{
-			ProbabilityRange probabilityRangeToReachState;
-
-			var probabilityToReachStateFormula = new UnaryFormula(stateFormula, UnaryOperator.Finally);
-
-			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
-
-			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
-			nmdpGenerator.AddFormulaToCheck(probabilityToReachStateFormula);
-			nmdpGenerator.Configuration.SuccessorCapacity *= 8;
-			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(stateFormula);
-
-			if (_convertNmdpToMdp)
-			{
-				var nmdpToMpd = new NmdpToMdp(nmdp);
-				var mdp = nmdpToMpd.MarkovDecisionProcess;
-				using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
-				{
-					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
-				}
-			}
-			else
-			{
-				using (var modelChecker = new BuiltinNmdpModelChecker(nmdp, System.Console.Out))
-				{
-					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(probabilityToReachStateFormula);
-				}
-			}
-
-			return probabilityRangeToReachState;
+			var finallyStateFormula = new UnaryFormula(stateFormula, UnaryOperator.Finally);
+			
+			return CalculateProbabilityRangeOfFormula(model, finallyStateFormula,stateFormula);
 		}
 
 
@@ -239,8 +230,7 @@ namespace SafetySharp.Analysis
 		/// <param name="model">The model that should be checked.</param>
 		/// <param name="formula">The state formula to be checked.</param>
 		/// <param name="terminateEarlyFormula">When terminateEarlyFormula is satisfied stop building the state space.</param>
-		/// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
-		public static ProbabilityRange CalculateProbabilityRangeOfFormulaBounded(ModelBase model, Formula formula, Formula terminateEarlyFormula, int bound)
+		public static ProbabilityRange CalculateProbabilityRangeOfFormula(ModelBase model, Formula formula, Formula terminateEarlyFormula)
 		{
 			ProbabilityRange probabilityRangeToReachState;
 
@@ -248,6 +238,7 @@ namespace SafetySharp.Analysis
 
 			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			nmdpGenerator.AddFormulaToCheck(formula);
+			nmdpGenerator.Configuration.SuccessorCapacity *= 8;
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(terminateEarlyFormula);
 
 
@@ -255,14 +246,14 @@ namespace SafetySharp.Analysis
 			{
 				var nmdpToMpd = new NmdpToMdp(nmdp);
 				var mdp = nmdpToMpd.MarkovDecisionProcess;
-				using (var modelChecker = new BuiltinMdpModelChecker(mdp, System.Console.Out))
+				using (var modelChecker = new BuiltinMdpModelChecker(mdp, TraversalConfiguration.DefaultTraceOutput))
 				{
 					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
 				}
 			}
 			else
 			{
-				using (var modelChecker = new BuiltinNmdpModelChecker(nmdp, System.Console.Out))
+				using (var modelChecker = new BuiltinNmdpModelChecker(nmdp, TraversalConfiguration.DefaultTraceOutput))
 				{
 					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
 				}
@@ -279,7 +270,7 @@ namespace SafetySharp.Analysis
 		public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(ModelBase model, Formula stateFormula, int bound)
 		{
 			var formula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
-			return CalculateProbabilityRangeOfFormulaBounded(model,formula, stateFormula, bound);
+			return CalculateProbabilityRangeOfFormula(model,formula, stateFormula);
 		}
 
 
@@ -296,7 +287,7 @@ namespace SafetySharp.Analysis
 		{
 			var formula = new BoundedBinaryFormula(invariantFormula, BinaryOperator.Until, stateFormula, bound);
 
-			return CalculateProbabilityRangeOfFormulaBounded(model, formula, stateFormula, bound);
+			return CalculateProbabilityRangeOfFormula(model, formula, stateFormula);
 		}
 
 

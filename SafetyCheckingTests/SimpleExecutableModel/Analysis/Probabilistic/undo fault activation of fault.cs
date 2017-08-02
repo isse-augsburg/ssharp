@@ -53,7 +53,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var final100Formula = new UnaryFormula(Model.StateIs100, UnaryOperator.Finally);
 			var final200Formula = new UnaryFormula(Model.StateIs200, UnaryOperator.Finally);
 
-			var markovChainGenerator = new SimpleDtmcFromExecutableModelGenerator(m);
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(final100Formula);
 			markovChainGenerator.AddFormulaToCheck(final200Formula);
