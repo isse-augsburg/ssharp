@@ -52,7 +52,9 @@
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
     <Compile Include="AnalysisModel\CounterExample.cs" />
     <Compile Include="AnalysisModel\TransitionFlags.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\BuiltinLtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelCheckerWithoutDictionaries.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\LtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcRetraverseModel.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
     <Compile Include="DiscreteTimeMarkovChain\QuantitativeParametricAnalysis.cs" />

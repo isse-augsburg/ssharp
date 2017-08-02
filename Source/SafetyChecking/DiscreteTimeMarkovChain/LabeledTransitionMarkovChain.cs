@@ -31,7 +31,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using Modeling;
 	using Utilities;
 	using AnalysisModel;
-
+	using Formula;
 
 	internal unsafe partial class LabeledTransitionMarkovChain : DisposableObject
 	{
@@ -256,6 +256,17 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		internal TransitionChainEnumerator GetTransitionChainEnumerator()
 		{
 			return new TransitionChainEnumerator(this);
+		}
+		
+		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
+		{
+			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
+			Func<int, bool> evaluator = transitionTarget =>
+			{
+				var stateFormulaSet = _transitionChainElementsMemory[transitionTarget].Formulas;
+				return stateFormulaEvaluator(stateFormulaSet);
+			};
+			return evaluator;
 		}
 
 		internal struct TransitionChainEnumerator

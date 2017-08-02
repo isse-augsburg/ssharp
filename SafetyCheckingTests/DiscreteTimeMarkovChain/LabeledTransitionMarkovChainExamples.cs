@@ -105,37 +105,37 @@ namespace Tests.DiscreteTimeMarkovChain.LabeledTransitionMarkovChainExamples
 	{
 		internal static LabeledTransitionMarkovChain Create()
 		{
-			// 1----> 
-			//  --b-> 2⟲
-			//           ----> 3⟲
-			//           --c-> 3
-			// 1--c->        3
+			// 0----> 
+			//  --b-> 1⟲
+			//           ----> 2⟲
+			//           --c-> 2
+			// 0--c->        2
 
 			var ltmcTestBuilder = new LtmcTestBuilder();
 			
 			// add initial state
 			ltmcTestBuilder.ClearTransitions();
-			ltmcTestBuilder.CreateTransition(new []{ false,false}, 1, 1.0);
+			ltmcTestBuilder.CreateTransition(new []{ false,false}, 0, 1.0);
 			ltmcTestBuilder.ProcessInitialTransitions();
+
+			// add state 0
+			ltmcTestBuilder.ClearTransitions();
+			ltmcTestBuilder.CreateTransition(new[] { false, false }, 1, 0.6);
+			ltmcTestBuilder.CreateTransition(new[] { true, false }, 1, 0.3);
+			ltmcTestBuilder.CreateTransition(new[] { false, true},  2, 0.1);
+			ltmcTestBuilder.ProcessStateTransitions(0);
 
 			// add state 1
 			ltmcTestBuilder.ClearTransitions();
-			ltmcTestBuilder.CreateTransition(new[] { false, false }, 2, 0.6);
-			ltmcTestBuilder.CreateTransition(new[] { true, false }, 2, 0.3);
-			ltmcTestBuilder.CreateTransition(new[] { false, true},  3, 0.1);
+			ltmcTestBuilder.CreateTransition(new[] { false, false }, 1, 0.9);
+			ltmcTestBuilder.CreateTransition(new[] { false, false }, 2, 0.01);
+			ltmcTestBuilder.CreateTransition(new[] { false, true }, 2, 0.09);
 			ltmcTestBuilder.ProcessStateTransitions(1);
 
 			// add state 2
 			ltmcTestBuilder.ClearTransitions();
-			ltmcTestBuilder.CreateTransition(new[] { false, false }, 2, 0.9);
-			ltmcTestBuilder.CreateTransition(new[] { false, false }, 3, 0.01);
-			ltmcTestBuilder.CreateTransition(new[] { false, true }, 3, 0.09);
+			ltmcTestBuilder.CreateTransition(new[] { false, false }, 2, 1.0);
 			ltmcTestBuilder.ProcessStateTransitions(2);
-
-			// add state 3
-			ltmcTestBuilder.ClearTransitions();
-			ltmcTestBuilder.CreateTransition(new[] { false, false }, 3, 1.0);
-			ltmcTestBuilder.ProcessStateTransitions(3);
 
 
 			ltmcTestBuilder.Ltmc.StateFormulaLabels = new [] {"label1", "label2" };
