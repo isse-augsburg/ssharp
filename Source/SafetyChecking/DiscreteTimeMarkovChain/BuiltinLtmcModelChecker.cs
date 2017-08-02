@@ -136,7 +136,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 			
 			var xold = new double[stateCount];
-			var xnew = CreateDerivedVector(precalculatedStates, PrecalculatedTransitionTarget.Satisfied); ;
+			var xnew = new double[stateCount];
 			var loops = 0;
 			while (loops < steps)
 			{

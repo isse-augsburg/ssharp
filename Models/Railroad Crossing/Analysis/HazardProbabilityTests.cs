@@ -43,6 +43,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		{
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.LtmcModelChecker = LtmcModelChecker.BuiltInLtmc;
+			//tc.UseAtomarPropositionsAsStateLabels = false;
 			SafetySharpModelChecker.TraversalConfiguration =tc;
 
 			var model = new Model();
