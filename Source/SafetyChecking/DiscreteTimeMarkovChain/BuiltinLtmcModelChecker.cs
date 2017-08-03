@@ -48,7 +48,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		// Note: Should be used with using(var modelchecker = new ...)
 		public BuiltinLtmcModelChecker(LabeledTransitionMarkovChain markovChain, TextWriter output = null) : base(markovChain, output)
 		{
-			AssertIsDense();
+			markovChain.AssertIsDense();
 		}
 
 		private PrecalculatedTransitionTarget[] CreateEmptyPrecalculatedTransitionTargetArray()
@@ -216,19 +216,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
 			return new Probability(result);
-		}
-
-		[Conditional("DEBUG")]
-		private void AssertIsDense()
-		{
-			var size = LabeledMarkovChain.SourceStates.Count;
-			using (var enumerator = LabeledMarkovChain.SourceStates.GetEnumerator())
-			{
-				while (enumerator.MoveNext())
-				{
-					Assert.That(enumerator.Current < size, "Markov chain must be dense");
-				}
-			}
 		}
 
 		private void ApproximateDelta(double target)

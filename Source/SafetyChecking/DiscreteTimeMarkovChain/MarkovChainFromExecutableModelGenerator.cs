@@ -159,7 +159,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
 		{
 			var ltmc = GenerateLabeledMarkovChain(terminateEarlyCondition);
-
 			return ConvertToMarkovChain(ltmc);
 		}
 

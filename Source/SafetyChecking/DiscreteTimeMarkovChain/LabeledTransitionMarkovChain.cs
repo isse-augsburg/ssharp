@@ -205,6 +205,20 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_transitionChainElementsBuffer.SafeDispose();
 		}
 
+
+		[Conditional("DEBUG")]
+		internal void AssertIsDense()
+		{
+			var size = SourceStates.Count;
+			using (var enumerator = SourceStates.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					Assert.That(enumerator.Current < size, "Markov chain must be dense");
+				}
+			}
+		}
+
 		internal LabeledTransitionEnumerator GetTransitionEnumerator(int stateStorageState)
 		{
 			var firstElement = _stateStorageStateToFirstTransitionChainElementMemory[stateStorageState];
