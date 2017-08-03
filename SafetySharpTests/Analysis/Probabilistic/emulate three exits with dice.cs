@@ -66,10 +66,7 @@ namespace Tests.Analysis.Probabilistic
 
 			public int State = 0;
 
-			public Formula InA()
-			{
-				return Decision == 1;
-			}
+			public Formula InA() => Decision == 1;
 
 			public Formula InB()
 			{
@@ -104,7 +101,10 @@ namespace Tests.Analysis.Probabilistic
 						new Option<int>(new Probability(0.5), 3));
 					Decision = State == 3 ? 3 : 0;
 				}
-
+				else if (State == 3)
+				{
+					Decision = 0;
+				}
 			}
 		}
 
