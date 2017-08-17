@@ -71,6 +71,31 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			probabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
 		}
 
+		[Fact]
+		public void CheckSmallerEqualTwo()
+		{
+			var m = new Model();
+			Probability probabilityOfFinalSmallerEqual2;
+
+			var finalSmallerEqual2Formula = new UnaryFormula(new SimpleStateInRangeFormula(0,2), UnaryOperator.Finally);
+
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
+			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.WriteGraphvizModels = true;
+			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			markovChainGenerator.AddFormulaToCheck(finalSmallerEqual2Formula);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				probabilityOfFinalSmallerEqual2 = modelChecker.CalculateProbability(finalSmallerEqual2Formula);
+			}
+
+			probabilityOfFinalSmallerEqual2.Is(1.0, 0.000001).ShouldBe(true);
+		}
+
 		public class Model : SimpleModelBase
 		{
 			public override Fault[] Faults { get; } = new Fault[0];

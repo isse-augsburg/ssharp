@@ -51,7 +51,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <param name="createModel">Creates the model that should be checked.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal ModelTraverser(AnalysisModelCreator createModel, AnalysisConfiguration configuration, int transitionSize)
+		internal ModelTraverser(AnalysisModelCreator createModel, AnalysisConfiguration configuration, int transitionSize, bool createStutteringState)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 			var stopwatch = new Stopwatch();
@@ -91,7 +91,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			else
 				_states = new SparseStateStorage(modelCapacity.SizeOfState, modelCapacity.NumberOfStates);
 			Context.States = _states;
-			Context.StutteringStateIndex = _states.ReserveStateIndex();
+			if (createStutteringState)
+				Context.StutteringStateIndex = _states.ReserveStateIndex();
 			_initializationTime = stopwatch.Elapsed;
 			stopwatch.Stop();
 		}

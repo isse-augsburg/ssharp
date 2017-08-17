@@ -125,6 +125,32 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			maxProbabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
 		}
 
+		[Fact]
+		public void CheckSmallerEqualTwo()
+		{
+			var m = new Model();
+			Probability minProbabilityOfFinalSmallerEqual2;
+			Probability maxProbabilityOfFinalSmallerEqual2;
+
+			var finalSmallerEqual2Formula = new BoundedUnaryFormula(new SimpleStateInRangeFormula(0, 2), UnaryOperator.Finally,5);
+
+			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
+			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			nmdpGenerator.Configuration.UseCompactStateStorage = true;
+			nmdpGenerator.Configuration.WriteGraphvizModels = true;
+			nmdpGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			nmdpGenerator.AddFormulaToCheck(finalSmallerEqual2Formula);
+			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
+			var typeOfModelChecker = typeof(BuiltinNmdpModelChecker);
+			var modelChecker = (NmdpModelChecker)Activator.CreateInstance(typeOfModelChecker, nmdp, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				minProbabilityOfFinalSmallerEqual2 = modelChecker.CalculateMinimalProbability(finalSmallerEqual2Formula);
+				maxProbabilityOfFinalSmallerEqual2 = modelChecker.CalculateMaximalProbability(finalSmallerEqual2Formula);
+			}
+		}
+
 		public class Model : SimpleModelBase
 		{
 			public override Fault[] Faults { get; } = new Fault[0];

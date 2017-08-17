@@ -45,15 +45,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmcGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
 									 AnalysisConfiguration configuration)
-			: base(createModel, configuration, LabeledTransitionMarkovChain.TransitionSize)
+			: base(createModel, configuration, LabeledTransitionMarkovChain.TransitionSize,terminateEarlyCondition!=null)
 		{
 			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates,Context.ModelCapacity.NumberOfTransitions);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 			
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
-			_markovChain.CreateStutteringState(Context.StutteringStateIndex);
 			if (terminateEarlyCondition != null)
 			{
+				_markovChain.CreateStutteringState(Context.StutteringStateIndex);
 				var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
 				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
 			}

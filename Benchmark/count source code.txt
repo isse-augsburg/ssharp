@@ -7,4 +7,7 @@ $year = (Get-Date).Year
 cloc-1.72.exe --csv --out=cloc-models-${year}_${month}.csv ..\Models
 cloc-1.72.exe --csv --out=cloc-safetychecking-${year}_${month}.csv ..\Source\SafetyChecking
 cloc-1.72.exe --csv --out=cloc-safetysharp-${year}_${month}.csv ..\Source\SafetySharp ..\Source\Compiler
+cloc-1.72.exe --csv --out=cloc-safetysharp-faultaware-${year}_${month}.csv ..\Source\SafetyChecking\FaultMinimalKripkeStructure ..\Source\SafetyChecking\MinimalCriticalSetAnalysis
+cloc-1.72.exe --csv --out=cloc-safetysharp-dtmc-${year}_${month}.csv ..\Source\SafetyChecking\DiscreteTimeMarkovChain
+cloc-1.72.exe --csv --out=cloc-safetysharp-mdp-${year}_${month}.csv ..\Source\SafetyChecking\MarkovDecisionProcess
 cloc-1.72.exe --csv --out=cloc-tests-${year}_${month}.csv ..\SafetySharpTests ..\SafetyCheckingTests

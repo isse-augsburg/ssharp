@@ -43,7 +43,7 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal StateGraphGenerator(AnalysisModelCreator createModel, 
 									 AnalysisConfiguration configuration)
-			: base(createModel, configuration, DeriveTransitionSizeFromModel)
+			: base(createModel, configuration, DeriveTransitionSizeFromModel, false)
 		{
 			var analyzedModel = AnalyzedModels.OfType<ExecutedModel<TExecutableModel>>().First();
 

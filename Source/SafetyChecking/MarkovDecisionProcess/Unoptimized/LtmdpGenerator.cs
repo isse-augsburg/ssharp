@@ -43,15 +43,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmdpGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
 									 AnalysisConfiguration configuration)
-			: base(createModel, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize)
+			: base(createModel, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize, terminateEarlyCondition != null)
 		{
 			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
 			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(_mdp, configuration));
-			_mdp.CreateStutteringState(Context.StutteringStateIndex);
 			if (terminateEarlyCondition != null)
 			{
+				_mdp.CreateStutteringState(Context.StutteringStateIndex);
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_mdp.StateFormulaLabels, terminateEarlyCondition);
 				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
 			}
