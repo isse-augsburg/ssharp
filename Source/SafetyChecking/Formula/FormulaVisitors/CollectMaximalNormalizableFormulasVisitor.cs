@@ -30,11 +30,11 @@ namespace ISSE.SafetyChecking.Formula
 	///   model normalized using a re-traversal (LtmcFromRetraverseModelGenerator). This means that using the unary Operator "Once" is okay,
 	///   as long as no other Once is nested inside.
 	/// </summary>
-	public class CollectMaximalNormalizableFormulasVisitor : CollectStateFormulasVisitor
+	public class CollectMaximalNormalizableFormulasVisitor : FormulaVisitor
 	{
 		public HashSet<Formula> MaximalNormalizableFormulas { get; } = new HashSet<Formula>();
 
-		public override IEnumerable<Formula> CollectedStateFormulas => MaximalNormalizableFormulas;
+		public IEnumerable<Formula> CollectedStateFormulas => MaximalNormalizableFormulas;
 
 		public bool IsNormalizable; //information propagated from children to parents
 		
@@ -201,7 +201,7 @@ namespace ISSE.SafetyChecking.Formula
 		/// <summary>
 		///   Visits the <paramref name="formula." />
 		/// </summary>
-		public override void VisitNewTopLevelFormula(Formula formula)
+		public void VisitNewTopLevelFormula(Formula formula)
 		{
 			formula.Visit(this);
 			if (IsNormalizable)

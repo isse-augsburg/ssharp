@@ -152,6 +152,7 @@
     <Compile Include="SimpleExecutableModel\SimpleExecutableModel.cs" />
     <Compile Include="SimpleExecutableModel\SimpleModelChecking.cs" />
     <Compile Include="SimpleExecutableModel\SimpleModelSerializer.cs" />
+    <Compile Include="SimpleExecutableModel\SimpleSimulator.cs" />
     <Compile Include="Utilities\TestTraceOutput.cs" />
   </ItemGroup>
   <ItemGroup>

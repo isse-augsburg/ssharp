@@ -20,7 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Analysis
+
+namespace Tests.SimpleExecutableModel
 {
 	using System;
 	using System.Collections.Generic;
@@ -31,53 +32,45 @@ namespace SafetySharp.Analysis
 	using ISSE.SafetyChecking.ExecutableModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.Simulator;
-	using Modeling;
-	using Runtime;
 	using Utilities;
-
-	/// <summary>
-	///   Simulates a S# model for debugging or testing purposes.
-	/// </summary>
-	public sealed class SafetySharpSimulator : Simulator<SafetySharpRuntimeModel>
+	
+	public sealed class SimpleSimulator : Simulator<SimpleExecutableModel>
 	{
 		/// <summary>
 		///   Gets the model that is simulated, i.e., a copy of the original model passed to the simulator.
 		/// </summary>
-		public ModelBase Model => RuntimeModel.Model;
+		public SimpleModelBase Model => RuntimeModel.Model;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model that should be simulated.</param>
 		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
-		public SafetySharpSimulator(ModelBase model, params Formula[] formulas)
-			: base(SafetySharpRuntimeModel.Create(model, formulas))
+		public SimpleSimulator(SimpleModelBase model, params Formula[] formulas)
+			: base(SimpleExecutableModel.CreateExecutedModelCreator(model, formulas).Create(0))
 		{
 		}
 
-		public SafetySharpSimulator(ExecutableCounterExample<SafetySharpRuntimeModel> counterExample)
+		public SimpleSimulator(ExecutableCounterExample<SimpleExecutableModel> counterExample)
 			: base(counterExample)
 		{
 		}
 	}
-
-	/// <summary>
-	///   Simulates a S# model for debugging or testing purposes.
-	/// </summary>
-	public sealed class SafetySharpProbabilisticSimulator : ProbabilisticSimulator<SafetySharpRuntimeModel>
+	
+	public sealed class SimpleProbabilisticSimulator : ProbabilisticSimulator<SimpleExecutableModel>
 	{
 		/// <summary>
 		///   Gets the model that is simulated, i.e., a copy of the original model passed to the simulator.
 		/// </summary>
-		public ModelBase Model => RuntimeModel.Model;
+		public SimpleModelBase Model => RuntimeModel.Model;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model that should be simulated.</param>
 		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
-		public SafetySharpProbabilisticSimulator(ModelBase model,  params Formula[] formulas)
-			: base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model),formulas)
+		public SimpleProbabilisticSimulator(SimpleModelBase model, params Formula[] formulas)
+			: base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model), formulas)
 		{
 		}
 	}

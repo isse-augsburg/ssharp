@@ -116,6 +116,7 @@ namespace ISSE.SafetyChecking.Simulator
 			{
 				if (_counterExample == null)
 				{
+					//TODO:  RuntimeModel.ExecuteInitialStep() missing?
 					RuntimeModel.ExecuteStep();
 
 					RuntimeModel.Serialize(state);

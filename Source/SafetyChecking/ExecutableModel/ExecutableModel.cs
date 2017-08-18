@@ -82,7 +82,6 @@ namespace ISSE.SafetyChecking.ExecutableModel
 
 		protected void CheckConsistencyAfterInitialization()
 		{
-			FaultSet.CheckFaultCount(Faults.Length);
 			StateFormulaSet.CheckFormulaCount(AtomarPropositionFormulas.Length);
 		}
 

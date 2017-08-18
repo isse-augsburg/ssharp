@@ -84,7 +84,8 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			}
 
 			ChoiceResolver = new NondeterministicChoiceResolver(useForwardOptimization);
-			
+			FaultSet.CheckFaultCount(RuntimeModel.Faults.Length);
+
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 		}
 

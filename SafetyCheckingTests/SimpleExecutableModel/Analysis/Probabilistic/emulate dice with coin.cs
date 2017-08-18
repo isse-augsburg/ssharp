@@ -47,7 +47,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			Probability probabilityOfFinal1;
 
 			var final1Formula = new UnaryFormula(Model.IsInStateFinal1, UnaryOperator.Finally);
-
+			
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(final1Formula);
@@ -60,6 +60,23 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			}
 
 			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
+		}
+
+		[Fact]
+		public void Simulate()
+		{
+			var m = new Model();
+
+			//var final1Formula = new UnaryFormula(Model.IsInStateFinal1, UnaryOperator.Finally);
+
+			var simulator = new SimpleProbabilisticSimulator(m, Model.IsInStateFinal1, Model.IsInStateInitialThrow);
+			simulator.SimulateSteps(100);
+
+			var initialThrowCount = simulator.GetCountOfSatisfiedOnTrace(Model.IsInStateInitialThrow);
+			var inStateFinal1Count = simulator.GetCountOfSatisfiedOnTrace(Model.IsInStateFinal1);
+			initialThrowCount.ShouldBe(1);
+			inStateFinal1Count.ShouldBeLessThan(100);
+			//probabilityOfFinal1.Between(0.0, 0.2).ShouldBe(true);
 		}
 
 		private enum S
@@ -133,8 +150,10 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				}
 				State = (int)s;
 			}
-			
-			public static Formula IsInStateFinal1 = new SimpleStateInRangeFormula((int) S.Final1);
+
+			public static Formula IsInStateFinal1 = new SimpleStateInRangeFormula((int)S.Final1);
+
+			public static Formula IsInStateInitialThrow = new SimpleStateInRangeFormula((int)S.InitialThrow);
 		}
 	}
 }
