@@ -57,6 +57,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			++_choiceIndex;
 
+			// TODO: Use probability of choice to resolve the choice
 			var randomIndex = _random.Next(valueCount);
 
 			_choices.Add(randomIndex);

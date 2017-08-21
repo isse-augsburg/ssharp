@@ -121,12 +121,41 @@ namespace SafetySharp.CaseStudies.SmallModels.Model2
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.ModelComponent.Value==3, 50);
 			Console.Write($"Probability of hazard: {result}");
 			
-			var formula2 = new ExecutableStateFormula(() => model.ModelComponent.Value == 3);
+			var is3Formula = new ExecutableStateFormula(() => model.ModelComponent.Value == 3);
 			var loopRequestBug = new ExecutableStateFormula(() => model.ModelComponent.LoopRequestBug);
-			var formula2OnceLoopRequestBug = new BinaryFormula(formula2,BinaryOperator.And, new UnaryFormula(loopRequestBug,UnaryOperator.Once));
+			var formula2OnceLoopRequestBug = new BinaryFormula(is3Formula,BinaryOperator.And, new UnaryFormula(loopRequestBug,UnaryOperator.Once));
 			var result2 = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, formula2OnceLoopRequestBug, 50);
-			Console.Write($"Probability of {formula2OnceLoopRequestBug}: {result2}");
+			Console.WriteLine($"Probability of {formula2OnceLoopRequestBug}: {result2}");
 		}
+
+		[Test]
+		public void Simulate()
+		{
+			var model = new ExampleModelBase();
+
+			var tc = SafetySharpModelChecker.TraversalConfiguration;
+			tc.AllowFaultsOnInitialTransitions = false;
+			SafetySharpModelChecker.TraversalConfiguration = tc;
+
+			var is3Formula = new ExecutableStateFormula(() => model.ModelComponent.Value == 3);
+			var f1Formula = new FaultFormula(model.ModelComponent.F1);
+			var loopRequestBugFormula = new ExecutableStateFormula(() => model.ModelComponent.LoopRequestBug);
+
+			SafetySharpProbabilisticSimulator simulator = new SafetySharpProbabilisticSimulator(model, is3Formula,f1Formula, loopRequestBugFormula);
+
+			for (var i = 0; i < 10; i++)
+			{
+				simulator.SimulateSteps(5);
+				var noIs3 = simulator.GetCountOfSatisfiedOnTrace(is3Formula);
+				var noF1 = simulator.GetCountOfSatisfiedOnTrace(f1Formula);
+				var probabilityOfTrace = simulator.TraceProbability;
+				Console.WriteLine($"No of Is3: {noIs3}");
+				Console.WriteLine($"No of f1 {noF1}: {noF1}");
+				Console.WriteLine($"Probability of trace: {probabilityOfTrace}");
+				Console.WriteLine();
+			}
+		}
+
 
 
 		[Test]
