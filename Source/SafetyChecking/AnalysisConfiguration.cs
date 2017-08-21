@@ -61,6 +61,10 @@ namespace ISSE.SafetyChecking
 		private long _successorStateCapacity;
 
 		/// <summary>
+		/// </summary>
+		public bool AllowFaultsOnInitialTransitions { get; set; }
+
+		/// <summary>
 		///   If set to true, the model checker uses a compact state storage, in which the found states are indexed by a continuous variable.
 		///   If set to false, the traditional sparse state storage is used, which requires a little less memory and is unnoticeable faster.
 		/// </summary>
@@ -97,6 +101,7 @@ namespace ISSE.SafetyChecking
 		/// </summary>
 		public static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
+			AllowFaultsOnInitialTransitions = true,
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,
 			DefaultTraceOutput = Console.Out,

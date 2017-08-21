@@ -29,6 +29,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using System.Linq;
 	using AnalysisModel;
 	using Formula;
+	using Modeling;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="ExecutedModel{TExecutableModel}" /> with
@@ -43,6 +44,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private readonly LtmdpStepGraph _stepGraph;
 
 		private readonly bool _activateIndependentFaultsAtStepBeginning;
+
+		private readonly bool _allowFaultsOnInitialTransitions;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -79,6 +82,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			ChoiceResolver = _ltmdpChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 
+			_allowFaultsOnInitialTransitions = configuration.AllowFaultsOnInitialTransitions;
+
 			_activateIndependentFaultsAtStepBeginning =
 				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
 		}
@@ -111,6 +116,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			foreach (var fault in RuntimeModel.NondeterministicFaults)
 				fault.Reset();
+			
+			var savedActivations = RuntimeModel.NondeterministicFaults.ToDictionary(fault => fault, fault => fault.Activation);
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation = Activation.Suppressed;
+				}
+			}
 
 			if (_activateIndependentFaultsAtStepBeginning)
 			{
@@ -130,6 +144,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					if (!(fault is Modeling.TransientFault))
 						fault.TryActivate();
+				}
+			}
+			
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation = savedActivations[fault];
 				}
 			}
 		}

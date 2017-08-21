@@ -29,6 +29,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 	using ExecutedModel;
 	using System.Linq;
 	using Formula;
+	using Modeling;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="SafetySharpRuntimeModel" /> with
@@ -38,6 +39,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 	{
 		private readonly Func<bool>[] _stateConstraints;
 		private readonly ActivationMinimalTransitionSetBuilder<TExecutableModel> _transitions;
+		private readonly bool _allowFaultsOnInitialTransitions;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -87,6 +89,8 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			FaultSet.CheckFaultCount(RuntimeModel.Faults.Length);
 
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
+
+			_allowFaultsOnInitialTransitions = configuration.AllowFaultsOnInitialTransitions;
 		}
 
 		/// <summary>
@@ -116,7 +120,24 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			foreach (var fault in RuntimeModel.NondeterministicFaults)
 				fault.Reset();
 
+			var savedActivations = RuntimeModel.NondeterministicFaults.ToDictionary(fault => fault, fault => fault.Activation);
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation = Activation.Suppressed;
+				}
+			}
+
 			RuntimeModel.ExecuteInitialStep();
+			
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation = savedActivations[fault];
+				}
+			}
 		}
 
 		/// <summary>

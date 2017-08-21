@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System;
+	using System.Collections.Generic;
 	using ExecutableModel;
 	using Modeling;
 	using Utilities;
@@ -42,6 +43,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private readonly LtmcTransitionSetBuilder<TExecutableModel> _transitions;
 
 		private readonly bool _activateIndependentFaultsAtStepBeginning;
+
+		private readonly bool _allowFaultsOnInitialTransitions;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -74,6 +77,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_ltmcChoiceResolver = new LtmcChoiceResolver(useForwardOptimization);
 			ChoiceResolver = _ltmcChoiceResolver;
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
+
+			_allowFaultsOnInitialTransitions = configuration.AllowFaultsOnInitialTransitions;
 
 			_activateIndependentFaultsAtStepBeginning =
 				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
@@ -108,6 +113,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			foreach (var fault in RuntimeModel.NondeterministicFaults)
 				fault.Reset();
 
+			var savedActivations = RuntimeModel.NondeterministicFaults.ToDictionary(fault=>fault,fault=>fault.Activation);
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation=Activation.Suppressed;
+				}
+			}
+
 			if (_activateIndependentFaultsAtStepBeginning)
 			{
 				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
@@ -126,6 +140,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				{
 					if (!(fault is Modeling.TransientFault))
 						fault.TryActivate();
+				}
+			}
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation = savedActivations[fault];
 				}
 			}
 		}
