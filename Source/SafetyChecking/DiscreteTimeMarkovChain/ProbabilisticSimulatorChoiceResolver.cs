@@ -85,6 +85,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_probabilities[_choiceIndex] = GetProbabilityOfPreviousPath() * probability;
 		}
 
+		/// <summary>
+		///	  The probability of the current path
+		/// </summary>
+		internal Probability CalculateProbabilityOfPath()
+		{
+			if (_choiceIndex == -1)
+				return Probability.One;
+			return _probabilities[_choiceIndex];
+		}
+
 		protected override void OnDisposing(bool disposing)
 		{
 		}

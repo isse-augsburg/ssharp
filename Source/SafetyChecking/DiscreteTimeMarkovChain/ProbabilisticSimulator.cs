@@ -51,7 +51,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	{
 		public readonly TExecutableModel RuntimeModel;
 		
-		private ChoiceResolver _choiceResolver;
+		private ProbabilisticSimulatorChoiceResolver _choiceResolver;
 
 		public Formula[] NormalizedFormulas { get; private set; }
 		public string[] NormalizedFormulaLabels { get; private set; }
@@ -63,10 +63,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		private readonly Func<bool>[] _compiledNormalizedFormulas;
 
+		private readonly bool _activateIndependentFaultsAtStepBeginning;
+		private readonly bool _allowFaultsOnInitialTransitions;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public ProbabilisticSimulator(ExecutableModelCreator<TExecutableModel> modelCreator, IEnumerable<Formula> formulas, int? seed=null)
+		public ProbabilisticSimulator(ExecutableModelCreator<TExecutableModel> modelCreator, IEnumerable<Formula> formulas, AnalysisConfiguration configuration)
 		{
 			// TODO: Set Mode WithCustomSeed (each thread must have its own seed) or RealRandom
 			Requires.NotNull(modelCreator, nameof(modelCreator));
@@ -77,6 +80,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			NormalizedFormulaLabels = NormalizedFormulas.Select(stateFormula => stateFormula.Label).ToArray();
 			NormalizedFormulaSatisfactionCount = new int[NormalizedFormulas.Length];
 			_compiledNormalizedFormulas = NormalizedFormulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
+			
+			_allowFaultsOnInitialTransitions = configuration.AllowFaultsOnInitialTransitions;
+
+			_activateIndependentFaultsAtStepBeginning =
+				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
 		}
 		
 		/// <summary>
@@ -84,11 +92,62 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		public void SimulateSteps(int steps)
 		{
-			Reset();
+			ResetTrace();
+
+			ResetStep();
+			SimulateInitialStep();
+			UpdateTraceProbability();
+			AddCurrentSituationToTrace();
 
 			for (var i = 0; i < steps; i++)
 			{
+				ResetStep();
 				SimulateStep();
+				UpdateTraceProbability();
+				AddCurrentSituationToTrace();
+			}
+		}
+
+		private void SimulateInitialStep()
+		{
+			foreach (var fault in RuntimeModel.NondeterministicFaults)
+				fault.Reset();
+
+			var savedActivations = RuntimeModel.NondeterministicFaults.ToDictionary(fault => fault, fault => fault.Activation);
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation = Activation.Suppressed;
+				}
+			}
+
+			if (_activateIndependentFaultsAtStepBeginning)
+			{
+				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.TryActivate();
+				}
+			}
+
+			RuntimeModel.ExecuteInitialStep();
+
+			if (!_activateIndependentFaultsAtStepBeginning)
+			{
+				// force activation of non-transient faults
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					if (!(fault is Modeling.TransientFault))
+						fault.TryActivate();
+				}
+			}
+			if (!_allowFaultsOnInitialTransitions)
+			{
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					fault.Activation = savedActivations[fault];
+				}
 			}
 		}
 
@@ -97,35 +156,58 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		private void SimulateStep()
 		{
-			try
+			foreach (var fault in RuntimeModel.NondeterministicFaults)
+				fault.Reset();
+
+			if (_activateIndependentFaultsAtStepBeginning)
 			{
-				if (_simulationTrace.Count == 0)
+				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
 				{
-					RuntimeModel.ExecuteInitialStep();
+					fault.TryActivate();
 				}
-				else
-				{
-					RuntimeModel.ExecuteStep();
-				}
-				
-				var step = new SimulationTraceStep();
-				AddState(step);
-				AddChoices(step);
-				var evaluatedCompilableFormulas = EvaluateCompilableFormulas();
-				AddEvaluatedCompilableFormulas(step,evaluatedCompilableFormulas);
-				UpdateNormalizedFormulaSatisfactionCount(evaluatedCompilableFormulas);
-				_simulationTrace.Add(step);
 			}
-			catch (ModelException me)
+
+			RuntimeModel.ExecuteStep();
+
+			if (!_activateIndependentFaultsAtStepBeginning)
 			{
-				me.RethrowInnerException();
+				// force activation of non-transient faults
+				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				{
+					if (!(fault is Modeling.TransientFault))
+						fault.TryActivate();
+				}
 			}
+		}
+
+		private void AddCurrentSituationToTrace()
+		{
+			var step = new SimulationTraceStep();
+			AddState(step);
+			AddChoices(step);
+			var evaluatedCompilableFormulas = EvaluateCompilableFormulas();
+			AddEvaluatedCompilableFormulas(step, evaluatedCompilableFormulas);
+			UpdateNormalizedFormulaSatisfactionCount(evaluatedCompilableFormulas);
+			_simulationTrace.Add(step);
+		}
+
+		public void UpdateTraceProbability()
+		{
+			TraceProbability *= _choiceResolver.CalculateProbabilityOfPath();
+		}
+
+		public Probability TraceProbability { get; private set; }
+		
+		private void ResetStep()
+		{
+			_choiceResolver.Clear();
 		}
 
 		/// <summary>
 		///   Resets the model to its initial state.
 		/// </summary>
-		private void Reset()
+		private void ResetTrace()
 		{
 			if (_choiceResolver == null)
 			{
@@ -137,10 +219,12 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				NormalizedFormulaSatisfactionCount[i] = 0;
 			}
-			
+
 			_simulationTrace.Clear();
-			
+
 			RuntimeModel.Reset();
+
+			TraceProbability = Probability.One;
 		}
 
 		/// <summary>
