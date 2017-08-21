@@ -24,11 +24,13 @@ namespace SafetySharp.CaseStudies.SmallModels.Model2
 {
 	using System;
 	using Analysis;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.Modeling;
 	using ModelChecking;
 	using Modeling;
 	using NUnit.Framework;
+	using ISSE.SafetyChecking.Formula;
 
 	public class ExampleComponent : Component
 	{
@@ -106,9 +108,24 @@ namespace SafetySharp.CaseStudies.SmallModels.Model2
 		public void CalculateProbability()
 		{
 			var model = new ExampleModelBase();
-			
+
+			var tc = SafetySharpModelChecker.TraversalConfiguration;
+			tc.WriteGraphvizModels = true;
+			tc.AllowFaultsOnInitialTransitions = false;
+			tc.UseAtomarPropositionsAsStateLabels = true;
+			tc.UseCompactStateStorage = true;
+			tc.RetraversalNormalizations = RetraversalNormalizations.EmbedObserversIntoModel;
+			tc.CpuCount = 1;
+			SafetySharpModelChecker.TraversalConfiguration = tc;
+
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.ModelComponent.Value==3, 50);
 			Console.Write($"Probability of hazard: {result}");
+			
+			var formula2 = new ExecutableStateFormula(() => model.ModelComponent.Value == 3);
+			var loopRequestBug = new ExecutableStateFormula(() => model.ModelComponent.LoopRequestBug);
+			var formula2OnceLoopRequestBug = new BinaryFormula(formula2,BinaryOperator.And, new UnaryFormula(loopRequestBug,UnaryOperator.Once));
+			var result2 = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, formula2OnceLoopRequestBug, 50);
+			Console.Write($"Probability of {formula2OnceLoopRequestBug}: {result2}");
 		}
 
 

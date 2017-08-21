@@ -54,8 +54,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			if (terminateEarlyCondition != null)
 			{
 				_markovChain.CreateStutteringState(Context.StutteringStateIndex);
-				var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
-				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
+				if (!terminateEarlyCondition.IsStateFormula())
+				{
+					configuration.DefaultTraceOutput.WriteLine("Ignoring terminateEarlyCondition (not a StateFormula).");
+				}
+				else
+				{
+					var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
+					Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
+				}
+
 			}
 		}
 
