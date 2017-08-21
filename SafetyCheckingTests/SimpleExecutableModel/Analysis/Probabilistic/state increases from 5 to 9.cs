@@ -56,6 +56,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.CpuCount = 1; //TODO:Remove
 			markovChainGenerator.AddFormulaToCheck(final9Once7Formula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);

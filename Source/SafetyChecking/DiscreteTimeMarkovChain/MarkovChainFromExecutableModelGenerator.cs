@@ -88,10 +88,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		private LabeledTransitionMarkovChain NormalizeLtmc(LabeledTransitionMarkovChain ltmc)
 		{
+			Assert.That(Configuration.CpuCount == 1, "currently no multi threading support here");
 			var retraverseModel = new LtmcRetraverseModel(ltmc, Configuration);
 			retraverseModel.AddFormulas(FormulasToCheck);
 
-			var createModel = new AnalysisModelCreator(() => retraverseModel);
+			var createModel = new AnalysisModelCreator(() => retraverseModel); //TODO: Change for multi thread support
 
 			using (var checker = new LtmcGenerator(createModel, null, retraverseModel.Formulas, Configuration))
 			{
