@@ -30,6 +30,8 @@ namespace Tests.FaultActivation.StateGraph
 	{
 		protected override void Check()
 		{
+			AllowFaultsOnInitialTransitions = true;
+
 			GenerateStateSpace(new C1());
 
 			StateCount.ShouldBe(3);

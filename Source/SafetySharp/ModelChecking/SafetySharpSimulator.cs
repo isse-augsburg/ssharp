@@ -27,6 +27,7 @@ namespace SafetySharp.Analysis
 	using System.Linq;
 	using System.Runtime.InteropServices;
 	using System.Text;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutableModel;
 	using ISSE.SafetyChecking.Formula;
@@ -71,13 +72,15 @@ namespace SafetySharp.Analysis
 		/// </summary>
 		public ModelBase Model => RuntimeModel.Model;
 
+		public static AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="model">The model that should be simulated.</param>
 		/// <param name="formulas">The formulas that can be evaluated on the model.</param>
 		public SafetySharpProbabilisticSimulator(ModelBase model,  params Formula[] formulas)
-			: base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model),formulas)
+			: base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model), formulas, Configuration)
 		{
 		}
 	}

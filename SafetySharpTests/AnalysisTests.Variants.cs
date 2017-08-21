@@ -44,6 +44,8 @@ namespace Tests
 	{
 		public abstract void SetModelCheckerParameter(bool suppressCounterExampleGeneration, TextWriter output);
 
+		public abstract void SetExecutionParameter(bool allowFaultsOnInitialTransitions);
+
 		public abstract InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants);
 
 		public abstract InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula);
@@ -53,24 +55,29 @@ namespace Tests
 
 	public class AnalysisTestsWithLtsMin: AnalysisTestsVariant
 	{
-		private LtsMin modelChecker;
+		private LtsMin _modelChecker;
 
 		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, TextWriter output)
 		{
 			// QualitativeChecker<SafetySharpRuntimeModel>
 			// LtsMin
-			modelChecker = new LtsMin();
-			modelChecker.Output= output;
+			_modelChecker = new LtsMin();
+			_modelChecker.Output= output;
+		}
+
+		public override void SetExecutionParameter(bool allowFaultsOnInitialTransitions)
+		{
+			//TODO
 		}
 
 		public override InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
-			return modelChecker.Check(createModel, formula);
+			return _modelChecker.Check(createModel, formula);
 		}
 
 		public override InvariantAnalysisResult CheckInvariant(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
 		{
-			return modelChecker.CheckInvariant(createModel, formula);
+			return _modelChecker.CheckInvariant(createModel, formula);
 		}
 
 		public override InvariantAnalysisResult[] CheckInvariants(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, params Formula[] invariants)
@@ -83,8 +90,7 @@ namespace Tests
 	{
 		private bool _suppressCounterExampleGeneration;
 		private AnalysisConfiguration _analysisConfiguration;
-
-
+		
 		public override void SetModelCheckerParameter(bool suppressCounterExampleGeneration, TextWriter output)
 		{
 			_suppressCounterExampleGeneration = suppressCounterExampleGeneration;
@@ -92,6 +98,11 @@ namespace Tests
 			_analysisConfiguration.DefaultTraceOutput = output;
 			_analysisConfiguration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			_analysisConfiguration.GenerateCounterExample = !suppressCounterExampleGeneration;
+		}
+
+		public override void SetExecutionParameter(bool allowFaultsOnInitialTransitions)
+		{
+			_analysisConfiguration.AllowFaultsOnInitialTransitions = allowFaultsOnInitialTransitions;
 		}
 
 		public override InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)
@@ -126,6 +137,11 @@ namespace Tests
 			_analysisConfiguration.DefaultTraceOutput = output;
 			_analysisConfiguration.ModelCapacity=ModelCapacityByMemorySize.Small;
 			_analysisConfiguration.GenerateCounterExample = !suppressCounterExampleGeneration;
+		}
+
+		public override void SetExecutionParameter(bool allowFaultsOnInitialTransitions)
+		{
+			_analysisConfiguration.AllowFaultsOnInitialTransitions = allowFaultsOnInitialTransitions;
 		}
 
 		public override InvariantAnalysisResult Check(CoupledExecutableModelCreator<SafetySharpRuntimeModel> createModel, Formula formula)

@@ -54,8 +54,8 @@ namespace Tests.Analysis.Probabilistic
 				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
 			}
 
-			// 1.0-(1.0-0.1)^4 = 0.68618940391
-			probabilityOfInvariantViolation.Is(0.3439, 0.00001).ShouldBe(true);
+			// 1.0-(1.0-0.1)^3 = 0.271
+			probabilityOfInvariantViolation.Is(0.271, 0.00001).ShouldBe(true);
 		}
 
 		private class C : Component

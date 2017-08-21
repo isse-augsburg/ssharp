@@ -46,6 +46,7 @@ namespace Tests
 		protected int StateCount => _result.StateCount;
 		protected long TransitionCount => _result.TransitionCount;
 		protected long ComputedTransitionCount => _result.ComputedTransitionCount;
+		protected bool AllowFaultsOnInitialTransitions { get; set; }
 
 		protected void GenerateStateSpace(params IComponent[] components)
 		{
@@ -56,6 +57,7 @@ namespace Tests
 			configuration.StackCapacity = 10000;
 			configuration.CpuCount = 1;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.AllowFaultsOnInitialTransitions = AllowFaultsOnInitialTransitions;
 
 			var analysisModelCreator=new AnalysisModelCreator(() => new ActivationMinimalExecutedModel<SafetySharpRuntimeModel>(_modelCreator, 0, configuration));
 

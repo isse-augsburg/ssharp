@@ -22,7 +22,9 @@
 
 namespace Tests.FaultActivation.Formulas
 {
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.Modeling;
+	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 
@@ -31,9 +33,16 @@ namespace Tests.FaultActivation.Formulas
 		protected override void Check()
 		{
 			var c = new C();
+
+			AllowFaultsOnInitialTransitions = true;
 			CheckInvariant(!c.F1.IsActivated, c).ShouldBe(false);
 			CheckInvariant(!c.F2.IsActivated, c).ShouldBe(false);
 			CheckInvariant(!(c.F1.IsActivated && c.F2.IsActivated), c).ShouldBe(false);
+
+			AllowFaultsOnInitialTransitions = false;
+			CheckInvariant(!c.F1.IsActivated, c).ShouldBe(true);
+			CheckInvariant(!c.F2.IsActivated, c).ShouldBe(true);
+			CheckInvariant(!(c.F1.IsActivated && c.F2.IsActivated), c).ShouldBe(true);
 		}
 
 		private class C : Component

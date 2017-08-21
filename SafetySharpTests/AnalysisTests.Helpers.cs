@@ -51,6 +51,8 @@ namespace Tests
 		protected IFaultSetHeuristic[] Heuristics { get; set; }
 		protected InvariantAnalysisResult Result { get; private set; }
 
+		protected bool AllowFaultsOnInitialTransitions { get; set; }
+
 		protected void SimulateCounterExample(ExecutableCounterExample<SafetySharpRuntimeModel> counterExample, Action<SafetySharpSimulator> action)
 		{
 			// Test directly
@@ -70,6 +72,7 @@ namespace Tests
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
 			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, Output.TextWriterAdapter());
+			analysisTestsVariant.SetExecutionParameter(AllowFaultsOnInitialTransitions);
 
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components), invariant);
 
@@ -93,9 +96,10 @@ namespace Tests
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(component), invariants);
-
-			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, Output.TextWriterAdapter());
 			
+			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, Output.TextWriterAdapter());
+			analysisTestsVariant.SetExecutionParameter(AllowFaultsOnInitialTransitions);
+
 			var results = analysisTestsVariant.CheckInvariants(modelCreator, invariants);
 			CounterExamples = results.Select(result => result.ExecutableCounterExample(modelCreator)).ToArray();
 			return results.Select(result => result.FormulaHolds).ToArray();
@@ -106,8 +110,9 @@ namespace Tests
 			var analysisTestsVariant = (AnalysisTestsVariant)Arguments[0];
 
 			var modelCreator = SafetySharpRuntimeModel.CreateExecutedModelCreator(TestModel.InitializeModel(components),formula);
-
+			
 			analysisTestsVariant.SetModelCheckerParameter(SuppressCounterExampleGeneration, Output.TextWriterAdapter());
+			analysisTestsVariant.SetExecutionParameter(AllowFaultsOnInitialTransitions);
 
 			var result = analysisTestsVariant.Check(modelCreator,formula);
 

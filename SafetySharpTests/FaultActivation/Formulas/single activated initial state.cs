@@ -31,7 +31,11 @@ namespace Tests.FaultActivation.Formulas
 		protected override void Check()
 		{
 			var c = new C();
+			AllowFaultsOnInitialTransitions = true;
 			CheckInvariant(!c.F.IsActivated, c).ShouldBe(false);
+
+			AllowFaultsOnInitialTransitions = false;
+			CheckInvariant(!c.F.IsActivated, c).ShouldBe(true);
 		}
 
 		private class C : Component
