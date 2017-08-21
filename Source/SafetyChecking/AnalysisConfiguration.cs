@@ -101,7 +101,7 @@ namespace ISSE.SafetyChecking
 		/// </summary>
 		public static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
-			AllowFaultsOnInitialTransitions = true,
+			AllowFaultsOnInitialTransitions = false,
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,
 			DefaultTraceOutput = Console.Out,

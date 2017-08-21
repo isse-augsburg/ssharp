@@ -38,7 +38,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		}
 
 		[Fact]
-		protected void Check()
+		protected void CheckWithFaultsPossibleOnInitialTransition()
 		{
 			var m = new Model();
 			Probability probabilityOfInvariantViolation;
@@ -47,6 +47,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.AllowFaultsOnInitialTransitions = true;
 			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			dtmc.ExportToGv(Output.TextWriterAdapter());
@@ -59,6 +60,31 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			// 1.0-(1.0-0.1)^11 = 0.68618940391
 			probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);
+		}
+
+		[Fact]
+		protected void CheckWithFaultsImpossibleOnInitialTransition()
+		{
+			var m = new Model();
+			Probability probabilityOfInvariantViolation;
+
+			var finallyInvariantViolated = new UnaryFormula(Model.InvariantViolated, UnaryOperator.Finally);
+
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
+			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.AllowFaultsOnInitialTransitions = false;
+			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			dtmc.ExportToGv(Output.TextWriterAdapter());
+			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
+			}
+
+			// 1.0-(1.0-0.1)^10 = 0.6513215599
+			probabilityOfInvariantViolation.Is(0.6513215599, 0.00001).ShouldBe(true);
 		}
 
 		private class Model : SimpleModelBase

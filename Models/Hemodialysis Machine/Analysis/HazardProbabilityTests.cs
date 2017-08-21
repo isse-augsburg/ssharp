@@ -28,10 +28,13 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 {
+	using System.Globalization;
 	using System.IO;
 	using FluentAssertions;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.Modeling;
+	using ModelChecking;
 	using Modeling;
 	using SafetySharp.Modeling;
 	using NUnit.Framework;
@@ -61,14 +64,46 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = _prob1Eneg5;
 		}
 
+		public HazardProbabilityTests()
+		{
+			var tc = SafetySharpModelChecker.TraversalConfiguration;
+			tc.AllowFaultsOnInitialTransitions = false;
+			SafetySharpModelChecker.TraversalConfiguration = tc;
+		}
+
 		[Test]
 		public void IncomingBloodIsContaminated()
 		{
 			var model = new Model();
 			SetProbabilities(model);
-
+			
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.IncomingBloodWasNotOk);
 			Console.Write($"Probability of hazard: {result}");
+		}
+
+		[Test]
+		public void IncomingBloodIsContaminated_FaultTree()
+		{
+			var model = new Model();
+			SetProbabilities(model);
+			var analysis = new SafetySharpSafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };
+
+			var result = analysis.ComputeMinimalCriticalSets(model, model.IncomingBloodWasNotOk);
+			var steps = 6;
+			var reaProbability = 0.0;
+			foreach (var mcs in result.MinimalCriticalSets)
+			{
+				var mcsProbability = 1.0;
+				foreach (var fault in mcs)
+				{
+					var pFaultInOneStep = fault.ProbabilityOfOccurrence.Value.Value;
+					var pFault = 1.0 - Math.Pow(1.0 - pFaultInOneStep, steps);
+					mcsProbability *= pFault;
+				}
+				reaProbability += mcsProbability;
+			}
+
+			Console.WriteLine($"Result with fault tree rare event approximation: {reaProbability.ToString(CultureInfo.InvariantCulture)}");
 		}
 
 		[Test]
@@ -79,6 +114,32 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.BloodNotCleanedAndDialyzingFinished);
 			Console.Write($"Probability of hazard: {result}");
+		}
+
+
+		[Test]
+		public void DialysisFinishedAndBloodNotCleaned_FaultTree()
+		{
+			var model = new Model();
+			SetProbabilities(model);
+			var analysis = new SafetySharpSafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };
+
+			var result = analysis.ComputeMinimalCriticalSets(model, model.BloodNotCleanedAndDialyzingFinished);
+			var steps = 6;
+			var reaProbability = 0.0;
+			foreach (var mcs in result.MinimalCriticalSets)
+			{
+				var mcsProbability = 1.0;
+				foreach (var fault in mcs)
+				{
+					var pFaultInOneStep = fault.ProbabilityOfOccurrence.Value.Value;
+					var pFault = 1.0 - Math.Pow(1.0 - pFaultInOneStep, steps);
+					mcsProbability *= pFault;
+				}
+				reaProbability += mcsProbability;
+			}
+
+			Console.WriteLine($"Result with fault tree rare event approximation: {reaProbability.ToString(CultureInfo.InvariantCulture)}");
 		}
 
 		[Test]
