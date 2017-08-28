@@ -38,7 +38,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             { Ictss1, Ictss2, Ictss3, Ictss4, Ictss5, Ictss6, Ictss7 };
 
         private static readonly Func<ModelBuilder, ModelBuilder>[] _performanceEvaluationConfigurations =
-            { FewAgentsHighRedundancy , ManyAgentsLowRedundancy/*, ManyAgentsLowRedundancy*/ };
+            { FewAgentsHighRedundancy , ManyAgentsLowRedundancy, ManyAgentsHighRedundancy, MediumSizePerformanceMeasurementModel };
 
         public static Model DefaultInstance<T>(AnalysisMode mode = AnalysisMode.AllFaults)
             where T : IController
@@ -298,14 +298,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
         public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
         {
-            // 35 robots 15 carts 15 capabilities/task
-            return builder;
+            const int capCount = 20;
+            const int sysSize = 20;
+            const int ioCount = 15;
+            const int numberOfCarts = 15;
+            const int numWorkpieces = 5;
+            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
         }
 
         public static ModelBuilder MediumSizePerformanceMeasurementModel(this ModelBuilder builder)
         {
-            // 15 agents 6 capabilities/task
-            return builder;
+            const int capCount = 5;
+            const int sysSize = 10;
+            const int ioCount = 10;
+            const int numberOfCarts = 3;
+            const int numWorkpieces = 5;
+            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
         }
 
         public static ModelBuilder Ictss1(this ModelBuilder builder)
