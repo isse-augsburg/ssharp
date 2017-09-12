@@ -38,7 +38,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	public class OrderAnalysis<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		// Note: The faultOrderModifier reserves the first 4 bytes of the state vector
-		private readonly FaultOptimizationBackend<TExecutableModel> _backend = new FaultOptimizationBackend<TExecutableModel>(stateHeaderBytes: 4);
+		private readonly FaultOptimizationBackend<TExecutableModel> _backend = new FaultOptimizationBackend<TExecutableModel>();
 		private readonly SafetyAnalysisResults<TExecutableModel> _results;
 
 		/// <summary>

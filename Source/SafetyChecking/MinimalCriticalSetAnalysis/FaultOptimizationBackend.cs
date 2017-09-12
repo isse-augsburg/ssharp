@@ -38,16 +38,13 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 	/// </summary>
 	internal class FaultOptimizationBackend<TExecutableModel> : AnalysisBackend<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		private readonly int _stateHeaderBytes;
 		private InvariantChecker _invariantChecker;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="stateHeaderBytes">The number of bytes to reserve in the state vector for analysis purposes.</param>
-		public FaultOptimizationBackend(int stateHeaderBytes = 0)
+		public FaultOptimizationBackend()
 		{
-			_stateHeaderBytes = stateHeaderBytes;
 		}
 
 		/// <summary>
@@ -58,7 +55,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		protected override void InitializeModel(AnalysisConfiguration configuration, Formula hazard)
 		{
 			Func<AnalysisModel> createAnalysisModelFunc = () =>
-				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, _stateHeaderBytes, configuration);
+				new ActivationMinimalExecutedModel<TExecutableModel>(RuntimeModelCreator, 0, configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 			var invariant = new UnaryFormula(hazard,UnaryOperator.Not);
 
@@ -88,7 +85,6 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		internal override InvariantAnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
-			Assert.That(_stateHeaderBytes==4, "4 bytes must be reserved for the FaultOrderModifier");
 			ChangeFaultActivations(minimalCriticalFaultSet, activation);
 
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Clear();
