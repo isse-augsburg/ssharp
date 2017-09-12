@@ -26,6 +26,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 	using System.Collections.Generic;
 	using System.Runtime.CompilerServices;
 	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using Utilities;
 	using ExecutableModel;
 
@@ -35,9 +36,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 	internal sealed unsafe class LtmdpCachedLabeledStates<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly Func<bool>[] _formulas;
-		private readonly int _stateVectorSize;
-		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
-		private readonly byte* _targetStateMemory;
 
 		private readonly MemoryBuffer _transitionsWithContinuationIdBuffer = new MemoryBuffer();
 		private readonly LtmdpTransition* _transitionsWithContinuationIdMemory;
@@ -46,21 +44,26 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		private readonly long _capacity;
 
 		private LtmdpStepGraph LtmdpStepGraph { get; }
+		
+		/// <summary>
+		///   A storage where temporal states can be saved to.
+		/// </summary>
+		private readonly TemporalStateStorage _temporalStateStorage;
 
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model the successors are computed for.</param>
+		/// <param name="temporalStateStorage">A storage where temporal states can be saved to.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public LtmdpCachedLabeledStates(ExecutableModel<TExecutableModel> model, long capacity, LtmdpStepGraph ltmdpStepGraph, params Func<bool>[] formulas)
+		public LtmdpCachedLabeledStates(TemporalStateStorage temporalStateStorage, long capacity, LtmdpStepGraph ltmdpStepGraph, params Func<bool>[] formulas)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(temporalStateStorage, nameof(temporalStateStorage));
 			Requires.NotNull(formulas, nameof(formulas));
 			Requires.That(formulas.Length < 32, "At most 32 formulas are supported.");
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
 
-			_stateVectorSize = model.StateVectorSize;
+			_temporalStateStorage = temporalStateStorage;
 			_formulas = formulas;
 			_capacity = capacity;
 
@@ -68,9 +71,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 
 			_transitionsWithContinuationIdBuffer.Resize(capacity * sizeof(LtmdpTransition), zeroMemory: false);
 			_transitionsWithContinuationIdMemory = (LtmdpTransition*)_transitionsWithContinuationIdBuffer.Pointer;
-
-			_targetStateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
-			_targetStateMemory = _targetStateBuffer.Pointer;
 		}
 
 		/// <summary>
@@ -90,7 +90,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 			
 			// 2. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    _including_ any changes resulting from notifications of fault activations
-			var successorState = _targetStateMemory + _stateVectorSize * _transitionsWithContinuationIdCount;
+			var successorState = _temporalStateStorage.GetFreeTemporalSpaceAddress();
 			model.Serialize(successorState);
 
 			// 3. Store the transition
@@ -126,7 +126,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 				return;
 
 			_transitionsWithContinuationIdBuffer.SafeDispose();
-			_targetStateBuffer.SafeDispose();
 		}
 
 

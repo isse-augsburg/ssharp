@@ -114,6 +114,12 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		private int _stateVectorSize;
 
 		/// <summary>
+		///   The length in bytes of the state vector of the analysis model with the extra bytes
+		///   required for the traversal.
+		/// </summary>
+		public override int StateVectorSize => _stateVectorSize;
+
+		/// <summary>
 		///   The number of saved states (internal variable)
 		/// </summary>
 		private int _savedStates = 0;

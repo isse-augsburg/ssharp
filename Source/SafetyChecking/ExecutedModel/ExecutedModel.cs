@@ -25,6 +25,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	using System;
 	using ExecutableModel;
 	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using Modeling;
 	using Utilities;
 
@@ -37,16 +38,20 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
+		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateHeaderBytes">
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
-		internal ExecutedModel(CoupledExecutableModelCreator<TExecutableModel> createModel, int stateHeaderBytes)
+		internal ExecutedModel(CoupledExecutableModelCreator<TExecutableModel> createModel, int stateHeaderBytes, AnalysisConfiguration configuration)
 		{
 			Requires.NotNull(createModel, nameof(createModel));
 
 			RuntimeModelCreator = createModel;
 			RuntimeModel = createModel.Create(stateHeaderBytes);
+			TemporalStateStorage = new TemporalStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
 		}
+
+		protected readonly TemporalStateStorage TemporalStateStorage;
 
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
@@ -67,7 +72,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <summary>
 		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
-		public sealed override int StateVectorSize => RuntimeModel.StateVectorSize;
+		public sealed override int ModelStateVectorSize => RuntimeModel.StateVectorSize;
 		
 		/// <summary>
 		///   Updates the activation states of the worker's faults.
@@ -88,6 +93,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 				return;
 
 			ChoiceResolver.SafeDispose();
+			TemporalStateStorage.SafeDispose();
 			RuntimeModel.SafeDispose();
 		}
 
@@ -175,14 +181,16 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 			return RuntimeModel.CreateCounterExample(RuntimeModelCreator, path, endsWithException);
 		}
-
+		
 		/// <summary>
 		///   Resets the model to its initial state.
 		/// </summary>
-		public sealed override void Reset()
+		/// <param name="traversalModifierStateVectorSize">Extra bytes in state vector for traversal parameters.</param>
+		public sealed override void Reset(int traversalModifierStateVectorSize)
 		{
 			ChoiceResolver.Clear();
 			RuntimeModel.Reset();
+			TemporalStateStorage.Reset(traversalModifierStateVectorSize);
 		}
 	}
 }

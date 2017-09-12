@@ -46,6 +46,12 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		///   Reserve a state index in StateStorage. Must not be called after AddState has been called.
 		/// </summary>
 		internal abstract int ReserveStateIndex();
+		
+		/// <summary>
+		///   The length in bytes of the state vector of the analysis model with the extra bytes
+		///   required for the traversal.
+		/// </summary>
+		public abstract int StateVectorSize { get; }
 
 		/// <summary>
 		///   Adds the <paramref name="state" /> to the cache if it is not already known. Returns <c>true</c> to indicate that the state

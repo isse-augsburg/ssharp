@@ -54,13 +54,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
 		internal LtmdpExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, AnalysisConfiguration configuration)
-			: base(runtimeModelCreator,stateHeaderBytes)
+			: base(runtimeModelCreator,stateHeaderBytes, configuration)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 
 			_stepGraph = new LtmdpStepGraph();
 
-			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(RuntimeModel, configuration.SuccessorCapacity, _stepGraph, formulas);
+			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(TemporalStateStorage, configuration.SuccessorCapacity, _stepGraph, formulas);
 			
 			bool useForwardOptimization;
 			switch (configuration.MomentOfIndependentFaultActivation)
@@ -198,6 +198,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		protected override void BeginExecution()
 		{
 			_cachedLabeledStates.Clear();
+			TemporalStateStorage.Clear();
 			_stepGraph.Clear();
 		}
 

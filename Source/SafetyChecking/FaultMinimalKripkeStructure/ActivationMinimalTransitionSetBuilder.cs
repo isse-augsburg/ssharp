@@ -27,6 +27,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 	using System.Runtime.CompilerServices;
 	using ExecutableModel;
 	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using Utilities;
 
 	/// <summary>
@@ -45,8 +46,6 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		private readonly MemoryBuffer _lookupBuffer = new MemoryBuffer();
 		private readonly int _stateVectorSize;
 		private readonly List<uint> _successors;
-		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
-		private readonly byte* _targetStateMemory;
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly CandidateTransition* _transitions;
 		private int _computedCount;
@@ -54,26 +53,29 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		private int _nextFaultIndex;
 
 		/// <summary>
+		///   A storage where temporal states can be saved to.
+		/// </summary>
+		private readonly TemporalStateStorage _temporalStateStorage;
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="model">The model the successors are computed for.</param>
+		/// <param name="temporalStateStorage">A storage where temporal states can be saved to.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public ActivationMinimalTransitionSetBuilder(ExecutableModel<TExecutableModel> model, long capacity, params Func<bool>[] formulas)
+		public ActivationMinimalTransitionSetBuilder(TemporalStateStorage temporalStateStorage, long capacity, params Func<bool>[] formulas)
 		{
-			Requires.NotNull(model, nameof(model));
+			Requires.NotNull(temporalStateStorage, nameof(temporalStateStorage));
 			Requires.NotNull(formulas, nameof(formulas));
 			Requires.That(formulas.Length < 32, "At most 32 formulas are supported.");
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
 
-			_stateVectorSize = model.StateVectorSize;
+			_temporalStateStorage = temporalStateStorage;
+			_stateVectorSize = temporalStateStorage.AnalysisModelStateVectorSize;
 			_formulas = formulas;
 
 			_transitionBuffer.Resize(capacity * sizeof(CandidateTransition), zeroMemory: false);
 			_transitions = (CandidateTransition*)_transitionBuffer.Pointer;
-
-			_targetStateBuffer.Resize(capacity * model.StateVectorSize, zeroMemory: true);
-			_targetStateMemory = _targetStateBuffer.Pointer;
 
 			_lookupBuffer.Resize(capacity * sizeof(int), zeroMemory: false);
 			_faultsBuffer.Resize(capacity * sizeof(FaultSetInfo), zeroMemory: false);
@@ -103,7 +105,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 
 			// 1. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    modulo any changes resulting from notifications of fault activations
-			var successorState = _targetStateMemory + _stateVectorSize * _count;
+			var successorState = _temporalStateStorage.GetFreeTemporalSpaceAddress();
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
 			model.Serialize(successorState);
 
@@ -289,7 +291,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 				return;
 
 			_transitionBuffer.SafeDispose();
-			_targetStateBuffer.SafeDispose();
+			_hashedStateBuffer.SafeDispose();
 			_faultsBuffer.SafeDispose();
 			_lookupBuffer.SafeDispose();
 		}

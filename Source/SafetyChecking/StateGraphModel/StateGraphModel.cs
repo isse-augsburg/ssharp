@@ -48,13 +48,13 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			Requires.NotNull(stateGraph, nameof(stateGraph));
 
 			_stateGraph = stateGraph;
-			_transitions = new StateGraphTransitionSetBuilder(StateVectorSize, successorStateCapacity);
+			_transitions = new StateGraphTransitionSetBuilder(ModelStateVectorSize, successorStateCapacity);
 		}
 
 		/// <summary>
 		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
-		public override int StateVectorSize => sizeof(int);
+		public override int ModelStateVectorSize => sizeof(int);
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
@@ -116,7 +116,8 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <summary>
 		///   Resets the model to its initial state.
 		/// </summary>
-		public override void Reset()
+		/// <param name="traversalModifierStateVectorSize">Extra bytes in state vector for traversal parameters.</param>
+		public sealed override void Reset(int traversalModifierStateVectorSize)
 		{
 			// Nothing to do here
 		}
@@ -135,7 +136,8 @@ namespace ISSE.SafetyChecking.StateGraphModel
 			{
 				var graphState = BitConverter.ToInt32(state, 0);
 				var modelState = _stateGraph.GetState(graphState);
-				var arrayState = new byte[_stateGraph.RuntimeModel.StateVectorSize];
+				var stateVectorSize = _stateGraph.StateVectorSize;
+				var arrayState = new byte[stateVectorSize];
 				Marshal.Copy(new IntPtr(modelState), arrayState, 0, arrayState.Length);
 
 				return arrayState;

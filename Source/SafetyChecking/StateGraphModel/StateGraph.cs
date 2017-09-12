@@ -96,6 +96,12 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		public int TransitionSize { get; }
 
 		/// <summary>
+		///   The length in bytes of the state vector of the analysis model with the extra bytes
+		///   required for the traversal.
+		/// </summary>
+		public int StateVectorSize => _stateStorage.StateVectorSize;
+
+		/// <summary>
 		///   Gets the number of states contained in the state graph.
 		/// </summary>
 		public int StateCount => _stateCount;

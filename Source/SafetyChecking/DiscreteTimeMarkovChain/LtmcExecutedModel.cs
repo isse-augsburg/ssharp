@@ -55,10 +55,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
 		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, AnalysisConfiguration configuration)
-			: base(runtimeModelCreator, stateHeaderBytes)
+			: base(runtimeModelCreator, stateHeaderBytes, configuration)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
-			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(RuntimeModel, configuration.SuccessorCapacity, formulas);
+			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(TemporalStateStorage, configuration.SuccessorCapacity, formulas);
 
 			bool useForwardOptimization;
 			switch (configuration.MomentOfIndependentFaultActivation)
@@ -206,6 +206,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		protected override void BeginExecution()
 		{
 			_transitions.Clear();
+			TemporalStateStorage.Clear();
 		}
 
 		/// <summary>

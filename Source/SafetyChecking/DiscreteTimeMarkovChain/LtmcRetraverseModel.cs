@@ -231,7 +231,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 
 		private const int InternalStateVectorSize = sizeof(int) + sizeof(int); //state is a tuple of (origin-state,enrichments)
-		public override int StateVectorSize { get; } = InternalStateVectorSize;
+		public override int ModelStateVectorSize { get; } = InternalStateVectorSize;
 		public override int TransitionSize { get; } = LabeledTransitionMarkovChain.TransitionSize;
 		public override Formula[] Formulas => _formulas;
 
@@ -292,7 +292,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return ConvertTransitions(currentEnrichment,enumerator);
 		}
 
-		public override void Reset()
+		/// <summary>
+		///   Resets the model to its initial state.
+		/// </summary>
+		/// <param name="traversalModifierStateVectorSize">Extra bytes in state vector for traversal parameters.</param>
+		public sealed override void Reset(int traversalModifierStateVectorSize)
 		{
 			_transitions.Clear();
 		}

@@ -64,11 +64,11 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
 		/// </param>
 		internal ActivationMinimalExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, Func<bool>[] formulas, AnalysisConfiguration configuration)
-			: base(runtimeModelCreator, stateHeaderBytes)
+			: base(runtimeModelCreator, stateHeaderBytes, configuration)
 		{
 			formulas = formulas ?? RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel,formula)).ToArray();
 
-			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(RuntimeModel, configuration.SuccessorCapacity, formulas);
+			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(TemporalStateStorage, configuration.SuccessorCapacity, formulas);
 			_stateConstraints = RuntimeModel.StateConstraints;
 
 			bool useForwardOptimization;
@@ -173,6 +173,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		protected override void BeginExecution()
 		{
 			_transitions.Clear();
+			TemporalStateStorage.Clear();
 		}
 
 		/// <summary>

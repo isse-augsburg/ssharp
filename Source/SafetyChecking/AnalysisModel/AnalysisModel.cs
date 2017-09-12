@@ -33,7 +33,7 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		/// <summary>
 		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
-		public abstract int StateVectorSize { get; }
+		public abstract int ModelStateVectorSize { get; }
 
 		/// <summary>
 		///   Gets the size of a single transition of the model in bytes.
@@ -59,7 +59,8 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		/// <summary>
 		///   Resets the model to its initial state.
 		/// </summary>
-		public abstract void Reset();
+		/// <param name="traversalModifierStateVectorSize">Extra bytes in state vector for traversal parameters.</param>
+		public abstract void Reset(int traversalModifierStateVectorSize);
 
 		/// <summary>
 		///   Creates a counter example from the <paramref name="path" />.

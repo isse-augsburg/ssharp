@@ -84,7 +84,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				transitionSize = firstModel.TransitionSize;
 			}
 
-			var modelCapacity = configuration.ModelCapacity.DeriveModelByteSize(firstModel.StateVectorSize, transitionSize);
+			var modelCapacity = configuration.ModelCapacity.DeriveModelByteSize(firstModel.ModelStateVectorSize, transitionSize);
 			Context.ModelCapacity = modelCapacity;
 			if (configuration.UseCompactStateStorage)
 				_states = new CompactStateStorage(modelCapacity.SizeOfState, modelCapacity.NumberOfStates);
@@ -139,7 +139,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			if (!Context.Configuration.ProgressReportsOnly)
 			{
 				Context.Output?.WriteLine($"Traverse model using {AnalyzedModels.Count()} CPU cores.");
-				Context.Output?.WriteLine($"State vector has {AnalyzedModels.First().StateVectorSize} bytes.");
+				Context.Output?.WriteLine($"State vector has {AnalyzedModels.First().ModelStateVectorSize} bytes.");
 			}
 
 			try
@@ -195,7 +195,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			foreach (var worker in _workers)
 				worker.Reset();
 
-			_states.Clear(_workers[0].ExtraBytesInStateVectorForTraversal);
+			_states.Clear(_workers[0].TraversalModifierStateVectorSize);
 			_loadBalancer.Reset();
 		}
 

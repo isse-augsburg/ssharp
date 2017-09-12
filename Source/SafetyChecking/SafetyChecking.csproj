@@ -49,6 +49,7 @@
     <Compile Include="AnalysisConfiguration.cs" />
     <Compile Include="AnalysisModelTraverser\CompactStateStorage.cs" />
     <Compile Include="AnalysisModelTraverser\SparseStateStorage.cs" />
+    <Compile Include="AnalysisModelTraverser\TemporalStateStorage.cs" />
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
     <Compile Include="AnalysisModel\CounterExample.cs" />
     <Compile Include="AnalysisModel\TransitionFlags.cs" />
