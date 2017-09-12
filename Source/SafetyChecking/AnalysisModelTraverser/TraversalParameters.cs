@@ -48,7 +48,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		///   instances.
 		/// </summary>
 		internal readonly List<Func<ITransitionModifier>> TransitionModifiers = new List<Func<ITransitionModifier>>();
-
+		
 		/// <summary>
 		///   Factory methods for <see cref="IStateAction" /> instances that should be executed by all <see cref="Worker" />
 		///   instances.

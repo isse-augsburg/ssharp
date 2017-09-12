@@ -58,7 +58,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   Clears all stored states.
 		/// </summary>
-		internal abstract void Clear();
+		internal abstract void Clear(int traversalModifierStateVectorSize);
 
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.

@@ -32,6 +32,10 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 	internal sealed unsafe class FaultSuppressionModifier : ITransitionModifier
 	{
 		private readonly FaultSet _suppressedFaults;
+		
+		public int ExtraBytesInStateVector { get; } = 0;
+
+		public int ExtraBytesOffset { get; set; }
 
 		/// <summary>
 		///   Initializes a new instance.

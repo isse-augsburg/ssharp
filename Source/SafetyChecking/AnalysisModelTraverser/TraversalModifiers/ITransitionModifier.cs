@@ -31,6 +31,16 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	internal unsafe interface ITransitionModifier
 	{
 		/// <summary>
+		///   Extra bytes in state vector for traversal parameters.
+		/// </summary>
+		int ExtraBytesInStateVector { get; }
+
+		/// <summary>
+		///   Sets the offset in the state vector for the reserved bytes.
+		/// </summary>
+		int ExtraBytesOffset { set; }
+
+		/// <summary>
 		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
 		///   added; transitions can be removed by setting their <see cref="CandidateTransition.IsValid" /> flag to <c>false</c>.
 		///   During subsequent traversal steps, only valid transitions and target states reached by at least one valid transition

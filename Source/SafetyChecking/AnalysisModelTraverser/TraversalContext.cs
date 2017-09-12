@@ -83,7 +83,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		public bool FormulaIsValid;
 
 		/// <summary>
-		///   Indicates whether a counter examle is currently being generated.
+		///   Indicates whether a counter example is currently being generated.
 		/// </summary>
 		public int GeneratingCounterExample;
 

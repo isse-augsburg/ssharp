@@ -192,11 +192,11 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		{
 			Context.Reset();
 
-			_states.Clear();
-			_loadBalancer.Reset();
-
 			foreach (var worker in _workers)
 				worker.Reset();
+
+			_states.Clear(_workers[0].ExtraBytesInStateVectorForTraversal);
+			_loadBalancer.Reset();
 		}
 
 		/// <summary>

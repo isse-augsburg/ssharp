@@ -88,11 +88,11 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		internal override InvariantAnalysisResult CheckOrder(Fault firstFault, Fault secondFault, FaultSet minimalCriticalFaultSet,
 													Activation activation, bool forceSimultaneous)
 		{
-			Assert.That(_stateHeaderBytes==4, "The first 4 bytes must be reserved for the FaultOrderModifier");
+			Assert.That(_stateHeaderBytes==4, "4 bytes must be reserved for the FaultOrderModifier");
 			ChangeFaultActivations(minimalCriticalFaultSet, activation);
 
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Clear();
-			// Note: The faultOrderModifier reserves the first 4 bytes of the state vector
+
 			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Add(
 				() => new FaultOrderModifier(firstFault, secondFault, forceSimultaneous));
 

@@ -65,6 +65,11 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		}
 
 		/// <summary>
+		///   Extra bytes in state vector for traversal parameters.
+		/// </summary>
+		internal int ExtraBytesInStateVectorForTraversal { get; private set; } = 0;
+
+		/// <summary>
 		///   Gets the model that is analyzed by the worker.
 		/// </summary>
 		public AnalysisModel Model { get; }
@@ -143,6 +148,15 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			_batchedTransitionActions = _context.TraversalParameters.BatchedTransitionActions.Select(a => a.Invoke()).ToArray();
 			_transitionModifiers = _context.TraversalParameters.TransitionModifiers.Select(a => a.Invoke()).ToArray();
 			_stateActions = _context.TraversalParameters.StateActions.Select(a => a.Invoke()).ToArray();
+
+			var currentOffsetInStateVectorForExtraBytes = Model.StateVectorSize;
+			ExtraBytesInStateVectorForTraversal = 0;
+			foreach (var transitionModifier in _transitionModifiers)
+			{
+				transitionModifier.ExtraBytesOffset = currentOffsetInStateVectorForExtraBytes;
+				ExtraBytesInStateVectorForTraversal += transitionModifier.ExtraBytesInStateVector;
+				currentOffsetInStateVectorForExtraBytes += transitionModifier.ExtraBytesInStateVector;
+			}
 		}
 
 		/// <summary>

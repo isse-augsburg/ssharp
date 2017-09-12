@@ -83,13 +83,24 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   The pointer to the underlying state memory.
 		/// </summary>
-		private readonly byte* _stateMemory;
+		private byte* _stateMemory;
 
 		/// <summary>
-		///   The length in bytes of a state vector.
+		///   The length in bytes of a state vector required for the analysis model.
 		/// </summary>
-		private readonly int _stateVectorSize;
-		
+		private readonly int _analysisModelStateVectorSize;
+
+		/// <summary>
+		///   Extra bytes in state vector for traversal parameters.
+		/// </summary>
+		private int _traversalModifierStateVectorSize;
+
+		/// <summary>
+		///   The length in bytes of the state vector of the analysis model with the extra bytes
+		///   required for the traversal.
+		/// </summary>
+		private int _stateVectorSize;
+
 		/// <summary>
 		///   The number of saved states (internal variable)
 		/// </summary>
@@ -99,23 +110,21 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		///   The number of saved states
 		/// </summary>
 		public int SavedStates => _savedStates;
-		
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="stateVectorSize">The size of the state vector in bytes.</param>
+		/// <param name="analysisModelStateVectorSize">The size of the state vector required for the analysis model in bytes.</param>
 		/// <param name="capacity">The capacity of the cache, i.e., the number of states that can be stored in the cache.</param>
-		/// <param name="compact">The returned indexes should be compact. For every stat.</param>
-		public SparseStateStorage(int stateVectorSize, long capacity)
+		public SparseStateStorage(int analysisModelStateVectorSize, long capacity)
 		{
 			Requires.InRange(capacity, nameof(capacity), 1024, Int32.MaxValue);
 
-			_stateVectorSize = stateVectorSize;
+			_analysisModelStateVectorSize = analysisModelStateVectorSize;
 			_totalCapacity = capacity;
 			_cachedStatesCapacity = capacity - BucketsPerCacheLine; //offset returned by this.Add may be up to BucketsPerCacheLine-1 positions bigger than _cachedStatesCapacity
 
-			_stateBuffer.Resize(_totalCapacity * _stateVectorSize, zeroMemory: false);
-			_stateMemory = _stateBuffer.Pointer;
+			ResizeStateBuffer();
 
 			// We allocate enough space so that we can align the returned pointer such that index 0 is the start of a cache line
 			_hashBuffer.Resize(_totalCapacity * sizeof(int) + CacheLineSize, zeroMemory: false);
@@ -219,11 +228,20 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				"Failed to find an empty hash table slot within a reasonable amount of time. Try increasing the state capacity.");
 		}
 
+		internal void ResizeStateBuffer()
+		{
+			_stateVectorSize = _analysisModelStateVectorSize + _traversalModifierStateVectorSize;
+			_stateBuffer.Resize(_totalCapacity * _stateVectorSize, zeroMemory: false);
+			_stateMemory = _stateBuffer.Pointer;
+		}
+
 		/// <summary>
 		///   Clears all stored states.
 		/// </summary>
-		internal override void Clear()
+		internal override void Clear(int traversalModifierStateVectorSize)
 		{
+			_traversalModifierStateVectorSize = traversalModifierStateVectorSize;
+			ResizeStateBuffer();
 			_hashBuffer.Clear();
 		}
 

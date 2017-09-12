@@ -37,6 +37,10 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		private readonly Fault _firstFault;
 		private readonly bool _forceSimultaneous;
 		private readonly Fault _secondFault;
+		
+		public int ExtraBytesInStateVector { get; } = sizeof(State);
+
+		public int ExtraBytesOffset { get; set; }
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -68,7 +72,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		{
 			// The fault order state is encoded into the first four bytes of the state vector (must be four bytes as required by 
 			// RuntimeModel's state header field)
-			var state = isInitial ? State.NeitherFaultActivated : *(State*)sourceState;
+			var state = isInitial ? State.NeitherFaultActivated : *(State*)(sourceState + ExtraBytesOffset);
 
 			foreach (CandidateTransition* transition in transitions)
 			{
@@ -108,7 +112,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 				}
 
 				transition->Flags = TransitionFlags.SetIsValidIffCondition(transition->Flags,isValid);
-				*(State*)transition->TargetStatePointer = nextState;
+				*(State*)(transition->TargetStatePointer + ExtraBytesOffset) = nextState;
 			}
 		}
 
