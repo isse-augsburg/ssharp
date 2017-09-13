@@ -90,6 +90,20 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			return successorState;
 		}
 
+		public bool TryToFindState(byte *stateToFind, out byte* foundState)
+		{
+			for (var i = 0; i < _temporalStates; i++)
+			{
+				var candidateState = _targetStateMemory + i * _stateVectorSize;
+				if (MemoryBuffer.AreEqual(stateToFind, candidateState, _stateVectorSize))
+				{
+					foundState = candidateState;
+					return true;
+				}
+			}
+			foundState = null;
+			return false;
+		}
 
 		internal void ResizeStateBuffer()
 		{

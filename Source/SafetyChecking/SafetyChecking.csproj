@@ -59,6 +59,7 @@
     <Compile Include="DiscreteTimeMarkovChain\LtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcRetraverseModel.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\MarkovChainFromMarkovChainGenerator.cs" />
     <Compile Include="DiscreteTimeMarkovChain\ProbabilisticSimulator.cs" />
     <Compile Include="DiscreteTimeMarkovChain\ProbabilisticSimulatorChoiceResolver.cs" />
     <Compile Include="DiscreteTimeMarkovChain\QuantitativeParametricAnalysis.cs" />

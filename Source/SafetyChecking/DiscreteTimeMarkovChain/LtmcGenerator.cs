@@ -32,7 +32,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	/// <summary>
 	///   Generates a <see cref="LabeledTransitionMarkovChain" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class LtmcGenerator : ModelTraverser
+	internal sealed class LtmcGenerator : ModelTraverser
 	{
 		private readonly LabeledTransitionMarkovChain _markovChain;
 

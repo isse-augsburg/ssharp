@@ -31,6 +31,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.Linq.Expressions;
 	using System.Runtime.CompilerServices;
 	using AnalysisModel;
+	using AnalysisModelTraverser;
 	using ExecutableModel;
 	using Formula;
 	using Modeling;
@@ -38,50 +39,42 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	
 	internal sealed unsafe class LtmcRetraverseTransitionSetBuilder : DisposableObject
 	{
-		private readonly int _stateVectorSize;
-		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
-		private readonly byte* _targetStateMemory;
 		private readonly MemoryBuffer _transitionBuffer = new MemoryBuffer();
 		private readonly LtmcTransition* _transitions;
 		private int _transitionCount;
-		private int _stateCount;
 		private readonly long _capacity;
+
+		private readonly TemporalStateStorage _temporalStateStorage;
 
 		public LtmcRetraverseTransitionSetBuilder(int stateVectorSize, long capacity)
 		{
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
-			_stateVectorSize = stateVectorSize;
+
 			_capacity = capacity;
 
 			_transitionBuffer.Resize(capacity * sizeof(LtmcTransition), zeroMemory: false);
 			_transitions = (LtmcTransition*)_transitionBuffer.Pointer;
-
-			_targetStateBuffer.Resize(capacity * _stateVectorSize, zeroMemory: false);
-			_targetStateMemory = _targetStateBuffer.Pointer;
+			
+			_temporalStateStorage = new TemporalStateStorage(stateVectorSize, capacity);
 		}
 
 		private byte* AddState(int originalState, int targetEnrichments)
 		{
 			// Try to find a matching state. If not found, then add a new one
 			byte* targetState;
-			int* targetStateAsInt;
-			for (var i = 0; i < _stateCount; i++)
-			{
-				targetState = _targetStateMemory + i * _stateVectorSize;
-				targetStateAsInt = (int*)targetState;
-				if (targetStateAsInt[0] == originalState && targetStateAsInt[1] == targetEnrichments)
-				{
-					return targetState;
-				}
-			}
-			Requires.That(_stateCount < _capacity, "more space needed");
 
-			targetState = _targetStateMemory + _stateCount * _stateVectorSize;
-			targetStateAsInt = (int*)targetState;
+			int* stateToFind = stackalloc int[2];
+			stateToFind[0] = originalState;
+			stateToFind[1] = targetEnrichments;
+
+			if (_temporalStateStorage.TryToFindState((byte*) stateToFind, out targetState))
+				return targetState;
+			
+			targetState = _temporalStateStorage.GetFreeTemporalSpaceAddress();
+			var targetStateAsInt = (int*)targetState;
 			// create new state
 			targetStateAsInt[0] = originalState;
 			targetStateAsInt[1] = targetEnrichments;
-			++_stateCount;
 			return targetState;
 		}
 		
@@ -119,7 +112,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public void Clear()
 		{
 			_transitionCount = 0;
-			_stateCount = 0;
 		}
 		
 		protected override void OnDisposing(bool disposing)
@@ -128,7 +120,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				return;
 
 			_transitionBuffer.SafeDispose();
-			_targetStateBuffer.SafeDispose();
+			_temporalStateStorage.SafeDispose();
 		}
 		
 		public TransitionCollection ToCollection()

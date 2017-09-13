@@ -52,11 +52,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.Configuration.RetraversalNormalizations = RetraversalNormalizations.EmbedObserversIntoModel;
 			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
-			markovChainGenerator.Configuration.CpuCount = 1; //TODO:Remove
 			markovChainGenerator.AddFormulaToCheck(final9Once7Formula);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);

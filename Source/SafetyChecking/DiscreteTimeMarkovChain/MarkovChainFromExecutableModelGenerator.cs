@@ -31,6 +31,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using Formula;
 	using AnalysisModelTraverser;
 	using System.Linq;
+	using AnalysisModelTraverser.TraversalModifiers;
 	using ExecutedModel;
 
 	public class MarkovChainFromExecutableModelGenerator<TExecutableModel> where TExecutableModel : ExecutableModel<TExecutableModel>
@@ -57,8 +58,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		
 		private void PrintStateFormulas(Formula[] stateFormulas)
 		{
-			if (!Configuration.WriteGraphvizModels)
-				return;
 			Configuration.DefaultTraceOutput?.WriteLine("Labels");
 			for (var i = 0; i < stateFormulas.Length; i++)
 			{
@@ -71,42 +70,45 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		private LabeledTransitionMarkovChain GenerateLtmc(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
+			// Embed Once-Formulas
+			var onceFormulaCollector = new CollectDeepestOnceFormulasWithCompilableOperandVisitor();
+			foreach (var formula in _formulasToCheck)
+			{
+				onceFormulaCollector.VisitNewTopLevelFormula(formula);
+			}
+			var onceFormulas = onceFormulaCollector.DeepestOnceFormulasWithCompilableOperand;
+			
+			LabeledTransitionMarkovChain labeledTransitionMarkovChain;
+
 			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, Configuration))
 			{
-				PrintStateFormulas(executableStateFormulas);
-
-				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
-				
-				if (Configuration.WriteGraphvizModels)
+				foreach (var onceFormula in onceFormulas)
 				{
-					Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");
-					labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
+					Assert.That(onceFormula.Operator == UnaryOperator.Once, "operator of OnceFormula must be Once");
 				}
-				return labeledTransitionMarkovChain;
+				var onceFormulaLabels = onceFormulas.Select(formula => formula.Label).ToArray();
+				var formulasToObserve = onceFormulas.Select(formula => formula.Operand).ToArray();
+
+				if (onceFormulas.Count > 0)
+				{
+					Func<ObserveFormulasModifier> observeFormulasModifier = () => new ObserveFormulasModifier(executableStateFormulas, formulasToObserve);
+					checker.Context.TraversalParameters.TransitionModifiers.Add(observeFormulasModifier);
+				}
+
+				labeledTransitionMarkovChain = checker.GenerateStateGraph();
+
+				labeledTransitionMarkovChain.StateFormulaLabels =
+					labeledTransitionMarkovChain.StateFormulaLabels.Concat(onceFormulaLabels).ToArray();
 			}
-		}
 
-		private LabeledTransitionMarkovChain NormalizeLtmc(LabeledTransitionMarkovChain ltmc)
-		{
-			Assert.That(Configuration.CpuCount == 1, "currently no multi threading support here");
-			var retraverseModel = new LtmcRetraverseModel(ltmc, Configuration);
-			retraverseModel.AddFormulas(FormulasToCheck);
-
-			var createModel = new AnalysisModelCreator(() => retraverseModel); //TODO: Change for multi thread support
-
-			using (var checker = new LtmcGenerator(createModel, null, retraverseModel.Formulas, Configuration))
+			if (Configuration.WriteGraphvizModels)
 			{
-				PrintStateFormulas(retraverseModel.Formulas);
-
-				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
-
-				if (Configuration.WriteGraphvizModels)
-				{
-					Configuration.DefaultTraceOutput.WriteLine("Ltmc Model normalized");
-					labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
-				}
-				return labeledTransitionMarkovChain;
+				PrintStateFormulas(executableStateFormulas);
+				Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");
+				labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
 			}
+
+			return labeledTransitionMarkovChain;
 		}
 
 		private DiscreteTimeMarkovChain ConvertToMarkovChain(LabeledTransitionMarkovChain labeledTransitionMarkovChain)
@@ -150,10 +152,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 
 			var ltmc = GenerateLtmc(createAnalysisModel, terminateEarlyCondition, stateFormulas);
-
-			if (Configuration.RetraversalNormalizations != RetraversalNormalizations.None)
-				ltmc = NormalizeLtmc(ltmc);
-
+			
 			return ltmc;
 		}
 		
@@ -167,9 +166,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public void AddFormulaToCheck(Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));
-
-			Interlocked.MemoryBarrier();
-			if ((bool)ProbabilityMatrixCreationStarted)
+			
+			if (ProbabilityMatrixCreationStarted)
 			{
 				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovChain));
 			}
