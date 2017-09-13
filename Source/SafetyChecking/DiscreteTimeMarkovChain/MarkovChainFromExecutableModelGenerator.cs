@@ -47,9 +47,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		public bool ProbabilityMatrixCreationStarted { get; private set; } = false;
-
-		// Create Tasks which make the checks (workers)
-		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
+		
 		public MarkovChainFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
 		{
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));

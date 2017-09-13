@@ -33,6 +33,7 @@ namespace ISSE.SafetyChecking
 		OnFirstMethodWithUndo
 	}
 
+	// TODO: obsolete
 	public enum RetraversalNormalizations
 	{
 		None,

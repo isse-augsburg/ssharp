@@ -146,8 +146,8 @@ namespace Tests.DiscreteTimeMarkovChain.LabeledTransitionMarkovChainExamples
 		{
 			Ltmc = Create();
 
-			// ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
-			// ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+			 ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			 ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
 			//StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 0, true }, { 2, true } };
 			//StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 3, true } };

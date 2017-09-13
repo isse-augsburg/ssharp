@@ -35,7 +35,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 	public class MarkovChainFromMarkovChainGenerator
 	{
-		private LabeledTransitionMarkovChain _sourceLtmc;
+		private readonly LabeledTransitionMarkovChain _sourceLtmc;
+
 		private readonly List<Formula> _formulasToCheck = new List<Formula>();
 
 		public IEnumerable<Formula> FormulasToCheck => _formulasToCheck;
@@ -46,9 +47,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
 
 		public bool ProbabilityMatrixCreationStarted { get; private set; } = false;
-
-		// Create Tasks which make the checks (workers)
-		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
+		
 		public MarkovChainFromMarkovChainGenerator(LabeledTransitionMarkovChain ltmc)
 		{
 			Requires.NotNull(ltmc, nameof(ltmc));
@@ -81,15 +80,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain(Formula terminateEarlyCondition = null)
 		{
-			Assert.That(Configuration.CpuCount == 1, "currently no multi threading support here");
-			var retraverseModel = new LtmcRetraverseModel(_sourceLtmc, Configuration);
-			retraverseModel.AddFormulas(FormulasToCheck);
+			//TODO: Embed Once (see MarkovChainFromExecutableModelGenerator how to do it)
 
-			var createModel = new AnalysisModelCreator(() => retraverseModel); //TODO: Change for multi thread support
+			var formulasToCheck = FormulasToCheck.ToArray();
 
-			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, retraverseModel.Formulas, Configuration))
+			var createModel = new AnalysisModelCreator(() => new LtmcRetraverseModel(_sourceLtmc, formulasToCheck, Configuration));
+
+			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, formulasToCheck, Configuration))
 			{
-				PrintStateFormulas(retraverseModel.Formulas);
+				PrintStateFormulas(formulasToCheck);
 
 				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
 
@@ -112,9 +111,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public void AddFormulaToCheck(Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));
-
-			Interlocked.MemoryBarrier();
-			if ((bool)ProbabilityMatrixCreationStarted)
+			
+			if (ProbabilityMatrixCreationStarted)
 			{
 				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovChain));
 			}
