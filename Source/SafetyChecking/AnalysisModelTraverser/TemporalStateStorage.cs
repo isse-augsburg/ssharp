@@ -51,7 +51,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		public int StateVectorSize => _stateVectorSize;
 
-		private int _temporalStates;
+		private long _temporalStates;
 
 		private readonly MemoryBuffer _targetStateBuffer = new MemoryBuffer();
 
