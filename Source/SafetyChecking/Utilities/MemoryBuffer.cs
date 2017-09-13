@@ -312,7 +312,24 @@ namespace ISSE.SafetyChecking.Utilities
 					Console.WriteLine($"{nameof(MemoryBuffer)}: Using slow memory clearing");
 					for (var i = 0; i < elements; i++)
 					{
-						memoryStart[i] = -1;
+						memoryStart[i] = 0;
+					}
+				}
+			}
+
+			public static void ClearWithZero(byte* memoryStart, long elements)
+			{
+				var bytesToErase = elements;
+				if (bytesToErase <= Int32.MaxValue)
+				{
+					Delegate(new IntPtr(memoryStart), (int)bytesToErase);
+				}
+				else
+				{
+					Console.WriteLine($"{nameof(MemoryBuffer)}: Using slow memory clearing");
+					for (var i = 0; i < elements; i++)
+					{
+						memoryStart[i] = 0;
 					}
 				}
 			}

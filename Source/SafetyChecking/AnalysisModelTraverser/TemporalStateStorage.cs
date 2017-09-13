@@ -84,7 +84,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				throw new OutOfMemoryException("Unable to store an additional temporal state. Try increasing the successor state capacity.");
 			
 			var successorState = _targetStateMemory + _stateVectorSize * _temporalStates;
-
+			
 			++_temporalStates;
 
 			return successorState;
@@ -103,6 +103,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		internal void Clear()
 		{
+			MemoryBuffer.ZeroMemoryWithInitblk.ClearWithZero(_targetStateMemory,_stateVectorSize * _temporalStates);
 			_temporalStates = 0;
 		}
 
