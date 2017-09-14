@@ -51,7 +51,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	{
 		public readonly TExecutableModel RuntimeModel;
 		
-		private ProbabilisticSimulatorChoiceResolver _choiceResolver;
+		private readonly ProbabilisticSimulatorChoiceResolver _choiceResolver;
 
 		public Formula[] NormalizedFormulas { get; private set; }
 		public string[] NormalizedFormulaLabels { get; private set; }
@@ -85,6 +85,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			_activateIndependentFaultsAtStepBeginning =
 				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
+			
+			_choiceResolver = new ProbabilisticSimulatorChoiceResolver(configuration.UseOptionProbabilitiesInSimulation);
+
+			RuntimeModel.SetChoiceResolver(_choiceResolver);
 		}
 		
 		/// <summary>
@@ -209,12 +213,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		private void ResetTrace()
 		{
-			if (_choiceResolver == null)
-			{
-				_choiceResolver = new ProbabilisticSimulatorChoiceResolver();
-				RuntimeModel.SetChoiceResolver(_choiceResolver);
-			}
-
 			for (var i = 0; i < NormalizedFormulaSatisfactionCount.Length; i++)
 			{
 				NormalizedFormulaSatisfactionCount[i] = 0;

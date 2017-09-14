@@ -115,7 +115,6 @@ namespace SafetySharp.CaseStudies.SmallModels.Model2
 			tc.UseAtomarPropositionsAsStateLabels = true;
 			tc.UseCompactStateStorage = true;
 			tc.RetraversalNormalizations = RetraversalNormalizations.EmbedObserversIntoModel;
-			tc.CpuCount = 1;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.ModelComponent.Value==3, 50);
@@ -135,7 +134,8 @@ namespace SafetySharp.CaseStudies.SmallModels.Model2
 
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.AllowFaultsOnInitialTransitions = false;
-			SafetySharpModelChecker.TraversalConfiguration = tc;
+			tc.UseOptionProbabilitiesInSimulation = false;
+			SafetySharpProbabilisticSimulator.Configuration = tc;
 
 			var is3Formula = new ExecutableStateFormula(() => model.ModelComponent.Value == 3);
 			var f1Formula = new FaultFormula(model.ModelComponent.F1);
@@ -143,7 +143,7 @@ namespace SafetySharp.CaseStudies.SmallModels.Model2
 
 			SafetySharpProbabilisticSimulator simulator = new SafetySharpProbabilisticSimulator(model, is3Formula,f1Formula, loopRequestBugFormula);
 
-			for (var i = 0; i < 10; i++)
+			for (var i = 0; i < 100; i++)
 			{
 				simulator.SimulateSteps(5);
 				var noIs3 = simulator.GetCountOfSatisfiedOnTrace(is3Formula);

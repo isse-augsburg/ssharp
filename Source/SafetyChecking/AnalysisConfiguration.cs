@@ -64,6 +64,12 @@ namespace ISSE.SafetyChecking
 		/// <summary>
 		/// </summary>
 		public bool AllowFaultsOnInitialTransitions { get; set; }
+		
+		/// <summary>
+		///   Simulation only: Use the probabilities of the options when selecting the result of a probabilistic choice.
+		///   Thus, more probable options get selected more probable. Otherwise, each option has the same chance to get selected.
+		/// </summary>
+		public bool UseOptionProbabilitiesInSimulation { get; set; }
 
 		/// <summary>
 		///   If set to true, the model checker uses a compact state storage, in which the found states are indexed by a continuous variable.
@@ -103,6 +109,7 @@ namespace ISSE.SafetyChecking
 		public static readonly AnalysisConfiguration Default = new AnalysisConfiguration
 		{
 			AllowFaultsOnInitialTransitions = false,
+			UseOptionProbabilitiesInSimulation = false,
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,
 			DefaultTraceOutput = Console.Out,
