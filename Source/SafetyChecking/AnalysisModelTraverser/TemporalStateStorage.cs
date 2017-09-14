@@ -108,7 +108,14 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		internal void ResizeStateBuffer()
 		{
 			_stateVectorSize = AnalysisModelStateVectorSize + _traversalModifierStateVectorSize;
+
+			// Note: zeroMemory=true
+			//   We do not require that Model.Serialize sets every available byte. If we do not zero the memory, 
+			//   it might occur that the same state is written twice into the state buffer but with a
+			//   different byte pattern. The reason for this difference lays in the bytes of the unzeroed
+			//   memory. Zeroing the memory ensures that one serialized state has always the same byte pattern.
 			_targetStateBuffer.Resize(_capacity * _stateVectorSize, zeroMemory: true);
+
 			_targetStateMemory = _targetStateBuffer.Pointer;
 		}
 
