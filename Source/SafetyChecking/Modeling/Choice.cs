@@ -259,10 +259,20 @@ namespace ISSE.SafetyChecking.Modeling
 					return -1;
 				case 1:
 					return 0;
+				case 2:
+					var result = Resolver.HandleProbabilisticChoice(_probability1Div2, _probability1Div2);
+					return result;
+				case 3:
+					result = Resolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
+					return result;
 				default:
 					var probability = new Probability(1.0 / elementCount);
-					var result = Resolver.HandleProbabilisticChoice(elementCount);
-					Resolver.SetProbabilityOfLastChoice(probability);
+					var array = new Probability[elementCount];
+					for (var i = 0; i < elementCount; i++)
+					{
+						array[i] = probability;
+					}
+					result = Resolver.HandleProbabilisticChoice(array);
 					return result;
 			}
 		}
@@ -303,13 +313,12 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(Option<T> value1, Option<T> value2)
 		{
-			switch (Resolver.HandleProbabilisticChoice(2))
+			var result = Resolver.HandleProbabilisticChoice(value1.Probability, value2.Probability);
+			switch (result)
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				default:
-					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 			}
 		}
@@ -324,16 +333,14 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3)
 		{
-			switch (Resolver.HandleProbabilisticChoice(3))
+			var result = Resolver.HandleProbabilisticChoice(value1.Probability, value2.Probability, value3.Probability);
+			switch (result)
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				default:
-					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 			}
 		}
@@ -350,19 +357,16 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3, Option<T> value4)
 		{
-			switch (Resolver.HandleProbabilisticChoice(4))
+			var result = Resolver.HandleProbabilisticChoice(value1.Probability, value2.Probability, value3.Probability, value4.Probability);
+			switch (result)
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				case 2:
-					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 				default:
-					Resolver.SetProbabilityOfLastChoice(value4.Probability);
 					return value4.Result;
 			}
 		}
@@ -380,22 +384,18 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3, Option<T> value4, Option<T> value5)
 		{
-			switch (Resolver.HandleProbabilisticChoice(5))
+			var result = Resolver.HandleProbabilisticChoice(value1.Probability, value2.Probability, value3.Probability, value4.Probability, value5.Probability);
+			switch (result)
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				case 2:
-					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 				case 3:
-					Resolver.SetProbabilityOfLastChoice(value4.Probability);
 					return value4.Result;
 				default:
-					Resolver.SetProbabilityOfLastChoice(value5.Probability);
 					return value5.Result;
 			}
 		}
@@ -414,25 +414,20 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(Option<T> value1, Option<T> value2, Option<T> value3, Option<T> value4, Option<T> value5, Option<T> value6)
 		{
-			switch (Resolver.HandleProbabilisticChoice(6))
+			var result = Resolver.HandleProbabilisticChoice(value1.Probability, value2.Probability, value3.Probability, value4.Probability, value5.Probability, value6.Probability);
+			switch (result)
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(value1.Probability);
 					return value1.Result;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(value2.Probability);
 					return value2.Result;
 				case 2:
-					Resolver.SetProbabilityOfLastChoice(value3.Probability);
 					return value3.Result;
 				case 3:
-					Resolver.SetProbabilityOfLastChoice(value4.Probability);
 					return value4.Result;
 				case 4:
-					Resolver.SetProbabilityOfLastChoice(value5.Probability);
 					return value5.Result;
 				default:
-					Resolver.SetProbabilityOfLastChoice(value6.Probability);
 					return value6.Result;
 			}
 		}
@@ -444,9 +439,13 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T Choose<T>(params Option<T>[] values)
 		{
-			var chosen = Resolver.HandleProbabilisticChoice(values.Length);
-			Resolver.SetProbabilityOfLastChoice(values[chosen].Probability);
-			return values[chosen].Result;
+			var array = new Probability[values.Length];
+			for (var i = 0; i < values.Length; i++)
+			{
+				array[i] = values[i].Probability;
+			}
+			var optionIndex = Resolver.HandleProbabilisticChoice(array);
+			return values[optionIndex].Result;
 		}
 
 
@@ -459,13 +458,12 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T ChooseWithUniformDistribution<T>(T value1, T value2)
 		{
-			switch (Resolver.HandleProbabilisticChoice(2))
+			var probability = _probability1Div2;
+			switch (Resolver.HandleProbabilisticChoice(probability, probability))
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div2);
 					return value1;
 				default:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div2);
 					return value2;
 			}
 		}
@@ -480,16 +478,14 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3)
 		{
-			switch (Resolver.HandleProbabilisticChoice(3))
+			var probability = _probability1Div3;
+			switch (Resolver.HandleProbabilisticChoice(probability, probability, probability))
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div3);
 					return value1;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div3);
 					return value2;
 				default:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div3);
 					return value3;
 			}
 		}
@@ -506,19 +502,16 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3, T value4)
 		{
-			switch (Resolver.HandleProbabilisticChoice(4))
+			var probability = _probability1Div4;
+			switch (Resolver.HandleProbabilisticChoice(probability, probability, probability, probability))
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
 					return value1;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
 					return value2;
 				case 2:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
 					return value3;
 				default:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div4);
 					return value4;
 			}
 		}
@@ -536,22 +529,18 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3, T value4, T value5)
 		{
-			switch (Resolver.HandleProbabilisticChoice(5))
+			var probability = _probability1Div5;
+			switch (Resolver.HandleProbabilisticChoice(probability, probability, probability, probability, probability))
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
 					return value1;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
 					return value2;
 				case 2:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
 					return value3;
 				case 3:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
 					return value4;
 				default:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div5);
 					return value5;
 			}
 		}
@@ -570,25 +559,20 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T ChooseWithUniformDistribution<T>(T value1, T value2, T value3, T value4, T value5, T value6)
 		{
-			switch (Resolver.HandleProbabilisticChoice(6))
+			var probability = _probability1Div6;
+			switch (Resolver.HandleProbabilisticChoice(probability, probability, probability, probability, probability, probability))
 			{
 				case 0:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
 					return value1;
 				case 1:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
 					return value2;
 				case 2:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
 					return value3;
 				case 3:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
 					return value4;
 				case 4:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
 					return value5;
 				default:
-					Resolver.SetProbabilityOfLastChoice(_probability1Div6);
 					return value6;
 			}
 		}
@@ -600,10 +584,14 @@ namespace ISSE.SafetyChecking.Modeling
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T ChooseWithUniformDistribution<T>(params T[] values)
 		{
-			var chosen = Resolver.HandleProbabilisticChoice(values.Length);
 			var probability = new Probability(1.0 / values.Length);
-			Resolver.SetProbabilityOfLastChoice(probability);
-			return values[chosen];
+			var array = new Probability[values.Length];
+			for (var i = 0; i < values.Length; i++)
+			{
+				array[i] = probability;
+			}
+			var optionIndex = Resolver.HandleProbabilisticChoice(array);
+			return values[optionIndex];
 		}
 	}
 }

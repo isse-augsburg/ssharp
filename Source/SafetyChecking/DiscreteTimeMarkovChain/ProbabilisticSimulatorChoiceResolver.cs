@@ -25,6 +25,7 @@ using System.Collections.Generic;
 
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
+	using System.Runtime.CompilerServices;
 	using ExecutableModel;
 	using Modeling;
 	using Utilities;
@@ -33,6 +34,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	{
 		private readonly List<int> _choices = new List<int>();
 		private readonly List<Probability> _probabilities = new List<Probability>();
+
+		private bool _useProbabilityOfChoice;
 
 		private int _choiceIndex = -1;
 
@@ -45,10 +48,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return _probabilities[_choiceIndex - 1];
 		}
 
-		public ProbabilisticSimulatorChoiceResolver(int seed = 0)
+		public ProbabilisticSimulatorChoiceResolver(bool useProbabilityOfChoice=true, int seed = 0)
 				: base(false)
 		{
-			_random=new Random(seed);
+			_useProbabilityOfChoice = useProbabilityOfChoice;
+			_random =new Random(seed);
 		}
 
 		internal override int LastChoiceIndex => _choices[_choices.Count - 1];
@@ -56,8 +60,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public override int HandleChoice(int valueCount)
 		{
 			++_choiceIndex;
-
-			// TODO: Use probability of choice to resolve the choice
+			
 			var randomIndex = _random.Next(valueCount);
 
 			_choices.Add(randomIndex);
@@ -66,9 +69,66 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return randomIndex;
 		}
 
-		public override int HandleProbabilisticChoice(int valueCount)
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between two options.
+		/// </summary>
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(Probability p0, Probability p1)
 		{
-			return HandleChoice(valueCount);
+			return HandleProbabilisticChoice(new [] { p0, p1 });
+		}
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between three options.
+		/// </summary>
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
+		/// <param name="p2">The probability of option 2.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(Probability p0, Probability p1, Probability p2)
+		{
+			return HandleProbabilisticChoice(new[] { p0, p1, p2 });
+		}
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between different options.
+		/// </summary>
+		/// <param name="p">Array with probabilities of each option.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(params Probability[] p)
+		{
+			++_choiceIndex;
+
+			int selectedOption;
+
+			if (_useProbabilityOfChoice)
+			{
+				var randomP = _random.NextDouble();
+				selectedOption = 0;
+				var currentP = 0.0;
+				for (var i = 0; i < p.Length; i++)
+				{
+					var nextP = currentP + p[i].Value;
+					if (randomP <= nextP)
+					{
+						selectedOption = i;
+						break;
+					}
+					currentP = nextP;
+				}
+			}
+			else
+			{
+				selectedOption = _random.Next(p.Length);
+			}
+
+			var probability = p[selectedOption];
+			_choices.Add(selectedOption);
+			_probabilities.Add(GetProbabilityOfPreviousPath() * probability);
+
+			return selectedOption;
 		}
 
 		public override bool PrepareNextPath()
@@ -78,12 +138,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		public override void PrepareNextState()
 		{
-		}
-
-		public override void SetProbabilityOfLastChoice(Probability probability)
-		{
-			Assert.That(_choiceIndex >= 0, "_choiceIndex>=0");
-			_probabilities[_choiceIndex] = GetProbabilityOfPreviousPath() * probability;
 		}
 
 		/// <summary>

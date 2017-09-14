@@ -200,7 +200,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// </summary>
 		/// <param name="valueCount">The number of values that can be chosen.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override int HandleProbabilisticChoice(int valueCount)
+		private int HandleProbabilisticChoice(int valueCount)
 		{
 			++_choiceIndex;
 			
@@ -235,6 +235,62 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return 0;
 		}
 
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between two options.
+		/// </summary>
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(Probability p0, Probability p1)
+		{
+			var choice = HandleProbabilisticChoice(2);
+			if (choice == 0)
+				SetProbabilityOfLastChoice(p0);
+			else
+				SetProbabilityOfLastChoice(p1);
+			return choice;
+		}
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between three options.
+		/// </summary>
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
+		/// <param name="p2">The probability of option 2.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(Probability p0, Probability p1, Probability p2)
+		{
+			var choice = HandleProbabilisticChoice(3);
+			switch (choice)
+			{
+				case 0:
+					SetProbabilityOfLastChoice(p0);
+					return choice;
+				case 1:
+					SetProbabilityOfLastChoice(p1);
+					return choice;
+				default:
+					SetProbabilityOfLastChoice(p2);
+					return choice;
+			}
+		}
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between different options.
+		/// </summary>
+		/// <param name="p">Array with probabilities of each option.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(params Probability[] p)
+		{
+			var choice = HandleProbabilisticChoice(p.Length);
+			SetProbabilityOfLastChoice(p[choice]);
+			return choice;
+		}
+
+
+
+
 		/// <summary>
 		///   Gets the continuation id of the current path.
 		/// </summary>
@@ -248,7 +304,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// </summary>
 		/// <param name="valueCount">The number of values that can be chosen.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override void SetProbabilityOfLastChoice(Probability probability)
+		private void SetProbabilityOfLastChoice(Probability probability)
 		{
 			var probabilitiesOfChosenValuesMaxIndex = _chosenValues.Count - 1;
 			// If this part of the path has previously been visited we do not change the value

@@ -143,23 +143,38 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 			return 0;
 		}
-
+		
 		/// <summary>
-		///   Handles a probabilistic choice that chooses between <paramref name="valueCount" /> options.
+		///   Handles a probabilistic choice that chooses between two options.
 		/// </summary>
-		/// <param name="valueCount">The number of values that can be chosen.</param>
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override int HandleProbabilisticChoice(int valueCount)
+		public override int HandleProbabilisticChoice(Probability p0, Probability p1)
 		{
-			return HandleChoice(valueCount);
+			return HandleChoice(2);
 		}
 
 		/// <summary>
-		///   Sets the probability of the taken option of the last taken probabilistic choice.
+		///   Handles a probabilistic choice that chooses between three options.
 		/// </summary>
-		/// <param name="probability">The probability of the last probabilistic choice.</param>
-		public override void SetProbabilityOfLastChoice(Probability probability)
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
+		/// <param name="p2">The probability of option 2.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(Probability p0, Probability p1, Probability p2)
 		{
+			return HandleChoice(3);
+		}
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between different options.
+		/// </summary>
+		/// <param name="p">Array with probabilities of each option.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int HandleProbabilisticChoice(params Probability[] p)
+		{
+			return HandleChoice(p.Length);
 		}
 
 		/// <summary>

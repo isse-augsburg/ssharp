@@ -37,6 +37,9 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 	public class LtmdpChoiceResolverTests
 	{
+		private static readonly Probability _probability1Div2 = new Probability(1.0 / 2.0);
+		private static readonly Probability _probability1Div3 = new Probability(1.0 / 3.0);
+
 		public TestTraceOutput Output { get; }
 
 
@@ -83,7 +86,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(2);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div2, _probability1Div2);
 
 			var entries = CountEntries(0);
 			entries.ShouldBe(2);
@@ -100,7 +103,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
 
 			var entries = CountEntries(0);
 			entries.ShouldBe(3);
@@ -121,8 +124,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
-			_choiceResolver.HandleProbabilisticChoice(2);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div2, _probability1Div2);
 			
 			var entries = CountEntries(0);
 			entries.ShouldBe(3);
@@ -145,7 +148,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
 			_choiceResolver.HandleChoice(2);
 
 			var entries = CountEntries(0);
@@ -169,7 +172,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
 			_choiceResolver.HandleChoice(2);
 
@@ -211,7 +214,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			_choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
 			_choiceResolver.HandleChoice(2);
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
 
@@ -261,7 +264,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.HandleChoice(2);
 			_choiceResolver.PrepareNextPath();
 			_choiceResolver.HandleChoice(2);
-			_choiceResolver.HandleProbabilisticChoice(2);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div2, _probability1Div2);
 			var choiceToMakeDeterministic = _choiceResolver.LastChoiceIndex;
 			var cidToForwardTo = _choiceResolver.GetContinuationId();
 			_choiceResolver.ForwardUntakenChoicesAtIndex(choiceToMakeDeterministic);
@@ -293,15 +296,13 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			var state1Path1Exists = _choiceResolver.PrepareNextPath();
-			var state1Path1Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
-			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.6));
+			var state1Path1Choice1 = _choiceResolver.HandleProbabilisticChoice(new Probability(0.6), new Probability(0.4));
 			var state1Path1Choice2 = _choiceResolver.HandleChoice(2);
 			var state1Path2Exists = _choiceResolver.PrepareNextPath();
-			var state1Path2Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
+			var state1Path2Choice1 = _choiceResolver.HandleProbabilisticChoice(new Probability(0.6), new Probability(0.4));
 			var state1Path2Choice2 = _choiceResolver.HandleChoice(2);
 			var state1Path3Exists = _choiceResolver.PrepareNextPath();
-			var state1Path3Choice1 = _choiceResolver.HandleProbabilisticChoice(2);
-			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.4));
+			var state1Path3Choice1 = _choiceResolver.HandleProbabilisticChoice(new Probability(0.6), new Probability(0.4));
 			var state1Path4Exists = _choiceResolver.PrepareNextPath();
 			// Collect data
 			var state1EntriesOfCid0 = CountEntries(0);
@@ -405,14 +406,11 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			var state1Path1Exists = _choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
-			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.3));
+			_choiceResolver.HandleProbabilisticChoice(new Probability(0.3), new Probability(0.3), new Probability(0.4));
 			var state1Path2Exists = _choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
-			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.3));
+			_choiceResolver.HandleProbabilisticChoice(new Probability(0.3), new Probability(0.3), new Probability(0.4));
 			var state1Path3Exists = _choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
-			_choiceResolver.SetProbabilityOfLastChoice(new Probability(0.4));
+			_choiceResolver.HandleProbabilisticChoice(new Probability(0.3), new Probability(0.3), new Probability(0.4));
 			var state1Path4Exists = _choiceResolver.PrepareNextPath();
 
 			state1Path1Exists.ShouldBe(true);
@@ -446,11 +444,11 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			_choiceResolver.PrepareNextState();
 			_stepGraph.Clear();
 			var state1Path1Exists = _choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
 			var state1Path2Exists = _choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
 			var state1Path3Exists = _choiceResolver.PrepareNextPath();
-			_choiceResolver.HandleProbabilisticChoice(3);
+			_choiceResolver.HandleProbabilisticChoice(_probability1Div3, _probability1Div3, _probability1Div3);
 			var state1Path4Exists = _choiceResolver.PrepareNextPath();
 
 			state1Path1Exists.ShouldBe(true);

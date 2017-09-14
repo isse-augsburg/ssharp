@@ -70,19 +70,30 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		/// <param name="valueCount">The number of values that can be chosen.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract int HandleChoice(int valueCount);
-		
-		/// <summary>
-		///   Handles a probabilistic choice that chooses between <paramref name="valueCount" /> options.
-		/// </summary>
-		/// <param name="valueCount">The number of values that can be chosen.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public abstract int HandleProbabilisticChoice(int valueCount);
 
-				/// <summary>
-		///   Sets the probability of the taken option of the last taken probabilistic choice.
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between two options.
 		/// </summary>
-		/// <param name="probability">The probability of the last probabilistic choice.</param>
-		public abstract void SetProbabilityOfLastChoice(Probability probability);
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public abstract int HandleProbabilisticChoice(Probability p0, Probability p1);
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between three options.
+		/// </summary>
+		/// <param name="p0">The probability of option 0.</param>
+		/// <param name="p1">The probability of option 1.</param>
+		/// <param name="p2">The probability of option 2.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public abstract int HandleProbabilisticChoice(Probability p0, Probability p1, Probability p2);
+
+		/// <summary>
+		///   Handles a probabilistic choice that chooses between different options.
+		/// </summary>
+		/// <param name="p">Array with probabilities of each option.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public abstract int HandleProbabilisticChoice(params Probability[] p);
 
 		/// <summary>
 		///   Makes taken choice identified by the <paramref name="choiceIndexToForward" /> deterministic
