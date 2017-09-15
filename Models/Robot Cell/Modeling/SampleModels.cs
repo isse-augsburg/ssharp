@@ -24,8 +24,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using Analysis;
+    using Controllers;
+    using Odp;
     using Odp.Reconfiguration;
     using static ModelBuilderHelper;
 
@@ -35,7 +38,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             { Ictss1, Ictss2, Ictss3, Ictss4, Ictss5, Ictss6, Ictss7 };
 
         private static readonly Func<ModelBuilder, ModelBuilder>[] _performanceEvaluationConfigurations =
-            { FewAgentsHighRedundancy /*, ManyAgentsLowRedundancy, ManyAgentsLowRedundancy*/ };
+            { FewAgentsHighRedundancy , ManyAgentsLowRedundancy/*, ManyAgentsLowRedundancy*/ };
 
         public static Model DefaultInstance<T>(AnalysisMode mode = AnalysisMode.AllFaults)
             where T : IController
@@ -61,6 +64,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 b => b.DisablePlants(),
                 b => b.UseCoalitionFormation().EnableControllerVerification(verify).DisableIntolerableFaults()
             );
+        }
+
+        public static IEnumerable<Model> CreateCentralConfigurations(bool verify = false)
+        {
+            return CreateConfigurations(
+                b => b.DisablePlants(),
+                b => b.ChooseController<FastController>().CentralReconfiguration().EnableControllerVerification(verify).DisableIntolerableFaults());
+                
         }
 
         public static IEnumerable<Model> CreatePerformanceEvaluationConfigurationsCentralized()
@@ -156,9 +167,134 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
         public static ModelBuilder ManyAgentsLowRedundancy(this ModelBuilder builder)
         {
-            // 35 robots 15 carts 15 capabilities/task
+            const int capCount = 5;
+            const int sysSize = 15;
+            const int ioCount = 15;
+            const int numberOfCarts = 5;
+            const int numWorkpieces = 5;
+            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
+        }
+
+        private static ModelBuilder GenerateSystem(this ModelBuilder builder, int capCount, int sysSize, int ioCount, int numberOfCarts, int numWorkpieces)
+        {
+            var tsg = new TestSystemGenerator();
+            var generatedSystem = tsg.Generate(sysSize, capCount, ioCount);
+            Debug.Assert(capCount <= Enum.GetNames(typeof(ProductionAction)).Length && Enum.GetNames(typeof(ProductionAction)).Length >= sysSize);
+
+            var currentCapa = generatedSystem.Item2;
+            var enumerator = Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().GetEnumerator();
+            var dummyToProcessCapability = new Dictionary<DummyCapability, ProcessCapability>();
+            foreach (var dummyCapability in currentCapa)
+            {
+                enumerator.MoveNext();
+                dummyToProcessCapability.Add(dummyCapability, new ProcessCapability(enumerator.Current));
+            }
+
+            // Produce needs to be added at the beginning and Consume at the end to complete the generated task
+            var newTask = new ICapability[generatedSystem.Item2.Count + 2];
+            var i = 0;
+            newTask[i++] = Produce;
+            foreach (var taskItem in generatedSystem.Item2)
+            {
+                newTask[i++] = dummyToProcessCapability[taskItem];
+            }
+            newTask[i++] = Consume;
+            
+            builder.DefineTask(numWorkpieces, newTask);
+            foreach (var dummyAgent in generatedSystem.Item1)
+            {
+                var currentCapabilities = new ICapability[dummyAgent.GetCapabilities().Count + 2];
+                var j = 0;
+                currentCapabilities[j++] = Produce;
+                foreach (var capability in dummyAgent.GetCapabilities())
+                {
+                    currentCapabilities[j++] = dummyToProcessCapability[capability];
+                }
+                currentCapabilities[j++] = Consume;
+
+                builder.AddRobot(currentCapabilities);
+            }
+
+            var neededConnections = new HashSet<Tuple<int, int>>();
+            var agents = generatedSystem.Item1.ToArray();
+            for (var index0 = 0; index0 < agents.Length; index0++)
+            {
+                for (var index1 = 0; index1 < agents.Length; index1++)
+                {
+                    if (agents[index0].GetOutputs().Contains(agents[index1]))
+                    {
+                        neededConnections.Add(new Tuple<int, int>(index0, index1));
+                    }
+                }
+            }
+            
+            for (var j = 0; j < numberOfCarts; j++)
+            {
+                builder.AddCart(neededConnections.ToArray());
+            }
+
+            //Debug.Assert(IsReconfigurationPossible(builder.Build().Tasks.First(), builder.Build().RobotAgents.ToArray()));
             return builder;
         }
+
+        private static bool IsReconfigurationPossible(ITask task, RobotAgent[] robotsAgents)
+        {
+            var matrix = GetConnectionMatrix(robotsAgents);
+
+            var isReconfPossible = task.RequiredCapabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilities.Contains(capability)));
+            if (!isReconfPossible)
+                return false;
+
+            var candidates = robotsAgents.Where(agent => agent.AvailableCapabilities.Contains(task.RequiredCapabilities.First())).ToArray();
+
+            for (var i = 0; i < task.RequiredCapabilities.Length - 1 && isReconfPossible; i++)
+            {
+                candidates = candidates.SelectMany(r => matrix[r])
+                                       .Where(r => r.AvailableCapabilities.Contains(task.RequiredCapabilities[i + 1]))
+                                       .ToArray();
+                isReconfPossible &= candidates.Length > 0;
+                Debug.WriteLine(i);
+            }
+
+            return isReconfPossible;
+        }
+
+        private static Dictionary<RobotAgent, List<RobotAgent>> GetConnectionMatrix(IEnumerable<RobotAgent> robotAgents)
+        {
+            var matrix = new Dictionary<RobotAgent, List<RobotAgent>>();
+
+            foreach (var robot in robotAgents)
+            {
+                var list = new List<RobotAgent>(robotAgents.Where(r => IsConnected(robot, r, new HashSet<RobotAgent>())));
+                matrix.Add(robot, list);
+            }
+
+            return matrix;
+        }
+
+        private static bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
+        {
+            if (source == target)
+                return true;
+
+            if (!seenRobots.Add(source))
+                return false;
+
+            foreach (var output in source.Outputs)
+            {
+                foreach (var output2 in output.Outputs)
+                {
+                    if (output2 == target)
+                        return true;
+
+                    if (IsConnected((RobotAgent)output2, target, seenRobots))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
 
         public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
         {
