@@ -46,27 +46,27 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser.TraversalModifiers
 		// Formula evaluator needs to know the labeling on the transition and the enrichment the _current_ state.
 		// For an initial transition, the enrichment 0 should be provided
 		private Func<StateFormulaSet, int, bool>[] _newFormulaEvaluators;
-		
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="previousFormulas">formulas already existing in StateFormulaSet.</param>
+		/// <param name="previousFormulaLabels">formulas already existing in StateFormulaSet.</param>
 		/// <param name="formulasToObserve">formulas to generate an observer for.</param>
-		public ObserveFormulasModifier(Formula[] previousFormulas, Formula[] formulasToObserve)
+		public ObserveFormulasModifier(string[] previousFormulaLabels, Formula[] formulasToObserve)
 		{
-			Assert.That(previousFormulas.Length + formulasToObserve.Length <= 32, "Too many Formulas");
+			Assert.That(previousFormulaLabels.Length + formulasToObserve.Length <= 32, "Too many Formulas");
 
-			_previousFormulaLabels = previousFormulas.Select(formula => formula.Label).ToArray();
+			_previousFormulaLabels = previousFormulaLabels;
 
-			GenerateEvaluators(previousFormulas, formulasToObserve);
+			GenerateEvaluators(formulasToObserve);
 		}
 
-		private void GenerateEvaluators(Formula[] previousFormulas, Formula[] formulasToObserve)
+		private void GenerateEvaluators(Formula[] formulasToObserve)
 		{
 			_newEnrichmentEvaluator = formulasToObserve.Select(CreateEnrichmentEvaluator).ToArray();
 
 			var newFormulaEvaluators = new List<Func<StateFormulaSet, int, bool>>();
-			for (var i = 0; i < previousFormulas.Length; i++)
+			for (var i = 0; i < _previousFormulaLabels.Length; i++)
 			{
 				var newFormulaEvaluator = CreatePreviousFormulaEvaluator(i);
 				newFormulaEvaluators.Add(newFormulaEvaluator);

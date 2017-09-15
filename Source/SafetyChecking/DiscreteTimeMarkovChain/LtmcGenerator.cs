@@ -79,7 +79,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
 					ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
 				}
-
 			}
 		}
 
@@ -120,7 +119,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 				if (onceFormulas.Count > 0)
 				{
-					Func<ObserveFormulasModifier> observeFormulasModifier = () => new ObserveFormulasModifier(executableStateFormulas, formulasToObserve);
+					var executableStateFormulasLabels = executableStateFormulas.Select(formula => formula.Label).ToArray();
+					Func<ObserveFormulasModifier> observeFormulasModifier = () => new ObserveFormulasModifier(executableStateFormulasLabels, formulasToObserve);
 					ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(observeFormulasModifier);
 				}
 
