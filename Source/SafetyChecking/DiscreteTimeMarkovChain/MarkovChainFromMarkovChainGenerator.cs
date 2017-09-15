@@ -33,49 +33,14 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.Linq;
 	using ExecutedModel;
 
-	public class MarkovChainFromMarkovChainGenerator
+	public class MarkovChainFromMarkovChainGenerator : LtmcGenerator
 	{
 		private readonly LabeledTransitionMarkovChain _sourceLtmc;
-
-		private readonly List<Formula> _formulasToCheck = new List<Formula>();
-
-		public IEnumerable<Formula> FormulasToCheck => _formulasToCheck;
-
-		/// <summary>
-		///   The model checker's configuration that determines certain model checker settings.
-		/// </summary>
-		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
-
-		public bool ProbabilityMatrixCreationStarted { get; private set; } = false;
 		
 		public MarkovChainFromMarkovChainGenerator(LabeledTransitionMarkovChain ltmc)
 		{
 			Requires.NotNull(ltmc, nameof(ltmc));
 			_sourceLtmc = ltmc;
-		}
-		
-		private void PrintStateFormulas(Formula[] stateFormulas)
-		{
-			if (!Configuration.WriteGraphvizModels)
-				return;
-			Configuration.DefaultTraceOutput?.WriteLine("Labels");
-			for (var i = 0; i < stateFormulas.Length; i++)
-			{
-				Configuration.DefaultTraceOutput?.WriteLine($"\t {i} {stateFormulas[i].Label}: {stateFormulas[i]}");
-			}
-		}
-		
-
-		private DiscreteTimeMarkovChain ConvertToMarkovChain(LabeledTransitionMarkovChain labeledTransitionMarkovChain)
-		{
-			var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
-			var markovChain = ltmcToMc.MarkovChain;
-			if (Configuration.WriteGraphvizModels)
-			{
-				Configuration.DefaultTraceOutput.WriteLine("Dtmc Model");
-				markovChain.ExportToGv(Configuration.DefaultTraceOutput);
-			}
-			return markovChain;
 		}
 
 		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain(Formula terminateEarlyCondition = null)
@@ -86,37 +51,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			var createModel = new AnalysisModelCreator(() => new LtmcRetraverseModel(_sourceLtmc, formulasToCheck, Configuration));
 
-			using (var checker = new LtmcGenerator(createModel, terminateEarlyCondition, formulasToCheck, Configuration))
-			{
-				PrintStateFormulas(formulasToCheck);
-
-				var labeledTransitionMarkovChain = checker.GenerateStateGraph();
-
-				if (Configuration.WriteGraphvizModels)
-				{
-					Configuration.DefaultTraceOutput.WriteLine("Ltmc Model normalized");
-					labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
-				}
-				return labeledTransitionMarkovChain;
-			}
+			Configuration.DefaultTraceOutput.WriteLine("Retraverse Model");
+			var labeledTransitionMarkovChain = GenerateLtmc(createModel, terminateEarlyCondition, formulasToCheck);
+			return labeledTransitionMarkovChain;
 		}
 		
 		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
 		{
 			var ltmc = GenerateLabeledMarkovChain(terminateEarlyCondition);
 			return ConvertToMarkovChain(ltmc);
-		}
-
-
-		public void AddFormulaToCheck(Formula formula)
-		{
-			Requires.NotNull(formula, nameof(formula));
-			
-			if (ProbabilityMatrixCreationStarted)
-			{
-				throw new Exception(nameof(AddFormulaToCheck) + " must be called before " + nameof(GenerateMarkovChain));
-			}
-			_formulasToCheck.Add(formula);
 		}
 	}
 }
