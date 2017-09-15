@@ -272,29 +272,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return matrix;
         }
 
-        private static bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
-        {
-            if (source == target)
-                return true;
-
-            if (!seenRobots.Add(source))
-                return false;
-
-            foreach (var output in source.Outputs)
-            {
-                foreach (var output2 in output.Outputs)
-                {
-                    if (output2 == target)
-                        return true;
-
-                    if (IsConnected((RobotAgent)output2, target, seenRobots))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
 
         public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
         {
