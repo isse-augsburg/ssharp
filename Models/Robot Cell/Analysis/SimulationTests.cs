@@ -42,19 +42,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
     public class SimulationTests
 	{
-        internal class ProfileBasedSimulator
-        {
-            private readonly Model _model;
-            Tuple<Fault, ReliabilityAttribute, IComponent>[] faults;
-            private readonly Simulator _simulator;
-            public int Throughput { get; set; } = 0;
-
-            public ProfileBasedSimulator(Model model)
-            {
-                _simulator = new Simulator(model);
-                _model = (Model)_simulator.Model;
-                CollectFaults();
-            }
+	    [Test]
+	    public void TempTestSystemGeneratorTest()
+	    {
+	        var tsg = new TestSystemGenerator();
+            var result = tsg.Generate(100, 10, 40);
+	        ;
+	    }
 
             private void CollectFaults()
             {
