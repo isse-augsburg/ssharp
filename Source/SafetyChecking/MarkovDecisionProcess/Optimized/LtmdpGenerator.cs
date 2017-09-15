@@ -28,11 +28,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 	using Formula;
 	using ExecutableModel;
 	using AnalysisModel;
+	using Utilities;
+
 	/// <summary>
-	///   Generates a <see cref="LabeledTransitionMarkovDecisionProcessOld" /> for an <see cref="AnalysisModel" />.
+	///   Generates a <see cref="LabeledTransitionMarkovDecisionProcess" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal class LtmdpGenerator : ModelTraverser
+	internal class LtmdpGenerator : DisposableObject
 	{
+		public ModelTraverser ModelTraverser { get; }
+
 		private readonly LabeledTransitionMarkovDecisionProcess _mdp;
 
 		/// <summary>
@@ -43,17 +47,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmdpGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
 									 AnalysisConfiguration configuration)
-			: base(createModel, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize, terminateEarlyCondition != null)
 		{
-			_mdp = new LabeledTransitionMarkovDecisionProcess(Context.ModelCapacity.NumberOfStates, Context.ModelCapacity.NumberOfTransitions);
+			ModelTraverser = new ModelTraverser(createModel, configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize, terminateEarlyCondition != null);
+
+			_mdp = new LabeledTransitionMarkovDecisionProcess(ModelTraverser.Context.ModelCapacity.NumberOfStates, ModelTraverser.Context.ModelCapacity.NumberOfTransitions);
 			_mdp.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(_mdp, configuration));
+			ModelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(_mdp, configuration));
 			if (terminateEarlyCondition != null)
 			{
-				_mdp.CreateStutteringState(Context.StutteringStateIndex);
+				_mdp.CreateStutteringState(ModelTraverser.Context.StutteringStateIndex);
 				var terminalteEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_mdp.StateFormulaLabels, terminateEarlyCondition);
-				Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
+				ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminalteEarlyFunc));
 			}
 		}
 
@@ -62,10 +67,24 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Optimized
 		/// </summary>
 		internal LabeledTransitionMarkovDecisionProcess GenerateStateGraph()
 		{
-			Context.Output.WriteLine("Generating labeled transition markov decision process.");
-			TraverseModelAndReport();
+			ModelTraverser.Context.Output.WriteLine("Generating labeled transition markov decision process.");
+			ModelTraverser.TraverseModelAndReport();
 
 			return _mdp;
+		}
+
+
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
+		{
+			ModelTraverser.Context.States.SafeDispose();
+
+			if (!disposing)
+				return;
+			ModelTraverser.SafeDispose();
 		}
 	}
 }

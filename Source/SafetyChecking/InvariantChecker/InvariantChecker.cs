@@ -35,19 +35,20 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	/// <summary>
 	///   Checks whether an invariant holds for all states of an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class InvariantChecker : ModelTraverser
+	internal sealed class InvariantChecker : DisposableObject
 	{
+		public ModelTraverser ModelTraverser { get; }
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="createModel">Creates the model that should be checked.</param>
-		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="formulaIndex">The zero-based index of the analyzed formula.</param>
 		internal InvariantChecker(AnalysisModelCreator createModel, AnalysisConfiguration configuration, int formulaIndex)
-			: base(createModel, configuration, 0,false)
 		{
-			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationByIndexAction(formulaIndex));
+			ModelTraverser = new ModelTraverser(createModel, configuration, 0, false);
+			ModelTraverser.Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationByIndexAction(formulaIndex));
 		}
 
 		/// <summary>
@@ -57,11 +58,11 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		/// <param name="stateFormula">The analyzed stateFormula.</param>
 		internal InvariantChecker(AnalysisModelCreator createModel, AnalysisConfiguration configuration, Formula stateFormula)
-			: base(createModel, configuration,0, false)
 		{
-			var formulasToCheck = AnalyzedModels.First().Formulas;
+			ModelTraverser = new ModelTraverser(createModel, configuration, 0, false);
+			var formulasToCheck = ModelTraverser.AnalyzedModels.First().Formulas;
 
-			Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction(formulasToCheck,stateFormula));
+			ModelTraverser.Context.TraversalParameters.TransitionActions.Add(() => new InvariantViolationAction(formulasToCheck,stateFormula));
 		}
 
 		/// <summary>
@@ -69,21 +70,21 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// </summary>
 		internal InvariantAnalysisResult Check()
 		{
-			Context.Output.WriteLine("Performing invariant check.");
-			
-			TraverseModelAndReport();
+			ModelTraverser.Context.Output.WriteLine("Performing invariant check.");
 
-			if (!Context.FormulaIsValid && !Context.Configuration.ProgressReportsOnly)
-				Context.Output.WriteLine("Invariant violation detected.");
+			ModelTraverser.TraverseModelAndReport();
+
+			if (!ModelTraverser.Context.FormulaIsValid && !ModelTraverser.Context.Configuration.ProgressReportsOnly)
+				ModelTraverser.Context.Output.WriteLine("Invariant violation detected.");
 
 			return new InvariantAnalysisResult
 			{
-				FormulaHolds = Context.FormulaIsValid,
-				CounterExample = Context.CounterExample,
-				StateCount = Context.StateCount,
-				TransitionCount = Context.TransitionCount,
-				ComputedTransitionCount = Context.ComputedTransitionCount,
-				LevelCount = Context.LevelCount
+				FormulaHolds = ModelTraverser.Context.FormulaIsValid,
+				CounterExample = ModelTraverser.Context.CounterExample,
+				StateCount = ModelTraverser.Context.StateCount,
+				TransitionCount = ModelTraverser.Context.TransitionCount,
+				ComputedTransitionCount = ModelTraverser.Context.ComputedTransitionCount,
+				LevelCount = ModelTraverser.Context.LevelCount
 			};
 		}
 
@@ -94,8 +95,11 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
-			Context.States.SafeDispose();
-			base.OnDisposing(disposing);
+			ModelTraverser.Context.States.SafeDispose();
+
+			if (!disposing)
+				return;
+			ModelTraverser.SafeDispose();
 		}
 	}
 }

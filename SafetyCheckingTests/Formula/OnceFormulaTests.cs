@@ -33,6 +33,7 @@ namespace Tests.Formula
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
+	using static TestFormulaGenerator;
 
 	public class OnceFormulaTests
 	{
@@ -43,51 +44,7 @@ namespace Tests.Formula
 		{
 			Output = new TestTraceOutput(output);
 		}
-
-		private Formula CreateBinaryFormula()
-		{
-			var ap1 = new AtomarPropositionFormula();
-			var ap2 = new AtomarPropositionFormula();
-			var bexp = new BinaryFormula(ap1, BinaryOperator.And, ap2);
-			return bexp;
-		}
-
-		private Formula CreateNestedOnceFormula()
-		{
-			var bexp = CreateBinaryFormula();
-			var once = new UnaryFormula(bexp, UnaryOperator.Once);
-			return once;
-		}
-
-		private Formula CreateConnectedNestedOnceFormula()
-		{
-			var once1 = CreateNestedOnceFormula();
-			var once2 = CreateNestedOnceFormula();
-			var conOnce = new BinaryFormula(once1, BinaryOperator.Or, once2);
-			return conOnce;
-		}
-
-		private Formula CreateFinallyNestedFormula()
-		{
-			var once = CreateNestedOnceFormula();
-			var fin = new UnaryFormula(once, UnaryOperator.Finally);
-			return fin;
-		}
-
-		private Formula CreateFinallyConnectedNestedFormula()
-		{
-			var conOnce = CreateConnectedNestedOnceFormula();
-			var fin = new UnaryFormula(conOnce, UnaryOperator.Finally);
-			return fin;
-		}
 		
-		private Formula CreateNestedTwice()
-		{
-			var once = CreateNestedOnceFormula();
-			var twice = new UnaryFormula(once, UnaryOperator.Once);
-			return twice;
-		}
-
 		[Fact]
 		public void CollectMaximalNormalizableFormulasWithBinary()
 		{

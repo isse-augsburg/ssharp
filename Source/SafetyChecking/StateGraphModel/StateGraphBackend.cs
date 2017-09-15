@@ -79,8 +79,8 @@ namespace ISSE.SafetyChecking.StateGraphModel
 					suppressedFaults = suppressedFaults.Add(fault);
 			}
 
-			_checker.Context.TraversalParameters.TransitionModifiers.Clear();
-			_checker.Context.TraversalParameters.TransitionModifiers.Add(() => new FaultSuppressionModifier(suppressedFaults));
+			_checker.ModelTraverser.Context.TraversalParameters.TransitionModifiers.Clear();
+			_checker.ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new FaultSuppressionModifier(suppressedFaults));
 
 			return _checker.Check();
 		}

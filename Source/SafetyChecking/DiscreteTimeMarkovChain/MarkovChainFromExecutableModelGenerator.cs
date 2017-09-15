@@ -90,7 +90,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				if (onceFormulas.Count > 0)
 				{
 					Func<ObserveFormulasModifier> observeFormulasModifier = () => new ObserveFormulasModifier(executableStateFormulas, formulasToObserve);
-					checker.Context.TraversalParameters.TransitionModifiers.Add(observeFormulasModifier);
+					checker.ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(observeFormulasModifier);
 				}
 
 				labeledTransitionMarkovChain = checker.GenerateStateGraph();

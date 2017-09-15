@@ -36,7 +36,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	/// <summary>
 	///   A base class for model traversers that travserse an <see cref="AnalysisModel" /> to carry out certain actions.
 	/// </summary>
-	internal abstract class ModelTraverser: DisposableObject
+	internal sealed class ModelTraverser : DisposableObject
 	{
 		public const int DeriveTransitionSizeFromModel = -1;
 
@@ -110,7 +110,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   Traverses the model.
 		/// </summary>
-		protected void TraverseModel()
+		private void TraverseModel()
 		{
 			Reset();
 
@@ -175,7 +175,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// <summary>
 		///   Rethrows any exception thrown during the traversal process, if any.
 		/// </summary>
-		protected void RethrowTraversalException()
+		private void RethrowTraversalException()
 		{
 			if (Context.Exception == null)
 				return;

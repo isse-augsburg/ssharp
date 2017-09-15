@@ -28,12 +28,15 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using Formula;
 	using ExecutableModel;
 	using AnalysisModel;
+	using Utilities;
 
 	/// <summary>
 	///   Generates a <see cref="LabeledTransitionMarkovChain" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class LtmcGenerator : ModelTraverser
+	internal sealed class LtmcGenerator : DisposableObject
 	{
+		public ModelTraverser ModelTraverser { get; }
+
 		private readonly LabeledTransitionMarkovChain _markovChain;
 
 		/// <summary>
@@ -45,15 +48,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal LtmcGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
 									 AnalysisConfiguration configuration)
-			: base(createModel, configuration, LabeledTransitionMarkovChain.TransitionSize,terminateEarlyCondition!=null)
 		{
-			_markovChain = new LabeledTransitionMarkovChain(Context.ModelCapacity.NumberOfStates,Context.ModelCapacity.NumberOfTransitions);
+			ModelTraverser = new ModelTraverser(createModel, configuration, LabeledTransitionMarkovChain.TransitionSize, terminateEarlyCondition != null);
+
+			_markovChain = new LabeledTransitionMarkovChain(ModelTraverser.Context.ModelCapacity.NumberOfStates, ModelTraverser.Context.ModelCapacity.NumberOfTransitions);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
-			
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
+
+			ModelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
 			if (terminateEarlyCondition != null)
 			{
-				_markovChain.CreateStutteringState(Context.StutteringStateIndex);
+				_markovChain.CreateStutteringState(ModelTraverser.Context.StutteringStateIndex);
 				if (!terminateEarlyCondition.IsStateFormula())
 				{
 					configuration.DefaultTraceOutput.WriteLine("Ignoring terminateEarlyCondition (not a StateFormula).");
@@ -61,7 +65,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				else
 				{
 					var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
-					Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
+					ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
 				}
 
 			}
@@ -72,9 +76,23 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		internal LabeledTransitionMarkovChain GenerateStateGraph()
 		{
-			Context.Output.WriteLine($"Generating labeled transition markov chain.");
-			TraverseModelAndReport();
+			ModelTraverser.Context.Output.WriteLine($"Generating labeled transition markov chain.");
+			ModelTraverser.TraverseModelAndReport();
 			return _markovChain;
+		}
+
+
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
+		{
+			ModelTraverser.Context.States.SafeDispose();
+
+			if (!disposing)
+				return;
+			ModelTraverser.SafeDispose();
 		}
 	}
 }

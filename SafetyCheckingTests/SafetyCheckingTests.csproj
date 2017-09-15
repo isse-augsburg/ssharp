@@ -78,6 +78,8 @@
     <Compile Include="DiscreteTimeMarkovChain\MarkovChainFromMarkovChainTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinLtmcModelCheckerTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LabeledTransitionMarkovChainExamples.cs" />
+    <Compile Include="Formula\FormulaManagerTests.cs" />
+    <Compile Include="Formula\TestFormulaGenerator.cs" />
     <Compile Include="Formula\OnceFormulaTests.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelCheckerTests.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\LtmdpBuilderDuringTraversalTests.cs" />

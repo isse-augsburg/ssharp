@@ -28,13 +28,16 @@ namespace ISSE.SafetyChecking.StateGraphModel
 	using AnalysisModelTraverser;
 	using System.Linq;
 	using ExecutedModel;
+	using Utilities;
 
 	/// <summary>
 	///   Generates a <see cref="StateGraph" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	internal sealed class StateGraphGenerator<TExecutableModel> : ModelTraverser where TExecutableModel : ExecutableModel<TExecutableModel>
+	internal sealed class StateGraphGenerator<TExecutableModel> : DisposableObject where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly StateGraph<TExecutableModel> _stateGraph;
+
+		private readonly ModelTraverser _modelTraverser;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -43,15 +46,16 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// <param name="configuration">The analysis configuration that should be used.</param>
 		internal StateGraphGenerator(AnalysisModelCreator createModel, 
 									 AnalysisConfiguration configuration)
-			: base(createModel, configuration, DeriveTransitionSizeFromModel, false)
 		{
-			var analyzedModel = AnalyzedModels.OfType<ExecutedModel<TExecutableModel>>().First();
+			_modelTraverser = new ModelTraverser(createModel, configuration, ModelTraverser.DeriveTransitionSizeFromModel, false);
+
+			var analyzedModel = _modelTraverser.AnalyzedModels.OfType<ExecutedModel<TExecutableModel>>().First();
 
 			_stateGraph = new StateGraph<TExecutableModel>(
-				Context, analyzedModel.TransitionSize,
+				_modelTraverser.Context, analyzedModel.TransitionSize,
 				analyzedModel.RuntimeModel, analyzedModel.RuntimeModelCreator);
 
-			Context.TraversalParameters.BatchedTransitionActions.Add(() => new StateGraphBuilder<TExecutableModel>(_stateGraph));
+			_modelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new StateGraphBuilder<TExecutableModel>(_stateGraph));
 		}
 
 		/// <summary>
@@ -59,10 +63,22 @@ namespace ISSE.SafetyChecking.StateGraphModel
 		/// </summary>
 		internal StateGraph<TExecutableModel> GenerateStateGraph()
 		{
-			Context.Output.WriteLine("Generating state graph.");
-			TraverseModelAndReport();
+			_modelTraverser.Context.Output.WriteLine("Generating state graph.");
+			_modelTraverser.TraverseModelAndReport();
 
 			return _stateGraph;
+		}
+
+		/// <summary>
+		///   Disposes the object, releasing all managed and unmanaged resources.
+		/// </summary>
+		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
+		protected override void OnDisposing(bool disposing)
+		{
+			if (!disposing)
+				return;
+
+			_modelTraverser.SafeDispose();
 		}
 	}
 }

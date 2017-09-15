@@ -87,9 +87,9 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		{
 			ChangeFaultActivations(minimalCriticalFaultSet, activation);
 
-			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Clear();
+			_invariantChecker.ModelTraverser.Context.TraversalParameters.TransitionModifiers.Clear();
 
-			_invariantChecker.Context.TraversalParameters.TransitionModifiers.Add(
+			_invariantChecker.ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(
 				() => new FaultOrderModifier(firstFault, secondFault, forceSimultaneous));
 
 			return _invariantChecker.Check();
@@ -100,7 +100,7 @@ namespace ISSE.SafetyChecking.MinimalCriticalSetAnalysis
 		/// </summary>
 		private void ChangeFaultActivations(FaultSet faults, Activation activation)
 		{
-			foreach (var model in _invariantChecker.AnalyzedModels.Cast<ExecutedModel<TExecutableModel>>())
+			foreach (var model in _invariantChecker.ModelTraverser.AnalyzedModels.Cast<ExecutedModel<TExecutableModel>>())
 				model.ChangeFaultActivations(GetUpdateFaultActivations(faults, activation));
 		}
 

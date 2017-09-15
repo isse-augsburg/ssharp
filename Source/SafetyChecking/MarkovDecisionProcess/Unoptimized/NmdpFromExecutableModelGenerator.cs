@@ -76,7 +76,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// </summary>
 		private NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
-			using (var checker = new LtmdpGenerator<TExecutableModel>(createModel, terminateEarlyCondition, executableStateFormulas, Configuration))
+			using (var checker = new LtmdpGenerator(createModel, terminateEarlyCondition, executableStateFormulas, Configuration))
 			{
 				PrintStateFormulas(executableStateFormulas);
 
