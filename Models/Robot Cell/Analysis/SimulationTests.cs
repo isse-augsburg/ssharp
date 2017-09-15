@@ -40,7 +40,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using NUnit.Framework;
 	using RDotNet;
 
-    public class SimulationTests
+    public partial class SimulationTests
 	{
 	    [Test]
 	    public void TempTestSystemGeneratorTest()
