@@ -79,8 +79,12 @@
     <Compile Include="Analysis\BackToBackTests.cs" />
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
     <Compile Include="Analysis\SimulationTests.cs" />
+    <Compile Include="Analysis\SimulationTests.ProfileBasedSimulator.cs">
+      <DependentUpon>SimulationTests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Analysis\FunctionalTests.cs" />
+    <Compile Include="Modeling\AgentCapabilityGenerator.cs" />
     <Compile Include="Modeling\Controllers\Agent.cs" />
     <Compile Include="Analysis\AnalysisMode.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\FastController.cs" />
@@ -90,9 +94,13 @@
     <Compile Include="Modeling\Controllers\Reconfiguration\PerformanceMeasurementController.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\VerifyingController.cs" />
     <Compile Include="Modeling\Controllers\Resource.cs" />
+    <Compile Include="Modeling\Controllers\SimpleProcessCapability.cs" />
     <Compile Include="Modeling\Controllers\Task.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\FaultyController.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\TolerableAnalysisController.cs" />
+    <Compile Include="Modeling\DummyAgent.cs" />
+    <Compile Include="Modeling\DummyCapability.cs" />
+    <Compile Include="Modeling\IOGraphGenerator.cs" />
     <Compile Include="Modeling\Model.cs" />
     <Compile Include="Modeling\ModelBuilder.cs" />
     <Compile Include="Modeling\ModelBuilder.RouteHelper.cs" />
@@ -107,6 +115,7 @@
     <Compile Include="Modeling\Plants\Tool.cs" />
     <Compile Include="Modeling\Plants\Workpiece.cs" />
     <Compile Include="Modeling\SampleModels.cs" />
+    <Compile Include="Modeling\TestSystemGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
