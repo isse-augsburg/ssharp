@@ -53,13 +53,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return this;
 		}
 
-		public ModelBuilder DefineTask(int count, params ICapability[] capabilities)
+		public ModelBuilder DefineTask(int numWorkpieces = 10, params ICapability[] capabilities)
 		{
 			var task = new Task(capabilities);
 			_model.Tasks.Add(task);
 			_model.TaskQueue.Enqueue(task);
 
-			for (var i = 0; i < count; ++i)
+			for (var i = 0; i < numWorkpieces; ++i)
 			{
 				var workpiece = CreateWorkpiece(capabilities);
 				_model.Resources.Add(new Resource(task, workpiece));

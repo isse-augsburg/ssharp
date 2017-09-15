@@ -302,7 +302,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			protected override bool CheckOutput(Agent agent) => false;
 		}
 
-		// TODO: a common base class for these effects would be nice (once S# supports it)
+	    // TODO: a common base class for these effects would be nice (once S# supports it)
 		[FaultEffect, Priority(1)]
 		public class DrillBrokenEffect : RobotAgent
 		{

@@ -24,10 +24,25 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
 	public enum ProductionAction
 	{
-		None,
 		Drill,
 		Insert,
 		Tighten,
-		Polish
-	}
+		Polish,
+        GenericA,
+        GenericB,
+        GenericC,
+        GenericD,
+	    GenericE,
+	    GenericF,
+	    GenericG,
+	    GenericH,
+	    GenericI,
+	    GenericJ,
+	    GenericK,
+	    GenericL,
+	    GenericM,
+	    GenericN,
+	    GenericO,
+	    GenericP
+    }
 }
