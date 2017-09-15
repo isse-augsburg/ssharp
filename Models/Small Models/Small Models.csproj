@@ -69,6 +69,9 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Experiments\Experiment1\OldAugmentedModel2.cs" />
+    <Compile Include="Experiments\Experiment1\OldModel2.cs" />
+    <Compile Include="Experiments\Experiment1\OldModel2Analysis.cs" />
     <Compile Include="Model3\Model3.cs" />
     <Compile Include="Model2\Model2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

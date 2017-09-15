@@ -225,7 +225,7 @@ namespace ISSE.SafetyChecking.Utilities
 		/// </summary>
 		/// <param name="condition">The condition that, if <c>false</c>, causes the exception to be raised.</param>
 		/// <param name="message">A message providing further details about the assertion.</param>
-		[DebuggerHidden, ContractAnnotation("condition: false => halt")]
+		[ContractAnnotation("condition: false => halt")]
 		public static void That(bool condition, [NotNull] string message)
 		{
 			NotNullOrWhitespace(message, nameof(message));

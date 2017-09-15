@@ -20,19 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Tests.Formula
+namespace Tests.FormulaManager
 {
-	using ISSE.SafetyChecking.Formula;
-	using ISSE.SafetyChecking.GenericDataStructures;
 	using Utilities;
-	using Xunit;
 	using Xunit.Abstractions;
+	using static Formula.TestFormulaGenerator;
 
 	public class FormulaManagerTests
 	{

@@ -22,16 +22,10 @@
 
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Threading;
-	using ExecutableModel;
 	using Utilities;
 	using AnalysisModel;
 	using Formula;
-	using AnalysisModelTraverser;
 	using System.Linq;
-	using ExecutedModel;
 
 	public class MarkovChainFromMarkovChainGenerator : LtmcGenerator
 	{

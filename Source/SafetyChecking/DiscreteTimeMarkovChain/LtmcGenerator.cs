@@ -59,10 +59,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
 		/// <param name="output">The callback that should be used to output messages.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal void InitializeLtmcGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas,
-									 AnalysisConfiguration configuration)
+		internal void InitializeLtmcGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
 		{
-			ModelTraverser = new ModelTraverser(createModel, configuration, LabeledTransitionMarkovChain.TransitionSize, terminateEarlyCondition != null);
+			ModelTraverser = new ModelTraverser(createModel, Configuration, LabeledTransitionMarkovChain.TransitionSize, terminateEarlyCondition != null);
 
 			_markovChain = new LabeledTransitionMarkovChain(ModelTraverser.Context.ModelCapacity.NumberOfStates, ModelTraverser.Context.ModelCapacity.NumberOfTransitions);
 			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
@@ -73,7 +72,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				_markovChain.CreateStutteringState(ModelTraverser.Context.StutteringStateIndex);
 				if (!terminateEarlyCondition.IsStateFormula())
 				{
-					configuration.DefaultTraceOutput.WriteLine("Ignoring terminateEarlyCondition (not a StateFormula).");
+					Configuration.DefaultTraceOutput.WriteLine("Ignoring terminateEarlyCondition (not a StateFormula).");
 				}
 				else
 				{
@@ -110,7 +109,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			LabeledTransitionMarkovChain labeledTransitionMarkovChain;
 
-			InitializeLtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas, Configuration);
+			InitializeLtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas);
 			{
 				foreach (var onceFormula in onceFormulas)
 				{
@@ -133,7 +132,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			if (Configuration.WriteGraphvizModels)
 			{
-				PrintStateFormulas(executableStateFormulas);
+				FormulaManager.PrintStateFormulas(executableStateFormulas, Configuration.DefaultTraceOutput);
 				Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");
 				labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
 			}
@@ -164,15 +163,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				throw new Exception(nameof(AddFormulaToCheck) + " must be called before the traversal of the model started!");
 			}
 			_formulasToCheck.Add(formula);
-		}
-
-		protected void PrintStateFormulas(Formula[] stateFormulas)
-		{
-			Configuration.DefaultTraceOutput?.WriteLine("Labels");
-			for (var i = 0; i < stateFormulas.Length; i++)
-			{
-				Configuration.DefaultTraceOutput?.WriteLine($"\t {i} {stateFormulas[i].Label}: {stateFormulas[i]}");
-			}
 		}
 
 

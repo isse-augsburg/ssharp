@@ -26,14 +26,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.Formula
+namespace Tests.FormulaManager
 {
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.GenericDataStructures;
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using static TestFormulaGenerator;
+	using static Formula.TestFormulaGenerator;
 
 	public class OnceFormulaTests
 	{
