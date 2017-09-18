@@ -186,7 +186,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			{
 				stateFormulaCollector.VisitNewTopLevelFormula(stateFormula);
 			}
-			if (_terminateEarlyFormula)
+			if (_terminateEarlyFormula != null)
 			{
 				stateFormulaCollector.VisitNewTopLevelFormula(_terminateEarlyFormula);
 			}
@@ -210,7 +210,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			{
 				onceFormulaCollector.VisitNewTopLevelFormula(formula);
 			}
-			if (_terminateEarlyFormula)
+			if (_terminateEarlyFormula != null)
 			{
 				onceFormulaCollector.VisitNewTopLevelFormula(_terminateEarlyFormula);
 			}
@@ -243,8 +243,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 			NeedsStutteringState = true;
 			
-			Assert.That(_labelsOfKnownFormulas.Contains(_terminateEarlyFormula.Label), "terminateEarlyFormula cannot be evaluated");
-			
+
+			// This method also succeeds with Once formulas, when those Once formulas have been normalized (i.e. a observeFormulasModifier exists)
 			var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(FinalStateFormulaLabels.ToArray(), _terminateEarlyFormula);
 			_transitionModifierGenerators.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
 		}

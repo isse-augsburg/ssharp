@@ -55,8 +55,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = true;
 			markovChainGenerator.AddFormulaToCheck(final9Once7Formula);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
+			var dtmc = markovChainGenerator.GenerateMarkovChain(is9Once7Formula);
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)
@@ -65,6 +66,37 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			}
 
 			probability.Is(0.4*0.4+0.6, 0.00000001).ShouldBe(true);
+		}
+
+
+		[Fact]
+		public void CheckOnceWithNonAtomarOperand()
+		{
+			var m = new Model();
+			Probability probability;
+			
+			var once7MoreComplex = new BinaryFormula(Model.IsInState7, BinaryOperator.And, Model.IsInState7);
+			var once7Formula = new UnaryFormula(once7MoreComplex, UnaryOperator.Once);
+			var is9Once7Formula = new BinaryFormula(Model.IsInState9, BinaryOperator.And, once7Formula);
+			var final9Once7Formula = new UnaryFormula(is9Once7Formula, UnaryOperator.Finally);
+
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
+			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			markovChainGenerator.Configuration.WriteGraphvizModels = true;
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = true;
+			markovChainGenerator.AddFormulaToCheck(final9Once7Formula);
+			var dtmc = markovChainGenerator.GenerateMarkovChain(is9Once7Formula);
+			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
+			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				probability = modelChecker.CalculateProbability(final9Once7Formula);
+			}
+
+			probability.Is(0.4 * 0.4 + 0.6, 0.00000001).ShouldBe(true);
 		}
 
 		public class Model : SimpleModelBase
