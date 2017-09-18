@@ -72,7 +72,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			markovChainGenerator.AddFormulaToCheck(finally2);
-			var dtmc = markovChainGenerator.GenerateMarkovChain(stateIs2);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			dtmc.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());

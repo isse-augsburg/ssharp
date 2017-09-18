@@ -49,13 +49,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		public LabeledTransitionMarkovDecisionProcess GenerateLabeledTransitionMarkovDecisionProcess(Formula terminateEarlyCondition = null)
+		public LabeledTransitionMarkovDecisionProcess GenerateLabeledTransitionMarkovDecisionProcess()
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 
 			ProbabilityMatrixCreationStarted = true;
-
-			FormulaManager.SetTerminateEarlyFormula(terminateEarlyCondition);
+			
 			FormulaManager.Calculate(Configuration);
 			var stateFormulasToCheckInBaseModel = FormulaManager.StateFormulasToCheckInBaseModel.ToArray();
 
@@ -72,9 +71,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		public NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(Formula terminateEarlyCondition = null)
+		public NestedMarkovDecisionProcess GenerateMarkovDecisionProcess()
 		{
-			var ltmdp = GenerateLabeledTransitionMarkovDecisionProcess(terminateEarlyCondition);
+			var ltmdp = GenerateLabeledTransitionMarkovDecisionProcess();
 			return ConvertToNmdp(ltmdp);
 		}
 

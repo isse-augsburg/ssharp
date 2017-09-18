@@ -47,6 +47,13 @@ namespace ISSE.SafetyChecking
 		ExternalMrmc
 	}
 
+	public enum LtmdpModelChecker
+	{
+		BuiltInLtmdp,
+		BuiltInNmdp,
+		BuildInMdp
+	}
+
 	/// <summary>
 	///   Configures S#'s model checker, determining the amount of CPU cores and memory to use.
 	/// </summary>
@@ -114,7 +121,7 @@ namespace ISSE.SafetyChecking
 		{
 			AllowFaultsOnInitialTransitions = false,
 			UseOptionProbabilitiesInSimulation = false,
-			EnableEarlyTermination = true,
+			EnableEarlyTermination = false,
 			CpuCount = Int32.MaxValue,
 			ProgressReportsOnly = false,
 			DefaultTraceOutput = Console.Out,
@@ -130,7 +137,8 @@ namespace ISSE.SafetyChecking
 			MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithUndo,
 			LimitOfActiveFaults = null,
 			RetraversalNormalizations = RetraversalNormalizations.None,
-			LtmcModelChecker = LtmcModelChecker.BuiltInDtmc
+			LtmcModelChecker = LtmcModelChecker.BuiltInDtmc,
+			LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp
 		};
 
 		/// <summary>
@@ -204,5 +212,9 @@ namespace ISSE.SafetyChecking
 		/// <summary>
 		/// </summary>
 		public LtmcModelChecker LtmcModelChecker { get; set; }
+
+		/// <summary>
+		/// </summary>
+		public LtmdpModelChecker LtmdpModelChecker { get; set; }
 	}
 }

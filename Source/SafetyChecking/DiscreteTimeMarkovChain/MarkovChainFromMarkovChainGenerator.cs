@@ -37,9 +37,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_sourceLtmc = ltmc;
 		}
 
-		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain(Formula terminateEarlyCondition = null)
+		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain()
 		{
-			FormulaManager.SetTerminateEarlyFormula(terminateEarlyCondition);
 			FormulaManager.Calculate(Configuration);
 			var stateFormulasToCheckInBaseModel = FormulaManager.StateFormulasToCheckInBaseModel.ToArray();
 
@@ -52,9 +51,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return labeledTransitionMarkovChain;
 		}
 		
-		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
+		public DiscreteTimeMarkovChain GenerateMarkovChain()
 		{
-			var ltmc = GenerateLabeledMarkovChain(terminateEarlyCondition);
+			var ltmc = GenerateLabeledMarkovChain();
 			return ConvertToMarkovChain(ltmc);
 		}
 	}

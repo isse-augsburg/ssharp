@@ -48,6 +48,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			markovChainGenerator.AddFormulaToCheck(finally3);
 			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			dtmc.ExportToGv(Output.TextWriterAdapter());
@@ -58,6 +59,8 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				probabilityOfFinally3 = modelChecker.CalculateProbability(finally3);
 			}
 
+			Assert.Equal(7, dtmc.States);
+			Assert.Equal(7, dtmc.Transitions);
 			probabilityOfFinally3.Between(0.66, 0.67).ShouldBe(true);
 		}
 
@@ -72,8 +75,9 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.EnableEarlyTermination = true;
 			markovChainGenerator.AddFormulaToCheck(finally3);
-			var dtmc = markovChainGenerator.GenerateMarkovChain(stateIs3);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			dtmc.ExportToGv(Output.TextWriterAdapter());
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
@@ -81,7 +85,8 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			{
 				probabilityOfFinally3 = modelChecker.CalculateProbability(finally3);
 			}
-
+			Assert.Equal(5, dtmc.States);
+			Assert.Equal(5, dtmc.Transitions);
 			probabilityOfFinally3.Between(0.66, 0.67).ShouldBe(true);
 		}
 

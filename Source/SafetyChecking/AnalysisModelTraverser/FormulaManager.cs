@@ -37,8 +37,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 		private readonly List<Formula> _formulasToCheck = new List<Formula>();
 
-		private Formula _terminateEarlyFormula;
-
 		private bool _finished = false;
 
 		private AnalysisConfiguration _configuration;
@@ -154,12 +152,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			}
 		}
 
-		public void SetTerminateEarlyFormula(Formula terminateEarlyFormula)
-		{
-			Assert.That(!_finished, $"terminateEarly formula may not be set after {nameof(Calculate)}");
-			_terminateEarlyFormula = terminateEarlyFormula;
-		}
-
 		/// <summary>
 		/// </summary>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
@@ -186,10 +178,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			{
 				stateFormulaCollector.VisitNewTopLevelFormula(stateFormula);
 			}
-			if (_terminateEarlyFormula != null)
-			{
-				stateFormulaCollector.VisitNewTopLevelFormula(_terminateEarlyFormula);
-			}
 			var stateFormulas = stateFormulaCollector.CollectedStateFormulas;
 
 			foreach (var formula in stateFormulas)
@@ -209,10 +197,6 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			foreach (var formula in _formulasToCheck)
 			{
 				onceFormulaCollector.VisitNewTopLevelFormula(formula);
-			}
-			if (_terminateEarlyFormula != null)
-			{
-				onceFormulaCollector.VisitNewTopLevelFormula(_terminateEarlyFormula);
 			}
 			var deepestOnceFormulas =  onceFormulaCollector.DeepestOnceFormulasWithCompilableOperand.ToArray();
 
@@ -237,16 +221,49 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			if (!_configuration.EnableEarlyTermination)
 				return;
 
-			// TerminateEarly also works with a OnceFormula when the TransitionModifier is added before the EarlyTerminationModifier
-			if (_terminateEarlyFormula == null)
+			if (_formulasToCheck.Count != 1)
+				return;
+
+			var terminateEarlyFormula = ExtractTerminateEarlyFromFormula(_formulasToCheck.First());
+
+			if (terminateEarlyFormula == null)
 				return;
 
 			NeedsStutteringState = true;
 			
-
 			// This method also succeeds with Once formulas, when those Once formulas have been normalized (i.e. a observeFormulasModifier exists)
-			var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(FinalStateFormulaLabels.ToArray(), _terminateEarlyFormula);
+			var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(FinalStateFormulaLabels.ToArray(), terminateEarlyFormula);
 			_transitionModifierGenerators.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
+		}
+		
+		public Formula ExtractTerminateEarlyFromFormula(Formula formula)
+		{
+			var unboundUnaryFormula = formula as UnaryFormula;
+			var boundedUnaryFormula = formula as BoundedUnaryFormula;
+			var unboundBinaryFormula = formula as BinaryFormula;
+			var boundedBinaryFormula = formula as BoundedBinaryFormula;
+			
+			if (unboundUnaryFormula != null && unboundUnaryFormula.Operator == UnaryOperator.Finally)
+			{
+				return unboundUnaryFormula.Operand;
+			}
+			if (boundedUnaryFormula != null && boundedUnaryFormula.Operator == UnaryOperator.Finally)
+			{
+				return boundedUnaryFormula.Operand;
+			}
+			if (unboundBinaryFormula != null && unboundBinaryFormula.Operator == BinaryOperator.Until)
+			{
+				// Can also extract negative left operand of U.
+				var negativeLeft = new UnaryFormula(unboundBinaryFormula.LeftOperand,UnaryOperator.Not);
+				return new BinaryFormula(negativeLeft, BinaryOperator.Or,unboundBinaryFormula.RightOperand);
+			}
+			if (boundedBinaryFormula != null && boundedBinaryFormula.Operator == BinaryOperator.Until)
+			{
+				// Can also extract negative left operand of U.
+				var negativeLeft = new UnaryFormula(boundedBinaryFormula.LeftOperand, UnaryOperator.Not);
+				return new BinaryFormula(negativeLeft, BinaryOperator.Or, boundedBinaryFormula.RightOperand);
+			}
+			return null;
 		}
 
 		public static void PrintStateFormulas(IEnumerable<Formula> stateFormulas, TextWriter writer)

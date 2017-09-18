@@ -57,7 +57,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = true;
 			markovChainGenerator.AddFormulaToCheck(final9Once7Formula);
-			var dtmc = markovChainGenerator.GenerateMarkovChain(is9Once7Formula);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)
@@ -88,7 +88,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = true;
 			markovChainGenerator.AddFormulaToCheck(final9Once7Formula);
-			var dtmc = markovChainGenerator.GenerateMarkovChain(is9Once7Formula);
+			var dtmc = markovChainGenerator.GenerateMarkovChain();
 			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
 			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
 			using (modelChecker)

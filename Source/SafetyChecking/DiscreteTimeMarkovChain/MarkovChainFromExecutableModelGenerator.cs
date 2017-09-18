@@ -40,13 +40,12 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_runtimeModelCreator = runtimeModelCreator;
 		}
 
-		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain(Formula terminateEarlyCondition = null)
+		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain()
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 
 			ProbabilityMatrixCreationStarted = true;
-
-			FormulaManager.SetTerminateEarlyFormula(terminateEarlyCondition);
+			
 			FormulaManager.Calculate(Configuration);
 			var stateFormulasToCheckInBaseModel = FormulaManager.StateFormulasToCheckInBaseModel.ToArray();
 
@@ -61,9 +60,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return ltmc;
 		}
 
-		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
+		public DiscreteTimeMarkovChain GenerateMarkovChain()
 		{
-			var ltmc = GenerateLabeledMarkovChain(terminateEarlyCondition);
+			var ltmc = GenerateLabeledMarkovChain();
 			return ConvertToMarkovChain(ltmc);
 		}
 	}
