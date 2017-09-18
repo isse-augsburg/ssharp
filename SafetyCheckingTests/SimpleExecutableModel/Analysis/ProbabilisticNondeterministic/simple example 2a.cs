@@ -60,7 +60,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var final1Formula = new BoundedUnaryFormula(SharedModels.SimpleExample2a.StateIs1, UnaryOperator.Finally, 4);
 			var final2Formula = new BoundedUnaryFormula(SharedModels.SimpleExample2a.StateIs2, UnaryOperator.Finally, 4);
 
-			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
+			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
 			nmdpGenerator.Configuration.WriteGraphvizModels = true;
 			nmdpGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;

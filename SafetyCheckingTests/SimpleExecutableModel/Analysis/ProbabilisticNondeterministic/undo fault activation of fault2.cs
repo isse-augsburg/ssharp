@@ -53,7 +53,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var final100Formula = new BoundedUnaryFormula(Model.StateIs100, UnaryOperator.Finally, 5);
 			var final200Formula = new BoundedUnaryFormula(Model.StateIs200, UnaryOperator.Finally, 5);
 
-			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
+			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			nmdpGenerator.AddFormulaToCheck(final100Formula);
 			nmdpGenerator.AddFormulaToCheck(final200Formula);

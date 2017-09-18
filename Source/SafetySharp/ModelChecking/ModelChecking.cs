@@ -76,9 +76,9 @@ namespace SafetySharp.ModelChecking
 		}
 	}
 
-	public sealed class SafetySharpNmdpFromExecutableModelGenerator : NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>
+	public sealed class SafetySharpMarkovDecisionProcessFromExecutableModelGenerator : NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>
 	{
-		public SafetySharpNmdpFromExecutableModelGenerator(ModelBase model) : base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model))
+		public SafetySharpMarkovDecisionProcessFromExecutableModelGenerator(ModelBase model) : base(SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model))
 		{
 		}
 	}

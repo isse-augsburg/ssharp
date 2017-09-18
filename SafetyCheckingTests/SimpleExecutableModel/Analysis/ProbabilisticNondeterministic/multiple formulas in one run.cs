@@ -50,7 +50,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var final2 = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
 			var final3 = new UnaryFormula(new SimpleStateInRangeFormula(3), UnaryOperator.Finally);
 
-			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
+			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			nmdpGenerator.AddFormulaToCheck(final2);
 			nmdpGenerator.AddFormulaToCheck(final3);
@@ -86,7 +86,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var final2 = new UnaryFormula(new SimpleStateInRangeFormula(2), UnaryOperator.Finally);
 			var final3 = new UnaryFormula(new SimpleStateInRangeFormula(3), UnaryOperator.Finally);
 
-			var nmdpGenerator = new SimpleNmdpFromExecutableModelGenerator(m);
+			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
 			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			nmdpGenerator.AddFormulaToCheck(final2);
 			nmdpGenerator.AddFormulaToCheck(final3);
