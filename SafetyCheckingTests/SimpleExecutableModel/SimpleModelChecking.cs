@@ -76,7 +76,7 @@ namespace Tests.SimpleExecutableModel
 		}
 	}
 
-	public sealed class SimpleNmdpFromExecutableModelGenerator : NmdpFromExecutableModelGenerator<SimpleExecutableModel>
+	public sealed class SimpleNmdpFromExecutableModelGenerator : MarkovDecisionProcessFromExecutableModelGenerator<SimpleExecutableModel>
 	{
 		public SimpleNmdpFromExecutableModelGenerator(SimpleModelBase model) : base(SimpleExecutableModel.CreateExecutedModelFromFormulasCreator(model))
 		{

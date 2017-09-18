@@ -156,7 +156,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		public void OneReflexiveTransition()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp,AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp);
 
 			// add initial state
 			Clear();
@@ -189,7 +189,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		public void ThreeReflexiveStatesFromInitialState()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp, AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp);
 
 			// add initial state
 			Clear();
@@ -241,7 +241,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		public void ThreeReflexiveStatesFromNonInitialState()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp, AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp);
 
 			// add initial state
 			Clear();
@@ -299,7 +299,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		public void StatesFromNonInitialStateWithMoreDistributions()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp, AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp);
 
 			// add initial state
 			Clear();
@@ -374,7 +374,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		public void TwoDistributionWithFiveContinuationsAfterTwoSplitsWithRemove()
 		{
 			var ltmdp = new LabeledTransitionMarkovDecisionProcess(StateCapacity, TransitionCapacity);
-			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp, AnalysisConfiguration.Default);
+			var ltmdpBuilder = new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(ltmdp);
 
 			// add initial state
 			Clear();

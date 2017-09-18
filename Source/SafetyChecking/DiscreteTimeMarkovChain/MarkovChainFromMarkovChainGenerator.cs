@@ -27,7 +27,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using Formula;
 	using System.Linq;
 
-	public class MarkovChainFromMarkovChainGenerator : LtmcGenerator
+	public class MarkovChainFromMarkovChainGenerator : MarkovChainGenerator
 	{
 		private readonly LabeledTransitionMarkovChain _sourceLtmc;
 		

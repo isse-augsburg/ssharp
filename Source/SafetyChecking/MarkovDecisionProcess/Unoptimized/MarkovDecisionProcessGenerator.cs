@@ -1,4 +1,4 @@
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2017, Institute for Software & Systems Engineering
 // 
@@ -20,23 +20,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
+using System;
+using System.Threading;
+using ISSE.SafetyChecking.Utilities;
+
+namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
+	using AnalysisModel;
 	using AnalysisModelTraverser;
 	using Formula;
-	using AnalysisModel;
-	using AnalysisModelTraverser.TraversalModifiers;
-	using Utilities;
+	using System.Linq;
 
-	/// <summary>
-	///   Generates a <see cref="LabeledTransitionMarkovChain" /> for an <see cref="AnalysisModel" />.
-	/// </summary>
-	public abstract class LtmcGenerator
+	public abstract class MarkovDecisionProcessGenerator
 	{
-		private LabeledTransitionMarkovChain _markovChain;
+		private LabeledTransitionMarkovDecisionProcess _mdp;
 		
 		public bool ProbabilityMatrixCreationStarted { get; protected set; } = false;
 
@@ -44,26 +41,29 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
-		
+
 		protected readonly FormulaManager FormulaManager = new FormulaManager();
-		
+
 		/// <summary>
-		///   Generates a <see cref="DiscreteTimeMarkovChain" /> for the model created by <paramref name="createModel" />.
+		///   Generates a <see cref="LabeledTransitionMarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal LabeledTransitionMarkovChain GenerateLtmc(AnalysisModelCreator createModel)
+		/// <param name="createModel">Creates the model that should be checked.</param>
+		internal LabeledTransitionMarkovDecisionProcess GenerateLtmdp(AnalysisModelCreator createModel)
 		{
-			using (var modelTraverser = new ModelTraverser(createModel, Configuration, LabeledTransitionMarkovChain.TransitionSize, FormulaManager.NeedsStutteringState))
+
+			using (var modelTraverser = new ModelTraverser(createModel, Configuration, LabeledTransitionMarkovDecisionProcess.TransitionSize,
+					FormulaManager.NeedsStutteringState))
 			{
-				_markovChain = new LabeledTransitionMarkovChain(modelTraverser.Context.ModelCapacity.NumberOfStates, modelTraverser.Context.ModelCapacity.NumberOfTransitions);
-				_markovChain.StateFormulaLabels = FormulaManager.FinalStateFormulaLabels.ToArray();
-				
+				_mdp = new LabeledTransitionMarkovDecisionProcess(modelTraverser.Context.ModelCapacity.NumberOfStates, modelTraverser.Context.ModelCapacity.NumberOfTransitions);
+				_mdp.StateFormulaLabels = FormulaManager.FinalStateFormulaLabels.ToArray();
+
 				if (FormulaManager.NeedsStutteringState)
-					_markovChain.CreateStutteringState(modelTraverser.Context.StutteringStateIndex);
+					_mdp.CreateStutteringState(modelTraverser.Context.StutteringStateIndex);
 
 				modelTraverser.Context.TraversalParameters.TransitionModifiers.AddRange(FormulaManager.TransitionModifierGenerators);
-				modelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
-
-				modelTraverser.Context.Output.WriteLine($"Generating labeled transition markov chain.");
+				modelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovDecisionProcess.LtmdpBuilderDuringTraversal(_mdp));
+				
+				modelTraverser.Context.Output.WriteLine("Generating labeled transition markov decision process.");
 				modelTraverser.TraverseModelAndReport();
 
 				// StateStorage must be freed manually. Reason is that invariant checker does not free up the
@@ -72,30 +72,29 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				modelTraverser.Context.States.SafeDispose();
 			}
 
+
 			if (Configuration.WriteGraphvizModels)
 			{
 				FormulaManager.PrintStateFormulas(FormulaManager.FinalStateFormulas, Configuration.DefaultTraceOutput);
-				Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");
-				_markovChain.ExportToGv(Configuration.DefaultTraceOutput);
+				Configuration.DefaultTraceOutput.WriteLine("Ltmdp Model");
+				_mdp.ExportToGv(Configuration.DefaultTraceOutput);
 			}
 
-			return _markovChain;
+			return _mdp;
 		}
 		
-
-		internal DiscreteTimeMarkovChain ConvertToMarkovChain(LabeledTransitionMarkovChain labeledTransitionMarkovChain)
+		internal NestedMarkovDecisionProcess ConvertToNmdp(LabeledTransitionMarkovDecisionProcess ltmdp)
 		{
-			var ltmcToMc = new LtmcToDtmc(labeledTransitionMarkovChain);
-			var markovChain = ltmcToMc.MarkovChain;
+			var ltmdpToNmdp = new LtmdpToNmdp(ltmdp);
+			var nmdp = ltmdpToNmdp.NestedMarkovDecisionProcess;
 			if (Configuration.WriteGraphvizModels)
 			{
-				Configuration.DefaultTraceOutput.WriteLine("Dtmc Model");
-				markovChain.ExportToGv(Configuration.DefaultTraceOutput);
+				Configuration.DefaultTraceOutput.WriteLine("Nmdp Model");
+				nmdp.ExportToGv(Configuration.DefaultTraceOutput);
 			}
-			return markovChain;
+			return nmdp;
 		}
-
-
+		
 		public void AddFormulaToCheck(Formula formula)
 		{
 			Requires.NotNull(formula, nameof(formula));

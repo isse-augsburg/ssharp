@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using Modeling;
 
 	//The LtmdpBuilder is tightly coupled to LabeledTransitionMarkovDecisionProcess, so we make it a nested class
-	internal unsafe partial class LabeledTransitionMarkovDecisionProcess
+	public unsafe partial class LabeledTransitionMarkovDecisionProcess
 	{
 		/// <summary>
 		///   Builds up a <see cref="LabeledTransitionMarkovDecisionProcess" /> instance during model traversal.
@@ -52,7 +52,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			///   Initializes a new instance.
 			/// </summary>
 			/// <param name="ltmdp">The Markov chain that should be built up.</param>
-			public LtmdpBuilderDuringTraversal(LabeledTransitionMarkovDecisionProcess ltmdp, AnalysisConfiguration configuration)
+			public LtmdpBuilderDuringTraversal(LabeledTransitionMarkovDecisionProcess ltmdp)
 			{
 				Requires.NotNull(ltmdp, nameof(ltmdp));
 				_ltmdp = ltmdp;

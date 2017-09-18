@@ -236,7 +236,7 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var nmdpGenerator = new NmdpFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
+			var nmdpGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			nmdpGenerator.AddFormulaToCheck(formula);
 			nmdpGenerator.Configuration.SuccessorCapacity *= 8;
 			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess(terminateEarlyFormula);

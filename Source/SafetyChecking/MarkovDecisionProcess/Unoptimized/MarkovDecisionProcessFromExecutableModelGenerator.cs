@@ -20,27 +20,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
+namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
 	using System;
+	using System.Collections.Generic;
+	using System.Linq;
+	using System.Threading;
+	using AnalysisModelTraverser;
 	using ExecutableModel;
+	using Formula;
 	using Utilities;
 	using AnalysisModel;
-	using Formula;
-	using System.Linq;
 	using ExecutedModel;
 
-	public class MarkovChainFromExecutableModelGenerator<TExecutableModel> : MarkovChainGenerator where TExecutableModel : ExecutableModel<TExecutableModel>
+	public class MarkovDecisionProcessFromExecutableModelGenerator<TExecutableModel> : MarkovDecisionProcessGenerator where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
 		private readonly ExecutableModelCreator<TExecutableModel> _runtimeModelCreator;
 
-		public MarkovChainFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
+		// Create Tasks which make the checks (workers)
+		// First formulas to check are collected (thus, the probability matrix only has to be calculated once)
+		public MarkovDecisionProcessFromExecutableModelGenerator(ExecutableModelCreator<TExecutableModel> runtimeModelCreator)
 		{
 			Requires.NotNull(runtimeModelCreator, nameof(runtimeModelCreator));
 			_runtimeModelCreator = runtimeModelCreator;
 		}
+		
 
-		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain(Formula terminateEarlyCondition = null)
+		/// <summary>
+		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
+		/// </summary>
+		public LabeledTransitionMarkovDecisionProcess GenerateLabeledTransitionMarkovDecisionProcess(Formula terminateEarlyCondition = null)
 		{
 			Requires.That(IntPtr.Size == 8, "Model checking is only supported in 64bit processes.");
 
@@ -53,18 +62,21 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			ExecutedModel<TExecutableModel> model = null;
 			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulasToCheckInBaseModel);
 			Func<AnalysisModel> createAnalysisModelFunc = () =>
-				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, Configuration);
+				model = new LtmdpExecutedModel<TExecutableModel>(modelCreator, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
-			
-			var ltmc = GenerateLtmc(createAnalysisModel);
 
-			return ltmc;
+			var ltmdp = GenerateLtmdp(createAnalysisModel);
+			return ltmdp;
 		}
-
-		public DiscreteTimeMarkovChain GenerateMarkovChain(Formula terminateEarlyCondition = null)
+		
+		/// <summary>
+		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
+		/// </summary>
+		public NestedMarkovDecisionProcess GenerateMarkovDecisionProcess(Formula terminateEarlyCondition = null)
 		{
-			var ltmc = GenerateLabeledMarkovChain(terminateEarlyCondition);
-			return ConvertToMarkovChain(ltmc);
+			var ltmdp = GenerateLabeledTransitionMarkovDecisionProcess(terminateEarlyCondition);
+			return ConvertToNmdp(ltmdp);
 		}
+
 	}
 }

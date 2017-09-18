@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using ExecutableModel;
 
 
-	internal unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
+	public unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionTargetElement);
 		private const int AvgGraphNodesPerSucceedingState = 7;
@@ -205,7 +205,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return _transitionTarget[position];
 		}
 
-		public TreeTraversal GetTreeTraverser(long parentContinuationId)
+		internal TreeTraversal GetTreeTraverser(long parentContinuationId)
 		{
 			return new TreeTraversal(this, parentContinuationId);
 		}
@@ -332,7 +332,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 
 
-		public DirectChildrenEnumerator GetDirectChildrenEnumerator(long parentContinuationId)
+		internal DirectChildrenEnumerator GetDirectChildrenEnumerator(long parentContinuationId)
 		{
 			return new DirectChildrenEnumerator(this, parentContinuationId);
 		}
