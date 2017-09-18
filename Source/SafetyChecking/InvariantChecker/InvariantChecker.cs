@@ -95,6 +95,9 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
 		protected override void OnDisposing(bool disposing)
 		{
+			// StateStorage must be freed manually. Reason is that invariant checker does not free up the
+			// space, because it might be necessary for other usages of the ModelTraversers (e.g. StateGraphGenerator
+			// which keeps the States for the StateGraph)
 			ModelTraverser.Context.States.SafeDispose();
 
 			if (!disposing)

@@ -51,11 +51,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		/// <param name="runtimeModelCreator">A factory function that creates the model instance that should be executed.</param>
 		/// <param name="configuration">The analysis configuration that should be used.</param>
-		/// <param name="stateHeaderBytes">
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </param>
-		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, int stateHeaderBytes, AnalysisConfiguration configuration)
-			: base(runtimeModelCreator, stateHeaderBytes, configuration)
+		internal LtmcExecutedModel(CoupledExecutableModelCreator<TExecutableModel> runtimeModelCreator, AnalysisConfiguration configuration)
+			: base(runtimeModelCreator, 0, configuration)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(TemporalStateStorage, configuration.SuccessorCapacity, formulas);

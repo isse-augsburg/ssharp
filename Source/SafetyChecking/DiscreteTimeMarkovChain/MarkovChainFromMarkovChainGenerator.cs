@@ -39,14 +39,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		public LabeledTransitionMarkovChain GenerateLabeledMarkovChain(Formula terminateEarlyCondition = null)
 		{
-			//TODO: Embed Once (see MarkovChainFromExecutableModelGenerator how to do it)
+			FormulaManager.SetTerminateEarlyFormula(terminateEarlyCondition);
+			FormulaManager.Calculate(Configuration);
+			var stateFormulasToCheckInBaseModel = FormulaManager.StateFormulasToCheckInBaseModel.ToArray();
 
-			var formulasToCheck = FormulasToCheck.ToArray();
-
-			var createModel = new AnalysisModelCreator(() => new LtmcRetraverseModel(_sourceLtmc, formulasToCheck, Configuration));
+			var createModel = new AnalysisModelCreator(() => new LtmcRetraverseModel(_sourceLtmc, stateFormulasToCheckInBaseModel, Configuration));
 
 			Configuration.DefaultTraceOutput.WriteLine("Retraverse Model");
-			var labeledTransitionMarkovChain = GenerateLtmc(createModel, terminateEarlyCondition, formulasToCheck);
+
+			var labeledTransitionMarkovChain = GenerateLtmc(createModel);
+
 			return labeledTransitionMarkovChain;
 		}
 		

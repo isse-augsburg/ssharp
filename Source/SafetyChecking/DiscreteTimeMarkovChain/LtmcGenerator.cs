@@ -34,10 +34,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	/// <summary>
 	///   Generates a <see cref="LabeledTransitionMarkovChain" /> for an <see cref="AnalysisModel" />.
 	/// </summary>
-	public class LtmcGenerator : DisposableObject
+	public abstract class LtmcGenerator
 	{
-		internal ModelTraverser ModelTraverser { get; private set; }
-
 		private LabeledTransitionMarkovChain _markovChain;
 		
 		public bool ProbabilityMatrixCreationStarted { get; protected set; } = false;
@@ -46,98 +44,42 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		///   The model checker's configuration that determines certain model checker settings.
 		/// </summary>
 		public AnalysisConfiguration Configuration = AnalysisConfiguration.Default;
-
-
-		protected readonly List<Formula> _formulasToCheck = new List<Formula>();
-
-		public IEnumerable<Formula> FormulasToCheck => _formulasToCheck;
-
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="createModel">Creates the model that should be checked.</param>
-		/// <param name="executableStateFormulas">The state formulas that can be evaluated over the generated state graph.</param>
-		/// <param name="output">The callback that should be used to output messages.</param>
-		/// <param name="configuration">The analysis configuration that should be used.</param>
-		internal void InitializeLtmcGenerator(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
-		{
-			ModelTraverser = new ModelTraverser(createModel, Configuration, LabeledTransitionMarkovChain.TransitionSize, terminateEarlyCondition != null);
-
-			_markovChain = new LabeledTransitionMarkovChain(ModelTraverser.Context.ModelCapacity.NumberOfStates, ModelTraverser.Context.ModelCapacity.NumberOfTransitions);
-			_markovChain.StateFormulaLabels = executableStateFormulas.Select(stateFormula=>stateFormula.Label).ToArray();
-
-			ModelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
-			if (terminateEarlyCondition != null)
-			{
-				_markovChain.CreateStutteringState(ModelTraverser.Context.StutteringStateIndex);
-				if (!terminateEarlyCondition.IsStateFormula())
-				{
-					Configuration.DefaultTraceOutput.WriteLine("Ignoring terminateEarlyCondition (not a StateFormula).");
-				}
-				else
-				{
-					var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_markovChain.StateFormulaLabels, terminateEarlyCondition);
-					ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
-				}
-			}
-		}
-
-		/// <summary>
-		///   Generates the state graph.
-		/// </summary>
-		internal LabeledTransitionMarkovChain GenerateStateGraph()
-		{
-			ModelTraverser.Context.Output.WriteLine($"Generating labeled transition markov chain.");
-			ModelTraverser.TraverseModelAndReport();
-			return _markovChain;
-		}
-
-
+		
+		protected readonly FormulaManager FormulaManager = new FormulaManager();
+		
 		/// <summary>
 		///   Generates a <see cref="DiscreteTimeMarkovChain" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		internal LabeledTransitionMarkovChain GenerateLtmc(AnalysisModelCreator createModel, Formula terminateEarlyCondition, Formula[] executableStateFormulas)
+		internal LabeledTransitionMarkovChain GenerateLtmc(AnalysisModelCreator createModel)
 		{
-			// Embed Once-Formulas
-			var onceFormulaCollector = new CollectDeepestOnceFormulasWithCompilableOperandVisitor();
-			foreach (var formula in _formulasToCheck)
+			using (var modelTraverser = new ModelTraverser(createModel, Configuration, LabeledTransitionMarkovChain.TransitionSize, FormulaManager.NeedsStutteringState))
 			{
-				onceFormulaCollector.VisitNewTopLevelFormula(formula);
-			}
-			var onceFormulas = onceFormulaCollector.DeepestOnceFormulasWithCompilableOperand;
+				_markovChain = new LabeledTransitionMarkovChain(modelTraverser.Context.ModelCapacity.NumberOfStates, modelTraverser.Context.ModelCapacity.NumberOfTransitions);
+				_markovChain.StateFormulaLabels = FormulaManager.FinalStateFormulaLabels.ToArray();
+				
+				if (FormulaManager.NeedsStutteringState)
+					_markovChain.CreateStutteringState(modelTraverser.Context.StutteringStateIndex);
 
-			LabeledTransitionMarkovChain labeledTransitionMarkovChain;
+				modelTraverser.Context.TraversalParameters.TransitionModifiers.AddRange(FormulaManager.TransitionModifierGenerators);
+				modelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
 
-			InitializeLtmcGenerator(createModel, terminateEarlyCondition, executableStateFormulas);
-			{
-				foreach (var onceFormula in onceFormulas)
-				{
-					Assert.That(onceFormula.Operator == UnaryOperator.Once, "operator of OnceFormula must be Once");
-				}
-				var onceFormulaLabels = onceFormulas.Select(formula => formula.Label).ToArray();
-				var formulasToObserve = onceFormulas.Select(formula => formula.Operand).ToArray();
+				modelTraverser.Context.Output.WriteLine($"Generating labeled transition markov chain.");
+				modelTraverser.TraverseModelAndReport();
 
-				if (onceFormulas.Count > 0)
-				{
-					var executableStateFormulasLabels = executableStateFormulas.Select(formula => formula.Label).ToArray();
-					Func<ObserveFormulasModifier> observeFormulasModifier = () => new ObserveFormulasModifier(executableStateFormulasLabels, formulasToObserve);
-					ModelTraverser.Context.TraversalParameters.TransitionModifiers.Add(observeFormulasModifier);
-				}
-
-				labeledTransitionMarkovChain = GenerateStateGraph();
-
-				labeledTransitionMarkovChain.StateFormulaLabels =
-					labeledTransitionMarkovChain.StateFormulaLabels.Concat(onceFormulaLabels).ToArray();
+				// StateStorage must be freed manually. Reason is that invariant checker does not free up the
+				// space, because it might be necessary for other usages of the ModelTraversers (e.g. StateGraphGenerator
+				// which keeps the States for the StateGraph)
+				modelTraverser.Context.States.SafeDispose();
 			}
 
 			if (Configuration.WriteGraphvizModels)
 			{
-				FormulaManager.PrintStateFormulas(executableStateFormulas, Configuration.DefaultTraceOutput);
+				FormulaManager.PrintStateFormulas(FormulaManager.FinalStateFormulas, Configuration.DefaultTraceOutput);
 				Configuration.DefaultTraceOutput.WriteLine("Ltmc Model");
-				labeledTransitionMarkovChain.ExportToGv(Configuration.DefaultTraceOutput);
+				_markovChain.ExportToGv(Configuration.DefaultTraceOutput);
 			}
 
-			return labeledTransitionMarkovChain;
+			return _markovChain;
 		}
 		
 
@@ -162,21 +104,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				throw new Exception(nameof(AddFormulaToCheck) + " must be called before the traversal of the model started!");
 			}
-			_formulasToCheck.Add(formula);
-		}
-
-
-		/// <summary>
-		///   Disposes the object, releasing all managed and unmanaged resources.
-		/// </summary>
-		/// <param name="disposing">If true, indicates that the object is disposed; otherwise, the object is finalized.</param>
-		protected override void OnDisposing(bool disposing)
-		{
-			ModelTraverser.Context.States.SafeDispose();
-
-			if (!disposing)
-				return;
-			ModelTraverser.SafeDispose();
+			FormulaManager.AddFormulaToCheck(formula);
 		}
 	}
 }

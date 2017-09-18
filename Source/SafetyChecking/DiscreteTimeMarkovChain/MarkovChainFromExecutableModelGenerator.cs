@@ -23,15 +23,11 @@
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Threading;
 	using ExecutableModel;
 	using Utilities;
 	using AnalysisModel;
 	using Formula;
-	using AnalysisModelTraverser;
 	using System.Linq;
-	using AnalysisModelTraverser.TraversalModifiers;
 	using ExecutedModel;
 
 	public class MarkovChainFromExecutableModelGenerator<TExecutableModel> : LtmcGenerator where TExecutableModel : ExecutableModel<TExecutableModel>
@@ -50,29 +46,17 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			ProbabilityMatrixCreationStarted = true;
 
-			CollectStateFormulasVisitor stateFormulaCollector;
-			if (Configuration.UseAtomarPropositionsAsStateLabels)
-				stateFormulaCollector = new CollectAtomarPropositionFormulasVisitor();
-			else
-				stateFormulaCollector = new CollectMaximalCompilableFormulasVisitor();
-
-			foreach (var stateFormula in _formulasToCheck)
-			{
-				stateFormulaCollector.VisitNewTopLevelFormula(stateFormula);
-			}
-			if (terminateEarlyCondition)
-			{
-				stateFormulaCollector.VisitNewTopLevelFormula(terminateEarlyCondition);
-			}
-			var stateFormulas = stateFormulaCollector.CollectedStateFormulas.ToArray();
+			FormulaManager.SetTerminateEarlyFormula(terminateEarlyCondition);
+			FormulaManager.Calculate(Configuration);
+			var stateFormulasToCheckInBaseModel = FormulaManager.StateFormulasToCheckInBaseModel.ToArray();
 
 			ExecutedModel<TExecutableModel> model = null;
-			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulas);
+			var modelCreator = _runtimeModelCreator.CreateCoupledModelCreator(stateFormulasToCheckInBaseModel);
 			Func<AnalysisModel> createAnalysisModelFunc = () =>
-				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, 0, Configuration);
+				model = new LtmcExecutedModel<TExecutableModel>(modelCreator, Configuration);
 			var createAnalysisModel = new AnalysisModelCreator(createAnalysisModelFunc);
 			
-			var ltmc = GenerateLtmc(createAnalysisModel, terminateEarlyCondition, stateFormulas);
+			var ltmc = GenerateLtmc(createAnalysisModel);
 
 			return ltmc;
 		}

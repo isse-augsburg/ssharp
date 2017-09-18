@@ -41,13 +41,13 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 		private bool _finished = false;
 
-		private readonly AnalysisConfiguration _configuration;
+		private AnalysisConfiguration _configuration;
 
 		/// <summary>
 		///   Contains the state labels after the StateFormulasToCheckInBaseModel have been evaluated and all 
 		///   TransitionModifiers have been executed .
 		/// </summary>
-		private readonly List<string> _finalStateFormulaLabels = new List<string>();
+		private readonly List<Formula> _finalStateFormulas = new List<Formula>();
 
 		/// <summary>
 		///   Contains the formulas which should be checked in the base model (these are the formulas which are
@@ -61,19 +61,16 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		private readonly List<Func<ITransitionModifier>> _transitionModifierGenerators = new List<Func<ITransitionModifier>>();
 
 		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="configuration">The analysis configuration that should be used.</param>
-		public FormulaManager(AnalysisConfiguration configuration)
-		{
-			_configuration = configuration;
-		}
-
-		/// <summary>
 		///   Contains the state labels after the StateFormulasToCheckInBaseModel have been evaluated and all 
 		///   TransitionModifiers have been executed .
 		/// </summary>
-		public IEnumerable<string> FinalStateFormulaLabels => _finalStateFormulaLabels;
+		public IEnumerable<string> FinalStateFormulaLabels => FinalStateFormulas.Select(formula => formula.Label);
+
+		/// <summary>
+		///   Contains the formulas after the StateFormulasToCheckInBaseModel have been evaluated and all 
+		///   TransitionModifiers have been executed .
+		/// </summary>
+		public IEnumerable<Formula> FinalStateFormulas => _finalStateFormulas;
 
 		/// <summary>
 		///   Contains the formulas which should be checked in the base model (these are the formulas which are
@@ -86,6 +83,19 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		internal IEnumerable<Func<ITransitionModifier>> TransitionModifierGenerators => _transitionModifierGenerators;
 
+
+		/// <summary>
+		///   Contains the TransitionModifiers which should be applied to embed observers and allow EarlyTermination.
+		/// </summary>
+		internal bool NeedsStutteringState { get; private set; }
+
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		public FormulaManager()
+		{
+		}
+		
 		public void AddKnownFormulaLabel(string knownFormulaLabel)
 		{
 			Assert.That(!_finished, $"no new elements may be added after {nameof(Calculate)}");
@@ -146,14 +156,18 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 		public void SetTerminateEarlyFormula(Formula terminateEarlyFormula)
 		{
-			Assert.That(!_finished, $"terminateEarly formula may be set after {nameof(Calculate)}");
+			Assert.That(!_finished, $"terminateEarly formula may not be set after {nameof(Calculate)}");
 			_terminateEarlyFormula = terminateEarlyFormula;
 		}
 
-		public void Calculate()
+		/// <summary>
+		/// </summary>
+		/// <param name="configuration">The analysis configuration that should be used.</param>
+		public void Calculate(AnalysisConfiguration configuration)
 		{
 			Assert.That(!_finished, $"{nameof(Calculate)} may only be called once");
 			_finished = true;
+			_configuration = configuration;
 
 			AddStateFormulasToCheckInBaseModel();
 			AddDeepestOnceFormulas();
@@ -182,14 +196,14 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			{
 				_stateFormulasToCheckInBaseModel.Add(formula);
 
-				_finalStateFormulaLabels.Add(formula.Label);
+				_finalStateFormulas.Add(formula);
 				_labelsOfKnownFormulas.Add(formula.Label);
 			}
 		}
 		
 		private void AddDeepestOnceFormulas()
 		{
-			var alreadyKnownLabels = _finalStateFormulaLabels.ToArray();
+			var alreadyKnownLabels = FinalStateFormulaLabels.ToArray();
 
 			var onceFormulaCollector = new CollectDeepestOnceFormulasWithCompilableOperandVisitor();
 			foreach (var formula in _formulasToCheck)
@@ -213,31 +227,40 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			foreach (var formula in deepestOnceFormulas)
 			{
 				Assert.That(formula.Operator == UnaryOperator.Once, "operator of OnceFormula must be Once");
-				_finalStateFormulaLabels.Add(formula.Label);
+				_finalStateFormulas.Add(formula);
 				_labelsOfKnownFormulas.Add(formula.Label);
 			}
 		}
 		
 		public void AddTerminateEarlyFormula()
 		{
+			if (!_configuration.EnableEarlyTermination)
+				return;
+
 			// TerminateEarly also works with a OnceFormula when the TransitionModifier is added before the EarlyTerminationModifier
 			if (_terminateEarlyFormula == null)
 				return;
 
-			throw new Exception("TODO: when code was replaced, do not forget to call createstutteringstate");
+			NeedsStutteringState = true;
 			
 			Assert.That(_labelsOfKnownFormulas.Contains(_terminateEarlyFormula.Label), "terminateEarlyFormula cannot be evaluated");
 			
-			var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(_finalStateFormulaLabels.ToArray(), _terminateEarlyFormula);
+			var terminateEarlyFunc = StateFormulaSetEvaluatorCompilationVisitor.Compile(FinalStateFormulaLabels.ToArray(), _terminateEarlyFormula);
 			_transitionModifierGenerators.Add(() => new EarlyTerminationModifier(terminateEarlyFunc));
 		}
 
-		public static void PrintStateFormulas(Formula[] stateFormulas, TextWriter writer)
+		public static void PrintStateFormulas(IEnumerable<Formula> stateFormulas, TextWriter writer)
 		{
-			writer.WriteLine("Labels");
-			for (var i = 0; i < stateFormulas.Length; i++)
+			writer?.WriteLine("Labels");
+
+			var i = 0;
+			using (var enumerator = stateFormulas.GetEnumerator())
 			{
-				writer?.WriteLine($"\t {i} {stateFormulas[i].Label}: {stateFormulas[i]}");
+				while (enumerator.MoveNext())
+				{
+					writer?.WriteLine($"\t {i} {enumerator.Current.Label}: {enumerator.Current}");
+					i++;
+				}
 			}
 		}
 	}
