@@ -192,13 +192,19 @@ namespace Tests
 		[Theory(Skip = "Requires external tools"), MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
 		public void ProbabilisticMrmc(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(ExternalDtmcModelCheckerMrmc));
+			ExecuteDynamicTests(file, ISSE.SafetyChecking.LtmcModelChecker.ExternalMrmc);
+		}
+
+		[Theory(Skip = "Not implemented yet"), MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
+		public void ProbabilisticBuiltinLtmc(string test, string file)
+		{
+			ExecuteDynamicTests(file, ISSE.SafetyChecking.LtmcModelChecker.BuiltInLtmc);
 		}
 
 		[Theory, MemberData("AllProbabilisticModelCheckerTests", "Analysis/Probabilistic")]
-		public void ProbabilisticBuiltin(string test, string file)
+		public void ProbabilisticBuiltinDtmc(string test, string file)
 		{
-			ExecuteDynamicTests(file, typeof(BuiltinDtmcModelChecker));
+			ExecuteDynamicTests(file, ISSE.SafetyChecking.LtmcModelChecker.BuiltInDtmc);
 		}
 	}
 }

@@ -24,6 +24,7 @@ namespace Tests.Analysis.Probabilistic
 {
 	using System;
 	using System.Diagnostics;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
@@ -46,10 +47,10 @@ namespace Tests.Analysis.Probabilistic
 
 			var markovChainGenerator = new SafetySharpMarkovChainFromExecutableModelGenerator(TestModel.InitializeModel(c));
 			markovChainGenerator.Configuration.ModelCapacity=ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration.LtmcModelChecker=(ISSE.SafetyChecking.LtmcModelChecker)Arguments[0];
 			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			var typeOfModelChecker = (Type)Arguments[0];
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, ltmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
