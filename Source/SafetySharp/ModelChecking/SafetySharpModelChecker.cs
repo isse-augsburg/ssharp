@@ -72,8 +72,6 @@ namespace SafetySharp.Analysis
 	/// </summary>
 	public static class SafetySharpModelChecker
 	{
-		public static bool _convertNmdpToMdp = false;
-
 		public static AnalysisConfiguration TraversalConfiguration;
 
 		static SafetySharpModelChecker()
@@ -152,38 +150,14 @@ namespace SafetySharp.Analysis
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.AddFormulaToCheck(formula);
-			if (TraversalConfiguration.LtmcModelChecker == LtmcModelChecker.BuiltInLtmc)
-			{
-				markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 
-				var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
-				using (var modelChecker = new BuiltinLtmcModelChecker(markovChain, TraversalConfiguration.DefaultTraceOutput))
-				{
-					probability = modelChecker.CalculateProbability(formula);
-				}
-			}
-			else
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(TraversalConfiguration, markovChain, TraversalConfiguration.DefaultTraceOutput))
 			{
-				var markovChain = markovChainGenerator.GenerateMarkovChain();
-				if (TraversalConfiguration.LtmcModelChecker == LtmcModelChecker.BuiltInDtmc)
-				{
-					using (var modelChecker = new BuiltinDtmcModelChecker(markovChain, TraversalConfiguration.DefaultTraceOutput))
-					{
-						probability = modelChecker.CalculateProbability(formula);
-					}
-				}
-				else if (TraversalConfiguration.LtmcModelChecker == LtmcModelChecker.ExternalMrmc)
-				{
-					using (var modelChecker = new ExternalDtmcModelCheckerMrmc(markovChain, TraversalConfiguration.DefaultTraceOutput))
-					{
-						probability = modelChecker.CalculateProbability(formula);
-					}
-				}
-				else
-				{
-					throw new NotImplementedException();
-				}
+				probability = modelChecker.CalculateProbability(formula);
 			}
+			
 			System.GC.Collect();
 			return probability;
 		}
@@ -241,28 +215,17 @@ namespace SafetySharp.Analysis
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-			var nmdpGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
-			nmdpGenerator.AddFormulaToCheck(formula);
-			nmdpGenerator.Configuration.SuccessorCapacity *= 8;
-			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
-
-
-			if (_convertNmdpToMdp)
+			var ltmdpGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = TraversalConfiguration };
+			ltmdpGenerator.AddFormulaToCheck(formula);
+			ltmdpGenerator.Configuration.SuccessorCapacity *= 8;
+			ltmdpGenerator.Configuration.UseCompactStateStorage = true;
+			var ltmdp = ltmdpGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+			
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(TraversalConfiguration, ltmdp, TraversalConfiguration.DefaultTraceOutput))
 			{
-				var nmdpToMpd = new NmdpToMdp(nmdp);
-				var mdp = nmdpToMpd.MarkovDecisionProcess;
-				using (var modelChecker = new BuiltinMdpModelChecker(mdp, TraversalConfiguration.DefaultTraceOutput))
-				{
-					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
-				}
+				probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
 			}
-			else
-			{
-				using (var modelChecker = new BuiltinNmdpModelChecker(nmdp, TraversalConfiguration.DefaultTraceOutput))
-				{
-					probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
-				}
-			}
+			
 			System.GC.Collect();
 			return probabilityRangeToReachState;
 		}

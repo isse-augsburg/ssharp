@@ -56,6 +56,7 @@
     <Compile Include="AnalysisModel\TransitionFlags.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinLtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinDtmcModelCheckerWithoutDictionaries.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\ConfigurationDependentLtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcModelChecker.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcRetraverseModel.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcToGv.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="GenericDataStructures\AutoResizeBigVector.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\BuiltinNmdpModelChecker.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\ConfigurationDependentLtmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LabeledTransitionMarkovDecisionProcess.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpBuilderDuringTraversal.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpCachedLabeledStates.cs" />
@@ -97,7 +99,7 @@
     <Compile Include="MarkovDecisionProcess\Unoptimized\MarkovDecisionProcessGenerator.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NestedMarkovDecisionProcess.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\MarkovDecisionProcessFromExecutableModelGenerator.cs" />
-    <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpModelChecker.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpToGv.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToGv.cs" />
     <Compile Include="ExternalToolSupport\ExternalMdpModelCheckerPrism.cs" />

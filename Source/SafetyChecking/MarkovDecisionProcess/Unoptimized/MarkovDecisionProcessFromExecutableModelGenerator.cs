@@ -71,7 +71,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <summary>
 		///   Generates a <see cref="MarkovDecisionProcess" /> for the model created by <paramref name="createModel" />.
 		/// </summary>
-		public NestedMarkovDecisionProcess GenerateMarkovDecisionProcess()
+		public NestedMarkovDecisionProcess GenerateNestedMarkovDecisionProcess()
 		{
 			var ltmdp = GenerateLabeledTransitionMarkovDecisionProcess();
 			return ConvertToNmdp(ltmdp);

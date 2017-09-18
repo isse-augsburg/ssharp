@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
@@ -31,7 +32,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	
+	using LtmdpModelChecker = ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized.LtmdpModelChecker;
 
 	public class SimpleExample2a : AnalysisTest
 	{
@@ -39,8 +40,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		{
 		}
 
-		[Fact]
-		public void Check()
+		private void Check(AnalysisConfiguration configuration)
 		{
 			var m = new SharedModels.SimpleExample2a();
 			Probability minProbabilityOfFinal0;
@@ -60,18 +60,14 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var final1Formula = new BoundedUnaryFormula(SharedModels.SimpleExample2a.StateIs1, UnaryOperator.Finally, 4);
 			var final2Formula = new BoundedUnaryFormula(SharedModels.SimpleExample2a.StateIs2, UnaryOperator.Finally, 4);
 
-			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
-			nmdpGenerator.Configuration.WriteGraphvizModels = true;
-			nmdpGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
-			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			nmdpGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
-			nmdpGenerator.AddFormulaToCheck(final0Formula);
-			nmdpGenerator.AddFormulaToCheck(final0LtFormula);
-			nmdpGenerator.AddFormulaToCheck(final1Formula);
-			nmdpGenerator.AddFormulaToCheck(final2Formula);
-			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
-			var typeOfModelChecker = typeof(BuiltinNmdpModelChecker);
-			var modelChecker = (NmdpModelChecker)Activator.CreateInstance(typeOfModelChecker, nmdp, Output.TextWriterAdapter());
+			var mdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
+			mdpGenerator.Configuration = configuration;
+			mdpGenerator.AddFormulaToCheck(final0Formula);
+			mdpGenerator.AddFormulaToCheck(final0LtFormula);
+			mdpGenerator.AddFormulaToCheck(final1Formula);
+			mdpGenerator.AddFormulaToCheck(final2Formula);
+			var mdp = mdpGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+			var modelChecker = new ConfigurationDependentLtmdpModelChecker(configuration, mdp, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				minProbabilityOfFinal0 = modelChecker.CalculateMinimalProbability(final0Formula);
@@ -93,6 +89,40 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var maxProbabilityOf1And2Calculated = 1.0 - Math.Pow(0.6, 4);
 			maxProbabilityOfFinal1.Is(maxProbabilityOf1And2Calculated, 0.000001).ShouldBe(true);
 			maxProbabilityOfFinal2.Is(maxProbabilityOf1And2Calculated, 0.000001).ShouldBe(true);
+		}
+
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckLtmdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.UseCompactStateStorage = true;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInLtmdp;
+
+			Check(configuration);
+		}
+
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckNmdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInNmdp;
+
+			Check(configuration);
+		}
+
+		[Fact]
+		public void CheckMdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.UseAtomarPropositionsAsStateLabels = false;
+			Check(configuration);
 		}
 	}
 }

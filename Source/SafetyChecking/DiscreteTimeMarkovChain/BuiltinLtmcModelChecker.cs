@@ -48,6 +48,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		// Note: Should be used with using(var modelchecker = new ...)
 		public BuiltinLtmcModelChecker(LabeledTransitionMarkovChain markovChain, TextWriter output = null) : base(markovChain, output)
 		{
+			Requires.That(true, "Need CompactStateStorage to use this model checker");
 			markovChain.AssertIsDense();
 		}
 

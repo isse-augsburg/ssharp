@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using ISSE.SafetyChecking.ExecutedModel;
@@ -42,9 +43,8 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		public UndoFaultActivationOfFault(ITestOutputHelper output = null) : base(output)
 		{
 		}
-
-		[Fact]
-		public void Check()
+		
+		private void Check(AnalysisConfiguration configuration)
 		{
 			var m = new Model();
 			Probability probabilityOfFinal100;
@@ -53,14 +53,12 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var final100Formula = new BoundedUnaryFormula(Model.StateIs100, UnaryOperator.Finally,5);
 			var final200Formula = new BoundedUnaryFormula(Model.StateIs200, UnaryOperator.Finally,5);
 
-			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
-			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			nmdpGenerator.AddFormulaToCheck(final100Formula);
-			nmdpGenerator.AddFormulaToCheck(final200Formula);
-			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
-			nmdp.ExportToGv(Output.TextWriterAdapter());
-			var typeOfModelChecker = typeof(BuiltinNmdpModelChecker);
-			var modelChecker = (BuiltinNmdpModelChecker)Activator.CreateInstance(typeOfModelChecker, nmdp, Output.TextWriterAdapter());
+			var mdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
+			mdpGenerator.Configuration = configuration;
+			mdpGenerator.AddFormulaToCheck(final100Formula);
+			mdpGenerator.AddFormulaToCheck(final200Formula);
+			var mdp = mdpGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+			var modelChecker = new ConfigurationDependentLtmdpModelChecker(configuration, mdp, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				probabilityOfFinal100 = modelChecker.CalculateMinimalProbability(final100Formula);
@@ -69,6 +67,39 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 
 			probabilityOfFinal100.Is(0.6 * 0.8, 0.000001).ShouldBe(true);
 			probabilityOfFinal200.Is(0.4 + 0.6 * 0.2, 0.000001).ShouldBe(true);
+		}
+
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckLtmdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.UseCompactStateStorage = true;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInLtmdp;
+
+			Check(configuration);
+		}
+
+		[Fact]
+		public void CheckNmdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInNmdp;
+
+			Check(configuration);
+		}
+
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckMdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			Check(configuration);
 		}
 
 		public class Model : SimpleModelBase

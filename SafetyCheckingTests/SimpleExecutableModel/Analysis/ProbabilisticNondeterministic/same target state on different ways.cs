@@ -25,6 +25,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 {
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
@@ -32,6 +33,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 	using Shouldly;
 	using Xunit;
 	using Xunit.Abstractions;
+	using LtmdpModelChecker = ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized.LtmdpModelChecker;
 
 	public class SameTargetStateOnDifferentWays : AnalysisTest
 	{
@@ -39,8 +41,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		{
 		}
 
-		[Fact]
-		protected void CheckMdp()
+		private void Check(AnalysisConfiguration configuration)
 		{
 			var m = new Model();
 			Probability minProbabilityOfFinal1;
@@ -48,17 +49,11 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 
 			var finally1 = new UnaryFormula(Model.StateIs1, UnaryOperator.Finally);
 
-			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
-			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			nmdpGenerator.AddFormulaToCheck(finally1);
-			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
-			nmdp.ExportToGv(Output.TextWriterAdapter());
-			Output.Log("");
-			var nmdpToMpd = new NmdpToMdp(nmdp);
-			var mdp = nmdpToMpd.MarkovDecisionProcess;
-			mdp.ExportToGv(Output.TextWriterAdapter());
-			var typeOfModelChecker = typeof(BuiltinMdpModelChecker);
-			var modelChecker = (MdpModelChecker)Activator.CreateInstance(typeOfModelChecker, mdp, Output.TextWriterAdapter());
+			var mdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
+			mdpGenerator.Configuration = configuration;
+			mdpGenerator.AddFormulaToCheck(finally1);
+			var mdp = mdpGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+			var modelChecker = new ConfigurationDependentLtmdpModelChecker(configuration, mdp, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				minProbabilityOfFinal1 = modelChecker.CalculateMinimalProbability(finally1);
@@ -70,28 +65,36 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		}
 
 		[Fact(Skip = "NotImplementedYet")]
-		protected void CheckNmdp()
+		public void CheckLtmdp()
 		{
-			var m = new Model();
-			Probability minProbabilityOfFinal1;
-			Probability maxProbabilityOfFinal1;
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.UseCompactStateStorage = true;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInLtmdp;
 
-			var finally1 = new UnaryFormula(Model.StateIs1, UnaryOperator.Finally);
+			Check(configuration);
+		}
 
-			var nmdpGenerator = new SimpleMarkovDecisionProcessFromExecutableModelGenerator(m);
-			nmdpGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			nmdpGenerator.AddFormulaToCheck(finally1);
-			var nmdp = nmdpGenerator.GenerateMarkovDecisionProcess();
-			var typeOfModelChecker = typeof(BuiltinNmdpModelChecker);
-			var modelChecker = (NmdpModelChecker)Activator.CreateInstance(typeOfModelChecker, nmdp, Output.TextWriterAdapter());
-			using (modelChecker)
-			{
-				minProbabilityOfFinal1 = modelChecker.CalculateMinimalProbability(finally1);
-				maxProbabilityOfFinal1 = modelChecker.CalculateMaximalProbability(finally1);
-			}
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckNmdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInNmdp;
 
-			minProbabilityOfFinal1.Is(0.65, 0.000001).ShouldBe(true);
-			maxProbabilityOfFinal1.Is(0.65, 0.000001).ShouldBe(true);
+			Check(configuration);
+		}
+
+		[Fact]
+		public void CheckMdp()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			Check(configuration);
 		}
 
 		private class Model : SimpleModelBase

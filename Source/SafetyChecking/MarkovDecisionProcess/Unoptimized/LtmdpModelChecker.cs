@@ -30,16 +30,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	/// <summary>
 	///   Represents a base class for external probabilistic model checker tools.
 	/// </summary>
-	internal abstract class NmdpModelChecker : IDisposable
+	public abstract class LtmdpModelChecker : IDisposable
 	{
 		protected TextWriter _output;
 
-		internal NestedMarkovDecisionProcess Nmdp { get; }
+		internal LabeledTransitionMarkovDecisionProcess Ltmdp { get; }
 		
 		// Note: Should be used with using(var modelchecker = new ...)
-		protected NmdpModelChecker(NestedMarkovDecisionProcess nmdp,TextWriter output =null)
+		protected LtmdpModelChecker(LabeledTransitionMarkovDecisionProcess mdp,TextWriter output =null)
 		{
-			Nmdp = nmdp;
+			Ltmdp = mdp;
 			_output = output;
 		}
 

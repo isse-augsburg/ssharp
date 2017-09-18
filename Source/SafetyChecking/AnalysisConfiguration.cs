@@ -138,7 +138,7 @@ namespace ISSE.SafetyChecking
 			LimitOfActiveFaults = null,
 			RetraversalNormalizations = RetraversalNormalizations.None,
 			LtmcModelChecker = LtmcModelChecker.BuiltInDtmc,
-			LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp
+			LtmdpModelChecker = LtmdpModelChecker.BuiltInNmdp
 		};
 
 		/// <summary>

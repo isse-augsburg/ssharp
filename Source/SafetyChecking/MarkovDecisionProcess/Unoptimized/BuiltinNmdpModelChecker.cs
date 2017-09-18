@@ -34,8 +34,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using GenericDataStructures;
 	using Utilities;
 
-	class BuiltinNmdpModelChecker : NmdpModelChecker
+	class BuiltinNmdpModelChecker : IDisposable
 	{
+		protected TextWriter _output;
+
+		internal NestedMarkovDecisionProcess Nmdp { get; }
+
 		private NestedMarkovDecisionProcess.UnderlyingDigraph _underlyingDigraph;
 
 		private double[] CreateDerivedVector(Dictionary<int, bool> exactlyOneStates)
@@ -65,8 +69,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		// Note: Should be used with using(var modelchecker = new ...)
 		public BuiltinNmdpModelChecker(NestedMarkovDecisionProcess nmdp, TextWriter output = null)
-			: base(nmdp, output)
 		{
+			Nmdp = nmdp;
+			_output = output;
 			_underlyingDigraph = Nmdp.CreateUnderlyingDigraph();
 		}
 
@@ -327,7 +332,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 
 
-		internal override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
+		internal ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -360,7 +365,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return new ProbabilityRange(minResult, maxResult);
 		}
 		
-		internal override Probability CalculateMinimalProbability(Formula formulaToCheck)
+		internal Probability CalculateMinimalProbability(Formula formulaToCheck)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -390,7 +395,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return new Probability(minResult);
 		}
 
-		internal override Probability CalculateMaximalProbability(Formula formulaToCheck)
+		internal Probability CalculateMaximalProbability(Formula formulaToCheck)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
@@ -421,12 +426,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 
 
-		internal override bool CalculateFormula(Formula formulaToCheck)
+		internal bool CalculateFormula(Formula formulaToCheck)
 		{
 			throw new NotImplementedException();
 		}
 
-		internal override RewardResult CalculateReward(Formula formulaToCheck)
+		internal RewardResult CalculateReward(Formula formulaToCheck)
 		{
 			throw new NotImplementedException();
 		}
@@ -434,7 +439,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>
-		public override void Dispose()
+		public void Dispose()
 		{
 		}
 	}
