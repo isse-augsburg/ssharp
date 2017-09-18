@@ -39,8 +39,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 		}
 
-		[Fact]
-		public void Check()
+		private void CheckOnceWithAtormarOperand(AnalysisConfiguration configuration)
 		{
 			var m = new Model();
 			Probability probability;
@@ -51,15 +50,10 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var final9Once7Formula = new UnaryFormula(is9Once7Formula, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
-			markovChainGenerator.Configuration.WriteGraphvizModels = true;
-			markovChainGenerator.Configuration.UseCompactStateStorage = true;
-			markovChainGenerator.Configuration.EnableEarlyTermination = true;
+			markovChainGenerator.Configuration = configuration;
 			markovChainGenerator.AddFormulaToCheck(final9Once7Formula);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(configuration, ltmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				probability = modelChecker.CalculateProbability(final9Once7Formula);
@@ -97,6 +91,17 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			}
 
 			probability.Is(0.4 * 0.4 + 0.6, 0.00000001).ShouldBe(true);
+		}
+
+		[Fact]
+		public void CheckBuiltinDtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			CheckOnceWithAtormarOperand(configuration);
 		}
 
 		public class Model : SimpleModelBase

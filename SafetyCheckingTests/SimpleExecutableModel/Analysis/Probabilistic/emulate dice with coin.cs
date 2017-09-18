@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
@@ -40,8 +41,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 		}
 
-		[Fact]
-		public void Check()
+		private void Check(AnalysisConfiguration configuration)
 		{
 			var m = new Model();
 			Probability probabilityOfFinal1;
@@ -49,17 +49,27 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var final1Formula = new UnaryFormula(Model.IsInStateFinal1, UnaryOperator.Finally);
 			
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration = configuration;
 			markovChainGenerator.AddFormulaToCheck(final1Formula);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(configuration, ltmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				probabilityOfFinal1 = modelChecker.CalculateProbability(final1Formula);
 			}
 
 			probabilityOfFinal1.Between(0.1, 0.2).ShouldBe(true);
+		}
+
+		[Fact]
+		public void CheckBuiltinDtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			Check(configuration);
 		}
 
 		[Fact]

@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.AnalysisModelTraverser;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutedModel;
@@ -41,8 +42,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 		}
 
-		[Fact]
-		public void Check()
+		private void Check(AnalysisConfiguration configuration)
 		{
 			Probability probabilityOfFinal1;
 			Probability probabilityOfFinal2;
@@ -62,14 +62,13 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var final4 = new UnaryFormula(formula4, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration = configuration;
 			markovChainGenerator.AddFormulaToCheck(final1);
 			markovChainGenerator.AddFormulaToCheck(final2);
 			markovChainGenerator.AddFormulaToCheck(final3);
 			markovChainGenerator.AddFormulaToCheck(final4);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(configuration, ltmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				probabilityOfFinal1 = modelChecker.CalculateProbability(final1);
@@ -82,6 +81,17 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			probabilityOfFinal2.Is(1.0, tolerance: 0.0001).ShouldBe(true);
 			probabilityOfFinal3.Is(1.0, tolerance: 0.0001).ShouldBe(true);
 			probabilityOfFinal4.Is(0.8333333333, tolerance: 0.0001).ShouldBe(true);
+		}
+
+		[Fact]
+		public void CheckBuiltinDtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			Check(configuration);
 		}
 
 		public class Model : SimpleModelBase

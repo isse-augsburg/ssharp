@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
@@ -37,8 +38,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 		}
 
-		[Fact]
-		public void Check()
+		private void Check(AnalysisConfiguration configuration)
 		{
 			var m = new Model();
 			Probability probabilityOfStep11FrozenValue0AndInvariantViolated;
@@ -58,16 +58,14 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var finallyFormulaProbabilityOfStep11FrozenValue1AndInvariantNotViolated = new UnaryFormula(formulaProbabilityOfStep11FrozenValue1AndInvariantNotViolated, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			markovChainGenerator.Configuration = configuration;
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue0AndInvariantViolated);
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue1AndInvariantViolated);
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue0AndInvariantNotViolated);
 			markovChainGenerator.AddFormulaToCheck(finallyFormulaProbabilityOfStep11FrozenValue1AndInvariantNotViolated);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			dtmc.ExportToGv(Output.TextWriterAdapter());
 
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter()); using (modelChecker)
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(configuration, ltmc, Output.TextWriterAdapter());
 			{
 				probabilityOfStep11FrozenValue0AndInvariantViolated = modelChecker.CalculateProbability(finallyFormulaProbabilityOfStep11FrozenValue0AndInvariantViolated);
 				probabilityOfStep11FrozenValue1AndInvariantViolated = modelChecker.CalculateProbability(finallyFormulaProbabilityOfStep11FrozenValue1AndInvariantViolated);
@@ -82,6 +80,17 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 				probabilityOfStep11FrozenValue1AndInvariantNotViolated;
 
 			probabilitiesSummedUp.Is(1.0, 0.000001).ShouldBe(true);
+		}
+
+		[Fact]
+		public void CheckBuiltinDtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			Check(configuration);
 		}
 
 		private class Model : SimpleModelBase

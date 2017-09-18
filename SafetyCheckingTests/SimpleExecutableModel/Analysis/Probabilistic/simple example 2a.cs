@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
@@ -39,8 +40,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 		}
 
-		[Fact]
-		public void Check()
+		private void Check(AnalysisConfiguration configuration)
 		{
 			var m = new SharedModels.SimpleExample2a();
 			Probability probabilityOfFinal0;
@@ -57,17 +57,13 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var final2Formula = new UnaryFormula(SharedModels.SimpleExample2a.StateIs2, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.WriteGraphvizModels = true;
-			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			markovChainGenerator.Configuration = configuration;
 			markovChainGenerator.AddFormulaToCheck(final0Formula);
 			markovChainGenerator.AddFormulaToCheck(final0LtFormula);
 			markovChainGenerator.AddFormulaToCheck(final1Formula);
 			markovChainGenerator.AddFormulaToCheck(final2Formula);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(configuration, ltmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				probabilityOfFinal0 = modelChecker.CalculateProbability(final0Formula);
@@ -80,6 +76,18 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			probabilityOfFinal0Lt.Is(0.55/3.0*4.0, 0.000001).ShouldBe(true);
 			probabilityOfFinal1.Is(0.5, 0.000001).ShouldBe(true);
 			probabilityOfFinal2.Is(0.5, 0.000001).ShouldBe(true);
+		}
+
+		[Fact]
+		public void CheckBuiltinDtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.UseAtomarPropositionsAsStateLabels = false;
+			Check(configuration);
 		}
 	}
 }

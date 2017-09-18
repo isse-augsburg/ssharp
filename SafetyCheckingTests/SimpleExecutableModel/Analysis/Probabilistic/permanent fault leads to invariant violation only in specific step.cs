@@ -23,6 +23,7 @@
 namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 {
 	using System;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
@@ -37,8 +38,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 		}
 
-		[Fact]
-		protected void CheckWithFaultsPossibleOnInitialTransition()
+		private Probability Check(AnalysisConfiguration configuration)
 		{
 			var m = new Model();
 			Probability probabilityOfInvariantViolation;
@@ -46,42 +46,43 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			var finallyInvariantViolated = new UnaryFormula(Model.InvariantViolated, UnaryOperator.Finally);
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.Configuration.AllowFaultsOnInitialTransitions = true;
+			markovChainGenerator.Configuration = configuration;
 			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			dtmc.ExportToGv(Output.TextWriterAdapter());
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(configuration, ltmc, Output.TextWriterAdapter());
 			using (modelChecker)
 			{
 				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
 			}
+
+			return probabilityOfInvariantViolation;
+		}
+
+		[Fact]
+		public void CheckWithFaultsPossibleOnInitialTransitionBuiltinDtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.AllowFaultsOnInitialTransitions = true;
+			var probabilityOfInvariantViolation = Check(configuration);
 
 			// 1.0-(1.0-0.1)^11 = 0.68618940391
 			probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);
 		}
 
 		[Fact]
-		protected void CheckWithFaultsImpossibleOnInitialTransition()
+		public void CheckWithFaultsImpossibleOnInitialTransitionBuiltinDtmc()
 		{
-			var m = new Model();
-			Probability probabilityOfInvariantViolation;
-
-			var finallyInvariantViolated = new UnaryFormula(Model.InvariantViolated, UnaryOperator.Finally);
-
-			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
-			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.Configuration.AllowFaultsOnInitialTransitions = false;
-			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
-			var dtmc = markovChainGenerator.GenerateMarkovChain();
-			dtmc.ExportToGv(Output.TextWriterAdapter());
-			var typeOfModelChecker = typeof(BuiltinDtmcModelChecker);
-			var modelChecker = (DtmcModelChecker)Activator.CreateInstance(typeOfModelChecker, dtmc, Output.TextWriterAdapter());
-			using (modelChecker)
-			{
-				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
-			}
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.AllowFaultsOnInitialTransitions = false;
+			var probabilityOfInvariantViolation = Check(configuration);
 
 			// 1.0-(1.0-0.1)^10 = 0.6513215599
 			probabilityOfInvariantViolation.Is(0.6513215599, 0.00001).ShouldBe(true);
