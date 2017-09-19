@@ -81,11 +81,6 @@
     <Compile Include="FormulaManager\FormulaManagerTests.cs" />
     <Compile Include="Formula\TestFormulaGenerator.cs" />
     <Compile Include="FormulaManager\OnceFormulaTests.cs" />
-    <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelCheckerTests.cs" />
-    <Compile Include="MarkovDecisionProcess\Optimized\LtmdpBuilderDuringTraversalTests.cs" />
-    <Compile Include="MarkovDecisionProcess\Optimized\LtmdpChoiceResolverTests.cs" />
-    <Compile Include="MarkovDecisionProcess\Optimized\LtmdpToNmdpTests.cs" />
-    <Compile Include="MarkovDecisionProcess\Optimized\NestedMarkovDecisionProcessExamples.cs" />
     <Compile Include="DataStructures\MultipleChainsInSingleArrayTests.cs" />
     <Compile Include="DataStructures\DoubleVectorTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\MarkovChainExamples.cs" />
