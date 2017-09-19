@@ -57,6 +57,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 		private readonly long _capacity;
 
+		private byte* _specialAddress1;
+
 		private byte* _targetStateMemory;
 
 
@@ -74,6 +76,19 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 			ResizeStateBuffer();
 		}
+
+		/// <summary>
+		///   Get temporal address. This address is not found by TryToFindState and may be used
+		///   inside a method for any purpose. Note, that this address should not leave the scope
+		///   of a method as it might be overwritten later on.
+		/// </summary>
+		public byte* ZeroedSpecialAddress1()
+		{
+			for (var i = 0; i < StateVectorSize; i++)
+				_specialAddress1[i] = 0;
+			return _specialAddress1;
+		}
+
 
 		/// <summary>
 		///   Get a free temporal address to store a state.
@@ -114,9 +129,13 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			//   it might occur that the same state is written twice into the state buffer but with a
 			//   different byte pattern. The reason for this difference lays in the bytes of the unzeroed
 			//   memory. Zeroing the memory ensures that one serialized state has always the same byte pattern.
-			_targetStateBuffer.Resize(_capacity * _stateVectorSize, zeroMemory: true);
+			
+			_targetStateBuffer.Resize((_capacity+1) * _stateVectorSize, zeroMemory: true);
 
-			_targetStateMemory = _targetStateBuffer.Pointer;
+			// SpecialAddress1 is a special address if a user needs a temporary space for a state
+			_specialAddress1 = _targetStateBuffer.Pointer;
+
+			_targetStateMemory = _targetStateBuffer.Pointer + _stateVectorSize;
 		}
 
 		/// <summary>

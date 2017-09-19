@@ -66,6 +66,54 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_transitions = (LtmcTransition*)_transitionBuffer.Pointer;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private byte* AddState(byte* stateToFind)
+		{
+			// Try to find a matching state. If not found, then add a new one
+			byte* targetState;
+
+			if (_temporalStateStorage.TryToFindState(stateToFind, out targetState))
+				return targetState;
+
+			targetState = _temporalStateStorage.GetFreeTemporalSpaceAddress();
+			MemoryBuffer.Copy(stateToFind,targetState, _temporalStateStorage.StateVectorSize);
+
+			return targetState;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void AddTransition(byte* stateToAdd, StateFormulaSet formulas, FaultSet activatedFaults, double probability)
+		{
+			// Try to find a matching transition. If not found, then add a new one
+			var successorState = AddState(stateToAdd);
+
+			for (var i = 0; i < _count; i++)
+			{
+				var candidateTransition = _transitions[i];
+				if (candidateTransition.TargetStatePointer == successorState &&
+					candidateTransition.Formulas == formulas &&
+					candidateTransition.ActivatedFaults == activatedFaults)
+				{
+					candidateTransition.Probability += probability;
+					_transitions[i] = candidateTransition;
+					return;
+				}
+			}
+
+			if (_count >= _capacity)
+				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
+
+			_transitions[_count] = new LtmcTransition
+			{
+				TargetStatePointer = successorState,
+				Formulas = formulas,
+				ActivatedFaults = activatedFaults,
+				Flags = TransitionFlags.IsValidFlag,
+				Probability = probability
+			};
+			++_count;
+		}
+
 		/// <summary>
 		///   Adds a transition to the <paramref name="model" />'s current state.
 		/// </summary>
@@ -73,29 +121,18 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="probability">The probability of the transition.</param>
 		public void Add(ExecutableModel<TExecutableModel> model, double probability)
 		{
-			if (_count >= _capacity)
-				throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
-
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
 			//    (Needed to persist persistent faults)
 			model.NotifyFaultActivations();
 			
 			// 2. Serialize the model's computed state; that is the successor state of the transition's source state
 			//    _including_ any changes resulting from notifications of fault activations
-			var successorState = _temporalStateStorage.GetFreeTemporalSpaceAddress();
-			model.Serialize(successorState);
+			var temporaryState = _temporalStateStorage.ZeroedSpecialAddress1();
+			model.Serialize(temporaryState);
 
 			// 3. Store the transition
 			var activatedFaults = FaultSet.FromActivatedFaults(model.NondeterministicFaults);
-			_transitions[_count] = new LtmcTransition
-			{
-				TargetStatePointer = successorState,
-				Formulas = new StateFormulaSet(_formulas),
-				ActivatedFaults = activatedFaults,
-				Flags = TransitionFlags.IsValidFlag,
-				Probability = probability
-			};
-			++_count;
+			AddTransition(temporaryState, new StateFormulaSet(_formulas), activatedFaults, probability);
 		}
 
 		/// <summary>
