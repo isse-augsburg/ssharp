@@ -95,8 +95,10 @@
     <Compile Include="DataStructures\MemoryBufferTests.cs" />
     <Compile Include="DataStructures\SparseDoubleMatrixTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LtmcBuilderTests.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\BuiltinLtmdpModelCheckerTests.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpToNmdpTests.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpBuilderDuringTraversalTests.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\LabeledTransitionMarkovDecisionProcessExamples.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NestedMarkovDecisionProcessExamples.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdpTests.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpChoiceResolverTests.cs" />

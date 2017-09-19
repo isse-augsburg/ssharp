@@ -35,7 +35,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 	using Utilities;
 	using Xunit;
 	using Xunit.Abstractions;
-	using Examples;
+	using NmdpExamples;
 
 	public class NmdpToMdpTests
 	{
@@ -89,7 +89,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleNoChoices()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleNoChoices.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleNoChoices.Create();
 			
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -114,7 +114,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleOneInitialProbabilisticSplit()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleOneInitialProbabilisticSplit.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleOneInitialProbabilisticSplit.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -139,7 +139,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleTwoInitialProbabilisticSplits()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleTwoInitialProbabilisticSplits.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialProbabilisticSplits.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -164,7 +164,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleTwoInitialSplitsNondeterministicThenProbabilistic()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleTwoInitialSplitsNondeterministicThenProbabilistic.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialSplitsNondeterministicThenProbabilistic.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -189,7 +189,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleTwoInitialSplitsProbabilisticThenNondeterministic()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleTwoInitialSplitsProbabilisticThenNondeterministic.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialSplitsProbabilisticThenNondeterministic.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -214,7 +214,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleOneStateProbabilisticSplit()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleOneStateProbabilisticSplit.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleOneStateProbabilisticSplit.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -239,7 +239,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleTwoStateProbabilisticSplits()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleTwoStateProbabilisticSplits.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateProbabilisticSplits.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -264,7 +264,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleTwoStateSplitsNondeterministicThenProbabilistic()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleTwoStateSplitsNondeterministicThenProbabilistic.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateSplitsNondeterministicThenProbabilistic.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
@@ -289,7 +289,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		[Fact]
 		public void ExampleTwoStateSplitsProbabilisticThenNondeterministic()
 		{
-			NestedMarkovDecisionProcess = Examples.ExampleTwoStateSplitsProbabilisticThenNondeterministic.Create();
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateSplitsProbabilisticThenNondeterministic.Create();
 
 			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;

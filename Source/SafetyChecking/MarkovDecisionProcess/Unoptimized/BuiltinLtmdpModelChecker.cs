@@ -462,7 +462,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			if (boundedUnaryFormula != null && boundedUnaryFormula.Operator == UnaryOperator.Finally)
 			{
 				phi = null;
-				psi = unboundUnaryFormula.Operand;
+				psi = boundedUnaryFormula.Operand;
 				steps = boundedUnaryFormula.Bound;
 				return;
 			}

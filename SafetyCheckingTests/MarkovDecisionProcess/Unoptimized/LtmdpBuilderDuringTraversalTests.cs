@@ -140,6 +140,21 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			t->Formulas = new StateFormulaSet(new Func<bool>[] { () => isFormulaSatisfied });
 			t->Flags = TransitionFlags.IsValidFlag | TransitionFlags.IsStateTransformedToIndexFlag;
 			t->ActivatedFaults = new FaultSet();
+			StepGraph.SetTargetOfFinalOrUnsplitChoice(continuationId, transition);
+		}
+
+		internal void CreateTransition(bool[] isFormulaSatisfied, int targetStateIndex, int continuationId)
+		{
+			var transition = _transitionCount;
+			_transitionCount++;
+			_transitions[transition] = new LtmdpTransition { Index = transition };
+			var t = (Transition*)(_transitions + transition);
+			t->SourceStateIndex = 0;
+			t->TargetStateIndex = targetStateIndex;
+			t->Formulas = new StateFormulaSet(isFormulaSatisfied);
+			t->Flags = TransitionFlags.IsValidFlag | TransitionFlags.IsStateTransformedToIndexFlag;
+			t->ActivatedFaults = new FaultSet();
+			StepGraph.SetTargetOfFinalOrUnsplitChoice(continuationId, transition);
 		}
 
 		internal TransitionCollection CreateTransitionCollection()
@@ -182,14 +197,14 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			// add initial state
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0,1.0);
+			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.ProcessInitialTransitions();
 			LtmdpTestBuilder.Clear();
 
 			// add reflexive state 5
-			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(5);
 
 			LtmdpTestBuilder.Ltmdp.TransitionTargets.ShouldBe(2);
@@ -224,20 +239,20 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			// add reflexive state 5
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(5);
 
 			// add reflexive state 7
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 7, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(7);
 
 			// add reflexive state 2
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(2);
 
 
@@ -261,8 +276,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			// add initial state
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.ProcessInitialTransitions();
 
 			// add state 5
@@ -279,20 +294,20 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			// add reflexive state 7
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 7, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 7, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(7);
 
 			// add reflexive state 2
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(2);
 
 			// add reflexive state 1
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 1, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 1, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(1);
 
 
@@ -316,8 +331,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			// add initial state
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.ProcessInitialTransitions();
 
 			// add state 5
@@ -326,16 +341,16 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
 			LtmdpTestBuilder.StepGraph.ProbabilisticSplit(2, 4, 6);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(2, 1.0);
-			LtmdpTestBuilder.CreateTransition(false, 1, 1 );
-			LtmdpTestBuilder.CreateTransition(false, 7, 4 );
-			LtmdpTestBuilder.CreateTransition(false, 2, 5 );
-			LtmdpTestBuilder.CreateTransition(false, 1, 6 );
-			LtmdpTestBuilder.CreateTransition(false, 7, 3 );
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(4, 0.3);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(5, 0.3);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(6, 0.4);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(1, 1.0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(3, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 1, 1);
+			LtmdpTestBuilder.CreateTransition(false, 7, 4);
+			LtmdpTestBuilder.CreateTransition(false, 2, 5);
+			LtmdpTestBuilder.CreateTransition(false, 1, 6);
+			LtmdpTestBuilder.CreateTransition(false, 7, 3);
 			LtmdpTestBuilder.ProcessStateTransitions(5);
 
 			// add reflexive state 7
@@ -356,14 +371,14 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			// add reflexive state 2
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(2);
 
 			// add reflexive state 1
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 1, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 1, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(1);
 
 
@@ -388,8 +403,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			// add initial state
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 5, 0);
 			LtmdpTestBuilder.ProcessInitialTransitions();
 
 			// add state 5
@@ -409,14 +424,14 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 			// add reflexive state 7
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 7, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 7, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(7);
 
 			// add reflexive state 2
 			LtmdpTestBuilder.Clear();
-			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.StepGraph.SetProbabilityOfContinuationId(0, 1.0);
+			LtmdpTestBuilder.CreateTransition(false, 2, 0);
 			LtmdpTestBuilder.ProcessStateTransitions(2);
 
 			LtmdpTestBuilder.Ltmdp.TransitionTargets.ShouldBe(5);
@@ -426,7 +441,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			// check that the transformed forward node (was 2) points to the correct target (was 4) and not to anything else.
 			var initialRootCidLocation = LtmdpTestBuilder.Ltmdp.GetRootContinuationGraphLocationOfInitialState();
 			var initialTarget = LtmdpTestBuilder.Ltmdp.GetContinuationGraphElement(initialRootCidLocation);
-			var state5Transformed = LtmdpTestBuilder.Ltmdp.GetTransitionTarget((int)initialTarget.To);
+			var state5Transformed = LtmdpTestBuilder.Ltmdp.GetTransitionTarget(initialTarget.To);
 			var state5TransformedRootCidLocation = LtmdpTestBuilder.Ltmdp.GetRootContinuationGraphLocationOfState(state5Transformed.TargetState);
 			var state5TransformedRootCid = LtmdpTestBuilder.Ltmdp.GetContinuationGraphElement(state5TransformedRootCidLocation);
 			var state5Successors = state5TransformedRootCid.To - state5TransformedRootCid.From + 1;

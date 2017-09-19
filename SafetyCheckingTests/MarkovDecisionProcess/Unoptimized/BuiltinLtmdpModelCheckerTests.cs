@@ -37,9 +37,9 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 	using Xunit.Abstractions;
 	using Shouldly;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
-	using NmdpExamples;
+	using LtmdpExamples;
 
-	public class BuiltinNmdpModelCheckerTests
+	public class BuiltinLtmdpModelCheckerTests
 	{
 		/// <summary>
 		///   Gets the output that writes to the test output stream.
@@ -55,20 +55,20 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			}
 		}
 
-		public BuiltinNmdpModelCheckerTests(ITestOutputHelper output)
+		public BuiltinLtmdpModelCheckerTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MinimalProbabilityToReachIn50Steps_Label1(NestedMarkovDecisionProcessExample example)
+		public void MinimalProbabilityToReachIn50Steps_Label1(LabeledTransitionMarkovDecisionProcessExample example)
 		{
-			var nmdp = example.Nmdp;
+			var ltmdp = example.Ltmdp;
 			var steps = 50;
 
-			var finallyLabel1 = new BoundedUnaryFormula(NestedMarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+			var finallyLabel1 = new BoundedUnaryFormula(LabeledTransitionMarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
 
-			using (var checker = new BuiltinNmdpModelChecker(nmdp, Output.TextWriterAdapter()))
+			using (var checker = new BuiltinLtmdpModelChecker(ltmdp, Output.TextWriterAdapter()))
 			{
 				var result = checker.CalculateMinimalProbability(finallyLabel1);
 				result.Is(example.MinimalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);
@@ -76,14 +76,14 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		}
 
 		[Theory, MemberData(nameof(DiscoverTests))]
-		public void MaximalProbabilityToReachIn50Steps_Label1(NestedMarkovDecisionProcessExample example)
+		public void MaximalProbabilityToReachIn50Steps_Label1(LabeledTransitionMarkovDecisionProcessExample example)
 		{
-			var nmdp = example.Nmdp;
+			var ltmdp = example.Ltmdp;
 			var steps = 50;
 
-			var finallyLabel1 = new BoundedUnaryFormula(NestedMarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
+			var finallyLabel1 = new BoundedUnaryFormula(LabeledTransitionMarkovDecisionProcessExample.Label1Formula, UnaryOperator.Finally, steps);
 
-			using (var checker = new BuiltinNmdpModelChecker(nmdp, Output.TextWriterAdapter()))
+			using (var checker = new BuiltinLtmdpModelChecker(ltmdp, Output.TextWriterAdapter()))
 			{
 				var result = checker.CalculateMaximalProbability(finallyLabel1);
 				result.Is(example.MaximalProbabilityFinallyLabel1, 0.0001).ShouldBe(true);

@@ -42,7 +42,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				else
 					sb.WriteLine($" {fromNode}->{thisNode} [ arrowhead =\"normal\"];");
 
-				var transitionTarget = ltmdp.GetTransitionTarget((int)choice.To);
+				var transitionTarget = ltmdp.GetTransitionTarget(choice.To);
 				sb.Write($" {thisNode} -> {transitionTarget.TargetState} [ arrowhead =\"normal\",");
 				sb.Write("label=\"");
 				for (int i = 0; i < ltmdp.StateFormulaLabels.Length; i++)

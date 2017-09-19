@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Tests.MarkovDecisionProcess.Unoptimized.Examples
+namespace Tests.MarkovDecisionProcess.Unoptimized.NmdpExamples
 {
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using ISSE.SafetyChecking.AnalysisModel;
