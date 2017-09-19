@@ -153,7 +153,7 @@ namespace SafetySharp.Analysis
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 
-			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(TraversalConfiguration, markovChain, TraversalConfiguration.DefaultTraceOutput))
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, TraversalConfiguration.DefaultTraceOutput))
 			{
 				probability = modelChecker.CalculateProbability(formula);
 			}
@@ -221,7 +221,7 @@ namespace SafetySharp.Analysis
 			ltmdpGenerator.Configuration.UseCompactStateStorage = true;
 			var ltmdp = ltmdpGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 			
-			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(TraversalConfiguration, ltmdp, TraversalConfiguration.DefaultTraceOutput))
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(ltmdpGenerator.Configuration, ltmdp, TraversalConfiguration.DefaultTraceOutput))
 			{
 				probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
 			}
