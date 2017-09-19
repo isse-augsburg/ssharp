@@ -102,6 +102,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				}
 				else
 				{
+					_markovChain.SourceStates.Add(sourceState);
 					_markovChain._stateStorageStateToFirstTransitionElementMemory[sourceState] = placeOfTransition;
 					_markovChain._stateStorageStateTransitionNumberElementMemory[sourceState] = transitionNo;
 				}
