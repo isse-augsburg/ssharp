@@ -91,8 +91,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				var candidateTransition = _transitions[i];
 				if (candidateTransition.TargetStatePointer == successorState &&
-					candidateTransition.Formulas == formulas &&
-					candidateTransition.ActivatedFaults == activatedFaults)
+					candidateTransition.Formulas == formulas //&&
+					//candidateTransition.ActivatedFaults == activatedFaults
+					)
 				{
 					candidateTransition.Probability += probability;
 					_transitions[i] = candidateTransition;
@@ -107,7 +108,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				TargetStatePointer = successorState,
 				Formulas = formulas,
-				ActivatedFaults = activatedFaults,
+				//ActivatedFaults = activatedFaults,
 				Flags = TransitionFlags.IsValidFlag,
 				Probability = probability
 			};

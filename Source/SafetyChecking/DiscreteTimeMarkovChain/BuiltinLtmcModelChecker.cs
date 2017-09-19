@@ -53,7 +53,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Requires.That(true, "Need CompactStateStorage to use this model checker");
 			LabeledMarkovChain.AssertIsDense();
 
-			output.WriteLine("Initializing Built-in Ltmdp Model checker");
+			output.WriteLine("Initializing Built-in Ltmc Model checker");
 			output.WriteLine("Creating underlying digraph");
 			_underlyingDigraph = LabeledMarkovChain.CreateUnderlyingDigraph();
 			output.WriteLine("Finished creating underlying digraph");

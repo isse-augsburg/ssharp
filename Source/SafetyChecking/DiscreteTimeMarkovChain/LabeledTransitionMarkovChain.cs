@@ -248,8 +248,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			public long CurrentIndex { get; private set; }
 
-			private long _nextElementIndex;
-
 			private readonly long _lastElementIndex;
 
 			public double CurrentProbability => _ltmc._transitionMemory[CurrentIndex].Probability;
@@ -261,8 +259,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			public LabeledTransitionEnumerator(LabeledTransitionMarkovChain ltmc, long firstElement, long elements)
 			{
 				_ltmc = ltmc;
-				CurrentIndex = -1;
-				_nextElementIndex = firstElement;
+				CurrentIndex = firstElement - 1;
 				_lastElementIndex = firstElement + elements -1;
 			}
 
@@ -276,8 +273,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				if (CurrentIndex >= _lastElementIndex)
 					return false;
-				CurrentIndex = _nextElementIndex;
-				_nextElementIndex++;
+				CurrentIndex ++;
 				return true;
 			}
 		}
