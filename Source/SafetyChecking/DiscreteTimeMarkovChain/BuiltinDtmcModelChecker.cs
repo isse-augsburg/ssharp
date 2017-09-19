@@ -38,7 +38,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 	class BuiltinDtmcModelChecker : DtmcModelChecker
 	{
-		private DiscreteTimeMarkovChain.UnderlyingDigraph _underlyingDigraph;
+		private readonly DiscreteTimeMarkovChain.UnderlyingDigraph _underlyingDigraph;
+
+		// Note: Should be used with using(var modelchecker = new ...)
+		public BuiltinDtmcModelChecker(DiscreteTimeMarkovChain markovChain, TextWriter output = null) : base(markovChain, output)
+		{
+			_underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
+		}
 
 		private SparseDoubleMatrix CreateDerivedMatrix(Dictionary<int, bool> exactlyOneStates, Dictionary<int, bool> exactlyZeroStates)
 		{
@@ -110,12 +116,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					complement.Add(i, true);
 			}
 			return complement;
-		}
-
-		// Note: Should be used with using(var modelchecker = new ...)
-		public BuiltinDtmcModelChecker(DiscreteTimeMarkovChain markovChain, TextWriter output = null) : base(markovChain, output)
-		{
-			_underlyingDigraph = MarkovChain.CreateUnderlyingDigraph();
 		}
 		
 

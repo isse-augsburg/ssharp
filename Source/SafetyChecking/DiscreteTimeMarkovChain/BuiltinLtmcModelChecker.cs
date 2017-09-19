@@ -34,7 +34,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.IO;
 	using Utilities;
 	using Formula;
-	using GenericDataStructures;
 
 	internal class BuiltinLtmcModelChecker : LtmcModelChecker
 	{
@@ -45,11 +44,19 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Excluded = 2,
 		}
 
+		private readonly LabeledTransitionMarkovChain.UnderlyingDigraph _underlyingDigraph;
+
 		// Note: Should be used with using(var modelchecker = new ...)
-		public BuiltinLtmcModelChecker(LabeledTransitionMarkovChain markovChain, TextWriter output = null) : base(markovChain, output)
+		public BuiltinLtmcModelChecker(LabeledTransitionMarkovChain markovChain, TextWriter output = null)
+			: base(markovChain, output)
 		{
 			Requires.That(true, "Need CompactStateStorage to use this model checker");
-			markovChain.AssertIsDense();
+			LabeledMarkovChain.AssertIsDense();
+
+			output.WriteLine("Initializing Built-in Ltmdp Model checker");
+			output.WriteLine("Creating underlying digraph");
+			_underlyingDigraph = LabeledMarkovChain.CreateUnderlyingDigraph();
+			output.WriteLine("Finished creating underlying digraph");
 		}
 
 		private PrecalculatedTransitionTarget[] CreateEmptyPrecalculatedTransitionTargetArray()

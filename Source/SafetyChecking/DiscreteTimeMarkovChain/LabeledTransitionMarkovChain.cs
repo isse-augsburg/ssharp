@@ -32,6 +32,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using Utilities;
 	using AnalysisModel;
 	using Formula;
+	using GenericDataStructures;
 
 	public unsafe partial class LabeledTransitionMarkovChain : DisposableObject
 	{
@@ -319,6 +320,44 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				if (CurrentIndex >= _ltmc._transitionChainElementCount)
 					return false;
 				return true;
+			}
+		}
+
+		internal UnderlyingDigraph CreateUnderlyingDigraph()
+		{
+			return new UnderlyingDigraph(this);
+		}
+
+		internal class UnderlyingDigraph
+		{
+			private readonly BidirectionalGraph _baseGraph;
+
+			public BidirectionalGraphDirectNodeAccess BaseGraph => _baseGraph;
+
+			public void AddStatesFromEnumerator(int sourceState, LabeledTransitionEnumerator enumerator)
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.CurrentProbability > 0.0)
+						_baseGraph.AddVerticesAndEdge(new Edge(sourceState, enumerator.CurrentTargetState));
+				}
+			}
+
+			public UnderlyingDigraph(LabeledTransitionMarkovChain markovChain)
+			{
+				// Assumption "every node is reachable" is fulfilled due to the construction
+				// Except maybe the stuttering state
+
+				_baseGraph = new BidirectionalGraph();
+
+				// transitions from initial state get artificial source state with index -1
+
+				var enumerator = markovChain.GetInitialDistributionEnumerator();
+				AddStatesFromEnumerator(-1, enumerator);
+				foreach (var sourceState in markovChain.SourceStates)
+				{
+					markovChain.GetTransitionEnumerator(sourceState);
+				}
 			}
 		}
 	}
