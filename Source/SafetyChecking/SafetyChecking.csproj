@@ -79,7 +79,6 @@
     <Compile Include="FormulaManager\CollectStateFormulasVisitor.cs" />
     <Compile Include="FormulaManager\CollectMaximalCompilableFormulasVisitor.cs" />
     <Compile Include="FormulaManager\IsFormulasStructurallyEquivalentVisitor.cs" />
-    <Compile Include="FormulaManager\StateFormulaSetEvaluatorCompilationVisitor2.cs" />
     <Compile Include="FormulaManager\TransferFormulaToNewExecutedModelInstanceVisitor .cs" />
     <Compile Include="FormulaManager\CollectAtomarPropositionFormulasVisitor.cs" />
     <Compile Include="AnalysisModelTraverser\AnalysisException.cs" />
@@ -111,7 +110,6 @@
     <Compile Include="FormulaManager\IsFormulaReturningRewardResultVisitor.cs" />
     <Compile Include="FormulaManager\IsLtlFormulaVisitor.cs" />
     <Compile Include="FormulaManager\IsStateFormulaVisitor.cs" />
-    <Compile Include="FormulaManager\LabelingVectorFormulaEvaluatorCompilationVisitor.cs" />
     <Compile Include="ExternalToolSupport\LtsMinLtlTransformer.cs" />
     <Compile Include="ExternalToolSupport\PrismTransformer.cs" />
     <Compile Include="FormulaManager\FormulaCompilationVisitor.cs" />
@@ -156,7 +154,6 @@
     <Compile Include="DiscreteTimeMarkovChain\LtmcTransitionSetBuilder.cs" />
     <Compile Include="ExternalToolSupport\MrmcTransformer.cs" />
     <Compile Include="AnalysisModelTraverser\TraversalModifiers\EarlyTerminationModifier.cs" />
-    <Compile Include="AnalysisModelTraverser\IModelWithStateLabelingInLabelingVector.cs" />
     <Compile Include="MarkovDecisionProcess\BuiltinMdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpChosenValueStack.cs" />
     <Compile Include="MarkovDecisionProcess\Traditional\MarkovDecisionProcess.cs" />

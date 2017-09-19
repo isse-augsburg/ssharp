@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 {
 	using System;
+	using System.Linq;
 	using ExecutableModel;
 	using AnalysisModel;
 	using AnalysisModelTraverser;
@@ -38,10 +39,12 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		/// <param name="formula">The analyzed formula.</param>
-		public InvariantViolationAction(Formula[] formulasToCheck, Formula formula)
+		/// <param name="formulasToCheck">Formulas which appear in the resulting state labeling.</param>
+		/// <param name="formulaToCheck">The analyzed formula.</param>
+		public InvariantViolationAction(Formula[] formulasToCheck, Formula formulaToCheck)
 		{
-			_evaluator = StateFormulaSetEvaluatorCompilationVisitor2.Compile(formulasToCheck, formula);
+			var formulaLabels = formulasToCheck.Select(formula => formula.Label).ToArray();
+			_evaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(formulaLabels, formulaToCheck);
 		}
 
 		/// <summary>

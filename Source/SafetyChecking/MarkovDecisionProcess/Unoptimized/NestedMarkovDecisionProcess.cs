@@ -37,7 +37,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using Utilities;
 	using System.Collections.Generic;
 
-	public unsafe class NestedMarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
+	public unsafe class NestedMarkovDecisionProcess
 	{
 		public static readonly int TransitionSize = sizeof(ContinuationGraphElement);
 		private const int StateSize = sizeof(int);
@@ -218,13 +218,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			StateLabeling[state] = formula;
 		}
 
-
 		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
 		{
-			return LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this, formula);
+			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
+			Func<int, bool> evaluator = transitionTarget =>
+			{
+				var stateFormulaSet = StateLabeling[transitionTarget];
+				return stateFormulaEvaluator(stateFormulaSet);
+			};
+			return evaluator;
 		}
-
-
 
 		internal TreeTraversal GetTreeTraverser(long parentContinuationId)
 		{

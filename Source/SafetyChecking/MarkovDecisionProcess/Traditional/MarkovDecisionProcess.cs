@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using Formula;
 	using GenericDataStructures;
 
-	public class MarkovDecisionProcess : IModelWithStateLabelingInLabelingVector
+	public class MarkovDecisionProcess
 	{
 
 		private bool _optimized = true;
@@ -324,13 +324,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			return StateToRowsL[state + 1] + StateToRowsRowCount[state + 1];
 		}
-		
 
 		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
 		{
-			return LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this, formula);
+			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
+			Func<int, bool> evaluator = transitionTarget =>
+			{
+				var stateFormulaSet = StateLabeling[transitionTarget];
+				return stateFormulaEvaluator(stateFormulaSet);
+			};
+			return evaluator;
 		}
-		
+
 		internal UnderlyingDigraph CreateUnderlyingDigraph()
 		{
 			return new UnderlyingDigraph(this);

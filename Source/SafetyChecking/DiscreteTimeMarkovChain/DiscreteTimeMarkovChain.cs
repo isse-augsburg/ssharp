@@ -32,13 +32,12 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.Globalization;
 	using System.Runtime.CompilerServices;
 	using Modeling;
-	using AnalysisModelTraverser;
 	using AnalysisModel;
 	using ExecutedModel;
 	using Formula;
 	using GenericDataStructures;
 
-	public class DiscreteTimeMarkovChain : IModelWithStateLabelingInLabelingVector
+	public class DiscreteTimeMarkovChain
 	{
 		public string[] StateFormulaLabels { get; set; }
 
@@ -210,7 +209,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		
 		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
 		{
-			return LabelingVectorFormulaEvaluatorCompilationVisitor.Compile(this,formula);
+			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
+			Func<int, bool> evaluator = transitionTarget =>
+			{
+				var stateFormulaSet = StateLabeling[transitionTarget];
+				return stateFormulaEvaluator(stateFormulaSet);
+			};
+			return evaluator;
 		}
 
 		internal UnderlyingDigraph CreateUnderlyingDigraph()
