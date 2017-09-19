@@ -46,7 +46,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				case SafetyChecking.LtmdpModelChecker.BuiltInLtmdp:
 					Requires.That(configuration.UseCompactStateStorage, "Need CompactStateStorage to use this algorithm");
-					throw new NotImplementedException();
+					_ltmdpModelChecker = new BuiltinLtmdpModelChecker(Ltmdp, output);
 					break;
 				case SafetyChecking.LtmdpModelChecker.BuiltInNmdp:
 					var nmdp = ConvertToNmdp(configuration, Ltmdp);

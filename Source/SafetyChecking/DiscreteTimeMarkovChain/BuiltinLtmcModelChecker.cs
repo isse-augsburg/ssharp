@@ -62,31 +62,31 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return outputTargets;
 		}
 
-		internal void CalculateSatisfiedTargets(PrecalculatedTransitionTarget[] precalculatedStates, Func<int, bool> formulaEvaluator)
+		private void CalculateSatisfiedTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, Func<int, bool> formulaEvaluator)
 		{
 			for (var i = 0; i < LabeledMarkovChain.Transitions; i++)
 			{
 				if (formulaEvaluator(i))
-					precalculatedStates[i] |= PrecalculatedTransitionTarget.Satisfied;
+					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Satisfied;
 			}
 		}
 
-		internal void CalculateExcludedTargets(PrecalculatedTransitionTarget[] precalculatedStates, Func<int, bool> formulaEvaluator)
+		private void CalculateExcludedTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, Func<int, bool> formulaEvaluator)
 		{
 			for (var i = 0; i < LabeledMarkovChain.Transitions; i++)
 			{
 				if (formulaEvaluator(i))
-					precalculatedStates[i] |= PrecalculatedTransitionTarget.Excluded;
+					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Excluded;
 			}
 		}
 
-		private double[] CreateDerivedVector(PrecalculatedTransitionTarget[] precalculatedStates, PrecalculatedTransitionTarget flagToLookFor)
+		private double[] CreateDerivedVector(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, PrecalculatedTransitionTarget flagToLookFor)
 		{
 			var derivedVector = new double[LabeledMarkovChain.Transitions];
 
 			for (var i = 0; i < LabeledMarkovChain.Transitions; i++)
 			{
-				if (precalculatedStates[i].HasFlag(flagToLookFor))
+				if (precalculatedTransitionTargets[i].HasFlag(flagToLookFor))
 					derivedVector[i] = 1.0;
 				else
 					derivedVector[i] = 0.0;
@@ -107,7 +107,31 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return finalProbability;
 		}
 
-		private double CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula psi, Formula phi, int steps)
+		private PrecalculatedTransitionTarget[] CreatePrecalculatedTransitionTargets(Formula phi, Formula psi)
+		{
+			var psiEvaluator = LabeledMarkovChain.CreateFormulaEvaluator(psi);
+
+			var precalculatedTransitionTargets = CreateEmptyPrecalculatedTransitionTargetArray();
+
+			CalculateSatisfiedTargets(precalculatedTransitionTargets, psiEvaluator);
+			if (phi != null)
+			{
+				// excludedStates = Sat(\phi) \Cup Sat(psi)
+				var phiEvaluator = LabeledMarkovChain.CreateFormulaEvaluator(phi);
+				Func<int, bool> calculateExcludedStates = target =>
+				{
+					if (precalculatedTransitionTargets[target] == PrecalculatedTransitionTarget.Satisfied)
+						return false; //satisfied states are never excluded
+					if (!phiEvaluator(target))
+						return true; //exclude state if it does not satisfy phi
+					return false;
+				};
+				CalculateExcludedTargets(precalculatedTransitionTargets, calculateExcludedStates);
+			}
+			return precalculatedTransitionTargets;
+		}
+
+		private double CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula phi, Formula psi, int steps)
 		{
 			// Pr[phi U psi]
 			// calculate P [true U<=steps psi]
@@ -115,26 +139,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var psiEvaluator = LabeledMarkovChain.CreateFormulaEvaluator(psi);
+			var precalculatedTransitionTargets = CreatePrecalculatedTransitionTargets(phi, psi);
+
 			var stateCount = LabeledMarkovChain.SourceStates.Count;
-
-			var precalculatedStates = CreateEmptyPrecalculatedTransitionTargetArray();
-
-			CalculateSatisfiedTargets(precalculatedStates,psiEvaluator);
-			if (phi != null)
-			{
-				// excludedStates = Sat(\phi) \Cup Sat(psi)
-				var phiEvaluator = LabeledMarkovChain.CreateFormulaEvaluator(phi);
-				Func<int,bool> calculateExcludedStates = target =>
-				{
-					if (precalculatedStates[target] == PrecalculatedTransitionTarget.Satisfied)
-						return false; //satisfied states are never excluded
-					if (!phiEvaluator(target))
-						return true; //exclude state if it does not satisfy phi
-					return false;
-				};
-				CalculateExcludedTargets(precalculatedStates, calculateExcludedStates);
-			}
 			
 			var xold = new double[stateCount];
 			var xnew = new double[stateCount];
@@ -154,11 +161,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					while (enumerator.MoveNext())
 					{
 						var transitionTarget = enumerator.CurrentIndex;
-						if (precalculatedStates[transitionTarget].HasFlag(PrecalculatedTransitionTarget.Satisfied))
+						if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.Satisfied))
 						{
 							sum += enumerator.CurrentProbability;
 						}
-						else if (precalculatedStates[transitionTarget].HasFlag(PrecalculatedTransitionTarget.Excluded))
+						else if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.Excluded))
 						{
 						}
 						else
@@ -190,23 +197,16 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var finallyUnboundUnaryFormula = formulaToCheck as UnaryFormula;
-			var finallyBoundedUnaryFormula = formulaToCheck as BoundedUnaryFormula;
-			var finallyBoundedBinaryFormula = formulaToCheck as BoundedBinaryFormula;
-
+			Formula phi;
+			Formula psi;
+			int? steps;
+			ExtractPsiPhiAndBoundFromFormula(formulaToCheck, out phi, out psi, out steps);
+			
 			double result;
 
-			if (finallyUnboundUnaryFormula != null && finallyUnboundUnaryFormula.Operator == UnaryOperator.Finally)
+			if (steps.HasValue)
 			{
-				throw new NotImplementedException();
-			}
-			else if (finallyBoundedUnaryFormula != null && finallyBoundedUnaryFormula.Operator == UnaryOperator.Finally)
-			{
-				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedUnaryFormula.Operand, null, finallyBoundedUnaryFormula.Bound);
-			}
-			else if (finallyBoundedBinaryFormula != null && finallyBoundedBinaryFormula.Operator == BinaryOperator.Until)
-			{
-				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(finallyBoundedBinaryFormula.RightOperand, finallyBoundedBinaryFormula.LeftOperand, finallyBoundedBinaryFormula.Bound);
+				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(phi, psi, steps.Value);
 			}
 			else
 			{
@@ -217,6 +217,47 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			_output?.WriteLine($"Built-in probabilistic model checker model checking time: {stopwatch.Elapsed}");
 			return new Probability(result);
+		}
+
+		private void ExtractPsiPhiAndBoundFromFormula(Formula formulaToCheck, out Formula phi, out Formula psi, out int? steps)
+		{
+			// [phi U<=steps psi]
+
+			var unboundUnaryFormula = formulaToCheck as UnaryFormula;
+			var boundedUnaryFormula = formulaToCheck as BoundedUnaryFormula;
+			var unboundBinaryFormula = formulaToCheck as BinaryFormula;
+			var boundedBinaryFormula = formulaToCheck as BoundedBinaryFormula;
+
+			if (unboundUnaryFormula != null && unboundUnaryFormula.Operator == UnaryOperator.Finally)
+			{
+				phi = null;
+				psi = unboundUnaryFormula.Operand;
+				steps = null;
+				return;
+			}
+			if (boundedUnaryFormula != null && boundedUnaryFormula.Operator == UnaryOperator.Finally)
+			{
+				phi = null;
+				psi = unboundUnaryFormula.Operand;
+				steps = boundedUnaryFormula.Bound;
+				return;
+			}
+			if (unboundBinaryFormula != null && unboundBinaryFormula.Operator == BinaryOperator.Until)
+			{
+				phi = unboundBinaryFormula.LeftOperand;
+				psi = unboundBinaryFormula.RightOperand;
+				steps = null;
+				return;
+			}
+			if (boundedBinaryFormula != null && boundedBinaryFormula.Operator == BinaryOperator.Until)
+			{
+				phi = boundedBinaryFormula.LeftOperand;
+				psi = boundedBinaryFormula.RightOperand;
+				steps = boundedBinaryFormula.Bound;
+				return;
+			}
+
+			throw new NotImplementedException();
 		}
 
 		private void ApproximateDelta(double target)

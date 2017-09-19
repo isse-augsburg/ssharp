@@ -86,6 +86,7 @@
     <Compile Include="InvariantChecker\InvariantAnalysisResult.cs" />
     <Compile Include="GenericDataStructures\AutoResizeBigVector.cs" />
     <Compile Include="MarkovDecisionProcess\Optimized\BuiltinNmdpModelChecker.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\BuiltinLtmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\BuiltinNmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\ConfigurationDependentLtmdpModelChecker.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LabeledTransitionMarkovDecisionProcess.cs" />

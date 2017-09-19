@@ -137,9 +137,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			if (choice.IsChoiceTypeUnsplitOrFinal)
 			{
-				Assert.That(choice.To<=int.MaxValue, "choice.To must be smaller than int.MaxValue");
-
-				var transitionTarget = _ltmdp.GetTransitionTarget( (int) choice.To);
+				var transitionTarget = _ltmdp.GetTransitionTarget( choice.To);
 				var targetEntry = new StateStorageEntry(transitionTarget.Formulas, transitionTarget.TargetState);
 				var targetState = _mapper[targetEntry];
 

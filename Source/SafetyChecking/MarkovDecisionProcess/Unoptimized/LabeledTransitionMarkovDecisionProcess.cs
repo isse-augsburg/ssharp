@@ -32,7 +32,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using Utilities;
 	using AnalysisModel;
 	using ExecutableModel;
-
+	using Formula;
 
 	public unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
 	{
@@ -111,7 +111,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			public StateFormulaSet Formulas;
 		}
 
-		public int TransitionTargets => _transitionTargetCount;
+		public long TransitionTargets => _transitionTargetCount;
 
 		private long GetPlaceForNewContinuationGraphElements(int number)
 		{
@@ -121,7 +121,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return locationOfFirstNewEntry;
 		}
 
-		private int GetPlaceForNewTransitionTargetElement()
+		private long GetPlaceForNewTransitionTargetElement()
 		{
 			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionTargetCount);
 			if (locationOfNewEntry >= _maxNumberOfTransitionTargets)
@@ -200,9 +200,33 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 
 
-		public TransitionTargetElement GetTransitionTarget(int position)
+		public TransitionTargetElement GetTransitionTarget(long position)
 		{
 			return _transitionTarget[position];
+		}
+		
+		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
+		{
+			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
+			Func<int, bool> evaluator = transitionTarget =>
+			{
+				var stateFormulaSet = _transitionTarget[transitionTarget].Formulas;
+				return stateFormulaEvaluator(stateFormulaSet);
+			};
+			return evaluator;
+		}
+
+		[Conditional("DEBUG")]
+		internal void AssertIsDense()
+		{
+			var size = SourceStates.Count;
+			using (var enumerator = SourceStates.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					Assert.That(enumerator.Current < size, "Markov chain must be dense");
+				}
+			}
 		}
 
 		internal TreeTraversal GetTreeTraverser(long parentContinuationId)

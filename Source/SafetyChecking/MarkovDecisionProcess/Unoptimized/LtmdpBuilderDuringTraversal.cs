@@ -44,7 +44,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			private readonly LabeledTransitionMarkovDecisionProcess _ltmdp;
 
-			private readonly AutoResizeVector<int> _transitionTargetMapper = new AutoResizeVector<int>();
+			private readonly AutoResizeVector<long> _transitionTargetMapper = new AutoResizeVector<long>();
 
 			private readonly AutoResizeVector<long> _stepGraphMapper = new AutoResizeVector<long> { DefaultValue = -1 };
 
