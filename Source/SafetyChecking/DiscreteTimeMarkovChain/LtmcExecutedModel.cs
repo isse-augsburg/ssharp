@@ -55,7 +55,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			: base(runtimeModelCreator, 0, configuration)
 		{
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
-			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(TemporalStateStorage, configuration.SuccessorCapacity, formulas);
+			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(TemporaryStateStorage, configuration.SuccessorCapacity, formulas);
 
 			bool useForwardOptimization;
 			switch (configuration.MomentOfIndependentFaultActivation)
@@ -203,7 +203,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		protected override void BeginExecution()
 		{
 			_transitions.Clear();
-			TemporalStateStorage.Clear();
+			TemporaryStateStorage.Clear();
 		}
 
 		/// <summary>

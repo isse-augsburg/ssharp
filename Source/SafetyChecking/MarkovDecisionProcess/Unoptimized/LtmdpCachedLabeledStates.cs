@@ -48,7 +48,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <summary>
 		///   A storage where temporal states can be saved to.
 		/// </summary>
-		private readonly TemporalStateStorage _temporalStateStorage;
+		private readonly TemporaryStateStorage _temporalStateStorage;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -56,7 +56,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		/// <param name="temporalStateStorage">A storage where temporal states can be saved to.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public LtmdpCachedLabeledStates(TemporalStateStorage temporalStateStorage, long capacity, LtmdpStepGraph ltmdpStepGraph, params Func<bool>[] formulas)
+		public LtmdpCachedLabeledStates(TemporaryStateStorage temporalStateStorage, long capacity, LtmdpStepGraph ltmdpStepGraph, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(temporalStateStorage, nameof(temporalStateStorage));
 			Requires.NotNull(formulas, nameof(formulas));

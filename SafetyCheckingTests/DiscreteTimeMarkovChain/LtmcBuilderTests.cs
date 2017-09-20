@@ -37,7 +37,7 @@ namespace Tests.DiscreteTimeMarkovChain
 	using Xunit;
 	using Xunit.Abstractions;
 
-	public unsafe class LtmcTestBuilder
+	public unsafe class LtmcTestBuilderWithStatesAsNumbers
 	{
 		private const int StateCapacity = 1024;
 		private const int TransitionCapacity = 4096;
@@ -50,7 +50,7 @@ namespace Tests.DiscreteTimeMarkovChain
 		internal LabeledTransitionMarkovChain Ltmc { get; }
 		internal LabeledTransitionMarkovChain.LtmcBuilder LtmcBuilder { get; }
 
-		public LtmcTestBuilder()
+		public LtmcTestBuilderWithStatesAsNumbers()
 		{
 			_transitionBuffer.Resize(TransitionCapacity * sizeof(LtmcTransition), zeroMemory: false);
 			_transitions = (LtmcTransition*)_transitionBuffer.Pointer;
@@ -112,7 +112,7 @@ namespace Tests.DiscreteTimeMarkovChain
 	{
 		public TestTraceOutput Output { get; }
 
-		public LtmcTestBuilder LtmcTestBuilder { get; } = new LtmcTestBuilder();
+		public LtmcTestBuilderWithStatesAsNumbers LtmcTestBuilder { get; } = new LtmcTestBuilderWithStatesAsNumbers();
 
 		public LtmcBuilderTests(ITestOutputHelper output)
 		{

@@ -43,7 +43,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   A storage where temporal states can be saved to.
 		/// </summary>
-		private readonly TemporalStateStorage _temporalStateStorage;
+		private readonly TemporaryStateStorage _temporalStateStorage;
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -51,7 +51,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="temporalStateStorage">A storage where temporal states can be saved to.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
 		/// <param name="formulas">The formulas that should be checked for all successor states.</param>
-		public LtmcTransitionSetBuilder(TemporalStateStorage temporalStateStorage, long capacity, params Func<bool>[] formulas)
+		public LtmcTransitionSetBuilder(TemporaryStateStorage temporalStateStorage, long capacity, params Func<bool>[] formulas)
 		{
 			Requires.NotNull(temporalStateStorage, nameof(temporalStateStorage));
 			Requires.NotNull(formulas, nameof(formulas));

@@ -48,10 +48,10 @@ namespace ISSE.SafetyChecking.ExecutedModel
 
 			RuntimeModelCreator = createModel;
 			RuntimeModel = createModel.Create(stateHeaderBytes);
-			TemporalStateStorage = new TemporalStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
+			TemporaryStateStorage = new TemporaryStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
 		}
 
-		protected readonly TemporalStateStorage TemporalStateStorage;
+		protected readonly TemporaryStateStorage TemporaryStateStorage;
 
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
@@ -93,7 +93,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 				return;
 
 			ChoiceResolver.SafeDispose();
-			TemporalStateStorage.SafeDispose();
+			TemporaryStateStorage.SafeDispose();
 			RuntimeModel.SafeDispose();
 		}
 
@@ -190,7 +190,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		{
 			ChoiceResolver.Clear();
 			RuntimeModel.Reset();
-			TemporalStateStorage.Reset(traversalModifierStateVectorSize);
+			TemporaryStateStorage.Reset(traversalModifierStateVectorSize);
 		}
 	}
 }

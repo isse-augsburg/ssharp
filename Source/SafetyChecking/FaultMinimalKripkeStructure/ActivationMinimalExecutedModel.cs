@@ -68,7 +68,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		{
 			formulas = formulas ?? RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel,formula)).ToArray();
 
-			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(TemporalStateStorage, configuration.SuccessorCapacity, formulas);
+			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(TemporaryStateStorage, configuration.SuccessorCapacity, formulas);
 			_stateConstraints = RuntimeModel.StateConstraints;
 
 			bool useForwardOptimization;
@@ -173,7 +173,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		protected override void BeginExecution()
 		{
 			_transitions.Clear();
-			TemporalStateStorage.Clear();
+			TemporaryStateStorage.Clear();
 		}
 
 		/// <summary>

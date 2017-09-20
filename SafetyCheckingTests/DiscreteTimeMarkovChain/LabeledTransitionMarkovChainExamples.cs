@@ -111,7 +111,7 @@ namespace Tests.DiscreteTimeMarkovChain.LabeledTransitionMarkovChainExamples
 			//           --c-> 2
 			// 0--c->        2
 
-			var ltmcTestBuilder = new LtmcTestBuilder();
+			var ltmcTestBuilder = new LtmcTestBuilderWithStatesAsNumbers();
 			
 			// add initial state
 			ltmcTestBuilder.ClearTransitions();

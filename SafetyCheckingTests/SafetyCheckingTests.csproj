@@ -75,6 +75,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="DataStructures\BidirectionalGraphTests.cs" />
+    <Compile Include="DiscreteTimeMarkovChain\ConsolidateTransitionsModifierTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\MarkovChainFromMarkovChainTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\BuiltinLtmcModelCheckerTests.cs" />
     <Compile Include="DiscreteTimeMarkovChain\LabeledTransitionMarkovChainExamples.cs" />

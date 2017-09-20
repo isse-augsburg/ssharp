@@ -26,7 +26,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	using System.Runtime.CompilerServices;
 	using Utilities;
 
-	public unsafe class TemporalStateStorage : DisposableObject
+	public unsafe class TemporaryStateStorage : DisposableObject
 	{
 
 		/// <summary>
@@ -67,7 +67,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		/// <param name="analysisModelStateVectorSize">The length in bytes of a state vector required for the analysis model.</param>
 		/// <param name="capacity">The maximum number of successors that can be cached.</param>
-		public TemporalStateStorage(int analysisModelStateVectorSize, long capacity)
+		public TemporaryStateStorage(int analysisModelStateVectorSize, long capacity)
 		{
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
 

@@ -44,9 +44,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private int _transitionCount;
 		private readonly long _capacity;
 
-		private readonly TemporalStateStorage _temporalStateStorage;
+		private readonly TemporaryStateStorage _temporalStateStorage;
 
-		public LtmcRetraverseTransitionSetBuilder(TemporalStateStorage temporalStateStorage, long capacity)
+		public LtmcRetraverseTransitionSetBuilder(TemporaryStateStorage temporalStateStorage, long capacity)
 		{
 			Requires.That(capacity <= (1 << 30), nameof(capacity), $"Maximum supported capacity is {1 << 30}.");
 
@@ -140,7 +140,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		
 		private readonly Func<StateFormulaSet, bool>[] _formulaInStateTransitionEvaluators;
 
-		protected readonly TemporalStateStorage TemporalStateStorage;
+		protected readonly TemporaryStateStorage TemporaryStateStorage;
 		
 		private readonly LtmcRetraverseTransitionSetBuilder _transitions;
 
@@ -151,8 +151,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Assert.That(stateFormulasToCheck.Length <= 32, "Too many Formulas");
 
 			LabeledTransitionMarkovChain = ltmc;
-			TemporalStateStorage = new TemporalStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
-			_transitions = new LtmcRetraverseTransitionSetBuilder(TemporalStateStorage, configuration.SuccessorCapacity);
+			TemporaryStateStorage = new TemporaryStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
+			_transitions = new LtmcRetraverseTransitionSetBuilder(TemporaryStateStorage, configuration.SuccessorCapacity);
 			_formulas = stateFormulasToCheck;
 
 			_formulaInStateTransitionEvaluators = stateFormulasToCheck.Select(CreateFormulaEvaluator).ToArray();
@@ -172,7 +172,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			if (disposing)
 			{
 				_transitions.SafeDispose();
-				TemporalStateStorage.SafeDispose();
+				TemporaryStateStorage.SafeDispose();
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		private TransitionCollection ConvertTransitions(LabeledTransitionMarkovChain.LabeledTransitionEnumerator enumerator)
 		{
-			TemporalStateStorage.Clear();
+			TemporaryStateStorage.Clear();
 			_transitions.Clear();
 			while (enumerator.MoveNext())
 			{
@@ -220,7 +220,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="traversalModifierStateVectorSize">Extra bytes in state vector for traversal parameters.</param>
 		public sealed override void Reset(int traversalModifierStateVectorSize)
 		{
-			TemporalStateStorage.Reset(traversalModifierStateVectorSize);
+			TemporaryStateStorage.Reset(traversalModifierStateVectorSize);
 		}
 
 		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)

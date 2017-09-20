@@ -61,7 +61,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			_stepGraph = new LtmdpStepGraph();
 
-			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(TemporalStateStorage, configuration.SuccessorCapacity, _stepGraph, formulas);
+			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(TemporaryStateStorage, configuration.SuccessorCapacity, _stepGraph, formulas);
 
 			bool useForwardOptimization;
 			switch (configuration.MomentOfIndependentFaultActivation)
@@ -210,7 +210,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		protected override void BeginExecution()
 		{
 			_cachedLabeledStates.Clear();
-			TemporalStateStorage.Clear();
+			TemporaryStateStorage.Clear();
 			_stepGraph.Clear();
 		}
 

@@ -55,6 +55,20 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		private readonly int _transitionSize;
 
 		/// <summary>
+		///   Gets the transition at the given zero-based <paramref name="index" />.
+		/// </summary>
+		/// <param name="index">The index of the transition that should be returned.</param>
+		public Transition* this[long index]
+		{
+			get
+			{
+				Assert.InRange(index, 0, Count);
+				var position = (((byte*)_transitions) + index * _transitionSize);
+				return (Transition*) position;
+			}
+		}
+
+		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
 		/// <param name="transitions">The transition instances stored in a contiguous array.</param>
