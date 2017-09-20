@@ -23,6 +23,7 @@
 namespace ISSE.SafetyChecking.AnalysisModelTraverser
 {
 	using System;
+	using System.Globalization;
 	using AnalysisModel;
 	using ExecutableModel;
 	using Utilities;
@@ -164,7 +165,9 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		/// </summary>
 		public void Report()
 		{
-			Output.WriteLine($"Discovered {StateCount:n0} states, {TransitionCount:n0} transitions, {LevelCount} levels.");
+			var stateCount = StateCount.ToString("N0", CultureInfo.InvariantCulture);
+			var transitionCount = TransitionCount.ToString("N0", CultureInfo.InvariantCulture);
+			Output.WriteLine($"Discovered {stateCount} states, {transitionCount} transitions, {LevelCount} levels.");
 		}
 	}
 }

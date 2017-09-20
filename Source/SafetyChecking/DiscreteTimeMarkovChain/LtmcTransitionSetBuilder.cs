@@ -39,6 +39,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private readonly LtmcTransition* _transitions;
 		private readonly long _capacity;
 		private int _count;
+		private int _totalCount;
 
 		/// <summary>
 		///   A storage where temporal states can be saved to.
@@ -122,6 +123,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <param name="probability">The probability of the transition.</param>
 		public void Add(ExecutableModel<TExecutableModel> model, double probability)
 		{
+			_totalCount++;
+
 			// 1. Notify all fault activations, so that the correct activation is set in the run time model
 			//    (Needed to persist persistent faults)
 			model.NotifyFaultActivations();
@@ -143,6 +146,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public void Clear()
 		{
 			_count = 0;
+			_totalCount = 0;
 		}
 		
 		/// <summary>
@@ -162,7 +166,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// </summary>
 		public TransitionCollection ToCollection()
 		{
-			return new TransitionCollection((Transition*)_transitions, _count, _count, sizeof(LtmcTransition));
+			return new TransitionCollection((Transition*)_transitions, _count, _totalCount, sizeof(LtmcTransition));
 		}
 	}
 }

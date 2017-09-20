@@ -32,6 +32,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 	using AnalysisModel;
 	using ExecutedModel;
 	using Utilities;
+	using System.Globalization;
 
 	/// <summary>
 	///   A base class for model traversers that travserse an <see cref="AnalysisModel" /> to carry out certain actions.
@@ -156,13 +157,23 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 				if (!Context.Configuration.ProgressReportsOnly)
 				{
+					var stateCount = Context.StateCount.ToString("N0", CultureInfo.InvariantCulture);
+					var transitionCount = Context.TransitionCount.ToString("N0", CultureInfo.InvariantCulture);
+					var computedTransitionCount = Context.ComputedTransitionCount.ToString("N0", CultureInfo.InvariantCulture);
+					var statesPerSecond = ((long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds)).ToString("N0", CultureInfo.InvariantCulture);
+					var transitionsPerSecond = ((long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds)).ToString("N0", CultureInfo.InvariantCulture);
+
 					Context.Output?.WriteLine(String.Empty);
 					Context.Output?.WriteLine("===============================================");
 					Context.Output?.WriteLine($"Initialization time: {_initializationTime}");
 					Context.Output?.WriteLine($"Model traversal time: {stopwatch.Elapsed}");
-					
-					Context.Output?.WriteLine($"{(long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds):n0} states per second");
-					Context.Output?.WriteLine($"{(long)(Context.TransitionCount / stopwatch.Elapsed.TotalSeconds):n0} transitions per second");
+
+					Context.Output?.WriteLine($"Saved states: {stateCount}");
+					Context.Output?.WriteLine($"Saved transitions: {transitionCount}");
+					Context.Output?.WriteLine($"Computed transitions: {computedTransitionCount}");
+
+					Context.Output?.WriteLine($"{statesPerSecond} states per second");
+					Context.Output?.WriteLine($"{transitionsPerSecond} transitions per second");
 
 					Context.Output?.WriteLine("===============================================");
 					Context.Output?.WriteLine(String.Empty);
