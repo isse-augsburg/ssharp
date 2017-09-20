@@ -65,7 +65,7 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInDtmc;
 			Check(configuration);
 		}
 

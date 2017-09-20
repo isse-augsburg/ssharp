@@ -51,7 +51,8 @@ namespace ISSE.SafetyChecking
 	{
 		BuiltInLtmdp,
 		BuiltInNmdp,
-		BuildInMdp
+		BuildInMdpWithNewStates,
+		BuildInMdpWithFlattening
 	}
 
 	/// <summary>

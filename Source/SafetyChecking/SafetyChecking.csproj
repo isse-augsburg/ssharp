@@ -104,6 +104,8 @@
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToGv.cs" />
     <Compile Include="ExternalToolSupport\ExternalMdpModelCheckerPrism.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpContinuationDistributionMapper.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdpByFlattening.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdpByNewStates.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdp.cs" />
     <Compile Include="MarkovDecisionProcess\LtmdpChoiceType.cs" />
     <Compile Include="MinimalCriticalSetAnalysis\FaultActivationBehavior.cs" />

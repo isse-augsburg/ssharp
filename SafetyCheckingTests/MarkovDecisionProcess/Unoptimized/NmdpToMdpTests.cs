@@ -91,7 +91,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleNoChoices.Create();
 			
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -116,7 +116,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleOneInitialProbabilisticSplit.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -141,7 +141,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialProbabilisticSplits.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -166,7 +166,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialSplitsNondeterministicThenProbabilistic.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -191,7 +191,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialSplitsProbabilisticThenNondeterministic.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -216,7 +216,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleOneStateProbabilisticSplit.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -241,7 +241,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateProbabilisticSplits.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -266,7 +266,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateSplitsNondeterministicThenProbabilistic.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -291,7 +291,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateSplitsProbabilisticThenNondeterministic.Create();
 
-			var converter = new NmdpToMdp(NestedMarkovDecisionProcess);
+			var converter = new NmdpToMdpByFlattening(NestedMarkovDecisionProcess);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;

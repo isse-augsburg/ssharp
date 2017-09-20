@@ -52,9 +52,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					var nmdp = ConvertToNmdp(configuration, Ltmdp);
 					_nmdpModelChecker = new BuiltinNmdpModelChecker(nmdp,output);
 					break;
-				case SafetyChecking.LtmdpModelChecker.BuildInMdp:
+				case SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates:
 					nmdp = ConvertToNmdp(configuration, Ltmdp);
-					var mdp = ConvertToMdp(configuration, nmdp);
+					var mdp = ConvertToMdpWithNewStates(configuration, nmdp);
+					_mdpModelChecker = new BuiltinMdpModelChecker(mdp, output);
+					break;
+				case SafetyChecking.LtmdpModelChecker.BuildInMdpWithFlattening:
+					nmdp = ConvertToNmdp(configuration, Ltmdp);
+					mdp = ConvertToMdpWithFlattening(configuration, nmdp);
 					_mdpModelChecker = new BuiltinMdpModelChecker(mdp, output);
 					break;
 				default:
@@ -74,9 +79,21 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return nmdp;
 		}
 
-		private MarkovDecisionProcess ConvertToMdp(AnalysisConfiguration configuration, NestedMarkovDecisionProcess nmdp)
+		private MarkovDecisionProcess ConvertToMdpWithNewStates(AnalysisConfiguration configuration, NestedMarkovDecisionProcess nmdp)
 		{
-			var nmdpToMpd = new NmdpToMdp(nmdp);
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp);
+			var mdp = nmdpToMpd.MarkovDecisionProcess;
+			if (configuration.WriteGraphvizModels)
+			{
+				configuration.DefaultTraceOutput.WriteLine("Mdp Model");
+				mdp.ExportToGv(configuration.DefaultTraceOutput);
+			}
+			return mdp;
+		}
+
+		private MarkovDecisionProcess ConvertToMdpWithFlattening(AnalysisConfiguration configuration, NestedMarkovDecisionProcess nmdp)
+		{
+			var nmdpToMpd = new NmdpToMdpByFlattening(nmdp);
 			var mdp = nmdpToMpd.MarkovDecisionProcess;
 			if (configuration.WriteGraphvizModels)
 			{

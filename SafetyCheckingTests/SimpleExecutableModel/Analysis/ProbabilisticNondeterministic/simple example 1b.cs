@@ -105,14 +105,25 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			Check(configuration);
 		}
 
-		[Fact]
-		public void CheckMdp()
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates;
+			Check(configuration);
+		}
+
+		[Fact]
+		public void CheckMdpWithFlattening()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithFlattening;
 			Check(configuration);
 		}
 

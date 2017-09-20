@@ -104,14 +104,25 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			Check(configuration);
 		}
 
-		[Fact]
-		public void CheckMdp()
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates;
+			Check(configuration);
+		}
+
+		[Fact]
+		public void CheckMdpWithFlattening()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithFlattening;
 			Check(configuration);
 		}
 
@@ -145,7 +156,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			configuration.WriteGraphvizModels = true;
 			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInLtmdp;
 
-			Check(configuration);
+			CheckSmallerEqualTwo(configuration);
 		}
 
 		[Fact(Skip = "NotImplementedYet")]
@@ -157,18 +168,29 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			configuration.WriteGraphvizModels = true;
 			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInNmdp;
 
-			Check(configuration);
+			CheckSmallerEqualTwo(configuration);
 		}
 
-		[Fact]
-		public void CheckSmallerEqualTwoMdp()
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckSmallerEqualTwoMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
-			Check(configuration);
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates;
+			CheckSmallerEqualTwo(configuration);
+		}
+
+		[Fact]
+		public void CheckSmallerEqualTwoMdpWithFlattening()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithFlattening;
+			CheckSmallerEqualTwo(configuration);
 		}
 
 		public class Model : SimpleModelBase

@@ -69,14 +69,26 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			probabilityOfFinal3.Is(1.0 / 3, tolerance: 0.0001).ShouldBe(true);
 		}
 
-		[Fact]
-		public void CheckBuiltinDtmc()
+
+		[Fact(Skip = "NotImplementedYet")]
+		public void CheckMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdp;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates;
+			Check(configuration);
+		}
+
+		[Fact]
+		public void CheckMdpWithFlattening()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithFlattening;
 			Check(configuration);
 		}
 

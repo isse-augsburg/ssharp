@@ -34,14 +34,29 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using GenericDataStructures;
 	using Utilities;
 
-	internal abstract class NmdpToMdp
+	internal sealed class NmdpToMdpByNewStates : NmdpToMdp
 	{
-		protected NestedMarkovDecisionProcess _nmdp;
-		public MarkovDecisionProcess MarkovDecisionProcess { get; protected set; }
-
-		protected NmdpToMdp(NestedMarkovDecisionProcess nmdp)
+		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp)
+			: base(nmdp)
 		{
-			_nmdp = nmdp;
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+			Console.Out.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
+			Console.Out.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
+
+			var modelCapacity = new ModelCapacityByModelSize(nmdp.States, nmdp.ContinuationGraphSize * 8L);
+			MarkovDecisionProcess = new MarkovDecisionProcess(modelCapacity);
+			MarkovDecisionProcess.StateFormulaLabels = nmdp.StateFormulaLabels;
+
+			//CopyStateLabeling();
+			//ConvertInitialTransitions();
+			//ConvertStateTransitions();
+			throw new NotImplementedException();
+
+			stopwatch.Stop();
+			_nmdp = null;
+			Console.Out.WriteLine($"Completed transformation in {stopwatch.Elapsed}");
+			Console.Out.WriteLine($"Mdp: States {MarkovDecisionProcess.States}, Transitions {MarkovDecisionProcess.Transitions}");
 		}
 	}
 }
