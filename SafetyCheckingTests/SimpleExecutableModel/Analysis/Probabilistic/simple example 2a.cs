@@ -74,8 +74,8 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			probabilityOfFinal0.Is(1.0, 0.000001).ShouldBe(true);
 			probabilityOfFinal0Lt.Is(0.55/3.0*4.0, 0.000001).ShouldBe(true);
-			probabilityOfFinal1.Is(0.5, 0.000001).ShouldBe(true);
-			probabilityOfFinal2.Is(0.5, 0.000001).ShouldBe(true);
+			probabilityOfFinal1.Is(0.5, 0.00001).ShouldBe(true);
+			probabilityOfFinal2.Is(0.5, 0.00001).ShouldBe(true);
 		}
 
 		[Fact]
