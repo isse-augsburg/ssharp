@@ -186,7 +186,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 
 
-		private double FixPointMethod(Formula psi, Formula phi, int iterationsLeft)
+		private double CalculateUnboundUntil(Formula psi, Formula phi, int iterationsLeft)
 		{
 			// On algorithmic verification methods for probabilistic systems (1998) by Christel Baier
 			// Theorem 3.1.6 (page 36)
@@ -239,6 +239,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				var xtemp = xold;
 				xold = xnew;
 				xnew = xtemp;
+				iterationsLeft--;
 				loops++;
 				for (var i = 0; i < stateCount; i++)
 				{

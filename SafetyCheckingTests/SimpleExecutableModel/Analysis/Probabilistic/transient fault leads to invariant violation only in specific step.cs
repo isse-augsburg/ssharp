@@ -69,6 +69,18 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			Check(configuration);
 		}
 
+		[Fact]
+		public void CheckBuiltinLtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.UseCompactStateStorage = true;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInLtmc;
+			Check(configuration);
+		}
+
 		private class Model : SimpleModelBase
 		{
 			public override Fault[] Faults { get; } = { new TransientFault() { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) } };

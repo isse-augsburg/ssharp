@@ -124,7 +124,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return precalculatedTransitionTargets;
 		}
 
-		private double CalculateProbabilityToReachStateFormulaInBoundedSteps(Formula phi, Formula psi, int steps)
+		private double CalculateBoundedProbability(Formula phi, Formula psi, int steps)
 		{
 			// Pr[phi U psi]
 			// calculate P [true U<=steps psi]
@@ -259,6 +259,80 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			SetFlagInUnmarkedTransitionTargets(precalculatedTransitionTargets, PrecalculatedTransitionTarget.SatisfiedFinally);
 		}
 
+
+		private double CalculateUnboundUntil(Formula phi, Formula psi, int iterationsLeft)
+		{
+			// Based on the iterative idea by:
+			// On algorithmic verification methods for probabilistic systems (1998) by Christel Baier
+			// Theorem 3.1.6 (page 36)
+			// http://wwwneu.inf.tu-dresden.de/content/institutes/thi/algi/publikationen/texte/15_98.pdf
+
+			// Pr[phi U psi]
+			// calculate P [true U<=steps psi]
+
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
+			var fixPointReached = iterationsLeft <= 0;
+
+			var precalculatedTransitionTargets = CreateSimplePrecalculatedTransitionTargets(phi, psi);
+			CalculateProb0TransitionTargets(precalculatedTransitionTargets);
+			CalculateProb1TransitionTargets(precalculatedTransitionTargets);
+
+			var stateCount = LabeledMarkovChain.SourceStates.Count;
+
+			var xold = new double[stateCount];
+			var xnew = new double[stateCount];
+			var loops = 0;
+			while (!fixPointReached)
+			{
+				// switch xold and xnew
+				var xtemp = xold;
+				xold = xnew;
+				xnew = xtemp;
+				iterationsLeft--;
+				loops++;
+				for (var i = 0; i < stateCount; i++)
+				{
+					var enumerator = LabeledMarkovChain.GetTransitionEnumerator(i);
+					var sum = 0.0;
+
+					while (enumerator.MoveNext())
+					{
+						var transitionTarget = enumerator.CurrentIndex;
+						if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.SatisfiedFinally))
+						{
+							sum += enumerator.CurrentProbability;
+						}
+						else if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.ExcludedFinally))
+						{
+						}
+						else
+						{
+							sum += enumerator.CurrentProbability * xold[enumerator.CurrentTargetState];
+						}
+					}
+					xnew[i] = sum;
+				}
+
+				if (loops % 10 == 0)
+				{
+					stopwatch.Stop();
+					var currentProbability = CalculateFinalProbability(xnew);
+					_output?.WriteLine($"{loops} Fixpoint Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
+					stopwatch.Start();
+				}
+				if (iterationsLeft <= 0)
+					fixPointReached = true;
+			}
+
+			var finalProbability = CalculateFinalProbability(xnew);
+
+			stopwatch.Stop();
+			return finalProbability;
+		}
+		
+
 		internal override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			_output.WriteLine($"Checking formula: {formulaToCheck}");
@@ -268,17 +342,18 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			Formula phi;
 			Formula psi;
 			int? steps;
-			ExtractPsiPhiAndBoundFromFormula(formulaToCheck, out phi, out psi, out steps);
+			ExtractPsiPhiAndBoundedFromFormula(formulaToCheck, out phi, out psi, out steps);
 			
 			double result;
 
 			if (steps.HasValue)
 			{
-				result = CalculateProbabilityToReachStateFormulaInBoundedSteps(phi, psi, steps.Value);
+				result = CalculateBoundedProbability(phi, psi, steps.Value);
 			}
 			else
 			{
-				throw new NotImplementedException();
+				var maxIterations = 50;
+				result = CalculateUnboundUntil(phi, psi, maxIterations);
 			}
 			
 			stopwatch.Stop();
@@ -287,7 +362,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return new Probability(result);
 		}
 
-		private void ExtractPsiPhiAndBoundFromFormula(Formula formulaToCheck, out Formula phi, out Formula psi, out int? steps)
+		private void ExtractPsiPhiAndBoundedFromFormula(Formula formulaToCheck, out Formula phi, out Formula psi, out int? steps)
 		{
 			// [phi U<=steps psi]
 

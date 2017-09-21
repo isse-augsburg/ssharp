@@ -73,6 +73,18 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		}
 
 		[Fact]
+		public void CheckBuiltinLtmc()
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.UseCompactStateStorage = true;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInLtmc;
+			Check(configuration);
+		}
+
+		[Fact]
 		public void Simulate()
 		{
 			var m = new Model();

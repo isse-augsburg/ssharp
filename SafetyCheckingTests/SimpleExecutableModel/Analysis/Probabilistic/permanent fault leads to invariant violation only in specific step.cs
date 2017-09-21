@@ -58,34 +58,55 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			return probabilityOfInvariantViolation;
 		}
 
-		[Fact]
-		public void CheckWithFaultsPossibleOnInitialTransitionBuiltinDtmc()
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public void CheckBuiltinDtmc(bool faultsPossibleOnInitialTransition)
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
 			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInDtmc;
-			configuration.AllowFaultsOnInitialTransitions = true;
+			configuration.AllowFaultsOnInitialTransitions = faultsPossibleOnInitialTransition;
 			var probabilityOfInvariantViolation = Check(configuration);
 
-			// 1.0-(1.0-0.1)^11 = 0.68618940391
-			probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);
+			if (faultsPossibleOnInitialTransition)
+			{
+				// 1.0-(1.0-0.1)^11 = 0.68618940391
+				probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);
+			}
+			else
+			{
+				// 1.0-(1.0-0.1)^10 = 0.6513215599
+				probabilityOfInvariantViolation.Is(0.6513215599, 0.00001).ShouldBe(true);
+			}
 		}
 
-		[Fact]
-		public void CheckWithFaultsImpossibleOnInitialTransitionBuiltinDtmc()
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public void CheckBuiltinLtmc(bool faultsPossibleOnInitialTransition)
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInDtmc;
-			configuration.AllowFaultsOnInitialTransitions = false;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInLtmc;
+			configuration.UseCompactStateStorage = true;
+			configuration.AllowFaultsOnInitialTransitions = faultsPossibleOnInitialTransition;
 			var probabilityOfInvariantViolation = Check(configuration);
 
-			// 1.0-(1.0-0.1)^10 = 0.6513215599
-			probabilityOfInvariantViolation.Is(0.6513215599, 0.00001).ShouldBe(true);
+			if (faultsPossibleOnInitialTransition)
+			{
+				// 1.0-(1.0-0.1)^11 = 0.68618940391
+				probabilityOfInvariantViolation.Is(0.68618940391, 0.00001).ShouldBe(true);
+			}
+			else
+			{
+				// 1.0-(1.0-0.1)^10 = 0.6513215599
+				probabilityOfInvariantViolation.Is(0.6513215599, 0.00001).ShouldBe(true);
+			}
 		}
 
 		private class Model : SimpleModelBase

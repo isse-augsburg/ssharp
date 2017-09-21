@@ -366,6 +366,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				AddStatesFromEnumerator(null, enumerator);
 				foreach (var sourceState in markovChain.SourceStates)
 				{
+					enumerator = markovChain.GetTransitionEnumerator(sourceState);
 					markovChain.GetTransitionEnumerator(sourceState);
 					AddStatesFromEnumerator(sourceState, enumerator);
 				}
@@ -383,13 +384,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 			private long StateToNodeIndex(int state)
 			{
-				Assert.That(state > 0 && state < _stateNo, "Out of range");
+				Assert.That(state >= 0 && state < _stateNo, "Out of range");
 				return _transitionTargetNo + state;
 			}
 
 			private long TransitionTargetToNodeIndex(long transition)
 			{
-				Assert.That(transition > 0 && transition < _transitionTargetNo, "Out of range");
+				Assert.That(transition >= 0 && transition < _transitionTargetNo, "Out of range");
 				return transition;
 			}
 

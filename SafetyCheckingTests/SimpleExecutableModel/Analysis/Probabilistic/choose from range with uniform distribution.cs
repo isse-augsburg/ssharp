@@ -70,25 +70,26 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		}
 
 
-		[Fact(Skip = "NotImplementedYet")]
-		public void CheckMdpWithNewStates()
+		[Fact]
+		public void CheckBuiltinDtmc()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInDtmc;
 			Check(configuration);
 		}
-
+		
 		[Fact]
-		public void CheckMdpWithFlattening()
+		public void CheckBuiltinLtmc()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
-			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithFlattening;
+			configuration.UseCompactStateStorage = true;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInLtmc;
 			Check(configuration);
 		}
 

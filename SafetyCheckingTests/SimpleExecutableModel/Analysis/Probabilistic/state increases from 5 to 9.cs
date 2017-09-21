@@ -93,15 +93,37 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 			probability.Is(0.4 * 0.4 + 0.6, 0.00000001).ShouldBe(true);
 		}
 
-		[Fact]
-		public void CheckBuiltinDtmc()
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public void CheckBuiltinDtmc(bool withAtomarOperand)
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
 			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInDtmc;
-			CheckOnceWithAtormarOperand(configuration);
+			if(withAtomarOperand)
+				CheckOnceWithAtormarOperand(configuration);
+			else
+				CheckOnceWithNonAtomarOperand();
+		}
+
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public void CheckBuiltinLtmc(bool withAtomarOperand)
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.UseCompactStateStorage = true;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInLtmc;
+			if (withAtomarOperand)
+				CheckOnceWithAtormarOperand(configuration);
+			else
+				CheckOnceWithNonAtomarOperand();
 		}
 
 		public class Model : SimpleModelBase
