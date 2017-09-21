@@ -125,7 +125,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private PrecalculatedState[] CreateEmptyPrecalculatedStatesArray()
 		{
 			PrecalculatedState[] outputStates = new PrecalculatedState[MarkovChain.States];
-			for (var i = 0; i < MarkovChain.States; i++)
+			for (var i = 0L; i < MarkovChain.States; i++)
 			{
 				outputStates[i] = PrecalculatedState.Nothing;
 			}
@@ -139,18 +139,18 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 		
 
-		internal void CalculateSatisfiedStates(PrecalculatedState[] precalculatedStates,Func<int,bool> formulaEvaluator)
+		internal void CalculateSatisfiedStates(PrecalculatedState[] precalculatedStates,Func<long,bool> formulaEvaluator)
 		{
-			for (var i = 0; i < MarkovChain.States; i++)
+			for (var i = 0L; i < MarkovChain.States; i++)
 			{
 				if (formulaEvaluator(i))
 					precalculatedStates[i] |= PrecalculatedState.Satisfied;
 			}
 		}
 		
-		internal void CalculateExcludedStates(PrecalculatedState[] precalculatedStates, Func<int, bool> formulaEvaluator)
+		internal void CalculateExcludedStates(PrecalculatedState[] precalculatedStates, Func<long, bool> formulaEvaluator)
 		{
-			for (var i = 0; i < MarkovChain.States; i++)
+			for (var i = 0L; i < MarkovChain.States; i++)
 			{
 				if (formulaEvaluator(i))
 					precalculatedStates[i] |= PrecalculatedState.Excluded;
@@ -297,40 +297,40 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private void ProbabilityExactlyZero(PrecalculatedState[] precalculatedStates)
 		{
 			// calculate probabilityExactlyZero (prob0)
-			Func<int, bool> nodesToIgnore =
+			Func<long, bool> nodesToIgnore =
 				node => precalculatedStates[node].HasFlag(PrecalculatedState.Excluded);
 
-			var directlySatisfiedStates = new List<int>();
-			for (var i = 0; i < precalculatedStates.Length; i++)
+			var directlySatisfiedStates = new List<long>();
+			for (var i = 0L; i < precalculatedStates.Length; i++)
 			{
 				if (precalculatedStates[i].HasFlag(PrecalculatedState.Satisfied))
 					directlySatisfiedStates.Add(i);
 			}
-			Func<int, bool> nodeIsGreaterZero = (state) => precalculatedStates[state].HasFlag(PrecalculatedState.GreaterZeroForFinally);
-			Action<int> nodeSetGreaterZero = (state) => precalculatedStates[state] |= PrecalculatedState.GreaterZeroForFinally;
+			Func<long, bool> nodeIsGreaterZero = (state) => precalculatedStates[state].HasFlag(PrecalculatedState.GreaterZeroForFinally);
+			Action<long> nodeSetGreaterZero = (state) => precalculatedStates[state] |= PrecalculatedState.GreaterZeroForFinally;
 
-			_underlyingDigraph.BaseGraph.GetAncestors(nodeIsGreaterZero, nodeSetGreaterZero, directlySatisfiedStates, nodesToIgnore);
+			_underlyingDigraph.BaseGraph.BackwardTraversal(nodeIsGreaterZero, nodeSetGreaterZero, directlySatisfiedStates, nodesToIgnore);
 			SetFlagForComplement(precalculatedStates, PrecalculatedState.GreaterZeroForFinally, PrecalculatedState.ExactlyZeroForFinally);
 		}
 
 		private void ProbabilityExactlyOne(PrecalculatedState[] precalculatedStates)
 		{
 			// calculate probabilityExactlyOne (prob1)
-			Func<int, bool> nodesToIgnore =
+			Func<long, bool> nodesToIgnore =
 				node => precalculatedStates[node].HasFlag(PrecalculatedState.Excluded) ||
 						precalculatedStates[node].HasFlag(PrecalculatedState.Satisfied);
 
-			var exactlyZeroStates = new List<int>();
-			for (var i = 0; i < precalculatedStates.Length; i++)
+			var exactlyZeroStates = new List<long>();
+			for (var i = 0L; i < precalculatedStates.Length; i++)
 			{
 				if (precalculatedStates[i].HasFlag(PrecalculatedState.ExactlyZeroForFinally))
 					exactlyZeroStates.Add(i);
 			}
 
-			Func<int, bool> nodeIsSmallerOne = (state) => precalculatedStates[state].HasFlag(PrecalculatedState.SmallerOneForFinally);
-			Action<int> nodeSetSmallerOne = (state) => precalculatedStates[state] |= PrecalculatedState.SmallerOneForFinally;
+			Func<long, bool> nodeIsSmallerOne = (state) => precalculatedStates[state].HasFlag(PrecalculatedState.SmallerOneForFinally);
+			Action<long> nodeSetSmallerOne = (state) => precalculatedStates[state] |= PrecalculatedState.SmallerOneForFinally;
 
-			_underlyingDigraph.BaseGraph.GetAncestors(nodeIsSmallerOne, nodeSetSmallerOne, exactlyZeroStates, nodesToIgnore);
+			_underlyingDigraph.BaseGraph.BackwardTraversal(nodeIsSmallerOne, nodeSetSmallerOne, exactlyZeroStates, nodesToIgnore);
 			SetFlagForComplement(precalculatedStates, PrecalculatedState.SmallerOneForFinally, PrecalculatedState.ExaclyOneForFinally);
 		}
 

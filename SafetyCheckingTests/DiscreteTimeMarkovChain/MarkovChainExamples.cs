@@ -92,13 +92,13 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 		internal Formula ExampleFormula1;
 		internal Formula ExampleFormula2;
 
-		public Dictionary<int, bool> StatesSatisfyDirectlyLabel1Formula;
-		public Dictionary<int, bool> StatesSatisfyDirectlyLabel2Formula;
-		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula1;
-		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula2;
+		public Dictionary<long, bool> StatesSatisfyDirectlyLabel1Formula;
+		public Dictionary<long, bool> StatesSatisfyDirectlyLabel2Formula;
+		public Dictionary<long, bool> StatesSatisfyDirectlyExampleFormula1;
+		public Dictionary<long, bool> StatesSatisfyDirectlyExampleFormula2;
 
-		public Dictionary<int, bool> AncestorsOfStatesWithLabel1;
-		public Dictionary<int, bool> AncestorsOfStatesWithLabel2;
+		public Dictionary<long, bool> AncestorsOfStatesWithLabel1;
+		public Dictionary<long, bool> AncestorsOfStatesWithLabel2;
 
 		public double ProbabilityFinallyLabel1;
 		public double ProbabilityFinally10Label1;
@@ -137,13 +137,13 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 			
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() {  };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true } };
 
 			ProbabilityFinallyLabel1 = 1.0;
 			ProbabilityFinally10Label1 = 0.9998951424;
@@ -182,13 +182,13 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true } };
 
 			ProbabilityFinallyLabel1 = 1.0;
 			ProbabilityFinally10Label1 = 1.0;
@@ -250,13 +250,13 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 0, true }, { 2, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 3, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 0, true }, { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 3, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 0, true }, { 2, true }, { 3, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 2, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
 
 			ProbabilityFinallyLabel1 = 1.0;
 			ProbabilityFinally10Label1 = 1.0;
@@ -325,13 +325,13 @@ namespace Tests.DiscreteTimeMarkovChain.MarkovChainExamples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 4, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true }, { 4, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 4, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 2, true }, { 4, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 4, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 2, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true }, { 4, true } };
 
 			ProbabilityFinallyLabel1 = 0.3;
 			ProbabilityFinally10Label1 = 0.3;

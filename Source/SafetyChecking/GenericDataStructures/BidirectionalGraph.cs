@@ -30,10 +30,10 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 {
 	public struct Edge
 	{
-		public int Source;
-		public int Target;
+		public long Source;
+		public long Target;
 
-		public Edge(int source, int target)
+		public Edge(long source, long target)
 		{
 			Source = source;
 			Target = target;
@@ -42,22 +42,22 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 
 	internal abstract class BidirectionalGraphDirectNodeAccess
 	{
-		public abstract IEnumerable<Edge> OutEdges(int vertex);
-		public abstract IEnumerable<Edge> InEdges(int vertex);
-		public abstract IEnumerable<int> GetNodes();
+		public abstract IEnumerable<Edge> OutEdges(long vertex);
+		public abstract IEnumerable<Edge> InEdges(long vertex);
+		public abstract IEnumerable<long> GetNodes();
 	}
 
 	internal sealed class BidirectionalGraph : BidirectionalGraphDirectNodeAccess
 	{
 
-		private Dictionary<int, List<Edge>> _outEdges = new Dictionary<int, List<Edge>>();
-		private Dictionary<int, List<Edge>> _inEdges = new Dictionary<int, List<Edge>>();
+		private Dictionary<long, List<Edge>> _outEdges = new Dictionary<long, List<Edge>>();
+		private Dictionary<long, List<Edge>> _inEdges = new Dictionary<long, List<Edge>>();
 
-		public override IEnumerable<Edge> OutEdges(int vertex) => _outEdges[vertex];
-		public override IEnumerable<Edge> InEdges(int vertex) => _inEdges[vertex];
-		private Dictionary<int, bool> _nodes = new Dictionary<int, bool>();
+		public override IEnumerable<Edge> OutEdges(long vertex) => _outEdges[vertex];
+		public override IEnumerable<Edge> InEdges(long vertex) => _inEdges[vertex];
+		private Dictionary<long, bool> _nodes = new Dictionary<long, bool>();
 
-		public override IEnumerable<int> GetNodes()
+		public override IEnumerable<long> GetNodes()
 		{
 			foreach (var node in _nodes)
 			{
@@ -65,7 +65,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			}
 		}
 
-		public List<Edge> GetOrCreateOutEdges(int vertex)
+		public List<Edge> GetOrCreateOutEdges(long vertex)
 		{
 			_nodes[vertex] = true;
 			if (_outEdges.ContainsKey(vertex))
@@ -77,7 +77,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			return dictionary;
 		}
 
-		public List<Edge> GetOrCreateInEdges(int vertex)
+		public List<Edge> GetOrCreateInEdges(long vertex)
 		{
 			_nodes[vertex] = true;
 			if (_inEdges.ContainsKey(vertex))
@@ -102,10 +102,10 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 	internal sealed class BidirectionalGraphSubViewDecorator : BidirectionalGraphDirectNodeAccess
 	{
 		private BidirectionalGraphDirectNodeAccess _baseGraph;
-		private Func<int, bool> _ignoreNodeFunc;
+		private Func<long, bool> _ignoreNodeFunc;
 		private Func<Edge, bool> _ignoreEdgeFunc;
 		
-		public override IEnumerable<int> GetNodes()
+		public override IEnumerable<long> GetNodes()
 		{
 			foreach (var node in _baseGraph.GetNodes())
 			{
@@ -114,7 +114,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			}
 		}
 
-		public override IEnumerable<Edge> OutEdges(int vertex)
+		public override IEnumerable<Edge> OutEdges(long vertex)
 		{
 			if (_ignoreNodeFunc==null && _ignoreEdgeFunc==null)
 			{
@@ -131,7 +131,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			return FilteredOutEdges(vertex);
 		}
 
-		private IEnumerable<Edge> FilteredOutEdges(int vertex)
+		private IEnumerable<Edge> FilteredOutEdges(long vertex)
 		{
 			// only use inside OutEdges(int vertex)
 			foreach (var edge in _baseGraph.OutEdges(vertex))
@@ -143,7 +143,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			}
 		}
 
-		public override IEnumerable<Edge> InEdges(int vertex)
+		public override IEnumerable<Edge> InEdges(long vertex)
 		{
 			if (_ignoreNodeFunc == null && _ignoreEdgeFunc == null)
 			{
@@ -160,7 +160,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			return FilteredInEdges(vertex);
 		}
 
-		private IEnumerable<Edge> FilteredInEdges(int vertex)
+		private IEnumerable<Edge> FilteredInEdges(long vertex)
 		{
 			// only use inside InEdges(int vertex)
 			foreach (var edge in _baseGraph.InEdges(vertex))
@@ -172,7 +172,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			}
 		}
 
-		public BidirectionalGraphSubViewDecorator(BidirectionalGraphDirectNodeAccess baseGraph, Func<int, bool> ignoreNodeFunc = null, Func<Edge, bool> ignoreEdgeFunc = null)
+		public BidirectionalGraphSubViewDecorator(BidirectionalGraphDirectNodeAccess baseGraph, Func<long, bool> ignoreNodeFunc = null, Func<Edge, bool> ignoreEdgeFunc = null)
 		{
 			_baseGraph = baseGraph;
 			_ignoreNodeFunc = ignoreNodeFunc;
@@ -182,14 +182,14 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 
 	public static class BidirectionalGraphAlgorithmExtensions
 	{
-		internal static Dictionary<int, bool> GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
-																	  Dictionary<int, bool> targetNodes)
+		internal static Dictionary<long, bool> GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
+																	  Dictionary<long, bool> targetNodes)
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
-			var nodesAdded = new Dictionary<int, bool>();
-			var nodesToTraverse = new Stack<int>();
+			var nodesAdded = new Dictionary<long, bool>();
+			var nodesToTraverse = new Stack<long>();
 			foreach (var node in targetNodes)
 			{
 				nodesToTraverse.Push(node.Key);
@@ -211,18 +211,18 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			return nodesAdded;
 		}
 
-		internal static Dictionary<int, bool> GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
-																	  Dictionary<int, bool> targetNodes, Func<int, bool> ignoreNodeFunc,
+		internal static Dictionary<long, bool> GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
+																	  IEnumerable<long> targetNodes, Func<long, bool> ignoreNodeFunc,
 																	  Func<Edge, bool> ignoreEdgeFunc = null)
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
-			var ancestors = new Dictionary<int, bool>();
-			var nodesToTraverse = new Stack<int>();
+			var ancestors = new Dictionary<long, bool>();
+			var nodesToTraverse = new Stack<long>();
 			foreach (var node in targetNodes)
 			{
-				nodesToTraverse.Push(node.Key);
+				nodesToTraverse.Push(node);
 			}
 
 			while (nodesToTraverse.Count > 0)
@@ -242,17 +242,18 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			}
 			return ancestors;
 		}
-
-		internal static void GetAncestors(this BidirectionalGraphDirectNodeAccess graph,
-											Func<int,bool> nodeIsAncestor,
-											Action<int> nodeSetAncestor,
-											IEnumerable<int> targetNodes, Func<int, bool> ignoreNodeFunc,
+		
+		// Analogue to GetAncestors but with delegates
+		internal static void BackwardTraversal(this BidirectionalGraphDirectNodeAccess graph,
+											Func<long, bool> nodeIsAncestor,
+											Action<long> nodeSetAncestor,
+											IEnumerable<long> targetNodes, Func<long, bool> ignoreNodeFunc,
 											Func<Edge, bool> ignoreEdgeFunc = null)
 		{
 			// standard behavior: do not ignore node or edge
 			// node in toNodes are their own ancestors, if they are not ignored by ignoreNodeFunc
 			// based on DFS https://en.wikipedia.org/wiki/Depth-first_search
-			var nodesToTraverse = new Stack<int>();
+			var nodesToTraverse = new Stack<long>();
 			foreach (var node in targetNodes)
 			{
 				nodesToTraverse.Push(node);
@@ -276,7 +277,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 		}
 
 		internal static BidirectionalGraph CreateSubGraph(this BidirectionalGraphDirectNodeAccess graph,
-																						 Dictionary<int, bool> nodesOfSubGraph)
+																						 Dictionary<long, bool> nodesOfSubGraph)
 		{
 			var newGraph = new BidirectionalGraph();
 			foreach (var node in nodesOfSubGraph)

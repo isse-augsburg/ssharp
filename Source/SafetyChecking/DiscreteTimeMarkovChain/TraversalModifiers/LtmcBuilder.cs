@@ -76,7 +76,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 				var placeOfTransition = _markovChain.GetPlaceForNewTransitionChainElements(transitionNo);
 
-				var index = 0;
+				var index = 0L;
 				foreach (var transition in transitions)
 				{
 					Assert.That(index<transitionNo,"Bug");

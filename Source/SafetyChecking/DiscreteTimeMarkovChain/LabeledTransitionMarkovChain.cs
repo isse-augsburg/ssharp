@@ -25,8 +25,10 @@ using System;
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
 	using System.Collections.Concurrent;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Linq;
 	using System.Runtime.CompilerServices;
 	using Modeling;
 	using Utilities;
@@ -283,10 +285,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return new TransitionChainEnumerator(this);
 		}
 		
-		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
+		public Func<long, bool> CreateFormulaEvaluator(Formula formula)
 		{
 			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
-			Func<int, bool> evaluator = transitionTarget =>
+			Func<long, bool> evaluator = transitionTarget =>
 			{
 				var stateFormulaSet = _transitionMemory[transitionTarget].Formulas;
 				return stateFormulaEvaluator(stateFormulaSet);
@@ -298,7 +300,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			private readonly LabeledTransitionMarkovChain _ltmc;
 
-			public int CurrentIndex { get; private set; }
+			public long CurrentIndex { get; private set; }
 			
 			public double CurrentProbability => _ltmc._transitionMemory[CurrentIndex].Probability;
 
@@ -340,33 +342,96 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		internal class UnderlyingDigraph
 		{
+			// Idea: Every transitionTarget and every state gets a node. From [0,markovChain.Transitions] are
+			// transitionTargets and from [markovChain.Transitions+1,markovChain.Transitions+markovChain.SourceStates.Count]
+			// transitions.
+
 			private readonly BidirectionalGraph _baseGraph;
 
-			public BidirectionalGraphDirectNodeAccess BaseGraph => _baseGraph;
+			private readonly long _transitionTargetNo;
+			private readonly int _stateNo;
 
-			public void AddStatesFromEnumerator(int sourceState, LabeledTransitionEnumerator enumerator)
-			{
-				while (enumerator.MoveNext())
-				{
-					if (enumerator.CurrentProbability > 0.0)
-						_baseGraph.AddVerticesAndEdge(new Edge(sourceState, enumerator.CurrentTargetState));
-				}
-			}
+			public BidirectionalGraphDirectNodeAccess BaseGraph => _baseGraph;
 
 			public UnderlyingDigraph(LabeledTransitionMarkovChain markovChain)
 			{
 				// Assumption "every node is reachable" is fulfilled due to the construction
 				// Except maybe the stuttering state
+				_transitionTargetNo = markovChain.Transitions;
+				_stateNo = markovChain.SourceStates.Count;
 
 				_baseGraph = new BidirectionalGraph();
 
-				// transitions from initial state get artificial source state with index -1
-
 				var enumerator = markovChain.GetInitialDistributionEnumerator();
-				AddStatesFromEnumerator(-1, enumerator);
+				AddStatesFromEnumerator(null, enumerator);
 				foreach (var sourceState in markovChain.SourceStates)
 				{
 					markovChain.GetTransitionEnumerator(sourceState);
+					AddStatesFromEnumerator(sourceState, enumerator);
+				}
+			}
+
+			public long? TryGetTransitionTargetIndex(long node)
+			{
+				Assert.That(node>=0 && node < _transitionTargetNo + _stateNo,"Out of index");
+				if (node < _transitionTargetNo)
+				{
+					return node;
+				}
+				return null;
+			}
+
+			private long StateToNodeIndex(int state)
+			{
+				Assert.That(state > 0 && state < _stateNo, "Out of range");
+				return _transitionTargetNo + state;
+			}
+
+			private long TransitionTargetToNodeIndex(long transition)
+			{
+				Assert.That(transition > 0 && transition < _transitionTargetNo, "Out of range");
+				return transition;
+			}
+
+			public void AddStatesFromEnumerator(int? sourceState, LabeledTransitionEnumerator enumerator)
+			{
+				while (enumerator.MoveNext())
+				{
+					if (!(enumerator.CurrentProbability > 0.0))
+						continue;
+
+					var transitionTargetNodeIndex = TransitionTargetToNodeIndex(enumerator.CurrentIndex);
+					var targetStateNodeIndex = StateToNodeIndex(enumerator.CurrentTargetState);
+					_baseGraph.AddVerticesAndEdge(new Edge(transitionTargetNodeIndex, targetStateNodeIndex));
+
+					if (sourceState == null)
+						continue;
+					var sourceStateNodeIndex = StateToNodeIndex(sourceState.Value);
+					_baseGraph.AddVerticesAndEdge(new Edge(sourceStateNodeIndex, transitionTargetNodeIndex));
+				}
+			}
+
+			internal void BackwardTraversal(IEnumerable<long> targetTransitionTargets, Action<long> actionOnResultingTransitionTarget, Func<long, bool> transitionTargetsToIgnore)
+			{
+				var transitionTargetNodes = targetTransitionTargets.Select(TransitionTargetToNodeIndex);
+
+				Func<long, bool> ignoreNodeFunc =
+					node =>
+					{
+						var transitionTarget = TryGetTransitionTargetIndex(node);
+						if (transitionTarget == null)
+							return false;
+						return transitionTargetsToIgnore(transitionTarget.Value);
+					};
+
+				var ancestors=_baseGraph.GetAncestors(transitionTargetNodes, ignoreNodeFunc);
+				foreach (var ancestor in ancestors)
+				{
+					var transitionTargetOfAncestor = TryGetTransitionTargetIndex(ancestor.Key);
+					if (transitionTargetOfAncestor != null)
+					{
+						actionOnResultingTransitionTarget(transitionTargetOfAncestor.Value);
+					}
 				}
 			}
 		}

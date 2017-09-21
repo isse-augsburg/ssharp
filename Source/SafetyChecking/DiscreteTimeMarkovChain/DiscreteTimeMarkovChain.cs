@@ -36,6 +36,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using ExecutedModel;
 	using Formula;
 	using GenericDataStructures;
+	using Utilities;
 
 	public class DiscreteTimeMarkovChain
 	{
@@ -207,12 +208,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 		}
 		
-		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
+		public Func<long, bool> CreateFormulaEvaluator(Formula formula)
 		{
 			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
-			Func<int, bool> evaluator = transitionTarget =>
+			Func<long, bool> evaluator = transitionTarget =>
 			{
-				var stateFormulaSet = StateLabeling[transitionTarget];
+				Assert.That(transitionTarget<int.MaxValue,"need to exchange int by long");
+				var stateFormulaSet = StateLabeling[(int)transitionTarget];
 				return stateFormulaEvaluator(stateFormulaSet);
 			};
 			return evaluator;

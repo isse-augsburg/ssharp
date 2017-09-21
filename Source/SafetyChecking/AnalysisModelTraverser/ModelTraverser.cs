@@ -160,7 +160,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 					var stateCount = Context.StateCount.ToString("N0", CultureInfo.InvariantCulture);
 					var transitionCount = Context.TransitionCount.ToString("N0", CultureInfo.InvariantCulture);
 					var computedTransitionCount = Context.ComputedTransitionCount.ToString("N0", CultureInfo.InvariantCulture);
-					var statesPerSecond = ((long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds)).ToString("N0", CultureInfo.InvariantCulture);
+					var statesPerSecond = ((long)(Context.TransitionCount / stopwatch.Elapsed.TotalSeconds)).ToString("N0", CultureInfo.InvariantCulture);
 					var transitionsPerSecond = ((long)(Context.StateCount / stopwatch.Elapsed.TotalSeconds)).ToString("N0", CultureInfo.InvariantCulture);
 
 					Context.Output?.WriteLine(String.Empty);

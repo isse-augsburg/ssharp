@@ -34,17 +34,22 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using System.IO;
 	using Utilities;
 	using Formula;
+	using GenericDataStructures;
 
 	internal class BuiltinLtmcModelChecker : LtmcModelChecker
 	{
+		[Flags]
 		internal enum PrecalculatedTransitionTarget : byte
 		{
 			Nothing = 0,
-			Satisfied = 1,
-			Excluded = 2,
+			SatisfiedDirect = 1,
+			ExcludedDirect = 2,
+			SatisfiedFinally = 4,
+			ExcludedFinally = 8,
+			Mark = 16,
 		}
 
-		private readonly LabeledTransitionMarkovChain.UnderlyingDigraph _underlyingDigraph;
+		private LabeledTransitionMarkovChain.UnderlyingDigraph _underlyingDigraph;
 
 		// Note: Should be used with using(var modelchecker = new ...)
 		public BuiltinLtmcModelChecker(LabeledTransitionMarkovChain markovChain, TextWriter output = null)
@@ -52,55 +57,36 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			Requires.That(true, "Need CompactStateStorage to use this model checker");
 			LabeledMarkovChain.AssertIsDense();
-
 			output.WriteLine("Initializing Built-in Ltmc Model checker");
-			output.WriteLine("Creating underlying digraph");
-			_underlyingDigraph = LabeledMarkovChain.CreateUnderlyingDigraph();
-			output.WriteLine("Finished creating underlying digraph");
 		}
 
 		private PrecalculatedTransitionTarget[] CreateEmptyPrecalculatedTransitionTargetArray()
 		{
 			PrecalculatedTransitionTarget[] outputTargets = new PrecalculatedTransitionTarget[LabeledMarkovChain.Transitions];
-			for (var i = 0; i < LabeledMarkovChain.Transitions; i++)
+			for (var i = 0L; i < LabeledMarkovChain.Transitions; i++)
 			{
 				outputTargets[i] = PrecalculatedTransitionTarget.Nothing;
 			}
 			return outputTargets;
 		}
 
-		private void CalculateSatisfiedTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, Func<int, bool> formulaEvaluator)
+		private void CalculateSatisfiedTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, Func<long, bool> formulaEvaluator)
 		{
-			for (var i = 0; i < LabeledMarkovChain.Transitions; i++)
+			for (var i = 0L; i < LabeledMarkovChain.Transitions; i++)
 			{
 				if (formulaEvaluator(i))
-					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Satisfied;
+					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.SatisfiedDirect;
 			}
 		}
 
-		private void CalculateExcludedTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, Func<int, bool> formulaEvaluator)
+		private void CalculateExcludedTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, Func<long, bool> formulaEvaluator)
 		{
-			for (var i = 0; i < LabeledMarkovChain.Transitions; i++)
+			for (var i = 0L; i < LabeledMarkovChain.Transitions; i++)
 			{
 				if (formulaEvaluator(i))
-					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Excluded;
+					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.ExcludedDirect;
 			}
 		}
-
-		private double[] CreateDerivedVector(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, PrecalculatedTransitionTarget flagToLookFor)
-		{
-			var derivedVector = new double[LabeledMarkovChain.Transitions];
-
-			for (var i = 0; i < LabeledMarkovChain.Transitions; i++)
-			{
-				if (precalculatedTransitionTargets[i].HasFlag(flagToLookFor))
-					derivedVector[i] = 1.0;
-				else
-					derivedVector[i] = 0.0;
-			}
-			return derivedVector;
-		}
-
 
 		private double CalculateFinalProbability(double[] initialStateProbabilities)
 		{
@@ -114,7 +100,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return finalProbability;
 		}
 
-		private PrecalculatedTransitionTarget[] CreatePrecalculatedTransitionTargets(Formula phi, Formula psi)
+		private PrecalculatedTransitionTarget[] CreateSimplePrecalculatedTransitionTargets(Formula phi, Formula psi)
 		{
 			var psiEvaluator = LabeledMarkovChain.CreateFormulaEvaluator(psi);
 
@@ -125,9 +111,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				// excludedStates = Sat(\phi) \Cup Sat(psi)
 				var phiEvaluator = LabeledMarkovChain.CreateFormulaEvaluator(phi);
-				Func<int, bool> calculateExcludedStates = target =>
+				Func<long, bool> calculateExcludedStates = target =>
 				{
-					if (precalculatedTransitionTargets[target] == PrecalculatedTransitionTarget.Satisfied)
+					if (precalculatedTransitionTargets[target] == PrecalculatedTransitionTarget.SatisfiedDirect)
 						return false; //satisfied states are never excluded
 					if (!phiEvaluator(target))
 						return true; //exclude state if it does not satisfy phi
@@ -146,7 +132,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var precalculatedTransitionTargets = CreatePrecalculatedTransitionTargets(phi, psi);
+			var precalculatedTransitionTargets = CreateSimplePrecalculatedTransitionTargets(phi, psi);
 
 			var stateCount = LabeledMarkovChain.SourceStates.Count;
 			
@@ -168,11 +154,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					while (enumerator.MoveNext())
 					{
 						var transitionTarget = enumerator.CurrentIndex;
-						if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.Satisfied))
+						if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.SatisfiedDirect))
 						{
 							sum += enumerator.CurrentProbability;
 						}
-						else if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.Excluded))
+						else if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.ExcludedDirect))
 						{
 						}
 						else
@@ -196,6 +182,81 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			
 			stopwatch.Stop();
 			return finalProbability;
+		}
+		
+		private void SetFlagInUnmarkedTransitionTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, PrecalculatedTransitionTarget flagToSet)
+		{
+			for (var i = 0L; i < LabeledMarkovChain.Transitions; i++)
+			{
+				if (precalculatedTransitionTargets[i].HasFlag(PrecalculatedTransitionTarget.Mark))
+				{
+					precalculatedTransitionTargets[i] = precalculatedTransitionTargets[i] & (~PrecalculatedTransitionTarget.Mark);
+				}
+				else
+				{
+					precalculatedTransitionTargets[i] = precalculatedTransitionTargets[i] | flagToSet;
+				}
+			}
+		}
+
+		private void CalculateUnderlyingDigraph()
+		{
+			// We use the underlying digraph to interfere the transitionTargets with the final probability
+			// of 0 or 1.
+			// I think, the data from the graph is also valid for the states. So, if a state-node
+			// is in Prob0 or Prob1, then we can also assume that the state has always probability 0 or 1,
+			// respectively. One further check can could be introduced. When we know that the probability
+			// of a state is 0 or 1, then we do not have to check the outgoing transitionTargets anymore.
+			if (_underlyingDigraph != null)
+				return;
+			_output.WriteLine("Creating underlying digraph");
+			_underlyingDigraph = LabeledMarkovChain.CreateUnderlyingDigraph();
+			_output.WriteLine("Finished creating underlying digraph");
+		}
+
+		private IEnumerable<long> GetAllTransitionTargetIndexesWithFlag(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, PrecalculatedTransitionTarget flag)
+		{
+			for (var i = 0L; i < precalculatedTransitionTargets.Length; i++)
+			{
+				if (precalculatedTransitionTargets[i].HasFlag(flag))
+					yield return i;
+			}
+		}
+
+		private void CalculateProb0TransitionTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		{
+			CalculateUnderlyingDigraph();
+
+			var targetTransitionTargets = GetAllTransitionTargetIndexesWithFlag(precalculatedTransitionTargets, PrecalculatedTransitionTarget.SatisfiedDirect);
+
+			Action<long> setFlagForTransitionTarget =
+				(index) => precalculatedTransitionTargets[index] |= PrecalculatedTransitionTarget.Mark;
+
+			Func<long, bool> transitionTargetsToIgnore =
+				(index) => precalculatedTransitionTargets[index].HasFlag(PrecalculatedTransitionTarget.ExcludedDirect);
+			
+			_underlyingDigraph.BackwardTraversal(targetTransitionTargets, setFlagForTransitionTarget, transitionTargetsToIgnore);
+
+			SetFlagInUnmarkedTransitionTargets(precalculatedTransitionTargets, PrecalculatedTransitionTarget.ExcludedFinally);
+		}
+
+		private void CalculateProb1TransitionTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		{
+			// Need to know Prob0TransitionTargets first
+
+			var targetTransitionTargets = GetAllTransitionTargetIndexesWithFlag(precalculatedTransitionTargets, PrecalculatedTransitionTarget.ExcludedFinally);
+
+			Action<long> setFlagForTransitionTarget =
+				(index) => precalculatedTransitionTargets[index] |= PrecalculatedTransitionTarget.Mark;
+
+			Func<long, bool> transitionTargetsToIgnore =
+				(index) =>
+				precalculatedTransitionTargets[index].HasFlag(PrecalculatedTransitionTarget.ExcludedDirect) ||
+				precalculatedTransitionTargets[index].HasFlag(PrecalculatedTransitionTarget.SatisfiedDirect);
+
+			_underlyingDigraph.BackwardTraversal(targetTransitionTargets, setFlagForTransitionTarget, transitionTargetsToIgnore);
+
+			SetFlagInUnmarkedTransitionTargets(precalculatedTransitionTargets, PrecalculatedTransitionTarget.SatisfiedFinally);
 		}
 
 		internal override Probability CalculateProbability(Formula formulaToCheck)
