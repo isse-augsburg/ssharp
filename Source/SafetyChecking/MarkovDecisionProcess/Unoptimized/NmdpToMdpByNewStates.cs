@@ -36,6 +36,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 	internal sealed class NmdpToMdpByNewStates : NmdpToMdp
 	{
+		// Problem with "For phi until psi" formula. Assume we have a state which has two successor states.
+		// One in which phi is true and one in which phi is not true. Shall we set phi to true in the intermediate
+		// steps or not? One solution might be to transform the formula into "(phi or intermediate state) until psi".
+		// Care has to be taken if generated MDP is used for something else than finally and until.
+
 		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp)
 			: base(nmdp)
 		{
