@@ -88,18 +88,6 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 		}
 
-		private double CalculateFinalProbability(double[] initialStateProbabilities)
-		{
-			var finalProbability = 0.0;
-
-			var enumerator = LabeledMarkovChain.GetInitialDistributionEnumerator();
-			while (enumerator.MoveNext())
-			{
-				finalProbability += enumerator.CurrentProbability * initialStateProbabilities[enumerator.CurrentTargetState];
-			}
-			return finalProbability;
-		}
-
 		private PrecalculatedTransitionTarget[] CreateSimplePrecalculatedTransitionTargets(Formula phi, Formula psi)
 		{
 			var psiEvaluator = LabeledMarkovChain.CreateFormulaEvaluator(psi);
@@ -122,6 +110,30 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				CalculateExcludedTargets(precalculatedTransitionTargets, calculateExcludedStates);
 			}
 			return precalculatedTransitionTargets;
+		}
+
+		private double CalculateFinalBoundedProbability(double[] initialStateProbabilities, PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		{
+			var finalProbability = 0.0;
+
+			var enumerator = LabeledMarkovChain.GetInitialDistributionEnumerator();
+
+			while (enumerator.MoveNext())
+			{
+				var transitionTarget = enumerator.CurrentIndex;
+				if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.SatisfiedDirect))
+				{
+					finalProbability += enumerator.CurrentProbability;
+				}
+				else if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.ExcludedDirect))
+				{
+				}
+				else
+				{
+					finalProbability += enumerator.CurrentProbability * initialStateProbabilities[enumerator.CurrentTargetState];
+				}
+			}
+			return finalProbability;
 		}
 
 		private double CalculateBoundedProbability(Formula phi, Formula psi, int steps)
@@ -172,13 +184,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				if (loops % 10 == 0)
 				{
 					stopwatch.Stop();
-					var currentProbability = CalculateFinalProbability(xnew);
+					var currentProbability = CalculateFinalBoundedProbability(xnew,precalculatedTransitionTargets);
 					_output?.WriteLine($"{loops} Bounded Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
 			}
 
-			var finalProbability=CalculateFinalProbability(xnew);
+			var finalProbability=CalculateFinalBoundedProbability(xnew, precalculatedTransitionTargets);
 			
 			stopwatch.Stop();
 			return finalProbability;
@@ -259,6 +271,30 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			SetFlagInUnmarkedTransitionTargets(precalculatedTransitionTargets, PrecalculatedTransitionTarget.SatisfiedFinally);
 		}
 
+		private double CalculateFinalUnboundedProbability(double[] initialStateProbabilities, PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		{
+			var finalProbability = 0.0;
+
+			var enumerator = LabeledMarkovChain.GetInitialDistributionEnumerator();
+
+			while (enumerator.MoveNext())
+			{
+				var transitionTarget = enumerator.CurrentIndex;
+				if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.SatisfiedFinally))
+				{
+					finalProbability += enumerator.CurrentProbability;
+				}
+				else if (precalculatedTransitionTargets[transitionTarget].HasFlag(PrecalculatedTransitionTarget.ExcludedFinally))
+				{
+				}
+				else
+				{
+					finalProbability += enumerator.CurrentProbability * initialStateProbabilities[enumerator.CurrentTargetState];
+				}
+			}
+			return finalProbability;
+		}
+
 
 		private double CalculateUnboundUntil(Formula phi, Formula psi, int iterationsLeft)
 		{
@@ -318,7 +354,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				if (loops % 10 == 0)
 				{
 					stopwatch.Stop();
-					var currentProbability = CalculateFinalProbability(xnew);
+					var currentProbability = CalculateFinalUnboundedProbability(xnew,precalculatedTransitionTargets);
 					_output?.WriteLine($"{loops} Fixpoint Until iterations in {stopwatch.Elapsed}. Current probability={currentProbability.ToString(CultureInfo.InvariantCulture)}");
 					stopwatch.Start();
 				}
@@ -326,7 +362,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					fixPointReached = true;
 			}
 
-			var finalProbability = CalculateFinalProbability(xnew);
+			var finalProbability = CalculateFinalUnboundedProbability(xnew,precalculatedTransitionTargets);
 
 			stopwatch.Stop();
 			return finalProbability;
