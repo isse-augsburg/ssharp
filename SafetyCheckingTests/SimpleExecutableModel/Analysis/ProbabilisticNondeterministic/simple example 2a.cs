@@ -166,7 +166,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			CheckBounded(configuration);
 		}
 
-		[Fact(Skip = "Not working, because depth of nodes must be aligned")]
+		[Fact]
 		public void CheckBoundedMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;

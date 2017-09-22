@@ -25,6 +25,7 @@ using System.Linq;
 
 namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using AnalysisModel;
 	using ExecutedModel;
@@ -43,10 +44,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		//     Flag: ConstantDistanceBetweenStates
 		//     Delaying should occur earliest possible (before splits)
 		//     Newly introduced states are called "PaddingStates"
+		//     Currently, the padding is added just after the splits by AddTransition.
+		//     Idea is to level the differences of the nodes. requiredPadding=requiredDistanceToLeaf-MaxDistanceToLeaf
+		//     TODO: Improve initial padding until first split
 
 		public Formula FormulaForArtificalState;
 
 		private StateFormulaSet _stateFormulaSetforArtificialState;
+
+		private readonly bool _makeConstantDistanceBetweenStates;
 
 		private readonly int _nmdpStates;
 
@@ -60,17 +66,27 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private readonly AutoResizeBigVector<int> _cidMaxDistanceFromLeaf = new AutoResizeBigVector<int>();
 
-		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp)
+		private readonly Dictionary<int,int> _paddingStates = new Dictionary<int, int>();
+
+		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp, bool makeConstantDistanceBetweenStates=true)
 			: base(nmdp)
 		{
+			_makeConstantDistanceBetweenStates = makeConstantDistanceBetweenStates;
+
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 			Console.Out.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
 			Console.Out.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
 
 			var newNumberOfStates = nmdp.ContinuationGraphSize - nmdp.States;
+			var newNumberOfTransitions = nmdp.ContinuationGraphSize;
+			if (_makeConstantDistanceBetweenStates)
+			{
+				newNumberOfStates = 30 * newNumberOfStates;
+				newNumberOfTransitions = 30 * newNumberOfTransitions;
+			}
 
-			var modelCapacity = new ModelCapacityByModelSize(newNumberOfStates, nmdp.ContinuationGraphSize);
+			var modelCapacity = new ModelCapacityByModelSize(newNumberOfStates, newNumberOfTransitions);
 			MarkovDecisionProcess = new MarkovDecisionProcess(modelCapacity);
 
 			_nmdpStates = _nmdp.States;
@@ -79,6 +95,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			CreateArtificalStateFormula();
 			ConvertInitialTransitions();
 			ConvertStateTransitions();
+			AddPaddingStatesInMdp();
 			SetStateLabelings();
 
 			stopwatch.Stop();
@@ -103,18 +120,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			_maximalDistanceBetweenStates = 0;
 			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
-			_cidDistanceFromRoot.Clear(cidOfStateRoot);
-			_cidMaxDistanceFromLeaf.Clear(cidOfStateRoot);
-
-			_maximalDistanceBetweenStates = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot, 0);
+			_maximalDistanceBetweenStates = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot);
 			
 			for (var state = 0; state < _nmdp.States; state++)
 			{
 				cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfState(state);
-				_cidDistanceFromRoot.Clear(cidOfStateRoot);
-				_cidMaxDistanceFromLeaf.Clear(cidOfStateRoot);
-
-				var maxDistranceFromLeaf = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot, 0);
+				var maxDistranceFromLeaf = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot);
 				_maximalDistanceBetweenStates = Math.Max(_maximalDistanceBetweenStates, maxDistranceFromLeaf);
 			}
 
@@ -122,8 +133,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				Console.Out.WriteLine($"Calculated a maximal distance between states of  {_maximalDistanceBetweenStates}");
 				Console.Out.WriteLine($"This may skew the results");
-				MarkovDecisionProcess.FactorForBoundedAnalysis = 1 + _maximalDistanceBetweenStates;
+				MarkovDecisionProcess.FactorForBoundedAnalysis = _maximalDistanceBetweenStates+1;
 			}
+		}
+
+		private int CalculateDistanceFromRootAndLeafOfCid(long cidOfStateRoot)
+		{
+			_cidDistanceFromRoot.Clear(cidOfStateRoot);
+			_cidMaxDistanceFromLeaf.Clear(cidOfStateRoot);
+			return CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot, 0);
 		}
 
 		private int CalculateDistanceFromRootAndLeafOfCid(long currentCid,int currentDistanceFromRoot)
@@ -139,6 +157,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				if (cge.IsChoiceTypeForward)
 				{
+					Console.Out.WriteLine("You are using BuildInMdpWithNewStates in conjunction with OnFirstMethodWithUndo. This feature is currently untested...");
 					maxDistanceFromLeaf = CalculateDistanceFromRootAndLeafOfCid(cgi.ToCid, currentDistanceFromRoot);
 				}
 				else
@@ -158,7 +177,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
 			_cidToArtificialStateMapping.Clear(cidOfStateRoot);
-			
+
+			CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot);
 			ConvertRootCid(null,cidOfStateRoot);
 		}
 
@@ -168,18 +188,27 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfState(state);
 				_cidToArtificialStateMapping.Clear(cidOfStateRoot);
-				
+
+				CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot);
 				ConvertRootCid(state,cidOfStateRoot);
 			}
 		}
 
-		private void AddDestination(long cidToAdd)
+		private void AddPaddedTransition(int mdpState,double probability, int requiredPadding)
 		{
+			var firstStateBeforePadding = CreateNewArtificialPaddingStates(mdpState, requiredPadding);
+			MarkovDecisionProcess.AddTransition(firstStateBeforePadding, probability);
+		}
+
+		private void AddDestination(long cidToAdd, int requiredDistanceToLeaf)
+		{
+			var requiredPadding = requiredDistanceToLeaf - _cidMaxDistanceFromLeaf[cidToAdd];
+
 			var cge = _nmdp.GetContinuationGraphElement(cidToAdd);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
 				var cgl = _nmdp.GetContinuationGraphLeaf(cidToAdd);
-				MarkovDecisionProcess.AddTransition(cgl.ToState,cgl.Probability);
+				AddPaddedTransition(cgl.ToState,cgl.Probability, requiredPadding);
 			}
 			else if (cge.IsChoiceTypeForward)
 			{
@@ -192,17 +221,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					mdpStateToForwardTo = nodeToForwardTo.AsLeaf.ToState;
 				else
 					mdpStateToForwardTo = _cidToArtificialStateMapping[cgi.ToCid];
-				MarkovDecisionProcess.AddTransition(mdpStateToForwardTo, cge.Probability);
+				AddPaddedTransition(mdpStateToForwardTo, cge.Probability, requiredPadding);
 			}
 			else
 			{
-				var newArtificialMarkovState = CreateNewArtificialState(cidToAdd);
-				MarkovDecisionProcess.AddTransition(newArtificialMarkovState, cge.Probability);
+				var newArtificialMarkovState = CreateNewArtificialCidState(cidToAdd);
+				_cidDistanceFromRoot[cidToAdd] += requiredPadding;
+				AddPaddedTransition(newArtificialMarkovState, cge.Probability, requiredPadding);
 			}
 		}
 
 		private void ConvertRootCid(int? sourceState, long currentCid)
 		{
+			var requiredDistanceToLeaf = _maximalDistanceBetweenStates - _cidDistanceFromRoot[currentCid];
 			var cge = _nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
@@ -212,7 +243,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					var mdpState = sourceState.Value;
 					MarkovDecisionProcess.StartWithNewDistributions(mdpState);
 					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(currentCid);
+					AddDestination(currentCid, requiredDistanceToLeaf);
 					MarkovDecisionProcess.FinishDistribution();
 					MarkovDecisionProcess.FinishDistributions();
 				}
@@ -220,7 +251,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					MarkovDecisionProcess.StartWithInitialDistributions();
 					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(currentCid);
+					AddDestination(currentCid, requiredDistanceToLeaf);
 					MarkovDecisionProcess.FinishDistribution();
 					MarkovDecisionProcess.FinishDistributions();
 				}
@@ -249,7 +280,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
 						MarkovDecisionProcess.StartWithNewDistribution();
-						AddDestination(i);
+						AddDestination(i, requiredDistanceToLeaf);
 						MarkovDecisionProcess.FinishDistribution();
 					}
 				}
@@ -258,7 +289,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					MarkovDecisionProcess.StartWithNewDistribution();
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
-						AddDestination(i);
+						AddDestination(i, requiredDistanceToLeaf);
 					}
 					MarkovDecisionProcess.FinishDistribution();
 				}
@@ -274,6 +305,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void ConvertChildCid(long currentCid)
 		{
+			var requiredDistanceToLeaf = _maximalDistanceBetweenStates - _cidDistanceFromRoot[currentCid];
 			var cge = _nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal || cge.IsChoiceTypeForward)
 				return;
@@ -286,7 +318,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
 					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(i);
+					AddDestination(i, requiredDistanceToLeaf);
 					MarkovDecisionProcess.FinishDistribution();
 				}
 			}
@@ -295,7 +327,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				MarkovDecisionProcess.StartWithNewDistribution();
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
-					AddDestination(i);
+					AddDestination(i, requiredDistanceToLeaf);
 				}
 				MarkovDecisionProcess.FinishDistribution();
 			}
@@ -308,12 +340,41 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 		}
 
-		private int CreateNewArtificialState(long cid)
+		private int CreateNewArtificialCidState(long cid)
 		{
 			var freshIndexInMdp = _artificialStates+_nmdpStates;
 			_artificialStates++;
 			_cidToArtificialStateMapping[cid] = freshIndexInMdp;
 			return freshIndexInMdp;
+		}
+
+		private int CreateNewArtificialPaddingStates(int toMdpState, int requiredPadding)
+		{
+			if (!_makeConstantDistanceBetweenStates)
+				return toMdpState;
+			// returns first mdpState which starts the padding
+			var currentTarget = toMdpState;
+			var currentPaddingState = toMdpState;
+			for (var i = 0; i < requiredPadding; i++)
+			{
+				currentPaddingState = _artificialStates + _nmdpStates;
+				_artificialStates++;
+				_paddingStates.Add(currentPaddingState,currentTarget);
+				currentTarget = currentPaddingState;
+			}
+			return currentPaddingState;
+		}
+
+		private void AddPaddingStatesInMdp()
+		{
+			foreach (var paddingState in _paddingStates)
+			{
+				MarkovDecisionProcess.StartWithNewDistributions(paddingState.Key);
+				MarkovDecisionProcess.StartWithNewDistribution();
+				MarkovDecisionProcess.AddTransition(paddingState.Value,1.0);
+				MarkovDecisionProcess.FinishDistribution();
+				MarkovDecisionProcess.FinishDistributions();
+			}
 		}
 
 		private void SetStateLabelings()

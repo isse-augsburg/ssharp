@@ -96,7 +96,8 @@
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpBuilderDuringTraversalTests.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LabeledTransitionMarkovDecisionProcessExamples.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NestedMarkovDecisionProcessExamples.cs" />
-    <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdpByNewStatesTests.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdpByNewStatesWithoutConstantDistanceTests.cs" />
+    <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdpByNewStatesWithConstantDistanceTests.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\NmdpToMdpByFlatteningTests.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpChoiceResolverTests.cs" />
     <Compile Include="MarkovDecisionProcess\Unoptimized\LtmdpContinuationDistributionMapperTests.cs" />
