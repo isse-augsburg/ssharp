@@ -52,7 +52,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private int _artificialStates;
 
+		private int _maximalDistanceBetweenStates;
+
 		private readonly AutoResizeBigVector<int> _cidToArtificialStateMapping = new AutoResizeBigVector<int>();
+
+		private readonly AutoResizeBigVector<int> _cidDistanceFromRoot = new AutoResizeBigVector<int>();
+
+		private readonly AutoResizeBigVector<int> _cidMaxDistanceFromLeaf = new AutoResizeBigVector<int>();
 
 		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp)
 			: base(nmdp)
@@ -69,6 +75,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			_nmdpStates = _nmdp.States;
 
+			CalculateMaxDistanceBetweenStates();
 			CreateArtificalStateFormula();
 			ConvertInitialTransitions();
 			ConvertStateTransitions();
@@ -90,6 +97,61 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			FormulaForArtificalState = new AtomarPropositionFormula();
 			MarkovDecisionProcess.StateFormulaLabels =
 				_nmdp.StateFormulaLabels.Concat(new[] { FormulaForArtificalState.Label }).ToArray();
+		}
+
+		private void CalculateMaxDistanceBetweenStates()
+		{
+			_maximalDistanceBetweenStates = 0;
+			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
+			_cidDistanceFromRoot.Clear(cidOfStateRoot);
+			_cidMaxDistanceFromLeaf.Clear(cidOfStateRoot);
+
+			_maximalDistanceBetweenStates = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot, 0);
+			
+			for (var state = 0; state < _nmdp.States; state++)
+			{
+				cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfState(state);
+				_cidDistanceFromRoot.Clear(cidOfStateRoot);
+				_cidMaxDistanceFromLeaf.Clear(cidOfStateRoot);
+
+				var maxDistranceFromLeaf = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot, 0);
+				_maximalDistanceBetweenStates = Math.Max(_maximalDistanceBetweenStates, maxDistranceFromLeaf);
+			}
+
+			if (_maximalDistanceBetweenStates > 0)
+			{
+				Console.Out.WriteLine($"Calculated a maximal distance between states of  {_maximalDistanceBetweenStates}");
+				Console.Out.WriteLine($"This may skew the results");
+				MarkovDecisionProcess.FactorForBoundedAnalysis = 1 + _maximalDistanceBetweenStates;
+			}
+		}
+
+		private int CalculateDistanceFromRootAndLeafOfCid(long currentCid,int currentDistanceFromRoot)
+		{
+			//returns maxDistanceFromLeaf
+			_cidDistanceFromRoot[currentCid] = currentDistanceFromRoot;
+			var maxDistanceFromLeaf = 0;
+
+			var cge = _nmdp.GetContinuationGraphElement(currentCid);
+			if (!cge.IsChoiceTypeUnsplitOrFinal)
+			{
+				var cgi = _nmdp.GetContinuationGraphInnerNode(currentCid);
+
+				if (cge.IsChoiceTypeForward)
+				{
+					maxDistanceFromLeaf = CalculateDistanceFromRootAndLeafOfCid(cgi.ToCid, currentDistanceFromRoot);
+				}
+				else
+				{
+					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
+					{
+						var maxDistanceFromLeafOfi = CalculateDistanceFromRootAndLeafOfCid(i, currentDistanceFromRoot + 1);
+						maxDistanceFromLeaf = Math.Max(maxDistanceFromLeaf, maxDistanceFromLeafOfi+1);
+					}
+				}
+			}
+			_cidMaxDistanceFromLeaf[currentCid] = maxDistanceFromLeaf;
+			return maxDistanceFromLeaf;
 		}
 
 		public void ConvertInitialTransitions()

@@ -55,10 +55,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		private const int _sizeOfState = sizeof(int);
 		private const int _sizeOfTransition = sizeof(int) + sizeof(double);  //sizeof(SparseDoubleMatrix.ColumnValue)
-
+		
 		internal SparseDoubleMatrix RowsWithDistributions { get; }
 
 		public LabelVector StateLabeling { get; }
+
+		// NmdpToMdpByNewStates increases the Depth of the models. So a former bound of 5 must be
+		// a bound of 5*FactorForBoundedAnalysis to give the correct result
+		public int FactorForBoundedAnalysis { get; set; } = 1;
 
 		public MarkovDecisionProcess(ModelCapacity modelCapacity)
 		{

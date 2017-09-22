@@ -281,12 +281,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
+			var correctedStepNumber = steps * MarkovDecisionProcess.FactorForBoundedAnalysis;
+
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
 
-			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, steps);
+			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, correctedStepNumber);
 
 			var finalProbability = CalculateMinimumFinalProbability(xnew);
 
@@ -295,13 +297,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
+			var correctedStepNumber = steps * MarkovDecisionProcess.FactorForBoundedAnalysis;
+
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
-
-
-			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, steps);
+			
+			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, correctedStepNumber);
 
 			var finalProbability = CalculateMaximumFinalProbability(xnew);
 
@@ -539,7 +542,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			// same algorithm as CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps with different
 			// directlySatisfiedStates and excludedStates
-			var maxSteps = 50;
+			var maxSteps = 50 * MarkovDecisionProcess.FactorForBoundedAnalysis;
 
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
@@ -562,7 +565,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			// same algorithm as CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps with different
 			// directlySatisfiedStates and excludedStates
-			var maxSteps = 50;
+			var maxSteps = 50 * MarkovDecisionProcess.FactorForBoundedAnalysis;
 
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
