@@ -281,14 +281,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal double CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
-			var correctedStepNumber = steps * MarkovDecisionProcess.FactorForBoundedAnalysis;
+			var adjustedSteps = AdjustNumberOfStepsForFactor(steps);
 
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
 
-			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, correctedStepNumber);
+			var xnew = MinimumIterator(directlySatisfiedStates, excludedStates, adjustedSteps);
 
 			var finalProbability = CalculateMinimumFinalProbability(xnew);
 
@@ -297,14 +297,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 
 		internal double CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps(Formula psi, int steps)
 		{
-			var correctedStepNumber = steps * MarkovDecisionProcess.FactorForBoundedAnalysis;
+			var adjustedSteps = AdjustNumberOfStepsForFactor(steps);
 
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
 			var directlySatisfiedStates = CalculateSatisfiedStates(psiEvaluator);
 			var excludedStates = new Dictionary<int, bool>(); // change for \phi Until \psi
 			
-			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, correctedStepNumber);
+			var xnew = MaximumIterator(directlySatisfiedStates, excludedStates, adjustedSteps);
 
 			var finalProbability = CalculateMaximumFinalProbability(xnew);
 
@@ -542,7 +542,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			// same algorithm as CalculateMaximumProbabilityToReachStateFormulaInBoundedSteps with different
 			// directlySatisfiedStates and excludedStates
-			var maxSteps = 50 * MarkovDecisionProcess.FactorForBoundedAnalysis;
+			var maxSteps = AdjustNumberOfStepsForFactor(50);
 
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
@@ -565,7 +565,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			// same algorithm as CalculateMinimumProbabilityToReachStateFormulaInBoundedSteps with different
 			// directlySatisfiedStates and excludedStates
-			var maxSteps = 50 * MarkovDecisionProcess.FactorForBoundedAnalysis;
+			var maxSteps = AdjustNumberOfStepsForFactor(50);
 
 			var psiEvaluator = MarkovDecisionProcess.CreateFormulaEvaluator(psi);
 
@@ -580,6 +580,15 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			var finalProbability = CalculateMinimumFinalProbability(xnew);
 
 			return finalProbability;
+		}
+
+		private int AdjustNumberOfStepsForFactor(int usualNoOfSteps)
+		{
+			var adjustmentForUsualSteps = usualNoOfSteps * MarkovDecisionProcess.FactorForBoundedAnalysis;
+			// The former initial step is now divided into the 1 initial mdp state and (FactorForBoundedAnalysis-1) normal mdp states
+			// But still, FactorForBoundedAnalysis steps are needed to reach the initial state
+			var adjustmentForInitialSteps = MarkovDecisionProcess.FactorForBoundedAnalysis;
+			return adjustmentForUsualSteps+adjustmentForInitialSteps;
 		}
 
 		/*
