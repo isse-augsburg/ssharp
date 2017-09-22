@@ -32,7 +32,6 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 	using Shouldly;
 	using Xunit;
 	using Xunit.Abstractions;
-	using LtmdpModelChecker = ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized.LtmdpModelChecker;
 
 	public class MultipleFormulasInOneRun : AnalysisTest
 	{
@@ -96,7 +95,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			Check(configuration);
 		}
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;

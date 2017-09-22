@@ -62,7 +62,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			Console.Out.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
 			Console.Out.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
 
-			var modelCapacity = new ModelCapacityByModelSize(nmdp.States, nmdp.ContinuationGraphSize * 8L);
+			var newNumberOfStates = nmdp.ContinuationGraphSize - nmdp.States;
+
+			var modelCapacity = new ModelCapacityByModelSize(newNumberOfStates, nmdp.ContinuationGraphSize);
 			MarkovDecisionProcess = new MarkovDecisionProcess(modelCapacity);
 
 			_nmdpStates = _nmdp.States;
@@ -117,6 +119,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				var cgl = _nmdp.GetContinuationGraphLeaf(cidToAdd);
 				MarkovDecisionProcess.AddTransition(cgl.ToState,cgl.Probability);
 			}
+			else if (cge.IsChoiceTypeForward)
+			{
+				// This ChoiceType might be created by ForwardUntakenChoicesAtIndex in ChoiceResolver
+				// We assume that the node to forward to has already been encountered
+				var cgi = _nmdp.GetContinuationGraphInnerNode(cidToAdd);
+				var nodeToForwardTo = _nmdp.GetContinuationGraphElement(cgi.ToCid);
+				int mdpStateToForwardTo;				
+				if (nodeToForwardTo.IsChoiceTypeUnsplitOrFinal)
+					mdpStateToForwardTo = nodeToForwardTo.AsLeaf.ToState;
+				else
+					mdpStateToForwardTo = _cidToArtificialStateMapping[cgi.ToCid];
+				MarkovDecisionProcess.AddTransition(mdpStateToForwardTo, cge.Probability);
+			}
 			else
 			{
 				var newArtificialMarkovState = CreateNewArtificialState(cidToAdd);
@@ -165,7 +180,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				if (cge.IsChoiceTypeForward)
 				{
 					// This ChoiceType might be created by ForwardUntakenChoicesAtIndex in ChoiceResolver
-					throw new Exception("Forward transitions not supported");
+					throw new Exception("Bug: RootCid cannot be a forward node");
 				}
 				else if (cge.IsChoiceTypeNondeterministic)
 				{
@@ -198,18 +213,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private void ConvertChildCid(long currentCid)
 		{
 			var cge = _nmdp.GetContinuationGraphElement(currentCid);
-			if (cge.IsChoiceTypeUnsplitOrFinal)
+			if (cge.IsChoiceTypeUnsplitOrFinal || cge.IsChoiceTypeForward)
 				return;
 			var mdpState = _cidToArtificialStateMapping[currentCid];
 			MarkovDecisionProcess.StartWithNewDistributions(mdpState);
 
 			var cgi = _nmdp.GetContinuationGraphInnerNode(currentCid);
-			if (cge.IsChoiceTypeForward)
-			{
-				// This ChoiceType might be created by ForwardUntakenChoicesAtIndex in ChoiceResolver
-				throw new Exception("Forward transitions not supported");
-			}
-			else if (cge.IsChoiceTypeNondeterministic)
+			if (cge.IsChoiceTypeNondeterministic)
 			{
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{

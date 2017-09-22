@@ -37,7 +37,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 	using Xunit.Abstractions;
 	using NmdpExamples;
 
-	public class NmdpToMdpTests
+	public class NmdpToMdpByFlatteningTests
 	{
 		public TestTraceOutput Output { get; }
 
@@ -45,7 +45,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 
 		public MarkovDecisionProcess MarkovDecisionProcess { get; private set; }
 		
-		public NmdpToMdpTests(ITestOutputHelper output)
+		public NmdpToMdpByFlatteningTests(ITestOutputHelper output)
 		{
 			Output = new TestTraceOutput(output);
 		}

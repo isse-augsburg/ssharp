@@ -94,7 +94,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			Check(configuration);
 		}
 		
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;

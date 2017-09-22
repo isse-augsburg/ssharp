@@ -71,7 +71,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 				maxProbabilityOfFinal3 = modelChecker.CalculateMaximalProbability(final3Formula);
 			}
 
-			minProbabilityOfFinal1.Is(1.0, 0.000001).ShouldBe(true);
+			minProbabilityOfFinal1.Is(1.0, 0.00001).ShouldBe(true);
 			minProbabilityOfFinal2.Is(0.0, 0.000001).ShouldBe(true);
 			minProbabilityOfFinal3.Is(0.0, 0.000001).ShouldBe(true);
 			maxProbabilityOfFinal1.Is(1.0, 0.000001).ShouldBe(true);
@@ -104,7 +104,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			Check(configuration);
 		}
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckMdpWithNewStates()
 		{
 			var configuration = AnalysisConfiguration.Default;
