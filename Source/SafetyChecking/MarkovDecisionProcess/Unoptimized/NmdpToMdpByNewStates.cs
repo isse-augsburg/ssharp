@@ -203,7 +203,11 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private void AddDestination(long cidToAdd, int distanceFromRootOfSourceNode)
 		{
 			var distanceFromRootOfCidToAdd = distanceFromRootOfSourceNode + 1;
-			var requiredPadding = _maximalDistanceBetweenStates - distanceFromRootOfCidToAdd - _cidMaxDistanceFromLeaf[cidToAdd];
+			var cidToAddMaxDistanceToLeaf = _cidMaxDistanceFromLeaf[cidToAdd];
+			// We have already made distanceFromRootOfCidToAdd steps. We have to make at most cidToAddMaxDistanceToLeaf other steps.
+			// We can pad the rest.
+			var requiredPadding = _maximalDistanceBetweenStates - distanceFromRootOfCidToAdd - cidToAddMaxDistanceToLeaf;
+			Assert.That(requiredPadding<= _maximalDistanceBetweenStates-1,"bug somewhere. we need at least one step for the final transition");
 
 			var cge = _nmdp.GetContinuationGraphElement(cidToAdd);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
