@@ -586,8 +586,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 		{
 			var adjustmentForUsualSteps = usualNoOfSteps * MarkovDecisionProcess.FactorForBoundedAnalysis;
 			// The former initial step is now divided into the 1 initial mdp state and (FactorForBoundedAnalysis-1) normal mdp states
-			// But still, FactorForBoundedAnalysis steps are needed to reach the initial state
-			var adjustmentForInitialSteps = MarkovDecisionProcess.FactorForBoundedAnalysis;
+			var adjustmentForInitialSteps = MarkovDecisionProcess.FactorForBoundedAnalysis -1;
 			return adjustmentForUsualSteps+adjustmentForInitialSteps;
 		}
 

@@ -179,7 +179,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		}
 
 		[Fact]
-		public void CheckBoundeMdpWithFlattening()
+		public void CheckBoundedMdpWithFlattening()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;

@@ -118,7 +118,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void CalculateMaxDistanceBetweenStates()
 		{
-			_maximalDistanceBetweenStates = 0;
+			_maximalDistanceBetweenStates = 1;
 			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
 			_maximalDistanceBetweenStates = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot);
 			
@@ -133,7 +133,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				Console.Out.WriteLine($"Calculated a maximal distance between states of  {_maximalDistanceBetweenStates}");
 				Console.Out.WriteLine($"This may skew the results");
-				MarkovDecisionProcess.FactorForBoundedAnalysis = _maximalDistanceBetweenStates+1;
+				MarkovDecisionProcess.FactorForBoundedAnalysis = _maximalDistanceBetweenStates;
 			}
 		}
 
@@ -202,7 +202,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void AddDestination(long cidToAdd, int requiredDistanceToLeaf)
 		{
-			var requiredPadding = requiredDistanceToLeaf - _cidMaxDistanceFromLeaf[cidToAdd];
+			var requiredPadding = requiredDistanceToLeaf - _cidMaxDistanceFromLeaf[cidToAdd]-1;
 
 			var cge = _nmdp.GetContinuationGraphElement(cidToAdd);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
