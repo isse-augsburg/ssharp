@@ -125,9 +125,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { true, false}));
 			mdp.StartWithNewDistributions(1);
@@ -184,9 +184,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { true, false }));
 			mdp.StartWithNewDistributions(1);
@@ -243,9 +243,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 
 			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
@@ -331,9 +331,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 
 			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
@@ -420,9 +420,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 
 			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
@@ -499,9 +499,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 
 			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
@@ -589,9 +589,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 
 			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
@@ -677,9 +677,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 			mdp.SetStateLabeling(1, new StateFormulaSet(new[] { true, false }));
 			mdp.StartWithNewDistributions(1);
@@ -740,9 +740,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));
 			mdp.StartWithNewDistributions(0);
@@ -811,9 +811,9 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			mdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
 			mdp.StateRewardRetrieverLabels = new string[] { };
 			mdp.StartWithInitialDistributions();
-			mdp.StartWithNewInitialDistribution();
-			mdp.AddTransitionToInitialDistribution(0, 1.0);
-			mdp.FinishInitialDistribution();
+			mdp.StartWithNewDistribution();
+			mdp.AddTransition(0, 1.0);
+			mdp.FinishDistribution();
 			mdp.FinishInitialDistributions();
 
 			mdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, false }));

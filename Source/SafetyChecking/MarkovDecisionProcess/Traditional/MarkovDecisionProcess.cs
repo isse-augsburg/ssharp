@@ -118,35 +118,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			_rowCountOfCurrentState = 0;
 			StateToRowsL[StateToRowsEntryOfInitialDistributions] = RowsWithDistributions.Rows; //set beginning row of state to the next free row
 		}
-		
-		internal void StartWithNewInitialDistribution()
-		{
-			RowsWithDistributions.SetRow(RowsWithDistributions.Rows); //just append one row in the matrix
-			_rowCountOfCurrentState++;
-		}
-
-		private void AddTransitionToInitialDistributionUnoptimized(int markovChainState, double probability)
-		{
-			RowsWithDistributions.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
-		}
-		
-		private void AddTransitionToInitialDistributionOptimized(int markovChainState, double probability)
-		{
-			RowsWithDistributions.MergeOrAddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
-		}
-
-		internal void AddTransitionToInitialDistribution(int markovChainState, double probability)
-		{
-			if (_optimized)
-				AddTransitionToInitialDistributionOptimized(markovChainState, probability);
-			else
-				AddTransitionToInitialDistributionUnoptimized(markovChainState, probability);
-		}
-
-		internal void FinishInitialDistribution()
-		{
-			RowsWithDistributions.FinishRow();
-		}
 
 		internal void FinishInitialDistributions()
 		{

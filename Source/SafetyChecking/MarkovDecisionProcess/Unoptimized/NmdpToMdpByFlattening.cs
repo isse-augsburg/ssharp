@@ -134,17 +134,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			if (_ltmdpContinuationDistributionMapper.IsDistributionEmpty(distribution))
 				return;
 
-			MarkovDecisionProcess.StartWithNewInitialDistribution();
+			MarkovDecisionProcess.StartWithNewDistribution();
 
 			var enumerator = _ltmdpContinuationDistributionMapper.GetContinuationsOfDistributionEnumerator(distribution);
 			while (enumerator.MoveNext())
 			{
 				var leaf = GetLeafOfCid(enumerator.CurrentContinuationId);
 				var probability = GetProbabilityOfCid(enumerator.CurrentContinuationId);
-				MarkovDecisionProcess.AddTransitionToInitialDistribution(leaf.ToState, probability);
+				MarkovDecisionProcess.AddTransition(leaf.ToState, probability);
 			}
 			
-			MarkovDecisionProcess.FinishInitialDistribution();
+			MarkovDecisionProcess.FinishDistribution();
 		}
 
 		private void Clear(long cidRoot)
