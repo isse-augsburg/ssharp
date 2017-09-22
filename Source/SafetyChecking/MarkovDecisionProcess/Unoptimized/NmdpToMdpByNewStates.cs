@@ -118,7 +118,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void CalculateMaxDistanceBetweenStates()
 		{
-			_maximalDistanceBetweenStates = 1;
+			_maximalDistanceBetweenStates = 0;
 			var cidOfStateRoot = _nmdp.GetRootContinuationGraphLocationOfInitialState();
 			_maximalDistanceBetweenStates = CalculateDistanceFromRootAndLeafOfCid(cidOfStateRoot);
 			
@@ -200,9 +200,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			MarkovDecisionProcess.AddTransition(firstStateBeforePadding, probability);
 		}
 
-		private void AddDestination(long cidToAdd, int requiredDistanceToLeaf)
+		private void AddDestination(long cidToAdd, int distanceFromRootOfSourceNode)
 		{
-			var requiredPadding = requiredDistanceToLeaf - _cidMaxDistanceFromLeaf[cidToAdd]-1;
+			var distanceFromRootOfCidToAdd = distanceFromRootOfSourceNode + 1;
+			var requiredPadding = _maximalDistanceBetweenStates - distanceFromRootOfCidToAdd - _cidMaxDistanceFromLeaf[cidToAdd];
 
 			var cge = _nmdp.GetContinuationGraphElement(cidToAdd);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
@@ -233,7 +234,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void ConvertRootCid(int? sourceState, long currentCid)
 		{
-			var requiredDistanceToLeaf = _maximalDistanceBetweenStates - _cidDistanceFromRoot[currentCid];
+			var distanceFromRootOfSourceNode = _cidDistanceFromRoot[currentCid];
 			var cge = _nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
@@ -243,7 +244,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					var mdpState = sourceState.Value;
 					MarkovDecisionProcess.StartWithNewDistributions(mdpState);
 					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(currentCid, requiredDistanceToLeaf);
+					AddDestination(currentCid, distanceFromRootOfSourceNode);
 					MarkovDecisionProcess.FinishDistribution();
 					MarkovDecisionProcess.FinishDistributions();
 				}
@@ -251,7 +252,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					MarkovDecisionProcess.StartWithInitialDistributions();
 					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(currentCid, requiredDistanceToLeaf);
+					AddDestination(currentCid, distanceFromRootOfSourceNode);
 					MarkovDecisionProcess.FinishDistribution();
 					MarkovDecisionProcess.FinishDistributions();
 				}
@@ -280,7 +281,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
 						MarkovDecisionProcess.StartWithNewDistribution();
-						AddDestination(i, requiredDistanceToLeaf);
+						AddDestination(i, distanceFromRootOfSourceNode);
 						MarkovDecisionProcess.FinishDistribution();
 					}
 				}
@@ -289,7 +290,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					MarkovDecisionProcess.StartWithNewDistribution();
 					for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 					{
-						AddDestination(i, requiredDistanceToLeaf);
+						AddDestination(i, distanceFromRootOfSourceNode);
 					}
 					MarkovDecisionProcess.FinishDistribution();
 				}
@@ -305,7 +306,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void ConvertChildCid(long currentCid)
 		{
-			var requiredDistanceToLeaf = _maximalDistanceBetweenStates - _cidDistanceFromRoot[currentCid];
+			var distanceFromRootOfSourceNode = _cidDistanceFromRoot[currentCid];
 			var cge = _nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal || cge.IsChoiceTypeForward)
 				return;
@@ -318,7 +319,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
 					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(i, requiredDistanceToLeaf);
+					AddDestination(i, distanceFromRootOfSourceNode);
 					MarkovDecisionProcess.FinishDistribution();
 				}
 			}
@@ -327,7 +328,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				MarkovDecisionProcess.StartWithNewDistribution();
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
-					AddDestination(i, requiredDistanceToLeaf);
+					AddDestination(i, distanceFromRootOfSourceNode);
 				}
 				MarkovDecisionProcess.FinishDistribution();
 			}
