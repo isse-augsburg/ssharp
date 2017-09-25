@@ -41,6 +41,11 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		int ExtraBytesOffset { set; }
 
 		/// <summary>
+		///   Returns the state vector size up to the size the ITransitionModifier should know about.
+		/// </summary>
+		int RelevantStateVectorSize { set; }
+
+		/// <summary>
 		///   Optionally modifies the <paramref name="transitions" />, changing any of their values. However, no new transitions can be
 		///   added; transitions can be removed by setting their <see cref="CandidateTransition.IsValid" /> flag to <c>false</c>.
 		///   During subsequent traversal steps, only valid transitions and target states reached by at least one valid transition

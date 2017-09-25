@@ -40,6 +40,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 
 		public int ExtraBytesOffset { get; set; }
 
+		public int RelevantStateVectorSize { get; set; }
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>

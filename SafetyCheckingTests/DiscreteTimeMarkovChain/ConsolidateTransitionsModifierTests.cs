@@ -108,7 +108,7 @@ namespace Tests.DiscreteTimeMarkovChain
 
 		public LtmcTestBuilderWithStatesAsByteVector LtmcTestBuilder { get; } = new LtmcTestBuilderWithStatesAsByteVector();
 
-		internal ConsolidateTransitionsModifier ConsolidateTransitionsModifier = new ConsolidateTransitionsModifier(sizeof(int));
+		internal ConsolidateTransitionsModifier ConsolidateTransitionsModifier = new ConsolidateTransitionsModifier {RelevantStateVectorSize = sizeof(int) };
 
 		public ConsolidateTransitionsModifierTests(ITestOutputHelper output)
 		{

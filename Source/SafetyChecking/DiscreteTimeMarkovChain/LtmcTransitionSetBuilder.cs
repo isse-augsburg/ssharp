@@ -41,6 +41,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private int _count;
 		private int _totalCount;
 
+		private bool _consolidateOnTheFly = true;
+
 		/// <summary>
 		///   A storage where temporal states can be saved to.
 		/// </summary>
@@ -68,7 +70,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private byte* AddState(byte* stateToFind)
+		private byte* AddStateConsolidate(byte* stateToFind)
 		{
 			// Try to find a matching state. If not found, then add a new one
 			byte* targetState;
@@ -83,10 +85,10 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void AddTransition(byte* stateToAdd, StateFormulaSet formulas, FaultSet activatedFaults, double probability)
+		private void AddTransitionConsolidate(byte* stateToAdd, StateFormulaSet formulas, FaultSet activatedFaults, double probability)
 		{
 			// Try to find a matching transition. If not found, then add a new one
-			var successorState = AddState(stateToAdd);
+			var successorState = AddStateConsolidate(stateToAdd);
 
 			for (var i = 0; i < _count; i++)
 			{
@@ -114,6 +116,29 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				Probability = probability
 			};
 			++_count;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void AddTransition(byte* stateToAdd, StateFormulaSet formulas, FaultSet activatedFaults, double probability)
+		{
+			if (_consolidateOnTheFly)
+			{
+				AddTransitionConsolidate(stateToAdd, formulas, activatedFaults, probability);
+			}
+			else
+			{
+				var successorState = _temporalStateStorage.GetFreeTemporalSpaceAddress();
+				MemoryBuffer.Copy(stateToAdd, successorState, _temporalStateStorage.StateVectorSize);
+				_transitions[_count] = new LtmcTransition
+				{
+					TargetStatePointer = successorState,
+					Formulas = formulas,
+					//ActivatedFaults = activatedFaults,
+					Flags = TransitionFlags.IsValidFlag,
+					Probability = probability
+				};
+				++_count;
+			}
 		}
 
 		/// <summary>

@@ -39,6 +39,8 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser.TraversalModifiers
 
 		public int ExtraBytesOffset { get; set; }
 
+		public int RelevantStateVectorSize { get; set; }
+
 		private readonly string[] _previousFormulaLabels;
 
 		private Func<StateFormulaSet, int, bool>[] _newEnrichmentEvaluator;

@@ -38,11 +38,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		public int ExtraBytesOffset { get; set; }
 
+		public int RelevantStateVectorSize { get; set; }
+
 		private readonly List<IndexWithHash> _sortedTransitions = new List<IndexWithHash>();
 
 		private readonly SortTransitionByHashComparer _transitionComparer = new SortTransitionByHashComparer();
-
-		private readonly int _stateVectorSize;
 
 		private TransitionCollection _transitions;
 
@@ -53,9 +53,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
-		public ConsolidateTransitionsModifier(int stateVectorSize)
+		public ConsolidateTransitionsModifier()
 		{
-			_stateVectorSize = stateVectorSize;
 		}
 
 		/// <summary>
@@ -146,7 +145,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				uint hash = 0;
 				if (!TransitionFlags.IsToStutteringState(transition->Flags))
-					hash = MemoryBuffer.Hash(transition->TargetStatePointer, _stateVectorSize, 0);
+					hash = MemoryBuffer.Hash(transition->TargetStatePointer, RelevantStateVectorSize, 0);
 				hash = hash * 397 ^ (uint)transition->Formulas.GetHashCode();
 				return hash;
 			}
@@ -181,7 +180,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			if (!aToStuttering)
 			{
 				// both target states are not the stuttering state. So check if the states match
-				if (!MemoryBuffer.AreEqual(a->TargetStatePointer, b->TargetStatePointer, _stateVectorSize))
+				if (!MemoryBuffer.AreEqual(a->TargetStatePointer, b->TargetStatePointer, RelevantStateVectorSize))
 					return false;
 			}
 			if (a->Flags != b->Flags)

@@ -153,6 +153,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				transitionModifier.ExtraBytesOffset = currentOffsetInStateVectorForExtraBytes;
 				TraversalModifierStateVectorSize += transitionModifier.ExtraBytesInStateVector;
 				currentOffsetInStateVectorForExtraBytes += transitionModifier.ExtraBytesInStateVector;
+				transitionModifier.RelevantStateVectorSize = currentOffsetInStateVectorForExtraBytes;
 			}
 			Assert.That(TraversalModifierStateVectorSize%4 ==0,"TraversalModifierStateVectorSize should be a multiple of 4");
 
