@@ -112,6 +112,18 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		}
 
 		/// <summary>
+		///   The number of transitions contained in the set. Count only valid transitions.
+		/// </summary>
+		public int CountValid()
+		{
+			var valid = 0;
+			var enumerator = GetEnumerator();
+			while (enumerator.MoveNext())
+				valid++;
+			return valid;
+		}
+
+		/// <summary>
 		///   Gets an enumerator that can be used to iterate through the collection.
 		/// </summary>
 		public TransitionEnumerator GetEnumerator()

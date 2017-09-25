@@ -41,7 +41,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private int _count;
 		private int _totalCount;
 
-		private bool _consolidateOnTheFly = true;
+		private bool _consolidateOnTheFly = false;
 
 		/// <summary>
 		///   A storage where temporal states can be saved to.

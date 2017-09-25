@@ -61,7 +61,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 					_markovChain.CreateStutteringState(modelTraverser.Context.StutteringStateIndex);
 
 				modelTraverser.Context.TraversalParameters.TransitionModifiers.AddRange(FormulaManager.TransitionModifierGenerators);
-				//modelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new ConsolidateTransitionsModifier());
+				modelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new ConsolidateTransitionsModifier());
 				modelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
 
 				modelTraverser.Context.Output.WriteLine($"Generating labeled transition markov chain.");

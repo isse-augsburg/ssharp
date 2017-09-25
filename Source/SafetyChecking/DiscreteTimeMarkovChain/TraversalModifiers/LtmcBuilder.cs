@@ -72,7 +72,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			
 			private void AddTransitions(int sourceState, bool areInitialTransitions, TransitionCollection transitions)
 			{
-				var transitionNo = transitions.Count;
+				var transitionNo = transitions.CountValid();
 
 				var placeOfTransition = _markovChain.GetPlaceForNewTransitionChainElements(transitionNo);
 
