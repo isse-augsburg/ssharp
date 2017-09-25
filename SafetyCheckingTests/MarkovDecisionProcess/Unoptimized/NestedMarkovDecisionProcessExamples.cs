@@ -849,6 +849,59 @@ namespace Tests.MarkovDecisionProcess.Unoptimized.NmdpExamples
 		}
 	}
 
+	public class ExampleNoChoices2 : NestedMarkovDecisionProcessExample
+	{
+		internal static NestedMarkovDecisionProcess Create()
+		{
+			// Just a simple MDP with only deterministic choices
+			//   0⟶1⟲
+			var nmdp = InitializeNmdp(2);
+			nmdp.StateFormulaLabels = new string[] { Label1Formula.Label, Label2Formula.Label };
+			nmdp.StateRewardRetrieverLabels = new string[] { };
+			var cidRootInitial = nmdp.GetPlaceForNewContinuationGraphElements(1);
+			nmdp.SetRootContinuationGraphLocationOfInitialState(cidRootInitial);
+			nmdp.AddContinuationGraphLeaf(cidRootInitial, 0, 1.0);
+
+			nmdp.SetStateLabeling(1, new StateFormulaSet(new[] { true, false }));
+			var cidRootState1 = nmdp.GetPlaceForNewContinuationGraphElements(1);
+			nmdp.SetRootContinuationGraphLocationOfState(1, cidRootState1);
+			nmdp.AddContinuationGraphLeaf(cidRootState1, 1, 1.0);
+
+			nmdp.SetStateLabeling(0, new StateFormulaSet(new[] { false, true }));
+			var cidRootState0 = nmdp.GetPlaceForNewContinuationGraphElements(1);
+			nmdp.SetRootContinuationGraphLocationOfState(0, cidRootState0);
+			nmdp.AddContinuationGraphLeaf(cidRootState0, 1, 1.0);
+			return nmdp;
+		}
+
+		public ExampleNoChoices2()
+		{
+			Nmdp = Create();
+
+			States = 2;
+			StateDistributions = 2;
+			InitialDistributions = 1;
+
+			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
+			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
+
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+
+			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+
+			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+
+			MinimalProbabilityFinallyLabel1 = 1.0;
+			MaximalProbabilityFinallyLabel1 = 1.0;
+		}
+	}
+
 	public class ExampleOneInitialProbabilisticSplit : NestedMarkovDecisionProcessExample
 	{
 		internal static NestedMarkovDecisionProcess Create()

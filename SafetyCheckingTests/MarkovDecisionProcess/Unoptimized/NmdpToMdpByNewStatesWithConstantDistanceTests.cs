@@ -27,6 +27,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 	using System.Collections.Generic;
 	using ISSE.SafetyChecking.AnalysisModel;
 	using ISSE.SafetyChecking.ExecutedModel;
+	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.GenericDataStructures;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using ISSE.SafetyChecking.Utilities;
@@ -86,12 +87,66 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			}
 		}
 
+		private void CalculateMinAndMaxDistanceToRealState(bool starting, int currentState, out int minDistance, out int maxDistance, int artificialFormulaIndex)
+		{
+			var currentIsArtificial = MarkovDecisionProcess.StateLabeling[currentState][artificialFormulaIndex];
+			if (!currentIsArtificial && !starting)
+			{
+				minDistance = 0;
+				maxDistance = 0;
+				return;
+			}
+			var enumerator = MarkovDecisionProcess.GetEnumerator();
+			enumerator.SelectSourceState(currentState);
+			minDistance = int.MaxValue;
+			maxDistance = int.MinValue;
+			while (enumerator.MoveNextDistribution())
+			{
+				while (enumerator.MoveNextTransition())
+				{
+					var childState = enumerator.CurrentTransition.Column;
+					int childMinDistance;
+					int childMaxDistance;
+					CalculateMinAndMaxDistanceToRealState(false, childState, out childMinDistance, out childMaxDistance, artificialFormulaIndex);
+					minDistance = Math.Min(minDistance, childMinDistance);
+					maxDistance = Math.Max(maxDistance, childMaxDistance);
+				}
+			}
+		}
+		
+		private void AssertDistanceIsEqual(Formula artificialFormulaI)
+		{
+			var artificialFormulaIndex = Array.IndexOf(MarkovDecisionProcess.StateFormulaLabels, artificialFormulaI.Label);
+
+			var requiredDistance = 0;
+			var isSet = false;
+
+			for (var i = 0; i < MarkovDecisionProcess.States; i++)
+			{
+				var currentIsArtificial = MarkovDecisionProcess.StateLabeling[i][artificialFormulaIndex];
+				if (!currentIsArtificial)
+				{
+					int minDistance;
+					int maxDistance;
+					CalculateMinAndMaxDistanceToRealState(true, i, out minDistance, out maxDistance, artificialFormulaIndex);
+					if (!isSet)
+					{
+						isSet = true;
+						requiredDistance = minDistance;
+					}
+					minDistance.ShouldBe(requiredDistance);
+					maxDistance.ShouldBe(requiredDistance);
+				}
+			}
+		}
+
+
 		[Fact]
 		public void ExampleNoChoices()
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleNoChoices.Create();
 			
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -109,6 +164,35 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
+		}
+
+		[Fact]
+		public void ExampleNoChoices2()
+		{
+			NestedMarkovDecisionProcess = NmdpExamples.ExampleNoChoices2.Create();
+
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
+			MarkovDecisionProcess = converter.MarkovDecisionProcess;
+
+			int initialDistributions;
+			int initialTransitions;
+			double initialProbabilities;
+			CalculateMetricsOfInitialState(out initialDistributions, out initialTransitions, out initialProbabilities);
+			initialDistributions.ShouldBe(1);
+			initialTransitions.ShouldBe(1);
+			initialProbabilities.ShouldBe(1.0, 0.0000001);
+
+			int state0Distributions;
+			int state0Transitions;
+			double state0Probabilities;
+			CalculateMetricsOfState(0, out state0Distributions, out state0Transitions, out state0Probabilities);
+			state0Distributions.ShouldBe(1);
+			state0Transitions.ShouldBe(1);
+			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 
 		[Fact]
@@ -116,7 +200,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleOneInitialProbabilisticSplit.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -134,6 +218,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 		
 		[Fact]
@@ -141,7 +227,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialProbabilisticSplits.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -159,6 +245,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 
 		[Fact]
@@ -166,7 +254,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialSplitsNondeterministicThenProbabilistic.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -184,6 +272,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 
 		[Fact]
@@ -191,7 +281,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoInitialSplitsProbabilisticThenNondeterministic.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -209,6 +299,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(1);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 		
 		[Fact]
@@ -216,7 +308,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleOneStateProbabilisticSplit.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -234,6 +326,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(3);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 
 		[Fact]
@@ -241,7 +335,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateProbabilisticSplits.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -259,6 +353,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(2);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 
 		[Fact]
@@ -266,7 +362,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateSplitsNondeterministicThenProbabilistic.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -284,6 +380,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(2);
 			state0Transitions.ShouldBe(2);
 			state0Probabilities.ShouldBe(2.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 
 		[Fact]
@@ -291,7 +389,7 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 		{
 			NestedMarkovDecisionProcess = NmdpExamples.ExampleTwoStateSplitsProbabilisticThenNondeterministic.Create();
 
-			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess,true);
+			var converter = new NmdpToMdpByNewStates(NestedMarkovDecisionProcess, Output.TextWriterAdapter(), true);
 			MarkovDecisionProcess = converter.MarkovDecisionProcess;
 
 			int initialDistributions;
@@ -309,6 +407,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 			state0Distributions.ShouldBe(1);
 			state0Transitions.ShouldBe(2);
 			state0Probabilities.ShouldBe(1.0, 0.0000001);
+
+			AssertDistanceIsEqual(converter.FormulaForArtificalState);
 		}
 	}
 }

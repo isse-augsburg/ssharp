@@ -27,6 +27,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 {
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using AnalysisModel;
 	using ExecutedModel;
 	using Formula;
@@ -59,6 +60,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private int _maximalDistanceBetweenStates;
 
+		private TextWriter _output;
+
 		private readonly AutoResizeBigVector<int> _cidToArtificialStateMapping = new AutoResizeBigVector<int>();
 
 		private readonly AutoResizeBigVector<int> _cidDistanceFromRoot = new AutoResizeBigVector<int>();
@@ -67,17 +70,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private readonly Dictionary<FromState, int> _paddingStates = new Dictionary<FromState, int>();
 
-		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp, bool makeConstantDistanceBetweenStates=true)
+		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp, TextWriter output = null, bool makeConstantDistanceBetweenStates =true)
 			: base(nmdp)
 		{
+			_output = output ?? Console.Out;
 			_makeConstantDistanceBetweenStates = makeConstantDistanceBetweenStates;
 
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
-			Console.Out.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
-			Console.Out.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
+			_output.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
+			_output.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
 
-			var newNumberOfStates = nmdp.ContinuationGraphSize - nmdp.States;
+			var newNumberOfStates = nmdp.ContinuationGraphSize;
 			var newNumberOfTransitions = nmdp.ContinuationGraphSize;
 			if (_makeConstantDistanceBetweenStates)
 			{
@@ -99,8 +103,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			stopwatch.Stop();
 			_nmdp = null;
-			Console.Out.WriteLine($"Completed transformation in {stopwatch.Elapsed}");
-			Console.Out.WriteLine($"Mdp: States {MarkovDecisionProcess.States}, Transitions {MarkovDecisionProcess.Transitions}");
+			_output.WriteLine($"Completed transformation in {stopwatch.Elapsed}");
+			_output.WriteLine($"Mdp: States {MarkovDecisionProcess.States}, Transitions {MarkovDecisionProcess.Transitions}");
 		}
 
 		public void CreateArtificalStateFormula()
@@ -130,8 +134,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			if (_maximalDistanceBetweenStates > 0)
 			{
-				Console.Out.WriteLine($"Calculated a maximal distance between states of  {_maximalDistanceBetweenStates}");
-				Console.Out.WriteLine($"This may skew the results");
+				_output.WriteLine($"Calculated a maximal distance between states of  {_maximalDistanceBetweenStates}");
+				_output.WriteLine($"This may skew the results");
 				MarkovDecisionProcess.FactorForBoundedAnalysis = _maximalDistanceBetweenStates;
 			}
 		}
@@ -166,7 +170,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 				if (cge.IsChoiceTypeForward)
 				{
-					Console.Out.WriteLine("You are using BuildInMdpWithNewStates in conjunction with OnFirstMethodWithUndo. This feature is currently untested...");
+					_output.WriteLine("You are using BuildInMdpWithNewStates in conjunction with OnFirstMethodWithUndo. This feature is currently untested...");
 					maxDistanceFromLeaf = CalculateDistanceFromRootAndLeafOfCid(cgi.ToCid, currentDistanceFromRoot);
 				}
 				else
