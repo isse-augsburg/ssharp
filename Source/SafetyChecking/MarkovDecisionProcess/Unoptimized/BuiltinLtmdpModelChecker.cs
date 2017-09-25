@@ -465,7 +465,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				}
 				//CalculateProb0ATransitionTargets(precalculatedTransitionTargets);
 				minResult = CalculateMinimumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
-				maxResult = CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
 			}
 			
 			stopwatch.Stop();
