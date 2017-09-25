@@ -108,8 +108,8 @@ namespace Tests.MarkovDecisionProcess.Unoptimized
 					int childMinDistance;
 					int childMaxDistance;
 					CalculateMinAndMaxDistanceToRealState(false, childState, out childMinDistance, out childMaxDistance, artificialFormulaIndex);
-					minDistance = Math.Min(minDistance, childMinDistance);
-					maxDistance = Math.Max(maxDistance, childMaxDistance);
+					minDistance = Math.Min(minDistance, childMinDistance+1);
+					maxDistance = Math.Max(maxDistance, childMaxDistance+1);
 				}
 			}
 		}
