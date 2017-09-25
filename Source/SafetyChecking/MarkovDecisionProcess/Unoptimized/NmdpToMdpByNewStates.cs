@@ -46,7 +46,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		//     Newly introduced states are called "PaddingStates"
 		//     Currently, the padding is added just after the splits by AddTransition.
 		//     Idea is to level the differences of the nodes. requiredPadding=requiredDistanceToLeaf-MaxDistanceToLeaf
-		//     TODO: Improve initial padding until first split
 
 		public Formula FormulaForArtificalState;
 
@@ -66,7 +65,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private readonly AutoResizeBigVector<int> _cidMaxDistanceFromLeaf = new AutoResizeBigVector<int>();
 
-		private readonly Dictionary<int,int> _paddingStates = new Dictionary<int, int>();
+		private readonly Dictionary<FromState, int> _paddingStates = new Dictionary<FromState, int>();
 
 		public NmdpToMdpByNewStates(NestedMarkovDecisionProcess nmdp, bool makeConstantDistanceBetweenStates=true)
 			: base(nmdp)
@@ -151,7 +150,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			var maxDistanceFromLeaf = 0;
 
 			var cge = _nmdp.GetContinuationGraphElement(currentCid);
-			if (!cge.IsChoiceTypeUnsplitOrFinal)
+			if (cge.IsChoiceTypeUnsplitOrFinal)
+			{
+				if (currentDistanceFromRoot == 0)
+				{
+					// Treat this as if there is a non-deterministic split with only one choice.
+					// Thus, we assume that this node is not the root node and its non-existing
+					// source has a distance of 0 from the root.
+					maxDistanceFromLeaf = 1;
+				}
+			}
+			else
 			{
 				var cgi = _nmdp.GetContinuationGraphInnerNode(currentCid);
 
@@ -196,7 +205,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private void AddPaddedTransition(int mdpState,double probability, int requiredPadding)
 		{
-			var firstStateBeforePadding = CreateNewArtificialPaddingStates(mdpState, requiredPadding);
+			var firstStateBeforePadding = CreateNewArtificialPaddingStatesBackward(mdpState, requiredPadding);
 			MarkovDecisionProcess.AddTransition(firstStateBeforePadding, probability);
 		}
 
@@ -207,7 +216,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			// We have already made distanceFromRootOfCidToAdd steps. We have to make at most cidToAddMaxDistanceToLeaf other steps.
 			// We can pad the rest.
 			var requiredPadding = _maximalDistanceBetweenStates - distanceFromRootOfCidToAdd - cidToAddMaxDistanceToLeaf;
-			Assert.That(requiredPadding<= _maximalDistanceBetweenStates-1,"bug somewhere. we need at least one step for the final transition");
+			Assert.That(!_makeConstantDistanceBetweenStates || requiredPadding<= _maximalDistanceBetweenStates-1,"bug somewhere. we need at least one step for the final transition");
 
 			var cge = _nmdp.GetContinuationGraphElement(cidToAdd);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
@@ -236,45 +245,58 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 		}
 
+		private void StartDistributions(int? stateToStartFrom)
+		{
+			if (stateToStartFrom.HasValue)
+			{
+				var mdpState = stateToStartFrom.Value;
+				MarkovDecisionProcess.StartWithNewDistributions(mdpState);
+			}
+			else
+			{
+				MarkovDecisionProcess.StartWithInitialDistributions();
+			}
+		}
+
+
+		private void FinishDistributions(int? stateToStartFrom)
+		{
+			if (stateToStartFrom.HasValue)
+			{
+				MarkovDecisionProcess.FinishDistributions();
+			}
+			else
+			{
+				MarkovDecisionProcess.FinishInitialDistributions();
+			}
+		}
+
 		private void ConvertRootCid(int? sourceState, long currentCid)
 		{
 			var distanceFromRootOfSourceNode = _cidDistanceFromRoot[currentCid];
-			var cge = _nmdp.GetContinuationGraphElement(currentCid);
+			var sourceNodeMaxDistanceToLeaf = _cidMaxDistanceFromLeaf[currentCid];
+			var requiredPadding = _maximalDistanceBetweenStates - distanceFromRootOfSourceNode - sourceNodeMaxDistanceToLeaf;
+			var stateToStartFrom = CreateNewArtificialPaddingStatesForward(sourceState, requiredPadding);
+			distanceFromRootOfSourceNode += requiredPadding;
+			_cidDistanceFromRoot[currentCid] = distanceFromRootOfSourceNode;
+			StartDistributions(stateToStartFrom);
+
+				var cge = _nmdp.GetContinuationGraphElement(currentCid);
 			if (cge.IsChoiceTypeUnsplitOrFinal)
 			{
-				// if a state leads directly into a new state, add this state directly
-				if (sourceState.HasValue)
-				{
-					var mdpState = sourceState.Value;
-					MarkovDecisionProcess.StartWithNewDistributions(mdpState);
-					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(currentCid, distanceFromRootOfSourceNode);
-					MarkovDecisionProcess.FinishDistribution();
-					MarkovDecisionProcess.FinishDistributions();
-				}
-				else
-				{
-					MarkovDecisionProcess.StartWithInitialDistributions();
-					MarkovDecisionProcess.StartWithNewDistribution();
-					AddDestination(currentCid, distanceFromRootOfSourceNode);
-					MarkovDecisionProcess.FinishDistribution();
-					MarkovDecisionProcess.FinishDistributions();
-				}
+				// If a state leads directly into a new state, add this state directly.
+				// Treat this as if there is a non-deterministic split with only one choice.
+				// Thus, we assume that this node is not the root node and its non-existing
+				// source has a distance of 0 from the root.
+				MarkovDecisionProcess.StartWithNewDistribution();
+				AddDestination(currentCid, distanceFromRootOfSourceNode);
+				MarkovDecisionProcess.FinishDistribution();
+				FinishDistributions(stateToStartFrom);
 			}
 			else
 			{
 				var cgi = _nmdp.GetContinuationGraphInnerNode(currentCid);
-
-				if (sourceState.HasValue)
-				{
-					var mdpState = sourceState.Value;
-					MarkovDecisionProcess.StartWithNewDistributions(mdpState);
-				}
-				else
-				{
-					MarkovDecisionProcess.StartWithInitialDistributions();
-				}
-
+				
 				if (cge.IsChoiceTypeForward)
 				{
 					// This ChoiceType might be created by ForwardUntakenChoicesAtIndex in ChoiceResolver
@@ -298,9 +320,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					}
 					MarkovDecisionProcess.FinishDistribution();
 				}
-				
-				MarkovDecisionProcess.FinishDistributions();
-				
+
+				FinishDistributions(stateToStartFrom);
+
 				for (var i = cgi.FromCid; i <= cgi.ToCid; i++)
 				{
 					ConvertChildCid(i);
@@ -353,7 +375,22 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return freshIndexInMdp;
 		}
 
-		private int CreateNewArtificialPaddingStates(int toMdpState, int requiredPadding)
+		private int? CreateNewArtificialPaddingStatesForward(int? fromMdpState, int requiredPadding)
+		{
+			// returns first mdpState which starts the padding int? currentSource = fromMdpState; 
+			if (!_makeConstantDistanceBetweenStates)
+				return fromMdpState;
+			var currentSource = fromMdpState;
+			for (var i = 0; i < requiredPadding; i++)
+			{
+				var currentPaddingState = _artificialStates + _nmdpStates; _artificialStates++;
+				_paddingStates.Add(new FromState(currentSource), currentPaddingState);
+				currentSource = currentPaddingState;
+			}
+			return currentSource;
+	}
+
+		private int CreateNewArtificialPaddingStatesBackward(int toMdpState, int requiredPadding)
 		{
 			if (!_makeConstantDistanceBetweenStates)
 				return toMdpState;
@@ -364,7 +401,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			{
 				currentPaddingState = _artificialStates + _nmdpStates;
 				_artificialStates++;
-				_paddingStates.Add(currentPaddingState,currentTarget);
+				_paddingStates.Add(new FromState(currentPaddingState),currentTarget);
 				currentTarget = currentPaddingState;
 			}
 			return currentPaddingState;
@@ -374,11 +411,18 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			foreach (var paddingState in _paddingStates)
 			{
-				MarkovDecisionProcess.StartWithNewDistributions(paddingState.Key);
+				if (paddingState.Key.IsInitial)
+					MarkovDecisionProcess.StartWithInitialDistributions();
+				else
+					MarkovDecisionProcess.StartWithNewDistributions(paddingState.Key.State);
 				MarkovDecisionProcess.StartWithNewDistribution();
 				MarkovDecisionProcess.AddTransition(paddingState.Value,1.0);
 				MarkovDecisionProcess.FinishDistribution();
-				MarkovDecisionProcess.FinishDistributions();
+
+				if (paddingState.Key.IsInitial)
+					MarkovDecisionProcess.FinishInitialDistributions();
+				else
+					MarkovDecisionProcess.FinishDistributions();
 			}
 		}
 
@@ -395,6 +439,50 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				// Set Artificial state label
 				var mdpState = _nmdpStates + i;
 				MarkovDecisionProcess.StateLabeling[mdpState] = _stateFormulaSetforArtificialState;
+			}
+		}
+
+		private struct FromState
+		{
+			public bool IsInitial { get; }
+			public int State { get; }
+
+			public static FromState InitialState { get; } = new FromState(null);
+
+			public FromState(int state)
+			{
+				IsInitial = false;
+				State = state;
+			}
+			public FromState(int? state)
+			{
+				if (state.HasValue)
+				{
+					IsInitial = false;
+					State = state.Value;
+				}
+				else
+				{
+					IsInitial = true;
+					State = 0;
+				}
+			}
+
+			public bool Equals(FromState other)
+			{
+				return State.Equals(other.State) && IsInitial== other.IsInitial;
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (ReferenceEquals(null, obj))
+					return false;
+				return obj is FromState && Equals((FromState)obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return State;
 			}
 		}
 	}
