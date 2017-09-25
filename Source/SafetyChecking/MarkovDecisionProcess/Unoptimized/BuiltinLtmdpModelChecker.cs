@@ -376,11 +376,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 
 
-		private void CalculateProb0ATransitionTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		private bool CalculateProb0ATransitionTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
 		{
 			// calculate probabilityExactlyZero (prob0a). No matter which scheduler is selected, the probability
 			// of the resulting states is zero.
-			// This is exact. Could be used for the calculation of the maximal probability
+			// This is exact. Could be used for the calculation of the maximal probability.
+			// Returns true, if initial root cid has probability 0 on all paths
 
 			// The idea of the algorithm is to calculate probabilityGreaterThanZero
 			//     all states where there _exists_ a scheduler such that a directlySatisfiedState
@@ -399,9 +400,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			Func<long, bool> transitionTargetsToIgnore =
 				(index) => precalculatedTransitionTargets[index].HasFlag(PrecalculatedTransitionTarget.ExcludedDirect);
 
-			_underlyingDigraph.BackwardTraversal(targetTransitionTargets, setFlagForTransitionTarget, transitionTargetsToIgnore);
+			var initialRootHasProbGreaterZeroOnAtLeastOnePath =
+				_underlyingDigraph.BackwardTraversal(targetTransitionTargets, setFlagForTransitionTarget, transitionTargetsToIgnore);
 
 			SetFlagInUnmarkedTransitionTargets(precalculatedTransitionTargets, PrecalculatedTransitionTarget.ExcludedAllPathsFinally);
+
+			return !initialRootHasProbGreaterZeroOnAtLeastOnePath; // == initialRootHasProbZeroOnAllPaths
 		}
 
 
@@ -449,8 +453,17 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 			else
 			{
+				var initialRootHasProbZeroOnAllPaths = CalculateProb0ATransitionTargets(precalculatedTransitionTargets);
+				if (initialRootHasProbZeroOnAllPaths)
+				{
+					_output.WriteLine("Found an exact result of 0.0");
+					maxResult = 0.0;
+				}
+				else
+				{
+					maxResult = CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
+				}
 				//CalculateProb0ATransitionTargets(precalculatedTransitionTargets);
-				//CalculateProb0ETransitionTargets(precalculatedTransitionTargets);
 				minResult = CalculateMinimumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
 				maxResult = CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
 			}
@@ -480,7 +493,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 			else
 			{
+				//If there exists one indeterministic path where all transitionTargets have flag "ExcludedAllPathsFinally", formula is satisfied
 				//CalculateProb0ETransitionTargets(precalculatedTransitionTargets);
+
 				minResult = CalculateMinimumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
 			}
 
@@ -509,8 +524,16 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 			else
 			{
-				//CalculateProb0ATransitionTargets(precalculatedTransitionTargets);
-				maxResult = CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
+				var initialRootHasProbZeroOnAllPaths = CalculateProb0ATransitionTargets(precalculatedTransitionTargets);
+				if (initialRootHasProbZeroOnAllPaths)
+				{
+					_output.WriteLine("Found an exact result of 0.0");
+					maxResult = 0.0;
+				}
+				else
+				{
+					maxResult = CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
+				}
 			}
 
 			stopwatch.Stop();

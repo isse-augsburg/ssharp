@@ -479,7 +479,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				return _transitionTargetNo + _stateNo +cid;
 			}
 
-			internal void BackwardTraversal(IEnumerable<long> targetTransitionTargets, Action<long> actionOnResultingTransitionTarget, Func<long, bool> transitionTargetsToIgnore)
+			internal bool BackwardTraversal(IEnumerable<long> targetTransitionTargets, Action<long> actionOnResultingTransitionTarget, Func<long, bool> transitionTargetsToIgnore)
 			{
 				var transitionTargetNodes = targetTransitionTargets.Select(TransitionTargetToNodeIndex);
 
@@ -501,6 +501,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 						actionOnResultingTransitionTarget(transitionTargetOfAncestor.Value);
 					}
 				}
+				// return, if root cid of initial state
+				var initialCid = _ltmdp.GetRootContinuationGraphLocationOfInitialState();
+				var initialCidNode = CidToNodeIndex(initialCid);
+				return ancestors.ContainsKey(initialCidNode);
 			}
 
 			public enum EdgeType : byte
