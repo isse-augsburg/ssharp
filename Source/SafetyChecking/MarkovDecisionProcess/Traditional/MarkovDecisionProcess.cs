@@ -33,6 +33,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 	using ExecutedModel;
 	using Formula;
 	using GenericDataStructures;
+	using Utilities;
 
 	public class MarkovDecisionProcess
 	{
@@ -300,12 +301,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			return StateToRowsL[state + 1] + StateToRowsRowCount[state + 1];
 		}
 
-		public Func<int, bool> CreateFormulaEvaluator(Formula formula)
+		public Func<long, bool> CreateFormulaEvaluator(Formula formula)
 		{
 			var stateFormulaEvaluator = StateFormulaSetEvaluatorCompilationVisitor.Compile(StateFormulaLabels, formula);
-			Func<int, bool> evaluator = transitionTarget =>
+			Func<long, bool> evaluator = transitionTarget =>
 			{
-				var stateFormulaSet = StateLabeling[transitionTarget];
+				Requires.That(transitionTarget<=int.MaxValue,"MDP currently cannot handle more than int.MaxValue states");
+				var stateFormulaSet = StateLabeling[(int)transitionTarget];
 				return stateFormulaEvaluator(stateFormulaSet);
 			};
 			return evaluator;
@@ -401,13 +403,19 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			{
 				if (state >= _mdp.States)
 					return false;
-				CurrentState = state;
+				CurrentState = (int)state;
 				_rowLOfCurrentState = _mdp.StateToRowL(state);
 				_rowHOfCurrentState = _mdp.StateToRowH(state);
 				RowOfCurrentDistribution = _rowLOfCurrentState-1; //select 1 entry before the actual first entry. So MoveNextDistribution can move to the right entry.
 				return true;
 			}
-			
+
+			public bool SelectSourceState(long state)
+			{
+				Requires.That(state <= int.MaxValue, "MDP currently cannot handle more than int.MaxValue states");
+				return SelectSourceState((int)state);
+			}
+
 			/// <summary>
 			/// Advances the enumerator to the next element of the collection.
 			/// </summary>
@@ -444,6 +452,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 				// TODO: Refactor Enumerator. Create separate enumerators for States, Distributions, and Transitions. One
 				RowOfCurrentDistribution = distribution;
 				_matrixEnumerator.MoveRow(RowOfCurrentDistribution);
+			}
+
+			public void MoveToDistribution(long distribution)
+			{
+				Requires.That(distribution <= int.MaxValue, "MDP currently cannot handle more than int.MaxValue distributions");
+				MoveToDistribution((int)distribution);
 			}
 
 

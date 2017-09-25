@@ -64,7 +64,7 @@ namespace Tests.MarkovDecisionProcess.Traditional
 		{
 			var mdp = example.Mdp;
 
-			var excludedStates = new Dictionary<int, bool>() { };
+			var excludedStates = new Dictionary<long, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
 			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
@@ -88,7 +88,7 @@ namespace Tests.MarkovDecisionProcess.Traditional
 		{
 			var mdp = example.Mdp;
 
-			var excludedStates = new Dictionary<int, bool>() { };
+			var excludedStates = new Dictionary<long, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
 			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))
@@ -111,7 +111,7 @@ namespace Tests.MarkovDecisionProcess.Traditional
 		{
 			var mdp = example.Mdp;
 
-			var excludedStates = new Dictionary<int, bool>() { };
+			var excludedStates = new Dictionary<long, bool>() { };
 			var directlySatisfiedStates = example.StatesSatisfyDirectlyLabel1Formula;
 
 			using (var checker = new BuiltinMdpModelChecker(mdp, Output.TextWriterAdapter()))

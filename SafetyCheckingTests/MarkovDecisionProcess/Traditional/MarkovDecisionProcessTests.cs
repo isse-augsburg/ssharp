@@ -131,7 +131,7 @@ namespace Tests.MarkovDecisionProcess.Traditional
 			var mdp = example.Mdp;
 
 			var underlyingDigraph = mdp.CreateUnderlyingDigraph();
-			var nodesToIgnore = new Dictionary<int, bool>();
+			var nodesToIgnore = new Dictionary<long, bool>();
 
 			var result1 = underlyingDigraph.BaseGraph.GetAncestors(example.StatesSatisfyDirectlyLabel1Formula, nodesToIgnore.ContainsKey);
 			foreach (var result in result1.Keys)

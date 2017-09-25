@@ -47,7 +47,7 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 	{
 		internal MarkovDecisionProcess Mdp { get;  set; } //TODO: When C# supports it, make setter "internal and protected"
 
-		public Dictionary<int, bool> NoState = new Dictionary<int, bool>() { };
+		public Dictionary<long, bool> NoState = new Dictionary<long, bool>() { };
 
 		internal static AtomarPropositionFormula Label1Formula = new AtomarPropositionFormula("label1");
 		internal static AtomarPropositionFormula Label2Formula = new AtomarPropositionFormula("label2");
@@ -55,17 +55,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 		internal Formula ExampleFormula1;
 		internal Formula ExampleFormula2;
 
-		public Dictionary<int, bool> StatesSatisfyDirectlyLabel1Formula;
-		public Dictionary<int, bool> StatesSatisfyDirectlyLabel2Formula;
-		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula1;
-		public Dictionary<int, bool> StatesSatisfyDirectlyExampleFormula2;
+		public Dictionary<long, bool> StatesSatisfyDirectlyLabel1Formula;
+		public Dictionary<long, bool> StatesSatisfyDirectlyLabel2Formula;
+		public Dictionary<long, bool> StatesSatisfyDirectlyExampleFormula1;
+		public Dictionary<long, bool> StatesSatisfyDirectlyExampleFormula2;
 
-		public Dictionary<int, bool> AncestorsOfStatesWithLabel1;
-		public Dictionary<int, bool> AncestorsOfStatesWithLabel2;
+		public Dictionary<long, bool> AncestorsOfStatesWithLabel1;
+		public Dictionary<long, bool> AncestorsOfStatesWithLabel2;
 		
-		public Dictionary<int, bool> StatesProb0ALabel1;
-		public Dictionary<int, bool> StatesProb1ELabel1;
-		public Dictionary<int, bool> StatesProb0ELabel1;
+		public Dictionary<long, bool> StatesProb0ALabel1;
+		public Dictionary<long, bool> StatesProb1ELabel1;
+		public Dictionary<long, bool> StatesProb0ELabel1;
 
 		public int States;
 		public int StateDistributions;
@@ -156,17 +156,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true } };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() {  };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true } , { 1, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() {  };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 0, true } , { 1, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { };
 
 			MinimalProbabilityFinallyLabel1 = 1.0;
 			MaximalProbabilityFinallyLabel1 = 1.0;
@@ -214,17 +214,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true } };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { };
 
 			MinimalProbabilityFinallyLabel1 = 1.0;
 			MaximalProbabilityFinallyLabel1 = 1.0;
@@ -301,17 +301,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 2, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 1, true } };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 2, true }, { 3, true } }; //Explanation: 1st iteration removes 1. 2nd 0 and 4
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { { 1, true } };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 2, true }, { 3, true } }; //Explanation: 1st iteration removes 1. 2nd 0 and 4
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
 
 			MinimalProbabilityFinallyLabel1 = 0.0;
 			MaximalProbabilityFinallyLabel1 = 0.5;
@@ -392,17 +392,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() {  };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 2, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 1, true } };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };  //Explanation: 1st iteration removes 1.
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { { 1, true } };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 2, true }, { 3, true }, { 4, true } };  //Explanation: 1st iteration removes 1.
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 3, true }, { 4, true } };
 
 			MinimalProbabilityFinallyLabel1 = 0.0;
 			MaximalProbabilityFinallyLabel1 = 1.0;
@@ -469,17 +469,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 3, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() {  };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 3, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { };
 
 			MinimalProbabilityFinallyLabel1 = 1.0;
 			MaximalProbabilityFinallyLabel1 = 1.0;
@@ -558,17 +558,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 3, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() {  };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() {  };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 3, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 4, true } };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 4, true } };
 
 			MinimalProbabilityFinallyLabel1 = 0.0;
 			MaximalProbabilityFinallyLabel1 = 1.0;
@@ -649,17 +649,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 3, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 3, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true }, { 3, true }, { 4, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { };
 
 			MinimalProbabilityFinallyLabel1 = 1.0;
 			MaximalProbabilityFinallyLabel1 = 1.0;
@@ -710,17 +710,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 1, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 0, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 0, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true } };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 0, true } , { 1, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true } };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 0, true } , { 1, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { { 0, true } };
 
 			MinimalProbabilityFinallyLabel1 = 0.0;
 			MaximalProbabilityFinallyLabel1 = 1.0;
@@ -786,17 +786,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = new BinaryFormula(Label1Formula, BinaryOperator.And, Label2Formula);
 			ExampleFormula2 = new BinaryFormula(Label1Formula, BinaryOperator.Or, Label2Formula);
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 2, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 3, true } };
-			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<int, bool>() { };
-			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<int, bool>() { { 2, true }, { 3, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 2, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 3, true } };
+			StatesSatisfyDirectlyExampleFormula1 = new Dictionary<long, bool>() { };
+			StatesSatisfyDirectlyExampleFormula2 = new Dictionary<long, bool>() { { 2, true }, { 3, true } };
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 2, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 2, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 3, true } };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 3, true } };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 2, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 0, true }, { 1, true }, { 3, true } };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { { 3, true } };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 2, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { { 0, true }, { 1, true }, { 3, true } };
 
 			MinimalProbabilityFinallyLabel1 = 0.0;
 			MaximalProbabilityFinallyLabel1 = 0.6;
@@ -859,17 +859,17 @@ namespace Tests.MarkovDecisionProcess.Traditional.Examples
 			ExampleFormula1 = Label1Formula;
 			ExampleFormula2 = Label2Formula;
 
-			StatesSatisfyDirectlyLabel1Formula = new Dictionary<int, bool>() { { 3, true } };
-			StatesSatisfyDirectlyLabel2Formula = new Dictionary<int, bool>() { { 1, true } };
+			StatesSatisfyDirectlyLabel1Formula = new Dictionary<long, bool>() { { 3, true } };
+			StatesSatisfyDirectlyLabel2Formula = new Dictionary<long, bool>() { { 1, true } };
 			StatesSatisfyDirectlyExampleFormula1 = StatesSatisfyDirectlyLabel1Formula;
 			StatesSatisfyDirectlyExampleFormula2 = StatesSatisfyDirectlyLabel2Formula;
 
-			AncestorsOfStatesWithLabel1 = new Dictionary<int, bool>() { { 0, true }, { 3, true } };
-			AncestorsOfStatesWithLabel2 = new Dictionary<int, bool>() { { 0, true }, { 1, true } };
+			AncestorsOfStatesWithLabel1 = new Dictionary<long, bool>() { { 0, true }, { 3, true } };
+			AncestorsOfStatesWithLabel2 = new Dictionary<long, bool>() { { 0, true }, { 1, true } };
 
-			StatesProb0ALabel1 = new Dictionary<int, bool>() { { 1, true } , { 2, true } };
-			StatesProb1ELabel1 = new Dictionary<int, bool>() { { 3, true } };
-			StatesProb0ELabel1 = new Dictionary<int, bool>() { { 1, true } , { 2, true } };
+			StatesProb0ALabel1 = new Dictionary<long, bool>() { { 1, true } , { 2, true } };
+			StatesProb1ELabel1 = new Dictionary<long, bool>() { { 3, true } };
+			StatesProb0ELabel1 = new Dictionary<long, bool>() { { 1, true } , { 2, true } };
 
 			MinimalProbabilityFinallyLabel1 = 0.4;
 			MaximalProbabilityFinallyLabel1 = 0.4;
