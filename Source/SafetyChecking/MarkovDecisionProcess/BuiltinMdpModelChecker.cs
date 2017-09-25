@@ -405,7 +405,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess
 			while (!fixpointReached)
 			{
 				// Calculate fix point of probabilityGreaterThanZero
-				// Should be finished in one iteration, but I do have not proved it yet, so repeat it until fixpoint is reached for sure.
+				// Should be finished in one iteration, but I have not proved it yet, so repeat it until fixpoint is reached for sure.
 				// (The proof relies on details of the algorithm GetAncestors. Intuition: When a state s was not added to the set of
 				//  ancestors it is because one distribution d' has no target state in the ancestors found yet. If the state is in the
 				//  final set of ancestors, the reason is that the state s' of the distribution d', which was responsible for declining

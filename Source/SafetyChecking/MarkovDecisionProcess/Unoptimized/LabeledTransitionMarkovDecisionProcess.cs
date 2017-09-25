@@ -503,7 +503,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				}
 			}
 
-			public enum EdgeType
+			public enum EdgeType : byte
 			{
 				Probabilistic,
 				NonDeterministic,

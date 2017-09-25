@@ -43,8 +43,14 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			Nothing = 0,
 			Satisfied = 1,
 			Excluded = 2,
+			SatisfiedDirect = 4,
+			ExcludedDirect = 8,
+			ExcludedAllPathsFinally = 16,
+			Mark = 64,
 		}
-		
+
+		private LabeledTransitionMarkovDecisionProcess.UnderlyingDigraph _underlyingDigraph;
+
 		// Note: Should be used with using(var modelchecker = new ...)
 		public BuiltinLtmdpModelChecker(LabeledTransitionMarkovDecisionProcess mdp, TextWriter output = null)
 			 : base(mdp, output)
@@ -68,7 +74,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			for (var i = 0; i < Ltmdp.TransitionTargets; i++)
 			{
 				if (formulaEvaluator(i))
-					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Satisfied;
+					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Satisfied | PrecalculatedTransitionTarget.SatisfiedDirect;
 			}
 		}
 
@@ -77,7 +83,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			for (var i = 0; i < Ltmdp.TransitionTargets; i++)
 			{
 				if (formulaEvaluator(i))
-					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Excluded;
+					precalculatedTransitionTargets[i] |= PrecalculatedTransitionTarget.Excluded | PrecalculatedTransitionTarget.ExcludedDirect;
 			}
 		}
 
@@ -94,7 +100,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 			return derivedVector;
 		}
-		
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool HasCacheEntry(AutoResizeBigVector<double> cache, long entry)
 		{
@@ -330,6 +336,97 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return finalProbability;
 		}
 
+		private void SetFlagInUnmarkedTransitionTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, PrecalculatedTransitionTarget flagToSet)
+		{
+			for (var i = 0L; i < Ltmdp.TransitionTargets; i++)
+			{
+				if (precalculatedTransitionTargets[i].HasFlag(PrecalculatedTransitionTarget.Mark))
+				{
+					precalculatedTransitionTargets[i] = precalculatedTransitionTargets[i] & (~PrecalculatedTransitionTarget.Mark);
+				}
+				else
+				{
+					precalculatedTransitionTargets[i] = precalculatedTransitionTargets[i] | flagToSet;
+				}
+			}
+		}
+
+		private void CalculateUnderlyingDigraph()
+		{
+			// We use the underlying digraph to interfere the transitionTargets with the final probability
+			// of 0 or 1.
+			// I think, the data from the graph is also valid for the states. So, if a state-node
+			// is in Prob0 or Prob1, then we can also assume that the state has always probability 0 or 1,
+			// respectively. One further check can could be introduced. When we know that the probability
+			// of a state is 0 or 1, then we do not have to check the outgoing transitionTargets anymore.
+			if (_underlyingDigraph != null)
+				return;
+			_output.WriteLine("Creating underlying digraph");
+			_underlyingDigraph = Ltmdp.CreateUnderlyingDigraph();
+			_output.WriteLine("Finished creating underlying digraph");
+		}
+
+		private IEnumerable<long> GetAllTransitionTargetIndexesWithFlag(PrecalculatedTransitionTarget[] precalculatedTransitionTargets, PrecalculatedTransitionTarget flag)
+		{
+			for (var i = 0L; i < precalculatedTransitionTargets.Length; i++)
+			{
+				if (precalculatedTransitionTargets[i].HasFlag(flag))
+					yield return i;
+			}
+		}
+
+
+		private void CalculateProb0ATransitionTargets(PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		{
+			// calculate probabilityExactlyZero (prob0a). No matter which scheduler is selected, the probability
+			// of the resulting states is zero.
+			// This is exact. Could be used for the calculation of the maximal probability
+
+			// The idea of the algorithm is to calculate probabilityGreaterThanZero
+			//     all states where there _exists_ a scheduler such that a directlySatisfiedState
+			//     might be reached with a probability > 0.
+			//     This is simply the set of all ancestors of directlySatisfiedStates.
+			// The complement of probabilityGreaterThanZero is the set of states where _all_ adversaries have a probability
+			// to reach a directlySatisfiedState is exactly 0.
+
+			CalculateUnderlyingDigraph();
+
+			var targetTransitionTargets = GetAllTransitionTargetIndexesWithFlag(precalculatedTransitionTargets, PrecalculatedTransitionTarget.Satisfied);
+
+			Action<long> setFlagForTransitionTarget =
+				(index) => precalculatedTransitionTargets[index] |= PrecalculatedTransitionTarget.Mark;
+
+			Func<long, bool> transitionTargetsToIgnore =
+				(index) => precalculatedTransitionTargets[index].HasFlag(PrecalculatedTransitionTarget.ExcludedDirect);
+
+			_underlyingDigraph.BackwardTraversal(targetTransitionTargets, setFlagForTransitionTarget, transitionTargetsToIgnore);
+
+			SetFlagInUnmarkedTransitionTargets(precalculatedTransitionTargets, PrecalculatedTransitionTarget.ExcludedAllPathsFinally);
+		}
+
+
+		internal double CalculateMinimumProbabilityToReachStateFormulaInUnboundedSteps(PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		{
+			var cache = CacheCidValues ? new AutoResizeBigVector<double> { DefaultValue = double.NaN } : null;
+
+			var xnew = MinimumIterator(cache, precalculatedTransitionTargets, 50);
+
+			var finalProbability = CalculateMinimumFinalProbability(cache, precalculatedTransitionTargets, xnew);
+
+			return finalProbability;
+		}
+
+		internal double CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(PrecalculatedTransitionTarget[] precalculatedTransitionTargets)
+		{
+			var cache = CacheCidValues ? new AutoResizeBigVector<double> { DefaultValue = double.NaN } : null;
+
+			var xnew = MaximumIterator(cache, precalculatedTransitionTargets, 50);
+
+			var finalProbability = CalculateMaximumFinalProbability(cache, precalculatedTransitionTargets, xnew);
+
+			return finalProbability;
+		}
+
 
 		internal override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
 		{
@@ -352,7 +449,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 			else
 			{
-				throw new NotImplementedException();
+				//CalculateProb0ATransitionTargets(precalculatedTransitionTargets);
+				//CalculateProb0ETransitionTargets(precalculatedTransitionTargets);
+				minResult = CalculateMinimumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
+				maxResult = CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
 			}
 			
 			stopwatch.Stop();
@@ -380,7 +480,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 			else
 			{
-				throw new NotImplementedException();
+				//CalculateProb0ETransitionTargets(precalculatedTransitionTargets);
+				minResult = CalculateMinimumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
 			}
 
 			stopwatch.Stop();
@@ -408,7 +509,8 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 			else
 			{
-				throw new NotImplementedException();
+				//CalculateProb0ATransitionTargets(precalculatedTransitionTargets);
+				maxResult = CalculateMaximumProbabilityToReachStateFormulaInUnboundedSteps(precalculatedTransitionTargets);
 			}
 
 			stopwatch.Stop();
