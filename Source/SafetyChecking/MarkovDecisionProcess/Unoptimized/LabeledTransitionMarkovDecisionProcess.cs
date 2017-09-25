@@ -28,11 +28,13 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Globalization;
+	using System.Linq;
 	using Modeling;
 	using Utilities;
 	using AnalysisModel;
 	using ExecutableModel;
 	using Formula;
+	using GenericDataStructures;
 
 	public unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
 	{
@@ -355,12 +357,160 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			}
 		}
 
+		internal UnderlyingDigraph CreateUnderlyingDigraph()
+		{
+			return new UnderlyingDigraph(this);
+		}
 
 		internal DirectChildrenEnumerator GetDirectChildrenEnumerator(long parentContinuationId)
 		{
 			return new DirectChildrenEnumerator(this, parentContinuationId);
 		}
 		
+		internal class UnderlyingDigraph
+		{
+			public BidirectionalGraph<EdgeType> _baseGraph { get; }
+
+			private readonly long _transitionTargetNo;
+
+			private readonly int _stateNo;
+
+			private readonly long _cidNo;
+
+			private LabeledTransitionMarkovDecisionProcess _ltmdp;
+
+			public UnderlyingDigraph(LabeledTransitionMarkovDecisionProcess ltmdp)
+			{
+				//Assumption "every node is reachable" is fulfilled due to the construction
+				_ltmdp = ltmdp;
+				_transitionTargetNo = ltmdp.TransitionTargets;
+				_cidNo = ltmdp.ContinuationGraphSize;
+				_stateNo = ltmdp.SourceStates.Count;
+				_baseGraph = new BidirectionalGraph<EdgeType>();
+
+				var initialCid = _ltmdp.GetRootContinuationGraphLocationOfInitialState();
+				AddNodesOfContinuationId(initialCid);
+
+				foreach (var sourceState in _ltmdp.SourceStates)
+				{
+					var stateRootCid = _ltmdp.GetRootContinuationGraphLocationOfState(sourceState);
+					AddNodesOfContinuationId(stateRootCid);
+					AddStateToRootCidTransition(sourceState, stateRootCid);
+				}
+				AddTransitionTargets();
+			}
+
+
+			private void AddNodesOfContinuationId(long continuationId)
+			{
+				var choice = _ltmdp.GetContinuationGraphElement(continuationId);
+
+				var cidNode = CidToNodeIndex(continuationId);
+
+				if (choice.IsChoiceTypeUnsplitOrFinal)
+				{
+					var transitionTargetIndex = choice.To;
+					var transitionTargetNode = TransitionTargetToNodeIndex(transitionTargetIndex);
+					_baseGraph.AddVerticesAndEdge(new Edge<EdgeType>(cidNode, transitionTargetNode, EdgeType.Deterministic));
+					return;
+				}
+				if (choice.IsChoiceTypeForward)
+				{
+					// no recursive descent here
+					var forwardToCid = choice.To;
+					var forwardToCidNode = CidToNodeIndex(forwardToCid);
+					_baseGraph.AddVerticesAndEdge(new Edge<EdgeType>(cidNode, forwardToCidNode, EdgeType.Deterministic));
+					return;
+				}
+				
+				// Assume that no child has probability of 0
+				var type = choice.IsChoiceTypeProbabilitstic ? EdgeType.Probabilistic:EdgeType.NonDeterministic;
+
+				for (var childCid = choice.From; childCid <= choice.To; childCid++)
+				{
+					var childCidNode = CidToNodeIndex(childCid);
+					_baseGraph.AddVerticesAndEdge(new Edge<EdgeType>(cidNode, childCidNode, type));
+				}
+			}
+
+			private void AddStateToRootCidTransition(int sourceState, long stateRootCid)
+			{
+				var sourceStateNode = StateToNodeIndex(sourceState);
+				var cidNode = CidToNodeIndex(stateRootCid);
+				_baseGraph.AddVerticesAndEdge(new Edge<EdgeType>(sourceStateNode, cidNode, EdgeType.Deterministic));
+			}
+
+			private void AddTransitionTargets()
+			{
+				for (var i = 0L; i < _transitionTargetNo; i++)
+				{
+					var transitionTarget = _ltmdp.GetTransitionTarget(i);
+					var transitionTargetNode = TransitionTargetToNodeIndex(i);
+					var transitionTargetStateNode = StateToNodeIndex(transitionTarget.TargetState);
+					_baseGraph.AddVerticesAndEdge(new Edge<EdgeType>(transitionTargetNode, transitionTargetStateNode, EdgeType.Deterministic));
+				}
+			}
+
+			public long? TryGetTransitionTargetIndex(long node)
+			{
+				Assert.That(node >= 0 && node < _transitionTargetNo + _stateNo, "Out of index");
+				if (node < _transitionTargetNo)
+				{
+					return node;
+				}
+				return null;
+			}
+
+			private long TransitionTargetToNodeIndex(long transition)
+			{
+				Assert.That(transition >= 0 && transition < _transitionTargetNo, "Out of range");
+				return transition;
+			}
+
+			private long StateToNodeIndex(int state)
+			{
+				Assert.That(state >= 0 && state < _stateNo, "Out of range");
+				return _transitionTargetNo + state;
+			}
+
+			private long CidToNodeIndex(long cid)
+			{
+				Assert.That(cid >= 0 && cid<_cidNo, "Out of range");
+				return _transitionTargetNo + _stateNo +cid;
+			}
+
+			internal void BackwardTraversal(IEnumerable<long> targetTransitionTargets, Action<long> actionOnResultingTransitionTarget, Func<long, bool> transitionTargetsToIgnore)
+			{
+				var transitionTargetNodes = targetTransitionTargets.Select(TransitionTargetToNodeIndex);
+
+				Func<long, bool> ignoreNodeFunc =
+					node =>
+					{
+						var transitionTarget = TryGetTransitionTargetIndex(node);
+						if (transitionTarget == null)
+							return false;
+						return transitionTargetsToIgnore(transitionTarget.Value);
+					};
+
+				var ancestors = _baseGraph.GetAncestors(transitionTargetNodes, ignoreNodeFunc);
+				foreach (var ancestor in ancestors)
+				{
+					var transitionTargetOfAncestor = TryGetTransitionTargetIndex(ancestor.Key);
+					if (transitionTargetOfAncestor != null)
+					{
+						actionOnResultingTransitionTarget(transitionTargetOfAncestor.Value);
+					}
+				}
+			}
+
+			public enum EdgeType
+			{
+				Probabilistic,
+				NonDeterministic,
+				Deterministic
+			}
+		}
+
 		internal struct DirectChildrenEnumerator
 		{
 			public long ParentContinuationId { get; }

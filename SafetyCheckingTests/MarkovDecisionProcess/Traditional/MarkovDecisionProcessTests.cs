@@ -133,7 +133,7 @@ namespace Tests.MarkovDecisionProcess.Traditional
 			var underlyingDigraph = mdp.CreateUnderlyingDigraph();
 			var nodesToIgnore = new Dictionary<long, bool>();
 
-			var result1 = underlyingDigraph.BaseGraph.GetAncestors(example.StatesSatisfyDirectlyLabel1Formula, nodesToIgnore.ContainsKey);
+			var result1 = underlyingDigraph.BaseGraph.GetAncestors(example.StatesSatisfyDirectlyLabel1Formula.Keys, nodesToIgnore.ContainsKey);
 			foreach (var result in result1.Keys)
 			{
 				Assert.True(example.AncestorsOfStatesWithLabel1.ContainsKey(result), $"state {result} not found in expected results (label1)");
@@ -144,7 +144,7 @@ namespace Tests.MarkovDecisionProcess.Traditional
 			}
 
 
-			var result2 = underlyingDigraph.BaseGraph.GetAncestors(example.StatesSatisfyDirectlyLabel2Formula, nodesToIgnore.ContainsKey);
+			var result2 = underlyingDigraph.BaseGraph.GetAncestors(example.StatesSatisfyDirectlyLabel2Formula.Keys, nodesToIgnore.ContainsKey);
 
 			foreach (var result in result2.Keys)
 			{

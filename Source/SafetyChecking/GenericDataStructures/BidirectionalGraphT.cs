@@ -217,7 +217,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 		}
 
 		internal static Dictionary<long, bool> GetAncestors<TEdgeData>(this BidirectionalGraphDirectNodeAccess<TEdgeData> graph,
-																	  Dictionary<long, bool> targetNodes, Func<long, bool> ignoreNodeFunc,
+																	  IEnumerable<long> targetNodes, Func<long, bool> ignoreNodeFunc,
 																	  Func<Edge<TEdgeData>, bool> ignoreEdgeFunc = null)
 		{
 			// standard behavior: do not ignore node or edge
@@ -227,7 +227,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 			var nodesToTraverse = new Stack<long>();
 			foreach (var node in targetNodes)
 			{
-				nodesToTraverse.Push(node.Key);
+				nodesToTraverse.Push(node);
 			}
 
 			while (nodesToTraverse.Count > 0)
