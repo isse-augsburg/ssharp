@@ -48,7 +48,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		private bool _useHash;
 
-		public int UseHashLimit { get; set; } = 31;
+		public int UseHashLimit { get; set; } = 16;
 
 		/// <summary>
 		///   Initializes a new instance.

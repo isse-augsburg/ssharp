@@ -94,6 +94,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 						};
 					index++;
 				}
+				Assert.That(index==transitionNo,"Bug");
 
 				if (areInitialTransitions)
 				{
