@@ -79,7 +79,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			maxProbabilityOfFinal3.Is(1.0, 0.000001).ShouldBe(true);
 		}
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckLtmdp()
 		{
 			var configuration = AnalysisConfiguration.Default;
@@ -146,7 +146,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			}
 		}
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckSmallerEqualTwoLtmdp()
 		{
 			var configuration = AnalysisConfiguration.Default;

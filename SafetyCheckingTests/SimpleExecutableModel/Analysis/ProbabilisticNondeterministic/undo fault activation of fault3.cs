@@ -69,7 +69,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			probabilityOfFinal200.Is(1.0, 0.000001).ShouldBe(true);
 		}
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckLtmdp()
 		{
 			var configuration = AnalysisConfiguration.Default;

@@ -70,7 +70,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			maxProbabilityOfFinal3.Is(0.6, tolerance: 0.0001).ShouldBe(true);
 		}
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckLtmdp()
 		{
 			var configuration = AnalysisConfiguration.Default;

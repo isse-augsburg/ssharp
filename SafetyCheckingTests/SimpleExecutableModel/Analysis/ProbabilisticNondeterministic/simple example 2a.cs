@@ -141,7 +141,7 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			maxProbabilityOfFinal2.Is(1.0, 0.000001).ShouldBe(true);
 		}
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckBoundedLtmdp()
 		{
 			var configuration = AnalysisConfiguration.Default;
