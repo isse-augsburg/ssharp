@@ -430,6 +430,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				{
 					var childCidNode = CidToNodeIndex(childCid);
 					_baseGraph.AddVerticesAndEdge(new Edge<EdgeType>(cidNode, childCidNode, type));
+					AddNodesOfContinuationId(childCid);
 				}
 			}
 
@@ -453,7 +454,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			public long? TryGetTransitionTargetIndex(long node)
 			{
-				Assert.That(node >= 0 && node < _transitionTargetNo + _stateNo, "Out of index");
+				Assert.That(node >= 0 && node < _transitionTargetNo + _stateNo + _cidNo, "Out of index");
 				if (node < _transitionTargetNo)
 				{
 					return node;

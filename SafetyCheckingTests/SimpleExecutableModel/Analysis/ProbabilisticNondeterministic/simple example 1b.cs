@@ -80,12 +80,13 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 		}
 		
 
-		[Fact(Skip = "NotImplementedYet")]
+		[Fact]
 		public void CheckLtmdp()
 		{
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.UseCompactStateStorage = true;
+			configuration.CpuCount = 1;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			configuration.WriteGraphvizModels = true;
 			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuiltInLtmdp;
@@ -111,6 +112,8 @@ namespace Tests.SimpleExecutableModel.Analysis.ProbabilisticNondeterministic
 			var configuration = AnalysisConfiguration.Default;
 			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
 			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.UseCompactStateStorage = true;
+			configuration.CpuCount = 1;
 			configuration.WriteGraphvizModels = true;
 			configuration.LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates;
 			Check(configuration);
