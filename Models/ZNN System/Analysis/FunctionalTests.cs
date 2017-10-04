@@ -21,11 +21,11 @@
 // THE SOFTWARE.
 
 using System;
-using System.Linq;
+using ISSE.SafetyChecking.ExecutedModel;
+using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 using NUnit.Framework;
-using SafetySharp.Analysis;
-using SafetySharp.Analysis.Heuristics;
 using SafetySharp.CaseStudies.ZNNSystem.Modeling;
+using SafetySharp.ModelChecking;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 {
@@ -36,26 +36,26 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 		{
 			var model = new Model();
 
-			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
-			var result = modelChecker.CheckInvariant(model, true);
+			var modelChecker = new SafetySharpQualitativeChecker(model) { Configuration = { CpuCount = 1, ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium) } };
+			var result = modelChecker.CheckInvariant(true);
 
-			Console.WriteLine(result);
+            Console.WriteLine(result);
 		}
 
 		[Test]
 		public void Evaluation()
 		{
 			var model = new Model(10, 10);
-			var safetyAnalysis = new SafetyAnalysis
+			var safetyAnalysis = new SafetySharpSafetyAnalysis
 			{
 				Configuration =
 				{
 					CpuCount = 4,
-					StateCapacity = 1 << 20,
-					GenerateCounterExample = false
+				    ModelCapacity = new ModelCapacityByModelDensity(1 << 20, ModelDensityLimit.Medium),
+                    GenerateCounterExample = false
 				},
 				FaultActivationBehavior = FaultActivationBehavior.ForceOnly,
-				Heuristics = { new SubsumptionHeuristic(model) }
+				Heuristics = { new SubsumptionHeuristic(model.Faults) }
 			};
 
 			var result = safetyAnalysis.ComputeMinimalCriticalSets(model, model.ProxyObserver.ReconfigurationState == ReconfStates.Failed);

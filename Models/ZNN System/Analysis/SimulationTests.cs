@@ -24,10 +24,11 @@ using System;
 using System.Linq;
 using System.Reflection;
 using FluentAssertions;
+using ISSE.SafetyChecking.Modeling;
 using NUnit.Framework;
-using SafetySharp.Analysis;
 using SafetySharp.CaseStudies.ZNNSystem.Modeling;
 using SafetySharp.Modeling;
+using SafetySharp.Analysis;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 {
@@ -45,8 +46,8 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 			var model = new Model();
 			model.Faults.SuppressActivations();
 
-			var simulator = new Simulator(model);
-			model = (Model) simulator.Model;
+            var simulator = new SafetySharpSimulator(model);
+            model = (Model) simulator.Model;
 			simulator.FastForward(steps: 120);
 
 			model.Servers.First().QueryCompleteCount.Should().BeGreaterOrEqualTo(1);
@@ -74,7 +75,7 @@ namespace SafetySharp.CaseStudies.ZNNSystem.Analysis
 
 
 
-			var simulator = new Simulator(model);
+			var simulator = new SafetySharpSimulator(model);
 			model = (Model) simulator.Model;
 			simulator.FastForward(steps: 120);
 

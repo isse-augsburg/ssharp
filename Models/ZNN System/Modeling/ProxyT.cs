@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SafetySharp.Analysis;
+using ISSE.SafetyChecking.Modeling;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling

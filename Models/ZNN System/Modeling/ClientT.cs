@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System;
+using ISSE.SafetyChecking.Modeling;
 using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.ZNNSystem.Modeling
