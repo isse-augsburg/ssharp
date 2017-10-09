@@ -295,11 +295,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				var previousRole = previousAgent.AllocatedRoles
 												.Single(role => role.PostCondition.StateLength == suggestion.TFR.Start);
 				config.RemoveRoles(previousAgent, previousRole); // remove old role
-				previousRole.PostCondition.Port = resourceFlow[1];
-				config.AddRoles(previousAgent, previousRole); // re-add updated role
+
+				var updatedRole = previousRole.WithOutput(resourceFlow[1]);
+				config.AddRoles(previousAgent, updatedRole); // re-add updated role
 
 				firstCoreAgent++;
-				preCondition = previousRole.PostCondition;
+				preCondition = updatedRole.PostCondition;
 			}
 
 			var lastCoreAgent = resourceFlow.Length - 1;
@@ -310,8 +311,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				var lastRole = exitEdgeAgent.AllocatedRoles
 											.Single(role => role.PreCondition.StateLength == suggestion.TFR.End + 1);
 				config.RemoveRoles(exitEdgeAgent, lastRole); // remove old role
-				lastRole.PreCondition.Port = resourceFlow[resourceFlow.Length - 2];
-				config.AddRoles(exitEdgeAgent, lastRole); // re-add updated role
+
+				var updatedRole = lastRole.WithInput(resourceFlow[resourceFlow.Length - 2]);
+				config.AddRoles(exitEdgeAgent, updatedRole); // re-add updated role
 
 				lastCoreAgent--;
 			}
@@ -324,11 +326,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			for (var i = firstCoreAgent; i <= lastCoreAgent; ++i)
 			{
 				var agent = resourceFlow[i];
-				var role = GetRole(task, previousAgent, preCondition);
-				role.PostCondition.Port = i < resourceFlow.Length - 1 ? resourceFlow[i + 1] : null;
+				var role = GetRole(task, previousAgent, preCondition)
+							.WithOutput(i < resourceFlow.Length - 1 ? resourceFlow[i + 1] : null);
 
 				while (currentState <= end && suggestion.CtfDistribution[currentState - offset] == agent)
-					role.AddCapability(task.RequiredCapabilities[currentState++]);
+					role = role.WithCapability(task.RequiredCapabilities[currentState++]);
 
 				config.AddRoles(agent, role);
 				previousAgent = agent;

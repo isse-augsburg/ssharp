@@ -60,18 +60,20 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 			producer.Connect(processor);
 			processor.Connect(consumer);
 
-			var producerRole = new Role() { PreCondition = { Task = task }, PostCondition = { Port = processor, Task = task } };
-			producerRole.AddCapability(produce);
+			var producerRole = new Role(new Condition(task, 0), new Condition(task, 0, processor))
+				.WithCapability(produce);
 			producer.AllocateRoles(new[] { producerRole });
 
-			var processorRole = new Role() { PreCondition = { Task = task, Port = producer }, PostCondition = { Port = consumer, Task = task } };
-			processorRole.Initialize(producerRole.PostCondition);
-			processorRole.AddCapability(process);
+			var processorRole = new Role(
+					new Condition(task, producerRole.PostCondition.StateLength, producer),
+					new Condition(task, producerRole.PostCondition.StateLength, consumer)
+				).WithCapability(process);
 			processor.AllocateRoles(new[] { processorRole });
 
-			var consumerRole = new Role() { PreCondition = { Task = task, Port = processor }, PostCondition = { Task = task } };
-			consumerRole.Initialize(processorRole.PostCondition);
-			consumerRole.AddCapability(consume);
+			var consumerRole = new Role(
+					new Condition(task, processorRole.PostCondition.StateLength, processor),
+					new Condition(task, processorRole.PostCondition.StateLength)
+				).WithCapability(consume);
 			consumer.AllocateRoles(new[] { consumerRole });
 
 			var model = TestModel.InitializeModel(producer, processor, consumer);
@@ -87,16 +89,19 @@ namespace Tests.OrganicDesignPattern.LocalReconfiguration
 			consumer = (Agent)simulator.Model.Roots[2];
 			task = producer.AllocatedRoles.First().Task as Task;
 
-			producerRole = new Role() { PreCondition = { Task = task }, PostCondition = { Port = processor, Task = task } };
-			producerRole.AddCapability(produce);
+			producerRole = new Role(new Condition(task, 0), new Condition(task, 0, processor))
+				.WithCapability(produce);
 
-			var transportRole = new Role() { PreCondition = { Port = producer, Task = task }, PostCondition = { Port = consumer, Task = task } };
-			transportRole.Initialize(producerRole.PostCondition);
+			var transportRole = new Role(
+					new Condition(task, producerRole.PostCondition.StateLength, producer),
+					new Condition(task, producerRole.PostCondition.StateLength, consumer)
+				);
 
-			var processConsumerRole = new Role() { PreCondition = { Port = processor, Task = task }, PostCondition = { Task = task } };
-			processConsumerRole.Initialize(transportRole.PostCondition);
-			processConsumerRole.AddCapability(process);
-			processConsumerRole.AddCapability(consume);
+			var processConsumerRole = new Role(
+					new Condition(task, transportRole.PostCondition.StateLength, processor),
+					new Condition(task, transportRole.PostCondition.StateLength)
+				).WithCapability(process)
+				.WithCapability(consume);
 	
 			producer.AllocatedRoles.ShouldBe(new[] { producerRole });
 			processor.AllocatedRoles.ShouldBe(new[] { transportRole });

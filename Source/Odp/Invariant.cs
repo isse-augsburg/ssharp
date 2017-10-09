@@ -68,9 +68,9 @@ namespace SafetySharp.Odp
 			 * */
 			// refer to current role explicitly -- execution state is not saved in AllocatedRoles due to roles being structs
 			if (agent.Resource != null
-				&& (agent.CurrentRole == null
-				    || agent.CurrentRole.Value.Task != agent.Resource.Task
-					|| !agent.CurrentRole.Value.ExecutionState.SequenceEqual(agent.Resource.State)))
+				&& (!agent.RoleExecutor.IsExecuting
+				    || agent.RoleExecutor.Task != agent.Resource.Task
+					|| !agent.RoleExecutor.ExecutionState.SequenceEqual(agent.Resource.State)))
 				return new[] { agent.Resource.Task };
 
 			return Enumerable.Empty<ITask>();

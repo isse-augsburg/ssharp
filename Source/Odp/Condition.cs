@@ -28,11 +28,14 @@ namespace SafetySharp.Odp
 
 	public struct Condition
 	{
-		public BaseAgent Port { get; set; }
-		public ITask Task { get; set; }
+		// actual data fields
+		public BaseAgent Port { get; }
 
-		private byte _statePrefixLength;
+		public ITask Task { get; }
 
+		private readonly byte _statePrefixLength;
+
+		// accessors
 		public IEnumerable<ICapability> State =>
 			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
@@ -44,21 +47,27 @@ namespace SafetySharp.Odp
 				   && _statePrefixLength == other._statePrefixLength;
 		}
 
-		internal void AppendToState(ICapability capability)
+		// (copy) constructors
+		public Condition(ITask task, int stateLength, BaseAgent port = null)
 		{
-			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
-				throw new InvalidOperationException("Condition already has maximum state.");
-			if (!Task.RequiredCapabilities[_statePrefixLength].Equals(capability))
-				throw new InvalidOperationException("Invalid capability order in Condition state.");
-
-			_statePrefixLength++;
+			Port = port;
+			Task = task;
+			_statePrefixLength = (byte)stateLength;
 		}
 
-		internal void CopyStateFrom(Condition other)
+		public Condition WithPort(BaseAgent port)
 		{
-			if (other.Task != Task)
-				throw new InvalidOperationException("Invalid task: cannot copy Condition state");
-			_statePrefixLength = other._statePrefixLength;
+			return new Condition(Task, _statePrefixLength, port);
+		}
+
+		public Condition WithCapability(ICapability capability)
+		{
+			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
+				throw new InvalidOperationException("All required capabilities already applied.");
+			if (!Task.RequiredCapabilities[_statePrefixLength].Equals(capability))
+				throw new InvalidOperationException("Capabilities must be applied according to task.");
+
+			return new Condition(Task, StateLength + 1, Port);
 		}
 	}
 }

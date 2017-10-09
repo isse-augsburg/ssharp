@@ -87,6 +87,7 @@
     <Compile Include="Reconfiguration\ReconfigurationMonitor.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Role.cs" />
+    <Compile Include="RoleExecutor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SafetySharp\SafetySharp.csproj">

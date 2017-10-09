@@ -61,21 +61,16 @@ namespace Tests.OrganicDesignPattern
 
 			agent1.Connect(agent2);
 
-			var producerRole = new Role
-			{
-				PreCondition = { Task = task },
-				PostCondition = { Task = task, Port = agent2 }
-			};
-			producerRole.AddCapability(produce);
+			var producerRole = new Role(
+					new Condition(task, 0),
+					new Condition(task, 0, agent2)
+				).WithCapability(produce);
 			agent1.AllocateRoles(new[] { producerRole });
 
-			var consumerRole = new Role
-			{
-				PreCondition = { Task = task, Port = agent1 },
-				PostCondition = { Task = task }
-			};
-			consumerRole.Initialize(producerRole.PostCondition);
-			consumerRole.AddCapability(consume);
+			var consumerRole = new Role(
+					new Condition(task, producerRole.PostCondition.StateLength, agent1),
+					new Condition(task, producerRole.PostCondition.StateLength)
+				).WithCapability(consume);
 			agent2.AllocateRoles(new [] { consumerRole });
 			/* end model setup */
 
