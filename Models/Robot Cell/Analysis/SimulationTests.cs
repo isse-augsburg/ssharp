@@ -26,7 +26,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System.Collections;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.IO;
 	using System.Linq;
 	using System.Reflection;
 
@@ -78,31 +77,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	            var seed = Environment.TickCount;
 				Console.WriteLine("SEED: " + seed);
                 var rd = new Random(seed);
-                double currentRDFail;
-                double currentDistValueFail;
-                double currentRDRepair;
-                double currentDistValueRepair;
-                using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\testRD.csv", true))
-                {
-                    sw.WriteLine("currentRDFail; currentDistValueFail; currentRDRepair; currentDistValueRepair; failed; repaired");
-                }
                 for (var x = 0; x < numberOfSteps; x++)
                 {
                     foreach (var fault in this.faults)
                     {
-                        
-//                        using (StreamWriter sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\testRD.csv", true))
-//                        {
-//                            sw.WriteLine(rn);
-//                        }
-                        /*currentRDFail = rd.NextDouble();
-                        currentDistValueFail = fault.Item2.DistributionValueToFail();
-                        currentRDRepair = rd.NextDouble();
-                        currentDistValueRepair = fault.Item2.DistributionValueToRepair();
-                        var failed = currentRDFail <= currentDistValueFail;
-                        var repaired = currentRDRepair <= currentDistValueRepair;*/
                         if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToFail())
-//                        if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && currentRDFail <= currentDistValueFail)
                         {
                             fault.Item1.ForceActivation();
                             Console.WriteLine("Activation of: " + fault.Item1.Name + " at time " + x);
@@ -110,7 +89,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                         }
                         else {
                             if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToRepair())
-//                            if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && currentRDRepair <= currentDistValueRepair)
                             {
                                 fault.Item1.SuppressActivation();
                                 Debug.Assert(fault.Item3 is Agent);
@@ -119,12 +97,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                                 fault.Item2.ResetDistributionToRepair();
                             }
                         }
-                        /*using (var sw = new StreamWriter(@"C:\Users\Eberhardinger\Documents\testRD.csv", true))
-                        {
-                            sw.WriteLine(currentRDFail + "; " + currentDistValueFail + "; " + currentRDRepair + "; " + currentDistValueRepair + "; " + failed + "; " + repaired);
-                        }*/
                     }
-                    _simulator.SimulateStep();
+	                Console.WriteLine("Step " + x);
+	                _simulator.SimulateStep();
                     Throughput = _model.Workpieces.Select(w => w.IsComplete).Count();
                 }
                 CreateStats(Throughput, (IPerformanceMeasurementController)_model.Controller);
@@ -181,16 +156,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
                 //clean up
                 engine.Dispose();
-
             }
-
-       
-            private bool ReonfPossibleAfterFault(Fault item1)
-            {
-
-                throw new NotImplementedException();
-            }
-
         }
 
         [Test]
