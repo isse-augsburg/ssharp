@@ -34,7 +34,7 @@ namespace Tests.Execution.Simulation
 	{
 		protected override void Check()
 		{
-			var model = TestModel.InitializeModel(new CFast(), new CSlow(), new CSync());
+			var model = TestModel.InitializeModel(new CFast(), new CSlow(), new CSync(), new CNested());
 			var simulator = new Simulator(model);
 			simulator.SimulateStep();
 		}
@@ -96,6 +96,31 @@ namespace Tests.Execution.Simulation
 				var watch = Stopwatch.StartNew();
 				Thread.Sleep(1000);
 				watch.ElapsedMilliseconds.ShouldBeInRange(1000, 1050);
+			}
+		}
+
+		private class CNested : Component
+		{
+			public override void Update()
+			{
+				MicrostepScheduler.Schedule(WorkAsync);
+			}
+
+			private async Task WorkAsync()
+			{
+				var outer = await AsyncPerformance.Measure(async () =>
+				{
+					await Task.Yield();
+					Thread.Sleep(300);
+					var inner = await AsyncPerformance.Measure(async () =>
+					{
+						await Task.Yield();
+						Thread.Sleep(50);
+					});
+					Thread.Sleep(100);
+					inner.ElapsedMilliseconds.ShouldBeInRange(50, 60);
+				});
+				outer.ElapsedMilliseconds.ShouldBeInRange(450, 460);
 			}
 		}
 	}
