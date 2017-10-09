@@ -31,10 +31,8 @@ namespace SafetySharp.Modeling
 	{
 		public static async Task<Stopwatch> Measure(Func<Task> asyncBlock)
 		{
-			var ctx = new PerformanceSynchronizationContext();
-			var task = ctx.MeasureAsync(asyncBlock);
-			await task;
-			return ctx.Stopwatch;
+			Func<Task<object>> wrappedBlock = async () => { await asyncBlock(); return null; };
+			return (await Measure(wrappedBlock)).Item2;
 		}
 
 		public static async Task<Tuple<T, Stopwatch>> Measure<T>(Func<Task<T>> asyncBlock)
