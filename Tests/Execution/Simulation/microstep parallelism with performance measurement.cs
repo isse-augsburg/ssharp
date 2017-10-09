@@ -22,12 +22,14 @@
 
 namespace Tests.Execution.Simulation
 {
+	using System.Diagnostics;
 	using System.Threading;
 	using System.Threading.Tasks;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
+	using PerformanceCounter = SafetySharp.Modeling.PerformanceCounter;
 
 	internal class MicrostepParallelismWithPerformanceMeasurement : TestObject
 	{
@@ -47,11 +49,12 @@ namespace Tests.Execution.Simulation
 
 			private async Task WorkAsync()
 			{
-				MicrostepScheduler.StartPerformanceMeasurement(this);
-				await Task.Yield();
-				Thread.Sleep(100);
-				await Submethod();
-				var watch = MicrostepScheduler.StopPerformanceMeasurement(this);
+				var watch = await PerformanceCounter.Measure(async () =>
+				{
+					await Task.Yield();
+					Thread.Sleep(100);
+					await Submethod();
+				});
 				watch.ElapsedMilliseconds.ShouldBeInRange(200, 250);
 			}
 
@@ -71,11 +74,12 @@ namespace Tests.Execution.Simulation
 
 			private async Task WorkAsync()
 			{
-				MicrostepScheduler.StartPerformanceMeasurement(this);
-				await Task.Yield();
-				Thread.Sleep(2500);
-				await Submethod();
-				var watch = MicrostepScheduler.StopPerformanceMeasurement(this);
+				var watch = await PerformanceCounter.Measure(async () =>
+				{
+					await Task.Yield();
+					Thread.Sleep(2500);
+					await Submethod();
+				});
 				watch.ElapsedMilliseconds.ShouldBeInRange(5000, 5050);
 			}
 
@@ -90,9 +94,8 @@ namespace Tests.Execution.Simulation
 		{
 			public override void Update()
 			{
-				MicrostepScheduler.StartPerformanceMeasurement(this);
+				var watch = Stopwatch.StartNew();
 				Thread.Sleep(1000);
-				var watch = MicrostepScheduler.StopPerformanceMeasurement(this);
 				watch.ElapsedMilliseconds.ShouldBeInRange(1000, 1050);
 			}
 		}
