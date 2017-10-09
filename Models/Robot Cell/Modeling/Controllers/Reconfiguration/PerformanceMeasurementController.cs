@@ -58,9 +58,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
         public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
         {
-            MicrostepScheduler.StartPerformanceMeasurement(_actingController);
-            var resultingTasks = await _actingController.CalculateConfigurations(context, task);
-            var reconfTime = MicrostepScheduler.StopPerformanceMeasurement(_actingController);
+	        var tuple = await AsyncPerformance.Measure(() => _actingController.CalculateConfigurations(context, task));
+	        var resultingTasks = tuple.Item1;
+	        var reconfTime = tuple.Item2;
+
             foreach (var agent in resultingTasks.InvolvedAgents)
             {
                 _stopwatchs[agent.ID].Stop();

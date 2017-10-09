@@ -29,7 +29,6 @@ namespace SafetySharp.Modeling
 	using System.Runtime.Remoting.Messaging;
 	using System.Threading;
 	using System.Threading.Tasks;
-	using Utilities;
 
     /// <summary>
 	/// This class can be used to simulate parallel execution within a microstep.
@@ -89,37 +88,13 @@ namespace SafetySharp.Modeling
 			}
 		}
 
-		public static void StartPerformanceMeasurement(object key)
-		{
-			Context.CreatePerformanceCounter(key);
-		}
-
-		public static Stopwatch StopPerformanceMeasurement(object key)
-		{
-			return Context.RemovePerformanceCounter(key);
-		}
-
 		private class SingleThreadSynchronizationContext : SynchronizationContext
 		{
 			private readonly Queue<Action> _queue = new Queue<Action>();
 
-			private readonly Dictionary<object, Stopwatch> _stopwatches = new Dictionary<object, Stopwatch>();
-
-			private object _currentPerformanceKey;
-
 			public override void Post(SendOrPostCallback d, object state)
 			{
-				if (_currentPerformanceKey == null)
-					_queue.Enqueue(() => d(state));
-				else
-				{
-					var boundKey = _currentPerformanceKey;
-					_queue.Enqueue(() =>
-					{
-						ResumePerformanceCounter(boundKey);
-						d(state);
-					});
-				}
+				_queue.Enqueue(() => d(state));
 			}
 
 			public void Run()
@@ -130,51 +105,12 @@ namespace SafetySharp.Modeling
 				{
 					SetSynchronizationContext(this);
 					while (_queue.Count > 0)
-					{
 						_queue.Dequeue().Invoke();
-						PausePerformanceCounter();
-					}
 				}
 				finally
 				{
-					PausePerformanceCounter();
 					SetSynchronizationContext(oldContext);
 				}
-			}
-
-			public void CreatePerformanceCounter(object key)
-			{
-				if (_currentPerformanceKey != null)
-					throw new InvalidOperationException("Nested measurements not supported");
-				_currentPerformanceKey = key;
-				_stopwatches[key] = Stopwatch.StartNew();
-			}
-
-			public Stopwatch RemovePerformanceCounter(object key)
-			{
-				var stopwatch = _stopwatches[key];
-				stopwatch.Stop();
-				_stopwatches.Remove(key);
-				if (_currentPerformanceKey == key)
-					_currentPerformanceKey = null;
-				return stopwatch;
-			}
-
-			private void PausePerformanceCounter()
-			{
-				if (_currentPerformanceKey == null)
-					return;
-
-				_stopwatches[_currentPerformanceKey].Stop();
-				_currentPerformanceKey = null;
-			}
-
-			private void ResumePerformanceCounter(object key)
-			{
-				if (_currentPerformanceKey != null)
-					throw new InvalidOperationException("Nested measurements not supported");
-				_currentPerformanceKey = key;
-				_stopwatches[key].Start();
 			}
 		}
 	}
