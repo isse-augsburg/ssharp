@@ -26,7 +26,7 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public struct Condition
+	public struct Condition : IEquatable<Condition>
 	{
 		// actual data fields
 		public BaseAgent Port { get; }
@@ -68,6 +68,40 @@ namespace SafetySharp.Odp
 				throw new InvalidOperationException("Capabilities must be applied according to task.");
 
 			return new Condition(Task, StateLength + 1, Port);
+		}
+
+		// equality (generated code)
+		public bool Equals(Condition other)
+		{
+			return _statePrefixLength == other._statePrefixLength && Equals(Port, other.Port) && Equals(Task, other.Task);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+				return false;
+			return obj is Condition && Equals((Condition)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hashCode = _statePrefixLength.GetHashCode();
+				hashCode = (hashCode * 397) ^ (Port != null ? Port.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ (Task != null ? Task.GetHashCode() : 0);
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(Condition left, Condition right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Condition left, Condition right)
+		{
+			return !left.Equals(right);
 		}
 	}
 }

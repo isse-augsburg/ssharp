@@ -27,7 +27,7 @@ namespace SafetySharp.Odp
 	using System.Diagnostics;
 	using System.Linq;
 
-	public struct Role
+	public struct Role : IEquatable<Role>
 	{
 		// actual data fields
 		public Condition PreCondition { get; }
@@ -73,6 +73,40 @@ namespace SafetySharp.Odp
 		public Role WithCapability(ICapability capability)
 		{
 			return new Role(PreCondition, PostCondition.WithCapability(capability), IsLocked);
+		}
+
+		// equality (generated code)
+		public bool Equals(Role other)
+		{
+			return PreCondition.Equals(other.PreCondition) && PostCondition.Equals(other.PostCondition) && IsLocked == other.IsLocked;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+				return false;
+			return obj is Role && Equals((Role)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hashCode = PreCondition.GetHashCode();
+				hashCode = (hashCode * 397) ^ PostCondition.GetHashCode();
+				hashCode = (hashCode * 397) ^ IsLocked.GetHashCode();
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(Role left, Role right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Role left, Role right)
+		{
+			return !left.Equals(right);
 		}
 	}
 }
