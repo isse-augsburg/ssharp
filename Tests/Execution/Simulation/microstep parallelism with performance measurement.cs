@@ -29,7 +29,6 @@ namespace Tests.Execution.Simulation
 	using SafetySharp.Modeling;
 	using Shouldly;
 	using Utilities;
-	using PerformanceCounter = SafetySharp.Modeling.PerformanceCounter;
 
 	internal class MicrostepParallelismWithPerformanceMeasurement : TestObject
 	{
@@ -49,7 +48,7 @@ namespace Tests.Execution.Simulation
 
 			private async Task WorkAsync()
 			{
-				var watch = await PerformanceCounter.Measure(async () =>
+				var watch = await AsyncPerformance.Measure(async () =>
 				{
 					await Task.Yield();
 					Thread.Sleep(100);
@@ -74,7 +73,7 @@ namespace Tests.Execution.Simulation
 
 			private async Task WorkAsync()
 			{
-				var watch = await PerformanceCounter.Measure(async () =>
+				var watch = await AsyncPerformance.Measure(async () =>
 				{
 					await Task.Yield();
 					Thread.Sleep(2500);

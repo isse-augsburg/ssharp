@@ -27,7 +27,7 @@ namespace SafetySharp.Modeling
 	using System.Threading;
 	using System.Threading.Tasks;
 
-	public static class PerformanceCounter
+	public static class AsyncPerformance
 	{
 		public static async Task<Stopwatch> Measure(Func<Task> asyncBlock)
 		{
