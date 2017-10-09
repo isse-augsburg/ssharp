@@ -101,8 +101,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	                Console.WriteLine("Step " + x);
 	                _simulator.SimulateStep();
                     Throughput = _model.Workpieces.Select(w => w.IsComplete).Count();
-                }
-                CreateStats(Throughput, (IPerformanceMeasurementController)_model.Controller);
+				}
+				CreateStats(Throughput, (IPerformanceMeasurementController)_model.Controller);
 
             }
 
@@ -112,15 +112,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 Debug.Assert(modelController.CollectedTimeValues != null);
                 
                 REngine engine;
-                string fileName;
 
-                //init the R engine            
-                REngine.SetEnvironmentVariables();
-                engine = REngine.GetInstance();
-                engine.Initialize();
+	            //init the R engine
+	            try
+	            {
+		            REngine.SetEnvironmentVariables();
+		            engine = REngine.GetInstance();
+		            engine.Initialize();
+	            }
+	            catch (Exception)
+	            {
+					Console.WriteLine("R failed to initialize - not writing statistics");
+		            return;
+	            }
 
-                //prepare data
-                var timeValueData = modelController.CollectedTimeValues;
+				//prepare data
+				var timeValueData = modelController.CollectedTimeValues;
                 var reconfTimeOfAgents = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item2.Ticks)).ToArray();
                 var productionTimeOfAgents = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item1.Ticks)).ToArray();
                 var measurePoints = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item3)).ToArray();
@@ -136,7 +143,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 engine.SetSymbol("w", engine.CreateNumericVector(new double[] { 0.5 }));
 
                 //prepare data
-                fileName = "C:\\Users\\Eberhardinger\\Desktop\\myplot.pdf";
+                var fileName = "C:\\Users\\Eberhardinger\\Desktop\\myplot.pdf";
 
                 //calculate
                 engine.Evaluate("perfomranceValueVector <- productionTimeOfAgents/reconfTimeOfAgents");
