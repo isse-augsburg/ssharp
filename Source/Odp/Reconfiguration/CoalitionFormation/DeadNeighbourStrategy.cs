@@ -68,13 +68,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			// Coalition.InviteCtf() will fill the gaps in the CTF
 			// (called in CalculateConfigurationsAsync()).
 
-			// unclear: is it necessary to surround empty predecessors / successors by empty roles?
-			// ~> test such situations
+			// TODO unclear: is it necessary to surround empty predecessors / successors by empty roles? ~> test such situations
 
 			// coalition might have lost capabilities due to dead agents
 			await MissingCapabilitiesStrategy.Instance.RecruitNecessaryAgents(coalition);
 
-			return TaskFragment.Merge(fragments);
+			return TaskFragment.Merge(coalition.Task, fragments);
 		}
 
 		// used to recruit predecessor / successor of a role connected to a dead agent

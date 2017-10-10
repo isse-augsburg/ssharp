@@ -40,7 +40,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			foreach (var agent in new AgentQueue(coalition))
 			{
-				if (coalition.CTF.Capabilities.IsSubsetOf(availableCapabilities))
+				if (availableCapabilities.IsSupersetOf(coalition.CTF.Capabilities))
 					break;
 
 				var newMember = await coalition.Invite(agent);

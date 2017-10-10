@@ -24,76 +24,122 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
     using System;
     using System.Collections.Generic;
-	using System.Diagnostics;
 	using System.Linq;
+    using JetBrains.Annotations;
 
-	public class TaskFragment
+	/// <summary>
+	///  Represents a continuous fragment of a task.
+	/// </summary>
+	/// <remarks>
+	///  This type is immutable.
+	///  This type is a commutative monoid.
+	/// </remarks>
+	public struct TaskFragment
 	{
+		#region data
+
+		/// <summary>
+		///  The <see cref="ITask"/> this fragment belongs to.
+		/// </summary>
+		[NotNull]
 		public ITask Task { get; }
-		public int Start { get; private set; }
-		public int End { get; private set; }
 
-		public ISet<ICapability> Capabilities { get; } = new HashSet<ICapability>();
+		/// <summary>
+		///  The index of the first capability that is part of the fragment.
+		/// </summary>
+		public int Start { get; }
 
+		/// <summary>
+		///  The index of the last capability that is part of the fragment.
+		/// </summary>
+		public int End { get; }
+
+		#endregion
+
+		#region accessors
+
+		/// <summary>
+		///  The sequence of capabilities that are part of this fragment.
+		/// </summary>
+		[NotNull]
+		public IEnumerable<ICapability> Capabilities => Task.RequiredCapabilities.Slice(Start, End);
+
+		/// <summary>
+		///  The capability indices that are part of this fragment.
+		/// </summary>
+		[NotNull]
+		public IEnumerable<int> CapabilityIndices => Enumerable.Range(Start, Length);
+
+		/// <summary>
+		///  The number of capabilities that are part of this fragment.
+		/// </summary>
 		public int Length => Math.Max(0, End - Start + 1);
 
-		public TaskFragment(ITask task, int start, int end)
+		#endregion
+
+		/// <summary>
+		///  Creates a new fragment.
+		///  Always use this instead of the default constructor.
+		/// </summary>
+		/// <param name="task">The fragment's <see cref="Task"/>.</param>
+		/// <param name="start">The fragment's <see cref="Start"/>.</param>
+		/// <param name="end">The fragment's <see cref="End"/>.</param>
+		/// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="start"/> or <paramref name="end"/> are invalid.</exception>
+		public TaskFragment([NotNull] ITask task, int start, int end)
 		{
+			if (task == null)
+				throw new ArgumentNullException(nameof(task));
+			if (start < 0 || start >= task.RequiredCapabilities.Length)
+				throw new ArgumentOutOfRangeException(nameof(start));
+			if (end < 0 || end >= task.RequiredCapabilities.Length)
+				throw new ArgumentOutOfRangeException(nameof(end));
+
 			Task = task;
 			Start = start;
 			End = end;
-
-			Capabilities.UnionWith(task.RequiredCapabilities.Slice(start, end));
 		}
 
-		public bool Prepend(int newStart)
-		{
-			if (newStart >= Start)
-				return false;
-			
-			Capabilities.UnionWith(Task.RequiredCapabilities.Slice(newStart, Start - 1));
-			Start = newStart;
-			return true;
-		}
-
-		public bool Append(int newEnd)
-		{
-			if (newEnd <= End)
-				return false;
-
-			Capabilities.UnionWith(Task.RequiredCapabilities.Slice(End + 1, newEnd));
-			End = newEnd;
-			return true;
-		}
-
-		public void Add(int index)
-		{
-			Append(index);
-			Prepend(index);
-		}
-
-		public TaskFragment Copy()
-		{
-			return new TaskFragment(Task, Start, End);
-		}
+		#region monoid operations
 
 		/// <summary>
-		/// Merges the given fragments into one.
+		///  Merges two fragments of the same <see cref="Task"/>.
 		/// </summary>
-		public static TaskFragment Merge(IEnumerable<TaskFragment> fragments)
+		/// <remarks>This operation is associative and commutative.</remarks>
+		/// <exception cref="InvalidOperationException">Thrown if the fragments do not belong to the same task.</exception>
+		[MustUseReturnValue]
+		public TaskFragment Merge(TaskFragment other)
 		{
-			var fragmentArray = fragments.ToArray();
-			Debug.Assert(fragmentArray.Length > 0);
-			Debug.Assert(fragmentArray.Select(f => f.Task).Distinct().Count() == 1);
-			return new TaskFragment(fragmentArray[0].Task, fragmentArray.Min(f => f.Start), fragmentArray.Max(f => f.End));
+			if (Task != other.Task)
+				throw new InvalidOperationException("Cannot merge fragments of different tasks.");
+
+			return new TaskFragment(Task, Math.Min(Start, other.Start), Math.Max(End, other.End));
 		}
 
 		/// <summary>
-		/// Returns a task fragment that is the identity for the merge operation (among all fragments of the given <paramref name="task"/>).
+		///  Returns a task fragment that is the identity for the merge operation (among all fragments of the given <paramref name="task"/>).
 		/// </summary>
 		public static TaskFragment Identity(ITask task)
 		{
 			return new TaskFragment(task, task.RequiredCapabilities.Length - 1, 0);
 		}
+
+		/// <summary>
+		///  See <see cref="Merge(TaskFragment)"/>.
+		/// </summary>
+		public static TaskFragment Merge(TaskFragment a, TaskFragment b)
+		{
+			return a.Merge(b);
+		}
+
+		/// <summary>
+		///  Extension of <see cref="Merge(TaskFragment)"/>
+		///  to arbitrary sequences of operands (including the empty sequence).
+		/// </summary>
+		public static TaskFragment Merge(ITask task, IEnumerable<TaskFragment> fragments)
+		{
+			return fragments.Aggregate(Identity(task), Merge);
+		}
+
+		#endregion
 	}
 }

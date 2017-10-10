@@ -42,7 +42,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <summary>
 		/// The connected task fragment handled by coalition members
 		/// </summary>
-		public TaskFragment CTF { get; }
+		public TaskFragment CTF { get; private set; }
 
 		// members & invitations
 		public CoalitionReconfigurationAgent Leader { get; }
@@ -71,6 +71,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			ViolatedPredicates = violatedPredicates;
 		    IsInitialConfiguration = initialConf;
 			Join(Leader = leader);
+		}
+
+		public void MergeCtf(TaskFragment fragment)
+		{
+			CTF = fragment.Merge(CTF);
 		}
 
 		public bool Contains(BaseAgent baseAgent)
@@ -240,8 +245,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			if (minPreState == -1) // && maxPostState == -1
 				return;
 
-			CTF.Prepend(minPreState);
-			CTF.Append(maxPostState);
+			CTF = new TaskFragment(Task, minPreState, maxPostState).Merge(CTF);
 		}
 
 		/// <summary>

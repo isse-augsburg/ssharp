@@ -38,6 +38,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			var affectedRoles = await FindDisconnectedRoles(coalition);
 
 			return TaskFragment.Merge(
+				coalition.Task,
 				await Task.WhenAll(
 					from entry in affectedRoles select RecruitNecessaryAgents(coalition, entry.Item1, entry.Item2)
 				)

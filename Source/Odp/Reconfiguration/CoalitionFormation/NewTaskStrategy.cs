@@ -31,15 +31,16 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
         public async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition)
         {
+			var entireTask = new TaskFragment(coalition.Task, 0, coalition.Task.RequiredCapabilities.Length - 1);
+
             // set CTF = entire task
-            coalition.CTF.Prepend(0);
-            coalition.CTF.Append(coalition.Task.RequiredCapabilities.Length - 1);
+			coalition.MergeCtf(entireTask);
 
             // recruit capabilities for CTF ( = entire task)
             await MissingCapabilitiesStrategy.Instance.RecruitNecessaryAgents(coalition);
 
             // reconfigure everything
-            return new TaskFragment(coalition.Task, 0, coalition.Task.RequiredCapabilities.Length - 1);
+	        return entireTask;
         }
     }
 }
