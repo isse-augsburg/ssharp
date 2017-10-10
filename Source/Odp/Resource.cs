@@ -45,7 +45,7 @@ namespace SafetySharp.Odp
 		/// <summary>
 		///  The number of capabilities already applied to the resource.
 		/// </summary>
-		private byte _statePrefixLength = 0;
+		private byte _statePrefixLength;
 
 		/// <summary>
 		///  The sequence of capabilities already applied to the resource.

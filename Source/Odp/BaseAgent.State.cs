@@ -34,7 +34,7 @@ namespace SafetySharp.Odp
 				ViolatedPredicates = violatedPredicates;
 			    IsInitialConfiguration = initialConf;
 
-				ID = agent.ID;
+				Id = agent.Id;
 				Resource = agent.Resource;
 				Inputs = agent.Inputs.ToArray();
 				Outputs = agent.Outputs.ToArray();
@@ -46,7 +46,7 @@ namespace SafetySharp.Odp
 			public InvariantPredicate[] ViolatedPredicates { get; }
             public bool IsInitialConfiguration { get; }
 
-			public uint ID { get; }
+			public uint Id { get; }
 			public Resource Resource { get; }
 			public BaseAgent[] Inputs { get; }
 			public BaseAgent[] Outputs { get; }

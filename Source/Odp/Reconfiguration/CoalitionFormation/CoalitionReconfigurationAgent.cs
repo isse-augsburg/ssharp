@@ -87,7 +87,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <summary>
 		/// Receives a response from an agent that received a reconfiguration request from this instance.
 		/// </summary>
-		/// <param name="agent">The agent responding to the reconfiguration request</param>
+		/// <param name="respondingAgent">The agent responding to the reconfiguration request</param>
 		private void ReceiveResponse(CoalitionReconfigurationAgent respondingAgent)
 		{
 			Debug.Assert(respondingAgent.CurrentCoalition == null);

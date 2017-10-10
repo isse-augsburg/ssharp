@@ -93,7 +93,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			_model.RobotAgents.Add(agent);
 			_model.ReconfigurationMonitor.AddAgent(agent);
 			agent.ReconfigurationMonitor = _model.ReconfigurationMonitor;
-			robot?.SetNames(agent.ID);
+			robot?.SetNames(agent.Id);
 
 			return this;
 		}
@@ -122,7 +122,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			var cart = _usePlants ? CreateCart(RouteHelper.ToRoutes(routeSpecifications, _model)) : null;
 			var agent = new CartAgent(cart) { TaskQueue = _model.TaskQueue };
 			_model.CartAgents.Add(agent);
-			cart?.SetNames(agent.ID);
+			cart?.SetNames(agent.Id);
 
 			RouteHelper.Connect(agent, routeSpecifications, _model);
 

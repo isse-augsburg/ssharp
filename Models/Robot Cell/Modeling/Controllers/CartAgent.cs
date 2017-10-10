@@ -42,7 +42,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected CartAgent() { } // for fault effects
 
-		public override string Name => $"C{ID}";
+		public override string Name => $"C{Id}";
 
 		public Cart Cart { get; }
 

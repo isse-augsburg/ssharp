@@ -34,8 +34,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	internal class AgentQueue : IEnumerable<BaseAgent>
 	{
 		private readonly HashSet<BaseAgent> _knownParticipants;
-		private readonly LinkedList<BaseAgent> _inputQueue = new LinkedList<BaseAgent>();
-		private readonly LinkedList<BaseAgent> _outputQueue = new LinkedList<BaseAgent>();
+		private readonly LinkedList<BaseAgent> _inputQueue;
+		private readonly LinkedList<BaseAgent> _outputQueue;
 
 		private LinkedListNode<BaseAgent> _firstInputParticipant;
 		private LinkedListNode<BaseAgent> _firstOutputParticipant;

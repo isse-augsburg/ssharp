@@ -113,7 +113,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
         protected RobotAgent() { } // for fault effects
 
-		public override string Name => $"R{ID}";
+		public override string Name => $"R{Id}";
 
 		public Robot Robot { get; }
 

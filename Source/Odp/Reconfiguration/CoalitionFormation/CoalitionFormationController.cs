@@ -471,6 +471,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					// find first role in TFR (or after, if TFR is empty) in old distribution
 					var firstRole = FindRoleForCapability(TFR.Start);
 					startEdgeAgent = firstRole.Input;
+					Debug.Assert(startEdgeAgent != null);
 					EdgeAgents.Add(startEdgeAgent);
 				}
 
@@ -479,6 +480,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					// find last role in TFR (or before, if TFR is empty) in old distribution
 					var lastRole = FindRoleForCapability(TFR.End);
 					endEdgeAgent = lastRole.Output;
+					Debug.Assert(endEdgeAgent != null);
 					EdgeAgents.Add(endEdgeAgent);
 				}
 			}

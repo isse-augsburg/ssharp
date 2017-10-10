@@ -93,7 +93,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			private readonly Dictionary<uint, ControllerReconfigurationAgent> _reconfAgents
 				= new Dictionary<uint, ControllerReconfigurationAgent>();
 
-			private int _ackCounter = 0;
+			private int _ackCounter;
 
 			private enum State { Idle, GatherGlobalKnowledge, CalculateRoles, AllocateRoles }
 			private readonly StateMachine<State> _stateMachine = State.Idle;
@@ -121,7 +121,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,
 					to: State.GatherGlobalKnowledge,
-					action: () => _reconfAgents.Add(baseAgentState.ID, agent)
+					action: () => _reconfAgents.Add(baseAgentState.Id, agent)
 				);
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,

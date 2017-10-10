@@ -61,8 +61,7 @@ namespace SafetySharp.Odp
 		///  in this condition.
 		/// </summary>
 		[NotNull]
-		public IEnumerable<ICapability> State =>
-			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
+		public IEnumerable<ICapability> State => Task.RequiredCapabilities.Take(_statePrefixLength);
 
 		/// <summary>
 		///  The number of capabilities already applied to a <see cref="Resource"/> in this condition.

@@ -63,7 +63,7 @@ namespace SafetySharp.Odp
 		///  The <see cref="ITask"/> according to which this <see cref="Role"/> processes resources.
 		/// </summary>
 		[NotNull]
-		public ITask Task => PreCondition.Task ?? PostCondition.Task;
+		public ITask Task => PreCondition.Task;
 
 		/// <summary>
 		///  The capabilities applied during execution of this <see cref="Role"/>.

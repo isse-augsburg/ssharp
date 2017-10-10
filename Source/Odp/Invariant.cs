@@ -30,7 +30,7 @@ namespace SafetySharp.Odp
 
 	public static class Invariant
 	{
-		public static IEnumerable<ITask> IOConsistency(BaseAgent agent)
+		public static IEnumerable<ITask> IoConsistency(BaseAgent agent)
 		{
 			return RoleInvariant(
 				agent,

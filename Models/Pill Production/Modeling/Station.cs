@@ -80,7 +80,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		}
 
 		protected override InvariantPredicate[] MonitoringPredicates => new[] {
-			Invariant.IOConsistency,
+			Invariant.IoConsistency,
 			Invariant.NeighborsAliveGuarantee,
 			Invariant.ResourceConsistency,
 

@@ -35,8 +35,8 @@ namespace SafetySharp.Odp
 		public static int MaximumResourceCount = 20;
 		public static int MaximumRoleCount = 40;
 
-		private static uint _maxID = 0;
-		public uint ID { get; }
+		private static uint _maxId;
+		public uint Id { get; }
 
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
@@ -49,7 +49,7 @@ namespace SafetySharp.Odp
 
 		protected BaseAgent()
 		{
-			ID = _maxID++;
+			Id = _maxId++;
 			RoleSelector = new FairRoleSelector(this);
 			RoleExecutor = new RoleExecutor(this);
 		}
@@ -272,13 +272,13 @@ namespace SafetySharp.Odp
 		public virtual bool IsAlive => true;
 
 		[Hidden]
-		private bool _deficientConfiguration = false;
+		private bool _deficientConfiguration;
 
 		[Hidden]
 		public Reconfiguration.IReconfigurationStrategy ReconfigurationStrategy { get; set; }
 
 		protected virtual InvariantPredicate[] MonitoringPredicates { get; } = {
-			Invariant.IOConsistency,
+			Invariant.IoConsistency,
 			Invariant.NeighborsAliveGuarantee,
 			Invariant.ResourceConsistency,
 			Invariant.CapabilityConsistency

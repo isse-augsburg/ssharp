@@ -40,7 +40,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			private readonly CancellationTokenSource _cancellation = new CancellationTokenSource();
 
-			public CancellationToken Cancel => _cancellation.Token;
+			private readonly CancellationToken _cancel;
 
 
 			private readonly Coalition _coalition;
@@ -48,13 +48,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			public MergeSupervisor(Coalition coalition)
 			{
 				_coalition = coalition;
+				_cancel = _cancellation.Token;
 			}
-
 
 			/// <summary>
 			/// Handles merge requests created when members are invited by another coalition.
 			/// </summary>
-			/// <exception cref="OperationCanceledException">Thrown if a merge results in dissolution of the coalition.</exception>
+			/// <exception cref="System.OperationCanceledException">Thrown if a merge results in dissolution of the coalition.</exception>
 			public void ProcessMergeRequests()
 			{
 				while (_mergeRequests.Count > 0)
@@ -63,7 +63,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					_mergeRequests.RemoveFirst();
 
 					ExecuteCoalitionMerge(request);
-					Cancel.ThrowIfCancellationRequested();
+					_cancel.ThrowIfCancellationRequested();
 				}
 			}
 
@@ -82,7 +82,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					await System.Threading.Tasks.Task.Yield();
 
 					// detect deadlock
-					if (!_mergeRequests.Any(request => request.OpposingLeader == _awaitingRendezvousFrom))
+					if (_mergeRequests.All(request => request.OpposingLeader != _awaitingRendezvousFrom))
 						continue;
 
 					// determine which agent has to break the deadlock
@@ -97,7 +97,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					var deadlockRequest = _mergeRequests.FirstOrDefault(request => request.OpposingLeader == _awaitingRendezvousFrom);
 					_mergeRequests.Remove(deadlockRequest);
 					ExecuteCoalitionMerge(deadlockRequest);
-					Cancel.ThrowIfCancellationRequested(); // The coalition might have been disbanded
+					_cancel.ThrowIfCancellationRequested(); // The coalition might have been disbanded
 
 					break;
 				}
@@ -109,7 +109,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <param name="source">The agent that invited a member, i.e. the leader of the other coalition.</param>
 			public void MergeCoalition(CoalitionReconfigurationAgent source)
 			{
-				_mergeRequests.AddLast(new MergeRequest { OpposingLeader = source, OriginalLeader = _coalition.Leader });
+				_mergeRequests.AddLast(new MergeRequest(_coalition.Leader, source));
 			}
 
 			/// <summary>
@@ -130,12 +130,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// Informs the coalition of a merge with another coalition.
 			/// </summary>
 			/// <param name="chosenCoalition">The coalition which will take over, i.e., either this instance or the other coalition.</param>
-			/// <param name="inNameOf">The agent who lead the other coalition when the <see cref="AwaitRendezvous(CoalitionReconfigurationAgent)"/>
+			/// <param name="inNameOf">The agent who lead the other coalition when the <see cref="AwaitRendezvous"/>
 			/// message was sent.</param>
 			private void RendezvousRequest(Coalition chosenCoalition, CoalitionReconfigurationAgent inNameOf)
 			{
 				Debug.Assert(_awaitingRendezvousFrom == inNameOf,
-					$"Awaiting rendezvous from agent #{_awaitingRendezvousFrom.BaseAgent.ID}, but received from agent #{inNameOf.BaseAgent.ID}.");
+					$"Awaiting rendezvous from agent #{_awaitingRendezvousFrom.BaseAgent.Id}, but received from agent #{inNameOf.BaseAgent.Id}.");
 				_awaitingRendezvousFrom = null;
 
 				if (chosenCoalition == _coalition)
@@ -175,11 +175,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <param name="request">The <see cref="MergeRequest"/> being executed.</param>
 			private void ExecuteCoalitionMerge(MergeRequest request)
 			{
-				if (request.OpposingLeader.CurrentCoalition != _coalition)
-				{
-					var leader = DetermineLeader(_coalition.Leader, request.OpposingLeader);
-					request.OpposingMerger.RendezvousRequest(leader.CurrentCoalition, inNameOf: request.OriginalLeader);
-				}
+				if (request.OpposingLeader.CurrentCoalition == _coalition)
+					return;
+
+				var leader = DetermineLeader(_coalition.Leader, request.OpposingLeader);
+				request.OpposingMerger.RendezvousRequest(chosenCoalition: leader.CurrentCoalition, inNameOf: request.OriginalLeader);
 			}
 
 			/// <summary>
@@ -187,7 +187,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// </summary>
 			private static CoalitionReconfigurationAgent DetermineLeader(CoalitionReconfigurationAgent leader1, CoalitionReconfigurationAgent leader2)
 			{
-				if (leader1.BaseAgent.ID < leader2.BaseAgent.ID)
+				if (leader1.BaseAgent.Id < leader2.BaseAgent.Id)
 					return leader1;
 				return leader2;
 			}
@@ -197,19 +197,23 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// </summary>
 			private struct MergeRequest
 			{
+				public MergeRequest(CoalitionReconfigurationAgent originalLeader, CoalitionReconfigurationAgent opposingLeader)
+				{
+					OriginalLeader = originalLeader;
+					OpposingLeader = opposingLeader;
+				}
+
 				/// <summary>
 				/// Leader of the coalition that shall be merged.
 				/// </summary>
-				public CoalitionReconfigurationAgent OpposingLeader { get; set; }
+				public CoalitionReconfigurationAgent OpposingLeader { get; }
 
-				public Coalition OpposingCoalition => OpposingLeader.CurrentCoalition;
-
-				public MergeSupervisor OpposingMerger => OpposingCoalition.Merger;
+				public MergeSupervisor OpposingMerger => OpposingLeader.CurrentCoalition.Merger;
 
 				/// <summary>
 				/// The original leader of the coalition that first created the request.
 				/// </summary>
-				public CoalitionReconfigurationAgent OriginalLeader { get; set; }
+				public CoalitionReconfigurationAgent OriginalLeader { get; }
 			}
 		}
 	}

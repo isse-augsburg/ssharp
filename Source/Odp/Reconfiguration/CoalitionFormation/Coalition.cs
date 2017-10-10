@@ -259,7 +259,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		/// <summary>
 		/// Notifies the coalition an invited agent already belongs to a different coalition,
-		/// and that it will receive a <see cref="RendezvousRequest(Coalition, CoalitionReconfigurationAgent)"/> from
+		/// and that its <see cref="MergeSupervisor"/> will receive a <see cref="MergeSupervisor.RendezvousRequest"/> from
 		/// the opposing <paramref name="leader"/>.
 		/// </summary>
 		public void AwaitRendezvous(CoalitionReconfigurationAgent invitedAgent, CoalitionReconfigurationAgent leader)

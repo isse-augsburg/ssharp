@@ -51,8 +51,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             _actingController = actingController;
             foreach (var agent in Agents)
             {
-                CollectedTimeValues.Add(agent.ID, new List<Tuple<TimeSpan, TimeSpan, long>>());
-                _stopwatchs.Add(agent.ID, Stopwatch.StartNew());
+                CollectedTimeValues.Add(agent.Id, new List<Tuple<TimeSpan, TimeSpan, long>>());
+                _stopwatchs.Add(agent.Id, Stopwatch.StartNew());
             }
         }
 
@@ -64,9 +64,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
             foreach (var agent in resultingTasks.InvolvedAgents)
             {
-                _stopwatchs[agent.ID].Stop();
-                CollectedTimeValues[agent.ID].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatchs[agent.ID].Elapsed-reconfTime.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
-                _stopwatchs[agent.ID].Restart();
+                _stopwatchs[agent.Id].Stop();
+                CollectedTimeValues[agent.Id].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatchs[agent.Id].Elapsed-reconfTime.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
+                _stopwatchs[agent.Id].Restart();
             }
             return resultingTasks;
         }
