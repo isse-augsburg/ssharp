@@ -30,9 +30,9 @@ namespace SafetySharp.Odp
 	{
 		public BaseAgent Agent { get; }
 
-		public Role Role { get; private set; }
-
 		public bool IsExecuting { get; private set; }
+
+		private Role _role;
 
 		private int _executionState;
 
@@ -41,16 +41,18 @@ namespace SafetySharp.Odp
 			Agent = agent;
 		}
 
-		public bool IsCompleted => IsExecuting && (Role.PreCondition.StateLength + _executionState == Role.PostCondition.StateLength);
+		public Role? Role => IsExecuting ? (Role?) _role : null;
 
-		public IEnumerable<ICapability> ExecutionState => Task.RequiredCapabilities.Take(Role.PreCondition.StateLength + _executionState);
+		public bool IsCompleted => IsExecuting && (_role.PreCondition.StateLength + _executionState == _role.PostCondition.StateLength);
+
+		public IEnumerable<ICapability> ExecutionState => Task.RequiredCapabilities.Take(_role.PreCondition.StateLength + _executionState);
 
 		internal void BeginExecution(Role role)
 		{
 			if (IsExecuting)
 				throw new InvalidOperationException("Already executing a role.");
 
-			Role = role;
+			_role = role;
 			IsExecuting = true;
 		}
 
@@ -61,7 +63,7 @@ namespace SafetySharp.Odp
 			if (IsCompleted)
 				throw new InvalidOperationException("The role has already been completely executed.");
 
-			var capability = Role.CapabilitiesToApply.ElementAt(_executionState);
+			var capability = _role.CapabilitiesToApply.ElementAt(_executionState);
 			capability.Execute(Agent);
 			_executionState++;
 		}
@@ -75,8 +77,8 @@ namespace SafetySharp.Odp
 		}
 
 		// convenience accessors
-		public BaseAgent Input => Role.PreCondition.Port;
-		public BaseAgent Output => Role.PostCondition.Port;
-		public ITask Task => Role.Task;
+		public BaseAgent Input => Role?.PreCondition.Port;
+		public BaseAgent Output => Role?.PostCondition.Port;
+		public ITask Task => Role?.Task;
 	}
 }

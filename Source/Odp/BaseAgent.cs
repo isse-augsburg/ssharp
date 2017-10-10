@@ -124,7 +124,7 @@ namespace SafetySharp.Odp
 					from: States.ExecuteRole,
 					to: States.Output,
 					guard: RoleExecutor.IsCompleted && RoleExecutor.Output != null,
-					action: () => RoleExecutor.Output.ResourceReady(this, RoleExecutor.Role.PostCondition))
+					action: () => RoleExecutor.Output.ResourceReady(this, RoleExecutor.Role.Value.PostCondition))
 				.Transition( // resource has been consumed
 					from: States.ExecuteRole,
 					to: States.Idle,
