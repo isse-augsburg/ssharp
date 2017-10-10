@@ -42,7 +42,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		public FastController(BaseAgent[] agents) : base(agents) { }
 
 		// synchronous implementation
-		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+		public override Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
 			_availableAgents = GetAvailableAgents();
 			var configs = new ConfigurationUpdate();

@@ -46,9 +46,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			remove { _controller.ConfigurationsCalculated -= value; }
 		}
 		public BaseAgent[] Agents => _controller.Agents;
-		public virtual Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+		public virtual Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
-			return _controller.CalculateConfigurations(context, task);
+			return _controller.CalculateConfigurationsAsync(context, task);
 		}
 
 		// fault & effect
@@ -57,7 +57,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		[FaultEffect(Fault = nameof(ReconfigurationFault))]
 		public abstract class ReconfigurationFailureEffect : FaultyController
 		{
-			public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+			public override Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 			{
 				var config = new ConfigurationUpdate();
 				config.Fail();

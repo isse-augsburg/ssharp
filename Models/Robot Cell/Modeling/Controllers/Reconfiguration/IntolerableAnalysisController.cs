@@ -56,7 +56,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 
 		public BaseAgent[] Agents => _controller.Agents;
-		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+		public async Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
 			if (_reconfHasFailed)
 				return null;
@@ -64,7 +64,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			if (StepCount >= MaxSteps)
 				return null;
 
-			var config = await _controller.CalculateConfigurations(context, task);
+			var config = await _controller.CalculateConfigurationsAsync(context, task);
 			_reconfHasFailed |= config.Failed;
 			return config;
 		}

@@ -66,7 +66,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			// once predecessor / successor are in the coalition,
 			// Coalition.InviteCtf() will fill the gaps in the CTF
-			// (called in CalculateConfigurations()).
+			// (called in CalculateConfigurationsAsync()).
 
 			// unclear: is it necessary to surround empty predecessors / successors by empty roles?
 			// ~> test such situations

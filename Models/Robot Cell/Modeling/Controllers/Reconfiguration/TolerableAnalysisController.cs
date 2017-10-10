@@ -45,7 +45,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 
 		public BaseAgent[] Agents => _controller.Agents;
-		public Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+		public Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
 			if (_hasReconfed)
 			{
@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			}
 
 			_hasReconfed = true;
-			return _controller.CalculateConfigurations(context, task);
+			return _controller.CalculateConfigurationsAsync(context, task);
 		}
 	}
 }

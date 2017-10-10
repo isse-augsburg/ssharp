@@ -24,16 +24,28 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Threading.Tasks;
+	using JetBrains.Annotations;
 
-
-    
-
+	/// <summary>
+	///  Calculates configurations for a given <see cref="ITask"/>.
+	/// </summary>
     public interface IController
     {
+		/// <summary>
+		///  The set of agents the controller knows about and controls.
+		/// </summary>
 		BaseAgent[] Agents { get; }
 
-		Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task);
+		/// <summary>
+		///  Asynchronously calculates a <see cref="ConfigurationUpdate"/>.
+		/// </summary>
+		/// <param name="context">An arbitrary context object some controllers may assign meaning to, while others may not.</param>
+		/// <param name="task">The task for which configurations should be updated.</param>
+		[NotNull, ItemNotNull] Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task);
 
+		/// <summary>
+		///  Raised when the controller has calculated configurations, just before <see cref="CalculateConfigurationsAsync"/> returns.
+		/// </summary>
 		event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated;
 	}
 }

@@ -47,10 +47,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		}
 
 		// delegate calculation to _controller, then verify result
-		public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+		public async Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
 			var isPossible = IsReconfigurationPossible(task);
-			var config = await _controller.CalculateConfigurations(context, task);
+			var config = await _controller.CalculateConfigurationsAsync(context, task);
 
 			if (!config.Failed && !isPossible)
 				throw new Exception("Reconfiguration successful even though there is no valid configuration.");

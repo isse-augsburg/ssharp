@@ -47,7 +47,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		// synchronous implementation
-		public override Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+		public override Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
 			var configs = new ConfigurationUpdate();
 		    configs.RecordInvolvement(GetAvailableAgents()); // central controller uses all agents!

@@ -72,7 +72,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 			else
 			{
-				var configs = await _controller.CalculateConfigurations(this, task);
+				var configs = await _controller.CalculateConfigurationsAsync(this, task);
 				if (configs != null)
 				{
 					await Task.WhenAll(CurrentCoalition.Members

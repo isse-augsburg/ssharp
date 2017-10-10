@@ -43,7 +43,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	        return Array.FindAll(Agents, agent => agent.IsAlive);
 	    }
 
-		public abstract Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task);
+		public abstract Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task);
 
 		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
 		{

@@ -56,9 +56,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             }
         }
 
-        public async Task<ConfigurationUpdate> CalculateConfigurations(object context, ITask task)
+        public async Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
         {
-	        var tuple = await AsyncPerformance.Measure(() => _actingController.CalculateConfigurations(context, task));
+	        var tuple = await AsyncPerformance.Measure(() => _actingController.CalculateConfigurationsAsync(context, task));
 	        var resultingTasks = tuple.Item1;
 	        var reconfTime = tuple.Item2;
 
