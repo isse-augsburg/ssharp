@@ -22,8 +22,14 @@
 
 namespace SafetySharp.Odp
 {
+	/// <summary>
+	///  Implemented by <see cref="BaseAgent"/> subclasses to indicate they can apply capabilities of type <typeparamref name="T"/>.
+	/// </summary>
 	public interface ICapabilityHandler<in T> where T : ICapability
 	{
+		/// <summary>
+		///  Applies the given <paramref name="capability"/> to the <see cref="BaseAgent"/>'s resource.
+		/// </summary>
 		void ApplyCapability(T capability);
 	}
 }

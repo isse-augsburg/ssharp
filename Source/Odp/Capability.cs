@@ -24,9 +24,18 @@ namespace SafetySharp.Odp
 {
 	using System;
 
+	/// <summary>
+	///  Provides a default base class for <see cref="ICapability"/> implementations.
+	/// </summary>
+	/// <typeparam name="T">The actual capability type, as in <c>class MyCapability : Capability&lt;MyCapability&gt;</c></typeparam>
 	public abstract class Capability<T> : ICapability
 		where T : Capability<T>
 	{
+		/// <summary>
+		///  Executes the capability by assuming <paramref name="agent"/> implements <see cref="ICapabilityHandler{T}"/>
+		///  and delegating to its <see cref="ICapabilityHandler{T}.ApplyCapability"/> method.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown if <paramref name="agent"/> does not implement <see cref="ICapabilityHandler{T}"/>.</exception>
 		public void Execute(BaseAgent agent)
 		{
 			var handler = agent as ICapabilityHandler<T>;

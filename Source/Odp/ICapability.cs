@@ -22,10 +22,22 @@
 
 namespace SafetySharp.Odp
 {
+	/// <summary>
+	///  Represents an action that is applied to a <see cref="Resource"/> as part of its processing.
+	/// </summary>
+	/// <remarks>
+	///  Implementing classes should also override <c>Equals</c>.
+	/// </remarks>
 	public interface ICapability
 	{
+		/// <summary>
+		///  Represents application of the capability by a <see cref="BaseAgent"/>, to the <paramref name="agent"/>'s <see cref="BaseAgent.Resource"/>.
+		/// </summary>
 		void Execute(BaseAgent agent);
 
+		/// <summary>
+		///  Indicates the type of capability.
+		/// </summary>
 		CapabilityType CapabilityType { get; }
 	}
 }

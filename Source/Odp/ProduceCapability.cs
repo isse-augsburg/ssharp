@@ -22,6 +22,10 @@
 
 namespace SafetySharp.Odp
 {
+	/// <summary>
+	///  A default <see cref="ICapability"/> implementation for produce capabilities.
+	/// </summary>
+	/// <remarks>All instances of this class are considered equal.</remarks>
 	public sealed class ProduceCapability : Capability<ProduceCapability>
 	{
 		public override CapabilityType CapabilityType => CapabilityType.Produce;

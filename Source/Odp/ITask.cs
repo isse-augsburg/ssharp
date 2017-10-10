@@ -22,10 +22,24 @@
 
 namespace SafetySharp.Odp
 {
+	using JetBrains.Annotations;
+
+	/// <summary>
+	///  A task describes how resources are processed by the self-organizing system.
+	/// </summary>
 	public interface ITask
 	{
+		/// <summary>
+		///  The sequence of capabilities that must be applied to resources.
+		/// </summary>
+		[NotNull]
 		ICapability[] RequiredCapabilities { get; }
 
+		/// <summary>
+		///  Whether or not processing for this task is complete.
+		///  For instance, implementations may always return <c>false</c> to indicate a never-ending task,
+		///  or may define a fixed number of resources to be produced and return <c>true</c> after that number is reached.
+		/// </summary>
 		bool IsCompleted { get; }
 	}
 }

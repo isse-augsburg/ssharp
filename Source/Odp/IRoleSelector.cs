@@ -23,11 +23,27 @@
 namespace SafetySharp.Odp
 {
 	using System.Collections.Generic;
+	using JetBrains.Annotations;
 
+	/// <summary>
+	///  A strategy interface for choosing a <see cref="Role"/> to be executed next by a <see cref="BaseAgent"/>.
+	///  Each instance is associated with one <see cref="BaseAgent"/>.
+	/// </summary>
 	public interface IRoleSelector
 	{
-		Role? ChooseRole(IEnumerable<BaseAgent.ResourceRequest> resourceRequests);
+		/// <summary>
+		///  Chooses the role to be executed.
+		/// </summary>
+		/// <param name="resourceRequests">The agent's resource requests.</param>
+		/// <returns>
+		///  <c>null</c> if the agent should not begin execution of a role at the moment.
+		///  Otherwise, one of the given <paramref name="resourceRequests"/>' <see cref="BaseAgent.ResourceRequest.Role"/>.
+		/// </returns>
+		Role? ChooseRole([NotNull] IEnumerable<BaseAgent.ResourceRequest> resourceRequests);
 
+		/// <summary>
+		///  Notifies the selector its <see cref="BaseAgent"/>'s role allocations have changed.
+		/// </summary>
 		void OnRoleAllocationsChanged();
 	}
 }

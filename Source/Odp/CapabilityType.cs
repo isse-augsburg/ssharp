@@ -22,10 +22,25 @@
 
 namespace SafetySharp.Odp
 {
+	/// <summary>
+	///  Represents a type of <see cref="ICapability"/>.
+	/// </summary>
 	public enum CapabilityType
 	{
+		/// <summary>
+		///  <see cref="Produce"/> capabilities create a new resource from scratch (or fetch it from outside the self-organizing system).
+		///  The first capability in a <see cref="ITask"/> must always be such a capability.
+		/// </summary>
 		Produce,
+
+		/// <summary>
+		///  <see cref="Process"/> capabilities describe the actions being applied to an existing resource.
+		/// </summary>
 		Process,
+
+		/// <summary>
+		///  <see cref="Consume"/> capabilities are the last step in a resource's processing and represent its removal from the system.
+		/// </summary>
 		Consume
 	}
 }

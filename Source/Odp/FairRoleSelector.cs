@@ -27,6 +27,7 @@ namespace SafetySharp.Odp
 	using System.Linq;
 
 	using Modeling;
+	using JetBrains.Annotations;
 
 	/// <summary>
 	///  A fair role selection algorithm
@@ -42,21 +43,27 @@ namespace SafetySharp.Odp
 	/// </remarks>
 	public class FairRoleSelector : IRoleSelector
 	{
+		// can be non-discoverable, since it is only a temp field populated and used within the same step
 		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly Dictionary<Role, int> _roleIndex = new Dictionary<Role, int>();
 
+		// can be non-discoverable, since it is only a temp field populated and used within the same step
 		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly Dictionary<BaseAgent.ResourceRequest, uint> _timeStamps = new Dictionary<BaseAgent.ResourceRequest, uint>();
 
+		// can be hidden, since it is only a temp field populated and used within the same step
 		[Hidden]
 		private uint _currentTime;
 
 		private readonly byte[] _applicationTimes = new byte[BaseAgent.MaximumRoleCount];
 
+		[NotNull]
 		protected BaseAgent Agent { get; }
 
-		public FairRoleSelector(BaseAgent agent)
+		public FairRoleSelector([NotNull] BaseAgent agent)
 		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
 			Agent = agent;
 		}
 
@@ -67,6 +74,9 @@ namespace SafetySharp.Odp
 
 		public virtual Role? ChooseRole(IEnumerable<BaseAgent.ResourceRequest> resourceRequests)
 		{
+			if (resourceRequests == null)
+				throw new ArgumentNullException(nameof(resourceRequests));
+
 			var candidateRoles = Agent.AllocatedRoles.Where(CanExecute).ToArray();
 			if (!candidateRoles.Any())
 				return null;
