@@ -169,7 +169,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			{
 				// add the capability to the current role
 				var capability = task.RequiredCapabilities[i];
-				role.AddCapability(capability);
+				role = role.WithCapability(capability);
 
 				// if this concludes the current role, prepare the next one
 				if (i + 1 < agentPath.Length && agentPath[i] != agentPath[i+1])
@@ -179,8 +179,7 @@ namespace SafetySharp.Odp.Reconfiguration
 					ConfigureConnection(agentPath[i], agentPath[i + 1], task, role.PostCondition, configs, out first, out last);
 
 					// complete the current role
-					role.PostCondition.Port = first;
-					configs.AddRoles(_availableAgents[agentPath[i]], role);
+					configs.AddRoles(_availableAgents[agentPath[i]], role.WithOutput(first));
 
 					// create a new role, referencing the last connection agent
 					// (role.PostCondition has the same state as the last transport role's PostCondition)
@@ -212,8 +211,8 @@ namespace SafetySharp.Odp.Reconfiguration
 				var link = _availableAgents[connection[i]];
 
 				// (initialCondition has the same state as the previous transport role's PostCondition)
-				var linkRole = GetRole(task, previous, initialCondition);
-				linkRole.PostCondition.Port = _availableAgents[connection[i + 1]];
+				var linkRole = GetRole(task, previous, initialCondition)
+					.WithOutput(_availableAgents[connection[i + 1]]);
 				configs.AddRoles(link, linkRole);
 
 				previous = link;

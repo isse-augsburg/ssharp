@@ -59,7 +59,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			return agent.AllocatedRoles
 				.Where(role => role.Task == _coalition.Task)
-				.SelectMany(role => new[] { role.PreCondition.Port, role.PostCondition.Port })
+				.SelectMany(role => new[] { role.Input, role.Output })
 				.Distinct()
 				.Where(participant => participant != null && participant.IsAlive);
 		}

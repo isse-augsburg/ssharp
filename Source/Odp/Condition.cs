@@ -26,13 +26,16 @@ namespace SafetySharp.Odp
 	using System.Collections.Generic;
 	using System.Linq;
 
-	public struct Condition
+	public struct Condition : IEquatable<Condition>
 	{
-		public BaseAgent Port { get; set; }
-		public ITask Task { get; set; }
+		// actual data fields
+		public BaseAgent Port { get; }
 
-		private byte _statePrefixLength;
+		public ITask Task { get; }
 
+		private readonly byte _statePrefixLength;
+
+		// accessors
 		public IEnumerable<ICapability> State =>
 			Task?.RequiredCapabilities.Take(_statePrefixLength) ?? Enumerable.Empty<ICapability>();
 
@@ -44,21 +47,61 @@ namespace SafetySharp.Odp
 				   && _statePrefixLength == other._statePrefixLength;
 		}
 
-		internal void AppendToState(ICapability capability)
+		// (copy) constructors
+		public Condition(ITask task, int stateLength, BaseAgent port = null)
 		{
-			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
-				throw new InvalidOperationException("Condition already has maximum state.");
-			if (!Task.RequiredCapabilities[_statePrefixLength].Equals(capability))
-				throw new InvalidOperationException("Invalid capability order in Condition state.");
-
-			_statePrefixLength++;
+			Port = port;
+			Task = task;
+			_statePrefixLength = (byte)stateLength;
 		}
 
-		internal void CopyStateFrom(Condition other)
+		public Condition WithPort(BaseAgent port)
 		{
-			if (other.Task != Task)
-				throw new InvalidOperationException("Invalid task: cannot copy Condition state");
-			_statePrefixLength = other._statePrefixLength;
+			return new Condition(Task, _statePrefixLength, port);
+		}
+
+		public Condition WithCapability(ICapability capability)
+		{
+			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
+				throw new InvalidOperationException("All required capabilities already applied.");
+			if (!Task.RequiredCapabilities[_statePrefixLength].Equals(capability))
+				throw new InvalidOperationException("Capabilities must be applied according to task.");
+
+			return new Condition(Task, StateLength + 1, Port);
+		}
+
+		// equality (generated code)
+		public bool Equals(Condition other)
+		{
+			return _statePrefixLength == other._statePrefixLength && Equals(Port, other.Port) && Equals(Task, other.Task);
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+				return false;
+			return obj is Condition && Equals((Condition)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hashCode = _statePrefixLength.GetHashCode();
+				hashCode = (hashCode * 397) ^ (Port != null ? Port.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ (Task != null ? Task.GetHashCode() : 0);
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(Condition left, Condition right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Condition left, Condition right)
+		{
+			return !left.Equals(right);
 		}
 	}
 }

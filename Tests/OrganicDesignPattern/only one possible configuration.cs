@@ -61,27 +61,32 @@ namespace Tests.OrganicDesignPattern
 
 				// verify configuration
 
-				var producerRole = new Role { PreCondition = { Task = task }, PostCondition = { Task = task, Port = agents[1] } };
-				producerRole.AddCapability(new ProduceCapability());
+				var producerRole = new Role(new Condition(task, 0), new Condition(task, 0, agents[1]))
+					.WithCapability(new ProduceCapability());
 				agents[0].AllocatedRoles.ShouldBe(new[] { producerRole }, ignoreOrder: false);
 
-				var transportRole = new Role { PreCondition = { Task = task, Port = agents[0] }, PostCondition = { Task = task, Port = agents[2] } };
-				transportRole.Initialize(producerRole.PostCondition);
+				var transportRole = new Role(
+						new Condition(task, producerRole.PostCondition.StateLength, agents[0]),
+						new Condition(task, producerRole.PostCondition.StateLength, agents[2])
+					);
 				agents[1].AllocatedRoles.ShouldBe(new [] { transportRole });
 
-				var processRoleA = new Role { PreCondition = { Task = task, Port = agents[1] }, PostCondition = { Task = task, Port = agents[3] } };
-				processRoleA.Initialize(transportRole.PostCondition);
-				processRoleA.AddCapability(new ProcessCapabilityA());
+				var processRoleA = new Role(
+						new Condition(task, transportRole.PostCondition.StateLength, agents[1]),
+						new Condition(task, transportRole.PostCondition.StateLength, agents[3])
+					).WithCapability(new ProcessCapabilityA());
 				agents[2].AllocatedRoles.ShouldBe(new [] { processRoleA });
 
-				var processRoleB = new Role { PreCondition = { Task = task, Port = agents[2] }, PostCondition = { Task = task, Port = agents[4] } };
-				processRoleB.Initialize(processRoleA.PostCondition);
-				processRoleB.AddCapability(new ProcessCapabilityB());
+				var processRoleB = new Role(
+						new Condition(task, processRoleA.PostCondition.StateLength, agents[2]),
+						new Condition(task, processRoleA.PostCondition.StateLength, agents[4])
+					).WithCapability(new ProcessCapabilityB());
 				agents[3].AllocatedRoles.ShouldBe(new[] { processRoleB });
 
-				var consumerRole = new Role { PreCondition = { Task = task, Port = agents[3] }, PostCondition = { Task = task } };
-				consumerRole.Initialize(processRoleB.PostCondition);
-				consumerRole.AddCapability(new ConsumeCapability());
+				var consumerRole = new Role(
+						new Condition(task, processRoleB.PostCondition.StateLength, agents[3]),
+						new Condition(task, processRoleB.PostCondition.StateLength)
+					).WithCapability(new ConsumeCapability());
 				agents[4].AllocatedRoles.ShouldBe(new[] { consumerRole });
 
 				agents[5].AllocatedRoles.ShouldBeEmpty();

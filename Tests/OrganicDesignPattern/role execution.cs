@@ -39,10 +39,10 @@ namespace Tests.OrganicDesignPattern
 			};
 
 			var t = new Task(capabilities);
-			var r = new Role() { PreCondition = { Task = t }, PostCondition = { Task = t } };
+			var r = new Role(new Condition(t, 0), new Condition(t, 0));
 
 			foreach (var c in capabilities)
-				r.AddCapability(c);
+				r = r.WithCapability(c);
 
 			var a = new A();
 			a.Capabilities.AddRange(capabilities);

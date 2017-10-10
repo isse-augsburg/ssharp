@@ -24,66 +24,93 @@ namespace SafetySharp.Odp
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 
-	public struct Role
+	public struct Role : IEquatable<Role>
 	{
-		public bool IsLocked { get; private set; }
+		// actual data fields
+		public Condition PreCondition { get; }
 
-		public Condition PreCondition;
-		public Condition PostCondition;
+		public Condition PostCondition { get; }
 
+		public bool IsLocked { get; }
+
+		// accessors
 		public ITask Task => PreCondition.Task ?? PostCondition.Task;
 
-		public IEnumerable<ICapability> CapabilitiesToApply =>
-			Task.RequiredCapabilities.Skip(_capabilitiesToApplyStart).Take(_capabilitiesToApplyCount);
+		public IEnumerable<ICapability> CapabilitiesToApply => Task.RequiredCapabilities
+				.Skip(PreCondition.StateLength)
+				.Take(PostCondition.StateLength - PreCondition.StateLength);
 
-		public IEnumerable<ICapability> ExecutionState =>
-			Task.RequiredCapabilities.Take(_capabilitiesToApplyStart + _current);
+		public bool IsEmpty => PreCondition.StateLength == PostCondition.StateLength;
 
-		private byte _capabilitiesToApplyStart;
-		private byte _capabilitiesToApplyCount;
-		private byte _current;
+		public BaseAgent Input => PreCondition.Port;
 
-		public bool IsCompleted => _current >= _capabilitiesToApplyCount;
+		public BaseAgent Output => PostCondition.Port;
 
-		public void ExecuteStep(BaseAgent agent)
+		// (copy) constructors
+		public Role(Condition pre, Condition post, bool locked = false)
 		{
-			if (IsCompleted)
-				throw new InvalidOperationException("The role has already been completely executed and must be reset.");
+			Debug.Assert(pre.Task == post.Task);
 
-			var capability = Task.RequiredCapabilities[_capabilitiesToApplyStart + _current];
-			capability.Execute(agent);
-			_current++;
-		}
-
-		public void Initialize(Condition initialCondition)
-		{
-			PreCondition.CopyStateFrom(initialCondition);
-			PostCondition.CopyStateFrom(initialCondition);
-			_capabilitiesToApplyStart = checked((byte)PreCondition.StateLength);
-		}
-
-		public void AddCapability(ICapability capability)
-		{
-			if (_capabilitiesToApplyStart + _capabilitiesToApplyCount >= Task.RequiredCapabilities.Length)
-				throw new InvalidOperationException("All required capabilities already applied.");
-			if (!capability.Equals(Task.RequiredCapabilities[_capabilitiesToApplyStart + _capabilitiesToApplyCount]))
-				throw new InvalidOperationException("Cannot apply capability that is not required.");
-			_capabilitiesToApplyCount++;
-			PostCondition.AppendToState(capability);
-		}
-
-		public bool IsEmpty()
-		{
-			return _capabilitiesToApplyCount == 0;
+			PreCondition = pre;
+			PostCondition = post;
+			IsLocked = locked;
 		}
 
 		public Role Lock(bool locked = true)
 		{
-			var role = this;
-			role.IsLocked = locked;
-			return role;
+			return new Role(PreCondition, PostCondition, locked);
+		}
+
+		public Role WithInput(BaseAgent port)
+		{
+			return new Role(PreCondition.WithPort(port), PostCondition, IsLocked);
+		}
+
+		public Role WithOutput(BaseAgent port)
+		{
+			return new Role(PreCondition, PostCondition.WithPort(port), IsLocked);
+		}
+
+		public Role WithCapability(ICapability capability)
+		{
+			return new Role(PreCondition, PostCondition.WithCapability(capability), IsLocked);
+		}
+
+		// equality (generated code)
+		public bool Equals(Role other)
+		{
+			return PreCondition.Equals(other.PreCondition) && PostCondition.Equals(other.PostCondition) && IsLocked == other.IsLocked;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+				return false;
+			return obj is Role && Equals((Role)obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				var hashCode = PreCondition.GetHashCode();
+				hashCode = (hashCode * 397) ^ PostCondition.GetHashCode();
+				hashCode = (hashCode * 397) ^ IsLocked.GetHashCode();
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(Role left, Role right)
+		{
+			return left.Equals(right);
+		}
+
+		public static bool operator !=(Role left, Role right)
+		{
+			return !left.Equals(right);
 		}
 	}
 }

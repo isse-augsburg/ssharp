@@ -119,8 +119,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			for (int i = 0; i < agentIds.Length; ++i)
 			{
 				var agent = GetAgent(agentIds[i]);
-				// connect to previous role
-				role.PostCondition.Port = agent;
+
 				// get new role
 				role = GetRole(task, lastAgent, lastAgent == null ? null : (Condition?)role.PostCondition);
 
@@ -130,11 +129,13 @@ namespace SafetySharp.Odp.Reconfiguration
 					if (capabilityIds[i] >= 0)
 					{
 						var capability = task.RequiredCapabilities[capabilityIds[i]];
-						role.AddCapability(capability);
+						role = role.WithCapability(capability);
 					}
 				}
 
-				configs.AddRoles(agent, role);
+				var nextAgent = i + 1 < agentIds.Length ? GetAgent(agentIds[i + 1]) : null;
+				configs.AddRoles(agent, role.WithOutput(nextAgent));
+
 				lastAgent = agent;
 			}
 		}
