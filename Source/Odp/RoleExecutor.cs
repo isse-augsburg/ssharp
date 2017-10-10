@@ -77,8 +77,8 @@ namespace SafetySharp.Odp
 		}
 
 		// convenience accessors
-		public BaseAgent Input => Role?.PreCondition.Port;
-		public BaseAgent Output => Role?.PostCondition.Port;
+		public BaseAgent Input => Role?.Input;
+		public BaseAgent Output => Role?.Output;
 		public ITask Task => Role?.Task;
 	}
 }

@@ -45,6 +45,10 @@ namespace SafetySharp.Odp
 
 		public bool IsEmpty => PreCondition.StateLength == PostCondition.StateLength;
 
+		public BaseAgent Input => PreCondition.Port;
+
+		public BaseAgent Output => PostCondition.Port;
+
 		// (copy) constructors
 		public Role(Condition pre, Condition post, bool locked = false)
 		{

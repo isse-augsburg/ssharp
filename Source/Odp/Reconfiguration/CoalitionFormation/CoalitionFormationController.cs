@@ -446,9 +446,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						
 						// otherwise, go back until just after dead agent
 						currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
-						while (currentRole.PreCondition.Port != null && currentRole.PreCondition.Port.IsAlive)
+						while (currentRole.Input != null && currentRole.Input.IsAlive)
 						{
-							current = currentRole.PreCondition.Port;
+							current = currentRole.Input;
 							currentPos = currentRole.PreCondition.StateLength;
 							currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PostCondition.StateLength == currentPos);
 						}
@@ -458,7 +458,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					CoreAgents.Add(current);
 					currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
 					currentPos = currentRole.PostCondition.StateLength;
-					current = currentRole.PostCondition.Port;
+					current = currentRole.Output;
 				}
 			}
 
@@ -470,7 +470,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				{
 					// find first role in TFR (or after, if TFR is empty) in old distribution
 					var firstRole = FindRoleForCapability(TFR.Start);
-					startEdgeAgent = firstRole.PreCondition.Port;
+					startEdgeAgent = firstRole.Input;
 					EdgeAgents.Add(startEdgeAgent);
 				}
 
@@ -478,7 +478,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				{
 					// find last role in TFR (or before, if TFR is empty) in old distribution
 					var lastRole = FindRoleForCapability(TFR.End);
-					endEdgeAgent = lastRole.PostCondition.Port;
+					endEdgeAgent = lastRole.Output;
 					EdgeAgents.Add(endEdgeAgent);
 				}
 			}

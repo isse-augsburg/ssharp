@@ -97,8 +97,8 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		{
 			var obsoleteRoles = (from role in AllocatedRoles where role.Task == recipe select role)
 				.ToArray(); // collect roles before underlying collection is modified
-			var affectedNeighbours = (from role in obsoleteRoles select role.PreCondition.Port)
-				.Concat(from role in obsoleteRoles select role.PostCondition.Port)
+			var affectedNeighbours = (from role in obsoleteRoles select role.Input)
+				.Concat(from role in obsoleteRoles select role.Output)
 				.Distinct()
 				.Where(neighbour => neighbour != null);
 

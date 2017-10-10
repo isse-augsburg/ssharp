@@ -144,20 +144,20 @@ namespace SafetySharp.Odp
 				return;
 
 			RoleExecutor.BeginExecution(role.Value);
-			_resourceRequests.RemoveAll(request => request.Source == role.Value.PreCondition.Port);
+			_resourceRequests.RemoveAll(request => request.Source == role.Value.Input);
 		}
 
 		public virtual bool CanExecute(Role role)
 		{
 			// producer roles and roles with open resource requests can be executed, unless they're locked
 			return !role.IsLocked
-				   && (role.PreCondition.Port == null || _resourceRequests.Any(req => role.Equals(req.Role)));
+				   && (role.Input == null || _resourceRequests.Any(req => role.Equals(req.Role)));
 		}
 
 		private Role[] GetRoles(BaseAgent source, Condition condition)
 		{
 			return AllocatedRoles.Where(role =>
-				!role.IsLocked && role.PreCondition.Port == source && role.PreCondition.StateMatches(condition)
+				!role.IsLocked && role.Input == source && role.PreCondition.StateMatches(condition)
 			).ToArray();
 		}
 

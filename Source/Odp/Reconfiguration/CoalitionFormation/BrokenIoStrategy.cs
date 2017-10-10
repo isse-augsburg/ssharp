@@ -57,32 +57,32 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			// predecessor
 			var currentRole = affectedRole;
 			var currentAgent = agent;
-			var previousAgent = currentRole.PreCondition.Port;
+			var previousAgent = currentRole.Input;
 
 			while (previousAgent != null && previousAgent.IsAlive && !currentRole.CapabilitiesToApply.Any())
 			{
 				await coalition.Invite(previousAgent);
 				currentRole = previousAgent.AllocatedRoles.Single(otherRole =>
-					otherRole.PostCondition.StateMatches(currentRole.PreCondition) && otherRole.PostCondition.Port == currentAgent
+					otherRole.PostCondition.StateMatches(currentRole.PreCondition) && otherRole.Output == currentAgent
 				);
 				currentAgent = previousAgent;
-				previousAgent = currentRole.PreCondition.Port;
+				previousAgent = currentRole.Input;
 			}
 			var fragmentStart = currentRole.PreCondition.StateLength; // first capability to be applied by non-empty predecessor role
 
 			// successor
 			currentRole = affectedRole;
 			currentAgent = agent;
-			var nextAgent = currentRole.PostCondition.Port;
+			var nextAgent = currentRole.Output;
 
 			while (nextAgent != null && nextAgent.IsAlive && !currentRole.CapabilitiesToApply.Any())
 			{
 				await coalition.Invite(nextAgent);
 				currentRole = nextAgent.AllocatedRoles.Single(otherRole =>
-					otherRole.PreCondition.StateMatches(currentRole.PostCondition) && otherRole.PreCondition.Port == currentAgent
+					otherRole.PreCondition.StateMatches(currentRole.PostCondition) && otherRole.Input == currentAgent
 				);
 				currentAgent = nextAgent;
-				nextAgent = currentRole.PostCondition.Port;
+				nextAgent = currentRole.Output;
 			}
 			var fragmentEnd = currentRole.PostCondition.StateLength - 1; // last capability to be applied by non-empty successor
 			// Note: subtraction is not a problem since there's never a role with PostCondition.StateLength = 0, as a resource is always produced before being transported.
@@ -110,21 +110,21 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 					// 1. invite disconnected agents (so their roles can be removed / updated)
 					var affected = false;
-					if (role.PreCondition.Port != null && !agent.Inputs.Contains(role.PreCondition.Port))
+					if (role.Input != null && !agent.Inputs.Contains(role.Input))
 					{
 						affected = true;
-						if (!coalition.Contains(role.PreCondition.Port) && role.PreCondition.Port.IsAlive)
+						if (!coalition.Contains(role.Input) && role.Input.IsAlive)
 						{
-							var newMember = await coalition.Invite(role.PreCondition.Port);
+							var newMember = await coalition.Invite(role.Input);
 							members.Add(newMember);
 						}
 					}
-					if (role.PostCondition.Port != null && !agent.Outputs.Contains(role.PostCondition.Port))
+					if (role.Output != null && !agent.Outputs.Contains(role.Output))
 					{
 						affected = true;
-						if (!coalition.Contains(role.PostCondition.Port) && role.PostCondition.Port.IsAlive)
+						if (!coalition.Contains(role.Output) && role.Output.IsAlive)
 						{
-							var newMember = await coalition.Invite(role.PostCondition.Port);
+							var newMember = await coalition.Invite(role.Output);
 							members.Add(newMember);
 						}
 					}

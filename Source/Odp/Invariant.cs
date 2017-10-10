@@ -34,8 +34,8 @@ namespace SafetySharp.Odp
 		{
 			return RoleInvariant(
 				agent,
-				role => (role.PreCondition.Port == null || agent.Inputs.Contains(role.PreCondition.Port))
-					&& (role.PostCondition.Port == null || agent.Outputs.Contains(role.PostCondition.Port))
+				role => (role.Input == null || agent.Inputs.Contains(role.Input))
+					&& (role.Output == null || agent.Outputs.Contains(role.Output))
 			);
 		}
 
@@ -90,19 +90,19 @@ namespace SafetySharp.Odp
 				agent,
 				role =>
 					// consistent input:
-					(role.PreCondition.Port == null // no input...
-					|| role.PreCondition.Port.AllocatedRoles.Any( // ... or there's a matching role at the input
+					(role.Input == null // no input...
+					|| role.Input.AllocatedRoles.Any( // ... or there's a matching role at the input
 						sendingRole => !sendingRole.IsLocked
 							&& sendingRole.PostCondition.StateMatches(role.PreCondition)
-							&& sendingRole.PostCondition.Port == agent
+							&& sendingRole.Output == agent
 						)
 					)
 					// consistent output:
-					&& (role.PostCondition.Port == null // no output...
-					|| role.PostCondition.Port.AllocatedRoles.Any( // ... or there's a matching role at the output
+					&& (role.Output == null // no output...
+					|| role.Output.AllocatedRoles.Any( // ... or there's a matching role at the output
 						receivingRole => !receivingRole.IsLocked
 							&& receivingRole.PreCondition.StateMatches(role.PostCondition)
-							&& receivingRole.PreCondition.Port == agent
+							&& receivingRole.Input == agent
 						)
 					)
 			);
@@ -128,7 +128,7 @@ namespace SafetySharp.Odp
 		{
 			return RoleInvariant(
 				agent,
-				role => (role.PreCondition.Port?.IsAlive ?? true) && (role.PostCondition.Port?.IsAlive ?? true)
+				role => (role.Input?.IsAlive ?? true) && (role.Output?.IsAlive ?? true)
 			);
 		}
 

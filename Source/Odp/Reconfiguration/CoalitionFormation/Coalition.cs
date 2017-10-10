@@ -100,7 +100,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
                 {
                     // if we do not know current agent but know its predecessor, ask it
                     if (current == null && previous != null && previous.IsAlive)
-				        current = currentRole.PostCondition.Port;
+				        current = currentRole.Output;
 
                     // if we (still) cannot contact current agent because we do not know it or it is dead:
                     if (current == null || !current.IsAlive)
@@ -118,9 +118,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
                         // otherwise, go back as far as possible
 				        currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
-				        while (currentRole.PreCondition.Port != null && currentRole.PreCondition.Port.IsAlive)
+				        while (currentRole.Input != null && currentRole.Input.IsAlive)
 				        {
-				            current = currentRole.PreCondition.Port;
+				            current = currentRole.Input;
 					        currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PostCondition.StateLength == currentPos);
 							currentPos = currentRole.PreCondition.StateLength;
 				        }
@@ -132,7 +132,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					previous = current;
                     currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
 				    currentPos = currentRole.PostCondition.StateLength;
-				    current = currentRole.PostCondition.Port;
+				    current = currentRole.Output;
 				}
 			} while (ctfStart > CTF.Start || ctfEnd < CTF.End); // loop because invitations might have enlarged CTF
 		}
