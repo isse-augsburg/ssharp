@@ -44,7 +44,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		public CoalitionFormationController(BaseAgent[] agents) : base(agents)
 		{
 			Register(Invariant.CapabilityConsistency, MissingCapabilitiesStrategy.Instance);
-			Register(Invariant.IOConsistency, BrokenIoStrategy.Instance);
+			Register(Invariant.IoConsistency, BrokenIoStrategy.Instance);
 			Register(Invariant.NeighborsAliveGuarantee, DeadNeighbourStrategy.Instance);
 		}
 
