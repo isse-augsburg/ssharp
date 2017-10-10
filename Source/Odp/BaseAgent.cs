@@ -376,48 +376,5 @@ namespace SafetySharp.Odp
 		}
 
 		#endregion
-
-
-	    public static bool operator ==(BaseAgent a, BaseAgent b)
-	    {
-            // If both are null, or both are same instance, return true.
-            if (System.Object.ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            // If one is null, but not both, return false.
-            if (((object)a == null) || ((object)b == null))
-            {
-                return false;
-            }
-
-	        return a.ID == b.ID;
-	    }
-
-	    public static bool operator !=(BaseAgent a, BaseAgent b)
-	    {
-	        return !(a == b);
-	    }
-
-	    public override bool Equals(System.Object obj)
-	    {
-            // If parameter cannot be cast to ThreeDPoint return false:
-            BaseAgent p = obj as BaseAgent;
-            if ((object)p == null)
-            {
-                return false;
-            }
-
-            return base.Equals(obj) && ID == p.ID;
-        }
-
-	    public bool Equals(BaseAgent a)
-	    {
-	        return base.Equals((BaseAgent)a) && ID == a.ID;
-	    }
-
-	    public override int GetHashCode() => (int)(ID * 42);
-
     }
 }
