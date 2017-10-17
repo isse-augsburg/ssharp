@@ -741,6 +741,7 @@
     <Compile Include="Serialization\StateLabels\ltl formula.cs" />
     <Compile Include="Serialization\StateLabels\invariants with closure.cs" />
     <Compile Include="Serialization\StateLabels\invariant without closure.cs" />
+    <Compile Include="Utilities\ShouldExtensions.cs" />
     <Compile Include="Utilities\TestErrorReporter.cs" />
     <Compile Include="Utilities\TestModel.cs" />
     <Compile Include="Utilities\TestTraceOutput.cs" />

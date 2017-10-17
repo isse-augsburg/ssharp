@@ -27,14 +27,15 @@ namespace Tests.Execution.Simulation
 	using System.Threading.Tasks;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-	using Shouldly;
 	using Utilities;
 
 	internal class MicrostepParallelismWithPerformanceMeasurement : TestObject
 	{
+		private const long Tolerance = 5L;
+
 		protected override void Check()
 		{
-			var model = TestModel.InitializeModel(new CFast(), new CSlow(), new CSync(), new CNested());
+			var model = TestModel.InitializeModel(new CFast(), new CSlow(), new CSync(), new CNested(), new CNonYield());
 			var simulator = new Simulator(model);
 			simulator.SimulateStep();
 		}
@@ -54,7 +55,7 @@ namespace Tests.Execution.Simulation
 					Thread.Sleep(100);
 					await Submethod();
 				});
-				watch.ElapsedMilliseconds.ShouldBeInRange(200, 250);
+				watch.ElapsedMilliseconds.ShouldBeApproximately(200, Tolerance);
 			}
 
 			private async Task Submethod()
@@ -79,7 +80,7 @@ namespace Tests.Execution.Simulation
 					Thread.Sleep(2500);
 					await Submethod();
 				});
-				watch.ElapsedMilliseconds.ShouldBeInRange(5000, 5050);
+				watch.ElapsedMilliseconds.ShouldBeApproximately(5000, Tolerance);
 			}
 
 			private async Task Submethod()
@@ -95,7 +96,7 @@ namespace Tests.Execution.Simulation
 			{
 				var watch = Stopwatch.StartNew();
 				Thread.Sleep(1000);
-				watch.ElapsedMilliseconds.ShouldBeInRange(1000, 1050);
+				watch.ElapsedMilliseconds.ShouldBeApproximately(1000, Tolerance);
 			}
 		}
 
@@ -118,9 +119,49 @@ namespace Tests.Execution.Simulation
 						Thread.Sleep(50);
 					});
 					Thread.Sleep(100);
-					inner.ElapsedMilliseconds.ShouldBeInRange(50, 60);
+					inner.ElapsedMilliseconds.ShouldBeApproximately(50, Tolerance);
 				});
-				outer.ElapsedMilliseconds.ShouldBeInRange(450, 460);
+				outer.ElapsedMilliseconds.ShouldBeApproximately(450, Tolerance);
+			}
+		}
+
+		private class CNonYield : Component
+		{
+			public override void Update()
+			{
+				MicrostepScheduler.Schedule(WorkAsync);
+			}
+
+			private async Task WorkAsync()
+			{
+				var source = new TaskCompletionSource<object>();
+				var task = MeasuredMethod(source.Task);
+				source.SetResult(null);
+				await task;
+
+				task = MeasuredMethod2();
+				Thread.Sleep(350);
+				await task;
+			}
+
+			private async Task MeasuredMethod(Task task)
+			{
+				var watch = await AsyncPerformance.Measure(async () =>
+				{
+					await task;
+					Thread.Sleep(200);
+				});
+				watch.ElapsedMilliseconds.ShouldBeApproximately(200, Tolerance);
+			}
+
+			private async Task MeasuredMethod2()
+			{
+				var watch = await AsyncPerformance.Measure(async () =>
+				{
+					await Task.Delay(300);
+					Thread.Sleep(250);
+				});
+				watch.ElapsedMilliseconds.ShouldBeApproximately(250, Tolerance);
 			}
 		}
 	}

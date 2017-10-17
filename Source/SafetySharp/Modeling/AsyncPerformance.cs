@@ -27,35 +27,68 @@ namespace SafetySharp.Modeling
 	using System.Threading;
 	using System.Threading.Tasks;
 
+	/// <summary>
+	///   Measures the time an asynchronous function takes to complete, excluding wait times.
+	/// </summary>
+	/// <remarks>
+	///   This method captures the current <see cref="SynchronizationContext"/> and wraps it in another one.
+	///   Hence, the measured functions should not rely on the exact type of the current <see cref="SynchronizationContext"/>.
+	///   Also, the measured functions must not use <c>ConfigureAwait(false)</c> or await other objects that
+	///   do not capture the current SynchronizationContext.
+	/// </remarks>
 	public static class AsyncPerformance
 	{
-		public static async Task<Stopwatch> Measure(Func<Task> asyncBlock)
+		/// <param name="asyncAction">The function to measure.</param>
+		/// <returns>A <see cref="Stopwatch"/> representing the elapsed time.</returns>
+		public static async Task<Stopwatch> Measure(Func<Task> asyncAction)
 		{
-			Func<Task<object>> wrappedBlock = async () => { await asyncBlock(); return null; };
-			return (await Measure(wrappedBlock)).Item2;
+			// just wrap the action and delegate to the real implementation
+			Func<Task<object>> wrappedAction = async () => { await asyncAction(); return null; };
+			return (await Measure(wrappedAction)).Item2;
 		}
 
-		public static async Task<Tuple<T, Stopwatch>> Measure<T>(Func<Task<T>> asyncBlock)
+		/// <typeparam name="T">The return type of the function to measure.</typeparam>
+		/// <param name="asyncFunc">The function to measure.</param>
+		/// <returns>A tuple containing the return value of the function and a <see cref="Stopwatch"/> representing the elapsed time.</returns>
+		public static async Task<Tuple<T, Stopwatch>> Measure<T>(Func<Task<T>> asyncFunc)
 		{
-			var ctx = new PerformanceSynchronizationContext();
-			var task = ctx.MeasureAsync(asyncBlock);
-			var value = await task;
+			var ctx = PerformanceSynchronizationContext.Create();
+			var value = await ctx.MeasureAsync(asyncFunc);
 			return Tuple.Create(value, ctx.Stopwatch);
 		}
 
+		// Used internally to measure the time needed for async functions.
 		private class PerformanceSynchronizationContext : SynchronizationContext
 		{
-			private SynchronizationContext _ctx;
+			private readonly SynchronizationContext _ctx;
 			public Stopwatch Stopwatch { get; } = new Stopwatch();
+
+			private PerformanceSynchronizationContext(SynchronizationContext ctx)
+			{
+				_ctx = ctx;
+			}
+
+			// Creates a new instance, capturing the current SynchronizationContext.
+			public static PerformanceSynchronizationContext Create()
+			{
+				return new PerformanceSynchronizationContext(Current);
+			}
 
 			public T MeasureAsync<T>(Func<T> measuredFunction)
 			{
-				_ctx = Current;
+				// replace sync context and start measuring
 				SetSynchronizationContext(this);
 				Stopwatch.Start();
 
+				// Execute the synchronous prefix of the async function.
+				// The first await will capture the SynchronizationContext
+				// (this instance) and then return. When the function is
+				// ready to continue, the continuation will be posted to
+				// the captured SynchronizationContext (this instance), and
+				// thus will be measured too.
 				var t = measuredFunction();
 
+				// pause measuring and reset SynchronizationContext
 				Stopwatch.Stop();
 				SetSynchronizationContext(_ctx);
 
@@ -64,17 +97,17 @@ namespace SafetySharp.Modeling
 
 			private void MeasureAsync(Action measuredAction)
 			{
-				Func<object> measuredFunction = () =>
-				{
-					measuredAction();
-					return null;
-				};
-				MeasureAsync(measuredFunction);
+				Func<object> wrappedAction = () => { measuredAction(); return null; };
+				MeasureAsync(wrappedAction);
 			}
 
+			// Actual SynchronizationContext implementation
 			public override void Post(SendOrPostCallback callback, object state)
 			{
-				SendOrPostCallback wrappedCallback = (s) => MeasureAsync(() => callback(s));
+				// wrap the callback: the synchronous prefix must be measured.
+				SendOrPostCallback wrappedCallback = (s) => MeasureAsync(() => { Debug.Assert(Current == this); callback(s); });
+
+				// delegate to the "real" SynchronizationContext
 				_ctx.Post(wrappedCallback, state);
 			}
 		}
