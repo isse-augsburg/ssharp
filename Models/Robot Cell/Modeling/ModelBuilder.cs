@@ -42,6 +42,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		private bool _usePlants = true;
 
+		private Func<Agent, IReconfigurationStrategy> _createReconfStrategy;
+
 		public ModelBuilder(string name = "")
 		{
 			_model = new Model(name);
@@ -87,8 +89,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public ModelBuilder AddRobot(params ICapability[] capabilities)
 		{
+			if (_createReconfStrategy == null)
+				throw new InvalidOperationException("Must choose a reconfiguration strategy before creating agents.");
+
 			var robot = CreateRobot(capabilities);
 			var agent = new RobotAgent(capabilities.Distinct().ToArray(), robot, _model.Tasks, _model.Resources) { TaskQueue = _model.TaskQueue };
+			agent.ReconfigurationStrategy = _createReconfStrategy(agent);
 
 			_model.RobotAgents.Add(agent);
 			_model.ReconfigurationMonitor.AddAgent(agent);
@@ -117,10 +123,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public ModelBuilder AddCart(params Tuple<int, int>[] routeSpecifications)
 		{
+			if (_createReconfStrategy == null)
+				throw new InvalidOperationException("Must choose a reconfiguration strategy before creating agents.");
+
 			routeSpecifications = RouteHelper.ComputeRoutes(routeSpecifications);
 
 			var cart = _usePlants ? CreateCart(RouteHelper.ToRoutes(routeSpecifications, _model)) : null;
 			var agent = new CartAgent(cart) { TaskQueue = _model.TaskQueue };
+			agent.ReconfigurationStrategy = _createReconfStrategy(agent);
+
 			_model.CartAgents.Add(agent);
 			cart?.SetNames(agent.Id);
 
@@ -212,23 +223,26 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public ModelBuilder CentralReconfiguration()
 		{
-			foreach (var agent in Agents)
-				agent.ReconfigurationStrategy = new CentralReconfiguration(_model.Controller);
+			_createReconfStrategy = agent => new CentralReconfiguration(_model.Controller);
 			return this;
 		}
 
 	    public ModelBuilder UseControllerReconfigurationAgents()
 	    {
-	        foreach (var agent in Agents)
-                agent.ReconfigurationStrategy = new ReconfigurationAgentHandler(agent, (b, h, t) => new ControllerReconfigurationAgent(b, h, _model.Controller));
+			_createReconfStrategy = agent => new ReconfigurationAgentHandler(
+				agent,
+				(baseAgent, handler, task) => new ControllerReconfigurationAgent(baseAgent, handler, _model.Controller)
+			);
 	        return this;
 	    }
 
 	    public ModelBuilder UseCoalitionFormation()
 	    {
 	        ChooseController<CoalitionFormationController>();
-	        foreach (var agent in Agents)
-                agent.ReconfigurationStrategy = new ReconfigurationAgentHandler(agent, (b, h, t) => new CoalitionReconfigurationAgent(b, h, _model.Controller));
+			_createReconfStrategy = agent => new ReconfigurationAgentHandler(
+				agent,
+				(baseAgent, handler, task) => new CoalitionReconfigurationAgent(baseAgent, handler, _model.Controller)
+			);
 	        return this;
 	    }
 

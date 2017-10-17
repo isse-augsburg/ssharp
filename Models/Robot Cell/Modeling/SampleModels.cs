@@ -40,26 +40,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         public static Model DefaultInstance<T>(AnalysisMode mode = AnalysisMode.AllFaults)
             where T : IController
         {
-            return DefaultSetup<T>(mode, false).Invoke(new ModelBuilder(nameof(Ictss1)).Ictss1()).Build();
+	        return DefaultSetup<T>(mode, false, new ModelBuilder(nameof(Ictss1)))
+		        .Ictss1()
+		        .Build();
         }
 
         public static IEnumerable<Model> CreateDefaultConfigurations<T>(AnalysisMode mode, bool verify = false)
             where T : IController
         {
-            return CreateConfigurations(b => b, DefaultSetup<T>(mode, verify));
+            return CreateConfigurations(DefaultSetup<T>(mode, verify), b => b);
         }
 
         public static IEnumerable<Model> CreateDefaultConfigurationsWithoutPlant<T>(AnalysisMode mode, bool verify = false)
             where T : IController
         {
-            return CreateConfigurations(b => b.DisablePlants(), DefaultSetup<T>(mode, verify));
+            return CreateConfigurations(b => DefaultSetup<T>(mode, verify, b).DisablePlants(), b => b);
         }
 
         public static IEnumerable<Model> CreateCoalitionConfigurations(bool verify = false)
         {
             return CreateConfigurations(
-                b => b.DisablePlants(),
-                b => b.UseCoalitionFormation().EnableControllerVerification(verify).DisableIntolerableFaults()
+                b => b.DisablePlants().UseCoalitionFormation().EnableControllerVerification(verify),
+                b => b.DisableIntolerableFaults()
             );
         }
 
@@ -67,8 +69,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         {
             return CreateConfigurations(
                 _performanceEvaluationConfigurations,
-                b => b.DisablePlants(),
-                b => b.ChooseController<FastController>().UseControllerReconfigurationAgents().EnablePerformanceMeasurement().DisableIntolerableFaults()
+                b => b.DisablePlants().ChooseController<FastController>().UseControllerReconfigurationAgents().EnablePerformanceMeasurement(),
+                b => b.DisableIntolerableFaults()
             );
         }
 
@@ -76,8 +78,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         {
             return CreateConfigurations(
                 _performanceEvaluationConfigurations,
-                b => b.DisablePlants(),
-                b => b.UseCoalitionFormation().EnablePerformanceMeasurement().DisableIntolerableFaults()
+                b => b.DisablePlants().UseCoalitionFormation().EnablePerformanceMeasurement(),
+                b => b.DisableIntolerableFaults()
             );
         }
 
@@ -96,17 +98,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
         private static Func<ModelBuilder, ModelBuilder> DefaultSetup<T>(AnalysisMode mode, bool verify) where T : IController
         {
-            return builder => ChooseAnalysisMode(builder.ChooseController<T>()
-                                                        .EnableControllerVerification(verify)
-                                                        .CentralReconfiguration(), mode);
+	        return builder => DefaultSetup<T>(mode, verify, builder);
         }
 
-        public static Model PerformanceMeasurement1<T>(AnalysisMode mode = AnalysisMode.AllFaults, bool verify = false)
+	    private static ModelBuilder DefaultSetup<T>(AnalysisMode mode, bool verify, ModelBuilder builder) where T : IController
+		{
+		    return ChooseAnalysisMode(builder.ChooseController<T>()
+											 .EnableControllerVerification(verify)
+											 .CentralReconfiguration(), mode);
+	    }
+
+
+		public static Model PerformanceMeasurement1<T>(AnalysisMode mode = AnalysisMode.AllFaults, bool verify = false)
             where T : IController
         {
             return ChooseAnalysisMode(
                 new ModelBuilder(nameof(PerformanceMeasurement1))
-                    .DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
+	                .ChooseController<T>()
+	                .EnablePerformanceMeasurement()
+	                .EnableControllerVerification(verify)
+	                .CentralReconfiguration()
+
+					.DefineTask(5, Produce, Drill, Insert, Tighten, Polish, Consume)
 
                     .AddRobot(Produce, Drill, Insert)
                     .AddRobot(Insert, Drill, Tighten)
@@ -122,11 +135,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(3, 4), Route(3, 5), Route(3, 6))
                     .AddCart(Route(4, 5), Route(3, 4))
                     .AddCart(Route(5, 6))
-
-                    .ChooseController<T>()
-                    .EnablePerformanceMeasurement()
-                    .EnableControllerVerification(verify)
-                    .CentralReconfiguration()
                 , mode).Build();
         }
 
