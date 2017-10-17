@@ -20,18 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.OrganicDesignPattern
+namespace Tests.OrganicDesignPattern.SimulationTests
 {
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
 	using SafetySharp.Odp;
 	using SafetySharp.Odp.Reconfiguration;
 	using Shouldly;
 	using Utilities;
-
-	using System;
-	using System.Collections.Generic;
-	using System.Diagnostics;
 
 	class ReconfigureAfterFailure : OdpTestObject
 	{

@@ -20,9 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.OrganicDesignPattern.LocalReconfiguration
+namespace Tests.OrganicDesignPattern.SimulationTests.LocalReconfiguration
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Analysis;

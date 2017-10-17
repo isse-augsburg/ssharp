@@ -20,10 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.OrganicDesignPattern
+namespace Tests.OrganicDesignPattern.SimulationTests
 {
 	using System;
-	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Odp;
 	using Shouldly;

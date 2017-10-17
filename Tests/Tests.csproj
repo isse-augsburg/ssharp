@@ -614,13 +614,13 @@
     <Compile Include="OdpTests.Helpers.cs">
       <DependentUpon>OdpTests.cs</DependentUpon>
     </Compile>
-    <Compile Include="OrganicDesignPattern\LocalReconfiguration\capability lost.cs" />
-    <Compile Include="OrganicDesignPattern\only one possible configuration.cs" />
-    <Compile Include="OrganicDesignPattern\production eventually completes.cs" />
-    <Compile Include="OrganicDesignPattern\reconfigure after failure.cs" />
-    <Compile Include="OrganicDesignPattern\resource flow.cs" />
-    <Compile Include="OrganicDesignPattern\resource handover.cs" />
-    <Compile Include="OrganicDesignPattern\role execution.cs" />
+    <Compile Include="OrganicDesignPattern\SimulationTests\LocalReconfiguration\capability lost.cs" />
+    <Compile Include="OrganicDesignPattern\SimulationTests\only one possible configuration.cs" />
+    <Compile Include="OrganicDesignPattern\SimulationTests\production eventually completes.cs" />
+    <Compile Include="OrganicDesignPattern\SimulationTests\reconfigure after failure.cs" />
+    <Compile Include="OrganicDesignPattern\SimulationTests\resource flow.cs" />
+    <Compile Include="OrganicDesignPattern\SimulationTests\resource handover.cs" />
+    <Compile Include="OrganicDesignPattern\SimulationTests\role execution.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />
     <Compile Include="Serialization\Compaction\Boolean 1 byte.cs" />
     <Compile Include="Serialization\Compaction\faults.cs" />

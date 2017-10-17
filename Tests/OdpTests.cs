@@ -26,8 +26,8 @@ namespace Tests
 
 	public partial class OdpTests
 	{
-		[Theory, MemberData(nameof(DiscoverTests), "OrganicDesignPattern")]
-		public void Odp(string test, string file)
+		[Theory, MemberData(nameof(DiscoverTests), "OrganicDesignPattern/SimulationTests")]
+		public void SimulationTests(string test, string file)
 		{
 			ExecuteDynamicTests(file);
 		}

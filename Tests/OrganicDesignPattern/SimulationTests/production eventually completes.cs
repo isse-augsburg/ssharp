@@ -20,18 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.OrganicDesignPattern
+namespace Tests.OrganicDesignPattern.SimulationTests
 {
+	using System;
+	using System.Collections.Generic;
 	using System.Linq;
 	using SafetySharp.Analysis;
 	using SafetySharp.Odp;
 	using SafetySharp.Odp.Reconfiguration;
 	using Shouldly;
 	using Utilities;
-
-	using static SafetySharp.Analysis.Operators;
-	using System.Collections.Generic;
-	using System;
 
 	internal class ProductionEventuallyCompletes : OdpTestObject
 	{
@@ -62,7 +60,7 @@ namespace Tests.OrganicDesignPattern
 				var result = modelChecker.CheckInvariant(model, ctx.Completed != ctx.Total);
 				result.FormulaHolds.ShouldBeFalse();
 
-				var result2 = ModelChecker.Check(model, F(ctx.Completed == ctx.Total));
+				var result2 = ModelChecker.Check(model, Operators.F(ctx.Completed == ctx.Total));
 				result2.FormulaHolds.ShouldBeTrue();
 			}
 		}
