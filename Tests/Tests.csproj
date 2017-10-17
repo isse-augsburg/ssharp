@@ -706,6 +706,7 @@
     <Compile Include="OrganicDesignPattern\SimulationTests\resource flow.cs" />
     <Compile Include="OrganicDesignPattern\SimulationTests\resource handover.cs" />
     <Compile Include="OrganicDesignPattern\SimulationTests\role execution.cs" />
+    <Compile Include="OrganicDesignPattern\UnitTests\RoleExecutorTest.cs" />
     <Compile Include="Serialization\Compaction\alignment.cs" />
     <Compile Include="Serialization\Compaction\Boolean 1 byte.cs" />
     <Compile Include="Serialization\Compaction\faults.cs" />
