@@ -129,18 +129,16 @@ namespace SafetySharp.Odp
 			// role with higher fitness wins
 			if (fitness1 > fitness2)
 				return role1;
-			else if (fitness1 < fitness2)
+			if (fitness1 < fitness2)
 				return role2;
-			else
-			{
-				// same fitness => older resource request wins
-				var timeStamp1 = GetTimeStamp(role1, resourceRequests);
-				var timeStamp2 = GetTimeStamp(role2, resourceRequests);
 
-				if (timeStamp1 <= timeStamp2)
-					return role1;
-				return role2;
-			}
+			// same fitness => older resource request wins
+			var timeStamp1 = GetTimeStamp(role1, resourceRequests);
+			var timeStamp2 = GetTimeStamp(role2, resourceRequests);
+
+			if (timeStamp1 <= timeStamp2)
+				return role1;
+			return role2;
 		}
 
 		private uint GetTimeStamp(Role role, IEnumerable<BaseAgent.ResourceRequest> resourceRequests)

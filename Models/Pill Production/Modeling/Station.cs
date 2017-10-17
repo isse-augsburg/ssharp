@@ -105,7 +105,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 			RemoveAllocatedRoles(obsoleteRoles);
 
 			foreach (var neighbour in affectedNeighbours)
-				(neighbour as Station).RemoveRecipeConfigurations(recipe);
+				((Station)neighbour).RemoveRecipeConfigurations(recipe);
 		}
 
 		/*[FaultEffect(Fault = nameof(CompleteStationFailure))]

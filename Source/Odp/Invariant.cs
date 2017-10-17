@@ -141,7 +141,7 @@ namespace SafetySharp.Odp
 
 		public static InvariantPredicate RoleInvariant(Predicate<Role> invariant)
 		{
-			return (agent) => RoleInvariant(agent, invariant);
+			return agent => RoleInvariant(agent, invariant);
 		}
 	}
 }

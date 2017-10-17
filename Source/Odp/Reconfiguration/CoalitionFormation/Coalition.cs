@@ -97,15 +97,15 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			    ctfEnd = CTF.End;
 
 			    BaseAgent previous = null;
-                var currentPos = ctfStart;
+				var previousRole = default(Role);
+				var currentPos = ctfStart;
 			    var current = RecoveredDistribution[currentPos];
-			    var currentRole = default(Role);
 
                 while (currentPos <= CTF.End)
                 {
                     // if we do not know current agent but know its predecessor, ask it
                     if (current == null && previous != null && previous.IsAlive)
-				        current = currentRole.Output;
+				        current = previousRole.Output;
 
                     // if we (still) cannot contact current agent because we do not know it or it is dead:
                     if (current == null || !current.IsAlive)
@@ -122,7 +122,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						Debug.Assert(current != null && current.IsAlive);
 
                         // otherwise, go back as far as possible
-				        currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
+				        var currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
 				        while (currentRole.Input != null && currentRole.Input.IsAlive)
 				        {
 				            current = currentRole.Input;
@@ -135,9 +135,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
                         await Invite(current);
 
 					previous = current;
-                    currentRole = current.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
-				    currentPos = currentRole.PostCondition.StateLength;
-				    current = currentRole.Output;
+		            previousRole = previous.AllocatedRoles.Single(role => role.Task == Task && role.PreCondition.StateLength == currentPos);
+	                currentPos = previousRole.PostCondition.StateLength;
+				    current = previousRole.Output;
 				}
 			} while (ctfStart > CTF.Start || ctfEnd < CTF.End); // loop because invitations might have enlarged CTF
 		}

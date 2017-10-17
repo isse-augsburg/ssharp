@@ -207,7 +207,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			_resources.RemoveAt(index);
 
 			(Resource.Task as Task).IsResourceInProduction = true;
-			Robot?.ProduceWorkpiece((Resource as Resource).Workpiece);
+			Robot?.ProduceWorkpiece(((Resource)Resource).Workpiece);
 			Resource.OnCapabilityApplied(capability);
 		}
 

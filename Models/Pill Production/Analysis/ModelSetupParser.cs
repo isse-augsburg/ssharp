@@ -116,9 +116,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 				case 'D':
 					station = new ParticulateDispenser();
 					foreach (IngredientType ingredient in Enum.GetValues(typeof(IngredientType)))
-					{
-						(station as ParticulateDispenser).SetStoredAmount(ingredient, Model.InitialIngredientAmount);
-					}
+						((ParticulateDispenser)station).SetStoredAmount(ingredient, Model.InitialIngredientAmount);
 					break;
 				default:
 					throw new InvalidDataException($"invalid type: {type}");

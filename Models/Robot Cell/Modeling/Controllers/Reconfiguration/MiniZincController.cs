@@ -23,7 +23,6 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 {
 	using System;
-	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
 	using Odp;
@@ -36,12 +35,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		protected override void WriteInputData(ITask task, StreamWriter writer)
 		{
-			var taskSequence = String.Join(",", task.RequiredCapabilities.Select(GetIdentifier));
-			var isCart = String.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
-			var capabilities = String.Join(",", Agents.Select(a =>
-				$"{{{String.Join(",", a.AvailableCapabilities.Select(GetIdentifier))}}}"));
-			var isConnected = String.Join("\n|", Agents.Select(from =>
-				String.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
+			var taskSequence = string.Join(",", task.RequiredCapabilities.Select(GetIdentifier));
+			var isCart = string.Join(",", Agents.Select(a => (a is CartAgent).ToString().ToLower()));
+			var capabilities = string.Join(",", Agents.Select(a =>
+				$"{{{string.Join(",", a.AvailableCapabilities.Select(GetIdentifier))}}}"));
+			var isConnected = string.Join("\n|", Agents.Select(from =>
+				string.Join(",", Agents.Select(to => (from.Outputs.Contains(to) || from == to).ToString().ToLower()))));
 
 			writer.WriteLine($"task = [{taskSequence}];");
 			writer.WriteLine($"noAgents = {Agents.Length};");
@@ -54,9 +53,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 		{
 			if (capability is ProduceCapability)
 				return 1;
-			else if (capability is ProcessCapability)
-				return (int)(capability as ProcessCapability).ProductionAction + 1;
-			else if (capability is ConsumeCapability)
+			if (capability is ProcessCapability)
+				return (int)((ProcessCapability)capability).ProductionAction + 1;
+			if (capability is ConsumeCapability)
 				return (int)Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().Max() + 2;
 			throw new InvalidOperationException("unsupported capability");
 		}

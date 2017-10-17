@@ -443,6 +443,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						}
 						if (currentPos > TFR.End)
 							break; // all further agents are dead
+						Debug.Assert(current != null && current.IsAlive);
 						
 						// otherwise, go back until just after dead agent
 						currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);

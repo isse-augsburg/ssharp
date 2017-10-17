@@ -51,7 +51,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			{
 				// This speeds up analyses when checking for reconf failures with DCCA, but is otherwise
 				// unacceptable for other kinds of analyses
-				return null;
+				return Task.FromResult<ConfigurationUpdate>(null);
 			}
 
 			_hasReconfed = true;

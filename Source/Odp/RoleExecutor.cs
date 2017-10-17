@@ -122,6 +122,7 @@ namespace SafetySharp.Odp
 				throw new InvalidOperationException("Cannot execute a locked role.");
 
 			_role = role;
+			_executionState = 0;
 			IsExecuting = true;
 		}
 
@@ -151,6 +152,7 @@ namespace SafetySharp.Odp
 				throw new InvalidOperationException("No role is being executed.");
 
 			IsExecuting = false;
+			_executionState = 0;
 		}
 	}
 }

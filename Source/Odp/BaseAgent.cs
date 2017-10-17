@@ -24,10 +24,15 @@ namespace SafetySharp.Odp
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using JetBrains.Annotations;
 	using Modeling;
 
+	/// <summary>
+	///   Represents an agent in the self-organizing system.
+	/// </summary>
 	public abstract partial class BaseAgent : Component, IAgent
 	{
 		// configuration options
@@ -35,17 +40,40 @@ namespace SafetySharp.Odp
 		public static int MaximumResourceCount = 20;
 		public static int MaximumRoleCount = 40;
 
-		private static uint _maxId;
+		/// <summary>
+		///   A unique identifier for the agent.
+		/// </summary>
 		public uint Id { get; }
+		private static uint _maxId;
 
+		/// <summary>
+		///   Lists the capabilities an agent can apply to resources.
+		/// </summary>
+		[NotNull, ItemNotNull]
 		public abstract IEnumerable<ICapability> AvailableCapabilities { get; }
 
+		/// <summary>
+		///   The roles allocated to the agent, according to which it processes resources.
+		/// </summary>
+		[NotNull]
+		public IEnumerable<Role> AllocatedRoles => _allocatedRoles;
 		private readonly List<Role> _allocatedRoles = new List<Role>(MaximumRoleCount);
 
-		public IEnumerable<Role> AllocatedRoles => _allocatedRoles;
+		#region delegated responsibilities
 
-		[Hidden]
-		public IRoleSelector RoleSelector { get; protected set; }
+		/// <summary>
+		///   Helper class that chooses the next role the agent will execute from its <see cref="AllocatedRoles"/>.
+		/// </summary>
+		[Hidden, NotNull]
+		protected IRoleSelector RoleSelector { get; set; }
+
+		/// <summary>
+		///   Helper class that handles step-by-step role execution for the agent.
+		/// </summary>
+		[NotNull]
+		public RoleExecutor RoleExecutor { get; }
+
+		#endregion
 
 		protected BaseAgent()
 		{
@@ -67,10 +95,13 @@ namespace SafetySharp.Odp
 
 		#region functional part
 
-		public RoleExecutor RoleExecutor { get; }
-
+		/// <summary>
+		///   The resource the agent is currently holding, if any.
+		/// </summary>
+		[CanBeNull]
 		public Resource Resource { get; protected set; }
 
+		// state machine for different processing steps
 		private readonly StateMachine<States> _stateMachine = States.Idle;
 
 		private enum States
@@ -83,6 +114,7 @@ namespace SafetySharp.Odp
 			ResourceGiven
 		}
 
+		// accepts, processes and relays resources
 		private void Work()
 		{
 			_stateMachine.Transition( // abort work if current task has configuration issues
@@ -132,6 +164,10 @@ namespace SafetySharp.Odp
 					action: () => RoleExecutor.EndExecution());
 		}
 
+		/// <summary>
+		///   Discards the currently held resource.
+		/// </summary>
+		/// <remarks>Override this if further action is necessary, do not forget to call the base method.</remarks>
 		protected virtual void DropResource()
 		{
 			Resource = null;
@@ -147,6 +183,10 @@ namespace SafetySharp.Odp
 			_resourceRequests.RemoveAll(request => request.Source == role.Value.Input);
 		}
 
+		/// <summary>
+		///   Indicates if the agent is currently able to execute one of its <see cref="AllocatedRoles"/>.
+		///   For instance, the role must not be locked and a resource to apply it to must be available (if required).
+		/// </summary>
 		public virtual bool CanExecute(Role role)
 		{
 			// producer roles and roles with open resource requests can be executed, unless they're locked
@@ -154,7 +194,11 @@ namespace SafetySharp.Odp
 				   && (role.Input == null || _resourceRequests.Any(req => role.Equals(req.Role)));
 		}
 
-		private Role[] GetRoles(BaseAgent source, Condition condition)
+		/// <summary>
+		///   Find roles that accept resources from <paramref name="source"/> in the given <paramref name="condition"/>.
+		/// </summary>
+		[NotNull]
+		private Role[] GetRoles([NotNull] BaseAgent source, Condition condition)
 		{
 			return AllocatedRoles.Where(role =>
 				!role.IsLocked && role.Input == source && role.PreCondition.StateMatches(condition)
@@ -166,25 +210,40 @@ namespace SafetySharp.Odp
 		private readonly List<BaseAgent> _inputs = new List<BaseAgent>(MaximumAgentCount);
 		private readonly List<BaseAgent> _outputs = new List<BaseAgent>(MaximumAgentCount);
 
+		/// <summary>
+		///   The agents from which this instance can receive resources.
+		/// </summary>
+		[NotNull, ItemNotNull]
 		public virtual IEnumerable<BaseAgent> Inputs => _inputs;
+
+		/// <summary>
+		///   The agents to which this instance can send resources.
+		/// </summary>
+		[NotNull, ItemNotNull]
 		public virtual IEnumerable<BaseAgent> Outputs => _outputs;
 
-		public virtual void Connect(BaseAgent successor)
+		public virtual void Connect([NotNull] BaseAgent successor)
 		{
+			if (successor == null)
+				throw new ArgumentNullException(nameof(successor));
+
 			if (!_outputs.Contains(successor))
 				_outputs.Add(successor);
 			if (!successor._inputs.Contains(this))
 				successor._inputs.Add(this);
 		}
 
-		public virtual void BidirectionallyConnect(BaseAgent neighbor)
+		public virtual void BidirectionallyConnect([NotNull] BaseAgent neighbor)
 		{
 			Connect(neighbor);
 			neighbor.Connect(this);
 		}
 
-		public virtual void Disconnect(BaseAgent successor)
+		public virtual void Disconnect([NotNull] BaseAgent successor)
 		{
+			if (successor == null)
+				throw new ArgumentNullException(nameof(successor));
+
 			_outputs.Remove(successor);
 			successor._inputs.Remove(this);
 		}
@@ -202,37 +261,69 @@ namespace SafetySharp.Odp
 		private readonly List<ResourceRequest> _resourceRequests
 			= new List<ResourceRequest>(MaximumResourceCount);
 
+		/// <summary>
+		///   Represents a request from a neighbouring agent to accept a resource.
+		/// </summary>
 		public struct ResourceRequest
 		{
-			internal ResourceRequest(BaseAgent source, Role role)
+			internal ResourceRequest([NotNull] BaseAgent source, Role role)
 			{
+				if (source == null)
+					throw new ArgumentNullException(nameof(source));
+
 				Source = source;
 				Role = role;
 			}
 
+			/// <summary>
+			///   The agent that sent the request.
+			/// </summary>
+			[NotNull]
 			public BaseAgent Source { get; }
+
+			/// <summary>
+			///   The role that will be applied when the request is accepted.
+			/// </summary>
 			public Role Role { get; }
 		}
 
-		protected virtual void InitiateResourceTransfer(BaseAgent source)
+		/// <summary>
+		///   An agent calls this when it has chosen to accept a <see cref="ResourceRequest"/>.
+		///   Notifies the agent that sent the request to begin transfer of the resource.
+		/// </summary>
+		/// <param name="source">The agent that sent the <see cref="ResourceRequest"/>.</param>
+		protected virtual void InitiateResourceTransfer([NotNull] BaseAgent source)
 		{
 			source.TransferResource();
 		}
 
-		private void ResourceReady(BaseAgent agent, Condition condition)
+		/// <summary>
+		///   Called to notify the agent that another agent wants to send it a resource.
+		///   Creates and queues the appropriate <see cref="ResourceRequest"/>.
+		/// </summary>
+		/// <param name="agent">The agent sending the resource.</param>
+		/// <param name="condition">The resource's condition.</param>
+		private void ResourceReady([NotNull] BaseAgent agent, Condition condition)
 		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
+
 			var roles = GetRoles(agent, condition);
 			if (roles.Length == 0)
 				throw new InvalidOperationException("no role found for resource request: invariant violated!");
 
 			foreach (var role in roles)
-			{
 				_resourceRequests.Add(new ResourceRequest(agent, role));
-			}
 		}
 
+		/// <summary>
+		///   Notifies the agent it can now send its current resource to the receiving agent.
+		/// </summary>
 		protected virtual void TransferResource()
 		{
+			Debug.Assert(_stateMachine.State == States.Output);
+			Debug.Assert(Resource != null);
+
 			_stateMachine.Transition(
 				from: States.Output,
 				to: States.ResourceGiven,
@@ -240,11 +331,16 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		protected virtual void TakeResource(Resource resource)
+		/// <summary>
+		///   Hands the agent a <paramref name="resource"/> to process.
+		/// </summary>
+		protected virtual void TakeResource([NotNull] Resource resource)
 		{
-			// assert resource != null
-			Resource = resource;
+			if (resource == null)
+				throw new ArgumentNullException(nameof(resource));
+			Debug.Assert(_stateMachine.State == States.WaitingForResource);
 
+			Resource = resource;
 			_stateMachine.Transition(
 				from: States.WaitingForResource,
 				to: States.ExecuteRole,
@@ -252,10 +348,15 @@ namespace SafetySharp.Odp
 			);
 		}
 
+		/// <summary>
+		///   Notifies the agent the resource it transferred to another agent
+		///   has been picked up by the receiving agent.
+		/// </summary>
 		protected virtual void ResourcePickedUp()
 		{
-			Resource = null;
+			Debug.Assert(_stateMachine.State == States.ResourceGiven);
 
+			Resource = null;
 			_stateMachine.Transition(
 				from: States.ResourceGiven,
 				to: States.Idle,
@@ -269,14 +370,25 @@ namespace SafetySharp.Odp
 
 		#region observer
 
+		/// <summary>
+		///   Indicates if the agent is currently able to communicate with other agents.
+		/// </summary>
 		public virtual bool IsAlive => true;
 
+		// indicates the currently executed role belongs to a task that is being reconfigured
 		[Hidden]
 		private bool _deficientConfiguration;
 
-		[Hidden]
+		/// <summary>
+		///   The strategy used by the agent to reconfigure if configuration invariants are violated.
+		/// </summary>
+		[Hidden, NotNull]
 		public Reconfiguration.IReconfigurationStrategy ReconfigurationStrategy { get; set; }
 
+		/// <summary>
+		///   A set of configuration invariants that are consistently monitored for violations.
+		/// </summary>
+		[NotNull, ItemNotNull]
 		protected virtual InvariantPredicate[] MonitoringPredicates { get; } = {
 			Invariant.IoConsistency,
 			Invariant.NeighborsAliveGuarantee,
@@ -284,12 +396,19 @@ namespace SafetySharp.Odp
 			Invariant.CapabilityConsistency
 		};
 
+		/// <summary>
+		///   A set of configuration invariants that need only be checked immediately after a reconfiguration.
+		/// </summary>
+		[NotNull, ItemNotNull]
 		protected virtual InvariantPredicate[] ConsistencyPredicates { get; } = {
 			Invariant.PrePostConditionConsistency,
 			Invariant.TaskEquality,
 			Invariant.StateConsistency
 		};
 
+		/// <summary>
+		///   Checks for invariant violations and performs reconfigurations if necessary.
+		/// </summary>
 		private async Task Observe()
 		{
 			var violations = FindInvariantViolations();
@@ -301,9 +420,16 @@ namespace SafetySharp.Odp
 			);
 		}
 
-		protected async Task PerformReconfiguration(IEnumerable<Tuple<ITask, State>> reconfigurations)
+		/// <summary>
+		///   Performs a reconfiguration of the given tasks.
+		/// </summary>
+		/// <param name="reconfigurations">A list of tuples, each containing a task to be reconfigured and a description of the agent's state.</param>
+		protected async Task PerformReconfiguration([NotNull] [ItemNotNull] IEnumerable<Tuple<ITask, State>> reconfigurations)
 		{
-            if (!reconfigurations.Any())
+			if (reconfigurations == null)
+				throw new ArgumentNullException(nameof(reconfigurations));
+
+			if (!reconfigurations.Any())
                 return;
 
             // initiate reconfiguration to fix violations
@@ -313,16 +439,23 @@ namespace SafetySharp.Odp
 		}
 
         /// <summary>
-        /// Prepares the agent for reconfiguration of some given <paramref name="task"/>.
+        ///   Prepares the agent for reconfiguration of some given <paramref name="task"/>.
         /// </summary>
-	    public void PrepareReconfiguration(ITask task)
+	    public void PrepareReconfiguration([NotNull] ITask task)
 	    {
-	        // stop work on deficient tasks
+		    if (task == null)
+			    throw new ArgumentNullException(nameof(task));
+
+		    // stop work on deficient tasks
 	        _resourceRequests.RemoveAll(request => request.Role.Task == task);
 	        // abort execution of current role if necessary
 	        _deficientConfiguration = RoleExecutor.IsExecuting && RoleExecutor.Task == task;
         }
 
+		/// <summary>
+		///   Verifies that the current configuration fulfills all invariants.
+		///   Otherwise, an exception is thrown.
+		/// </summary>
 		private void VerifyInvariants()
 		{
 			foreach (var predicate in MonitoringPredicates.Concat(ConsistencyPredicates))
@@ -330,6 +463,10 @@ namespace SafetySharp.Odp
 					throw new InvalidOperationException("New configuration violates invariant.");
 		}
 
+		/// <summary>
+		///   Finds violations of the <see cref="MonitoringPredicates"/> by the current configuration.
+		/// </summary>
+		[NotNull]
 		private Dictionary<ITask, IEnumerable<InvariantPredicate>> FindInvariantViolations()
 		{
 			var violations = new Dictionary<ITask, IEnumerable<InvariantPredicate>>();
@@ -345,28 +482,64 @@ namespace SafetySharp.Odp
 			return violations;
 		}
 
-		public virtual Task RequestReconfiguration(IAgent agent, ITask task)
+		/// <summary>
+		///   Called by other agents to request the agent partakes in a reconfiguration.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> that completes once the entire reconfiguration has finished.</returns>
+		public virtual Task RequestReconfiguration([NotNull] IAgent agent, [NotNull] ITask task)
 		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
+			if (task == null)
+				throw new ArgumentNullException(nameof(task));
+
 			return PerformReconfiguration(new[] {
 				Tuple.Create(task, new State(this, agent))
 			});
 		}
 
-		public virtual void AllocateRoles(IEnumerable<Role> roles)
+		/// <summary>
+		///   Adds the given <paramref name="roles"/> to the agent's <see cref="AllocatedRoles"/>.
+		/// </summary>
+		public virtual void AllocateRoles([NotNull] IEnumerable<Role> roles)
 		{
+			if (roles == null)
+				throw new ArgumentNullException(nameof(roles));
+
+#if DEBUG
+			foreach (var role in roles)
+			{
+				if (_allocatedRoles.Any(r => r.PreCondition.StateMatches(role.PreCondition)))
+					throw new Exception("Duplicate precondition");
+				if (_allocatedRoles.Any(r => r.PostCondition.StateMatches(role.PostCondition)))
+					throw new Exception("Duplicate postcondition");
+			}
+#endif
 			_allocatedRoles.AddRange(roles);
 			RoleSelector.OnRoleAllocationsChanged();
 		}
 
-		public virtual void RemoveAllocatedRoles(IEnumerable<Role> roles)
+		/// <summary>
+		///   Removes the given <paramref name="roles"/> from the agent's <see cref="AllocatedRoles"/>.
+		/// </summary>
+		public virtual void RemoveAllocatedRoles([NotNull] IEnumerable<Role> roles)
 		{
+			if (roles == null)
+				throw new ArgumentNullException(nameof(roles));
+
 			foreach (var role in roles.ToArray())
 				_allocatedRoles.Remove(role);
 			RoleSelector.OnRoleAllocationsChanged();
 		}
 
-		public void LockRoles(IEnumerable<Role> roles, bool locked = true)
+		/// <summary>
+		///   Locks (or unlocks) the given <paramref name="roles"/> in the agent's configuration.
+		/// </summary>
+		public void LockRoles([NotNull] IEnumerable<Role> roles, bool locked = true)
 		{
+			if (roles == null)
+				throw new ArgumentNullException(nameof(roles));
+
 			var set = new HashSet<Role>(roles);
 			for (var i = 0; i < _allocatedRoles.Count; ++i)
 			{
