@@ -26,6 +26,7 @@ namespace SafetySharp.Odp
 
 	public partial class BaseAgent
 	{
+		// TODO: refactor - remove BaseAgent info, separate rest into subtypes
 		public class State
 		{
 			public State(BaseAgent agent, IAgent requestSource = null, bool initialConf = false, params InvariantPredicate[] violatedPredicates)
