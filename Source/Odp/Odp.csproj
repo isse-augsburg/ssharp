@@ -50,9 +50,6 @@
     <Compile Include="Reconfiguration\AbstractController.cs" />
     <Compile Include="Reconfiguration\AbstractMiniZincController.cs" />
     <Compile Include="BaseAgent.cs" />
-    <Compile Include="BaseAgent.State.cs">
-      <DependentUpon>BaseAgent.cs</DependentUpon>
-    </Compile>
     <Compile Include="Reconfiguration\CentralReconfiguration.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\BrokenIoStrategy.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\Coalition.cs" />

@@ -83,7 +83,7 @@ namespace Tests.OrganicDesignPattern.SimulationTests
 
 			internal void ConfigureTask(ITask task)
 			{
-				PerformReconfiguration(new[] { Tuple.Create(task, new State(this)) });
+				PerformReconfiguration(new[] { ReconfigurationRequest.Initial(task) });
 			}
 		}
 

@@ -56,7 +56,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		public override Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
 			var leader = (CoalitionReconfigurationAgent)context;
-			var coalition = new Coalition(leader, task, leader.BaseAgentState.ViolatedPredicates, leader.BaseAgentState.IsInitialConfiguration);
+			var coalition = new Coalition(leader, task, leader.ViolatedPredicates, leader.IsInitialConfiguration);
 
 			return CalculateConfigurations(coalition);
 		}

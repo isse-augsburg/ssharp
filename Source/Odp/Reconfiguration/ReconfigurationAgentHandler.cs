@@ -72,15 +72,14 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// <summary>
 		///   cf. <see cref="IReconfigurationStrategy.Reconfigure"/>.
 		/// </summary>
-		public async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		public async Task Reconfigure(IEnumerable<ReconfigurationRequest> reconfigurations)
 		{
 			var newReconfigurations = new List<Task>();
 
-			foreach (var tuple in reconfigurations)
+			foreach (var request in reconfigurations)
 			{
-				var task = tuple.Item1;
-				var baseAgentState = tuple.Item2;
-				var agent = baseAgentState.ReconfRequestSource ?? _baseAgent;
+				var task = request.Task;
+				var agent = (request.Reason as ParticipationRequested)?.RequestingAgent ?? _baseAgent;
 
 				LockAllocatedRoles(task);
 
@@ -90,7 +89,7 @@ namespace SafetySharp.Odp.Reconfiguration
 					_reconfigurationProcesses[task] = new TaskCompletionSource<object>();
 				}
 				newReconfigurations.Add(_reconfigurationProcesses[task].Task);
-				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, baseAgentState);
+				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, request.Reason);
 			}
 
 			await Task.WhenAll(newReconfigurations);

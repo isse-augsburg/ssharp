@@ -50,8 +50,9 @@ namespace SafetySharp.Odp.Reconfiguration
 		///   The agent causing the call. This is either the associated base agent,
 		///   or another reconf agent that requested participation.
 		/// </param>
-		/// <param name="baseAgentState">The state of the base agent as well as additional information about the reason for the call.</param>
-		void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState);
+		/// <param name="reason">The reason given by the <see cref="BaseAgent"/> for the reconfiguration.</param>
+		void StartReconfiguration(ITask task, IAgent agent, ReconfigurationReason reason);
+		// TODO: replace all 3 params by ReconfRequest
 
 		/// <summary>
 		///   Called by the <see cref="ReconfigurationAgentHandler"/> in response to <see cref="ReconfigurationAgentHandler.UpdateAllocatedRoles"/>.

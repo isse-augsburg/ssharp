@@ -29,6 +29,7 @@ namespace Tests
 	using Xunit.Abstractions;
 	using JetBrains.Annotations;
 	using System;
+	using SafetySharp.Odp.Reconfiguration;
 
 	public partial class OdpTests : Tests
 	{
@@ -57,7 +58,7 @@ namespace Tests
 
 		internal void ConfigureTask(ITask task)
 		{
-			PerformReconfiguration(new [] { Tuple.Create(task, new State(this)) });
+			PerformReconfiguration(new [] { ReconfigurationRequest.Initial(task) });
 		}
 	}
 

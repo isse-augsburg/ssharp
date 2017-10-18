@@ -33,15 +33,11 @@ namespace SafetySharp.Odp.Reconfiguration
 	public interface IReconfigurationStrategy
 	{
 		/// <summary>
-		///   Reconfigure the given tasks.
+		///   Performs the requested reconfigurations.
 		/// </summary>
-		/// <param name="reconfigurations">
-		///   A list of tuples, each containing a task to be reconfigured
-		///   and a description state of the agent requesting the reconfiguration.
-		///   The state also includes additional info such as violated invariants.
-		/// </param>
+		/// <param name="reconfigurations">A list of reconfiguration requests.</param>
 		/// <returns>A task that completes when all requested reconfigurations have completed.</returns>
 		[NotNull]
-		Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations);
+		Task Reconfigure(IEnumerable<ReconfigurationRequest> reconfigurations);
 	}
 }
