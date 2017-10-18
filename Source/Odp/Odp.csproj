@@ -65,6 +65,7 @@
     <Compile Include="Condition.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\IRecruitingStrategy.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\MissingCapabilitiesStrategy.cs" />
+    <Compile Include="Reconfiguration\ReconfigurationReason.cs" />
     <Compile Include="Reconfiguration\ConfigurationUpdate.cs" />
     <Compile Include="Reconfiguration\ControllerReconfigurationAgent.cs" />
     <Compile Include="FairRoleSelector.cs" />
