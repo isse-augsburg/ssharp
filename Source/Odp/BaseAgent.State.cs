@@ -34,25 +34,11 @@ namespace SafetySharp.Odp
 				ReconfRequestSource = requestSource;
 				ViolatedPredicates = violatedPredicates;
 			    IsInitialConfiguration = initialConf;
-
-				Id = agent.Id;
-				Resource = agent.Resource;
-				Inputs = agent.Inputs.ToArray();
-				Outputs = agent.Outputs.ToArray();
-				AllocatedRoles = agent.AllocatedRoles.ToArray();
-				AvailableCapabilities = agent.AvailableCapabilities.ToArray();
 			}
 
 			public IAgent ReconfRequestSource { get; }
 			public InvariantPredicate[] ViolatedPredicates { get; }
             public bool IsInitialConfiguration { get; }
-
-			public uint Id { get; }
-			public Resource Resource { get; }
-			public BaseAgent[] Inputs { get; }
-			public BaseAgent[] Outputs { get; }
-			public Role[] AllocatedRoles { get; }
-			public ICapability[] AvailableCapabilities { get; }
 		}
 	}
 }
