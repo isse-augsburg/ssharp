@@ -39,7 +39,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	///   A <see cref="ReconfigurationReason"/> representing a request by another <see cref="IAgent"/>
 	///   to participate in a reconfiguration.
 	/// </summary>
-	public class ReconfigurationRequested : ReconfigurationReason
+	public class ParticipationRequested : ReconfigurationReason
 	{
 		/// <summary>
 		///   The agent that requested the participation.
@@ -47,7 +47,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		[NotNull]
 		public IAgent RequestingAgent { get; }
 
-		public ReconfigurationRequested([NotNull] IAgent requestingAgent)
+		public ParticipationRequested([NotNull] IAgent requestingAgent)
 		{
 			if (requestingAgent == null)
 				throw new ArgumentNullException(nameof(requestingAgent));
