@@ -25,9 +25,23 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System;
 	using System.Collections.Generic;
 	using System.Threading.Tasks;
+	using JetBrains.Annotations;
 
+	/// <summary>
+	///   Handles reconfigurations of agents.
+	/// </summary>
 	public interface IReconfigurationStrategy
 	{
+		/// <summary>
+		///   Reconfigure the given tasks.
+		/// </summary>
+		/// <param name="reconfigurations">
+		///   A list of tuples, each containing a task to be reconfigured
+		///   and a description state of the agent requesting the reconfiguration.
+		///   The state also includes additional info such as violated invariants.
+		/// </param>
+		/// <returns>A task that completes when all requested reconfigurations have completed.</returns>
+		[NotNull]
 		Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations);
 	}
 }
