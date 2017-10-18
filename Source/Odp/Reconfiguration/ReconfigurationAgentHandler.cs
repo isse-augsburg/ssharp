@@ -70,8 +70,8 @@ namespace SafetySharp.Odp.Reconfiguration
 				{
 					_tasksUnderReconstruction[task] = _createReconfAgent(_baseAgent, this, task);
 					_reconfigurationProcesses[task] = new TaskCompletionSource<object>();
-					newReconfigurations.Add(_reconfigurationProcesses[task].Task);
 				}
+				newReconfigurations.Add(_reconfigurationProcesses[task].Task);
 				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, baseAgentState);
 			}
 
