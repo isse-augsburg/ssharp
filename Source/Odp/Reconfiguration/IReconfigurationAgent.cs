@@ -39,7 +39,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// </summary>
 		/// <remarks>
 		///   This may be called because the agent detected an invariant violation,
-		///   or for an initial configuration for the <paramref name="task"/>,
+		///   or for an initial configuration for a task,
 		///   or because another agent requested its participation in an ongoing reconfiguration.
 		///   It may be called several times during the lifetime of the reconfiguration agent
 		///   - at most once for either of the first two reasons, but an unlimited number of times
