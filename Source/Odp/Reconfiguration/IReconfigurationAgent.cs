@@ -35,7 +35,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	{
 		/// <summary>
 		///   Called to notify the reconfiguration agent, that its <see cref="BaseAgent"/>
-		///   requested it reconfigure the given <see cref="task"/>.
+		///   requested it perform the given <paramref name="reconfiguration"/>.
 		/// </summary>
 		/// <remarks>
 		///   This may be called because the agent detected an invariant violation,
@@ -45,14 +45,8 @@ namespace SafetySharp.Odp.Reconfiguration
 		///   - at most once for either of the first two reasons, but an unlimited number of times
 		///   for the last reason.
 		/// </remarks>
-		/// <param name="task">The task for which the reconfiguration agent is responsible.</param>
-		/// <param name="agent">
-		///   The agent causing the call. This is either the associated base agent,
-		///   or another reconf agent that requested participation.
-		/// </param>
-		/// <param name="reason">The reason given by the <see cref="BaseAgent"/> for the reconfiguration.</param>
-		void StartReconfiguration(ITask task, IAgent agent, ReconfigurationReason reason);
-		// TODO: replace all 3 params by ReconfRequest
+		/// <param name="reconfiguration">A <see cref="ReconfigurationRequest"/> describing the reconfiguration agent should perform.</param>
+		void StartReconfiguration(ReconfigurationRequest reconfiguration);
 
 		/// <summary>
 		///   Called by the <see cref="ReconfigurationAgentHandler"/> in response to <see cref="ReconfigurationAgentHandler.UpdateAllocatedRoles"/>.

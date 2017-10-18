@@ -79,8 +79,6 @@ namespace SafetySharp.Odp.Reconfiguration
 			foreach (var request in reconfigurations)
 			{
 				var task = request.Task;
-				var agent = (request.Reason as ParticipationRequested)?.RequestingAgent ?? _baseAgent;
-
 				LockAllocatedRoles(task);
 
 				if (!_tasksUnderReconstruction.ContainsKey(task))
@@ -88,8 +86,9 @@ namespace SafetySharp.Odp.Reconfiguration
 					_tasksUnderReconstruction[task] = _createReconfAgent(_baseAgent, this, task);
 					_reconfigurationProcesses[task] = new TaskCompletionSource<object>();
 				}
+
 				newReconfigurations.Add(_reconfigurationProcesses[task].Task);
-				_tasksUnderReconstruction[task].StartReconfiguration(task, agent, request.Reason);
+				_tasksUnderReconstruction[task].StartReconfiguration(request);
 			}
 
 			await Task.WhenAll(newReconfigurations);

@@ -51,17 +51,17 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			_acknowledgment?.SetResult(null);
 		}
 
-		void IReconfigurationAgent.StartReconfiguration(ITask task, IAgent agent, ReconfigurationReason reason)
+		void IReconfigurationAgent.StartReconfiguration(ReconfigurationRequest reconfiguration)
 		{
-			MicrostepScheduler.Schedule(() => ReconfigureAsync(task, agent, reason));
+			MicrostepScheduler.Schedule(() => ReconfigureAsync(reconfiguration));
 		}
 
-		private async Task ReconfigureAsync(ITask task, IAgent agent, ReconfigurationReason reason)
+		private async Task ReconfigureAsync(ReconfigurationRequest reconfiguration)
 		{
-			ViolatedPredicates = (reason as InvariantsViolated)?.ViolatedPredicates ?? new InvariantPredicate[0];
-			IsInitialConfiguration = reason is InitialReconfiguration;
+			ViolatedPredicates = (reconfiguration.Reason as InvariantsViolated)?.ViolatedPredicates ?? new InvariantPredicate[0];
+			IsInitialConfiguration = reconfiguration.Reason is InitialReconfiguration;
 
-			var participationRequest = reason as ParticipationRequested;
+			var participationRequest = reconfiguration.Reason as ParticipationRequested;
 			if (participationRequest != null)
 			{
 				var source = (CoalitionReconfigurationAgent)participationRequest.RequestingAgent;
@@ -75,7 +75,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 			else
 			{
-				var configs = await _controller.CalculateConfigurationsAsync(this, task);
+				var configs = await _controller.CalculateConfigurationsAsync(this, reconfiguration.Task);
 				if (configs != null)
 				{
 					await Task.WhenAll(CurrentCoalition.Members
