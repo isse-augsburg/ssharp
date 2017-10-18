@@ -90,6 +90,7 @@
     <Compile Include="Reconfiguration\CoalitionFormation\ShortestPaths.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\TaskFragment.cs" />
     <Compile Include="Reconfiguration\ReconfigurationMonitor.cs" />
+    <Compile Include="Reconfiguration\ReconfigurationRequest.cs" />
     <Compile Include="Resource.cs" />
     <Compile Include="Role.cs" />
     <Compile Include="RoleExecutor.cs" />
