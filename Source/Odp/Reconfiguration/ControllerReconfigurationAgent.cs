@@ -59,10 +59,10 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			_task = reconfiguration.Task;
 
-			var participationRequest = reconfiguration.Reason as ParticipationRequested;
+			var participationRequest = reconfiguration.Reason as ReconfigurationReason.ParticipationRequested;
 			if (participationRequest == null)
 			{
-				Debug.Assert(reconfiguration.Reason is InvariantsViolated || reconfiguration.Reason is InitialReconfiguration);
+				Debug.Assert(reconfiguration.Reason is ReconfigurationReason.InvariantsViolated || reconfiguration.Reason is ReconfigurationReason.InitialReconfiguration);
 
 				_roleCalculationAgent = new RoleCalculationAgent(_controller);
 				_roleCalculationAgent.StartCentralReconfiguration(_task, _baseAgent);

@@ -58,17 +58,17 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public static ReconfigurationRequest Initial(ITask task)
 		{
-			return new ReconfigurationRequest(task, InitialReconfiguration.Instance);
+			return new ReconfigurationRequest(task, ReconfigurationReason.InitialReconfiguration.Instance);
 		}
 
 		public static ReconfigurationRequest Request(ITask task, IAgent agent)
 		{
-			return new ReconfigurationRequest(task, new ParticipationRequested(agent));
+			return new ReconfigurationRequest(task, new ReconfigurationReason.ParticipationRequested(agent));
 		}
 
 		public static ReconfigurationRequest Violation(ITask task, InvariantPredicate[] predicates)
 		{
-			return new ReconfigurationRequest(task, new InvariantsViolated(predicates));
+			return new ReconfigurationRequest(task, new ReconfigurationReason.InvariantsViolated(predicates));
 		}
 	}
 }

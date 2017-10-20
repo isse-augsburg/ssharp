@@ -31,100 +31,103 @@ namespace SafetySharp.Odp.Reconfiguration
 	/// </summary>
 	public abstract class ReconfigurationReason : IEquatable<ReconfigurationReason>
 	{
+		// make constructor private to restrict inheritance to the classes defined here
+		private ReconfigurationReason() { }
+
 		public abstract bool Equals(ReconfigurationReason other);
-	}
 
-	/// <summary>
-	///   A <see cref="ReconfigurationReason"/> for initial configurations.
-	/// </summary>
-	public sealed class InitialReconfiguration : ReconfigurationReason, IEquatable<InitialReconfiguration>
-	{
-		public static InitialReconfiguration Instance = new InitialReconfiguration();
-
-		private InitialReconfiguration() { }
-
-		#region equality
-
-		public override bool Equals(ReconfigurationReason other) => Equals(other as InitialReconfiguration);
-
-		public bool Equals(InitialReconfiguration other) => ReferenceEquals(this, other);
-
-		#endregion
-	}
-
-	/// <summary>
-	///   A <see cref="ReconfigurationReason"/> representing a request by another <see cref="IAgent"/>
-	///   to participate in a reconfiguration.
-	/// </summary>
-	public sealed class ParticipationRequested : ReconfigurationReason, IEquatable<ParticipationRequested>
-	{
 		/// <summary>
-		///   The agent that requested the participation.
+		///   A <see cref="ReconfigurationReason"/> for initial configurations.
 		/// </summary>
-		[NotNull]
-		public IAgent RequestingAgent { get; }
-
-		public ParticipationRequested([NotNull] IAgent requestingAgent)
+		public sealed class InitialReconfiguration : ReconfigurationReason, IEquatable<InitialReconfiguration>
 		{
-			if (requestingAgent == null)
-				throw new ArgumentNullException(nameof(requestingAgent));
+			public static InitialReconfiguration Instance = new InitialReconfiguration();
 
-			RequestingAgent = requestingAgent;
+			private InitialReconfiguration() { }
+
+			#region equality
+
+			public override bool Equals(ReconfigurationReason other) => Equals(other as InitialReconfiguration);
+
+			public bool Equals(InitialReconfiguration other) => ReferenceEquals(this, other);
+
+			#endregion
 		}
 
-		#region equality
-
-		public override bool Equals(object obj) => Equals(obj as ParticipationRequested);
-
-		public override bool Equals(ReconfigurationReason other) => Equals(other as ParticipationRequested);
-
-		public bool Equals(ParticipationRequested other)
-		{
-			if (ReferenceEquals(other, null))
-				return false;
-			return RequestingAgent.Equals(other.RequestingAgent);
-		}
-
-		public override int GetHashCode() => RequestingAgent.GetHashCode();
-
-		#endregion
-	}
-
-	/// <summary>
-	///   A <see cref="ReconfigurationReason"/> used if the <see cref="BaseAgent"/>
-	///   detected invariant violations.
-	/// </summary>
-	public class InvariantsViolated : ReconfigurationReason, IEquatable<InvariantsViolated>
-	{
 		/// <summary>
-		///   The violated predicates.
+		///   A <see cref="ReconfigurationReason"/> representing a request by another <see cref="IAgent"/>
+		///   to participate in a reconfiguration.
 		/// </summary>
-		[NotNull, ItemNotNull]
-		public InvariantPredicate[] ViolatedPredicates { get; }
-
-		public InvariantsViolated([NotNull, ItemNotNull] InvariantPredicate[] violatedPredicates)
+		public sealed class ParticipationRequested : ReconfigurationReason, IEquatable<ParticipationRequested>
 		{
-			if (violatedPredicates == null)
-				throw new ArgumentNullException(nameof(violatedPredicates));
+			/// <summary>
+			///   The agent that requested the participation.
+			/// </summary>
+			[NotNull]
+			public IAgent RequestingAgent { get; }
 
-			ViolatedPredicates = violatedPredicates;
+			public ParticipationRequested([NotNull] IAgent requestingAgent)
+			{
+				if (requestingAgent == null)
+					throw new ArgumentNullException(nameof(requestingAgent));
+
+				RequestingAgent = requestingAgent;
+			}
+
+			#region equality
+
+			public override bool Equals(object obj) => Equals(obj as ParticipationRequested);
+
+			public override bool Equals(ReconfigurationReason other) => Equals(other as ParticipationRequested);
+
+			public bool Equals(ParticipationRequested other)
+			{
+				if (ReferenceEquals(other, null))
+					return false;
+				return RequestingAgent.Equals(other.RequestingAgent);
+			}
+
+			public override int GetHashCode() => RequestingAgent.GetHashCode();
+
+			#endregion
 		}
 
-		#region equality
-
-		public override bool Equals(object obj) => Equals(obj as InvariantsViolated);
-
-		public override bool Equals(ReconfigurationReason other) => Equals(other as InvariantsViolated);
-
-		public bool Equals(InvariantsViolated other)
+		/// <summary>
+		///   A <see cref="ReconfigurationReason"/> used if the <see cref="BaseAgent"/>
+		///   detected invariant violations.
+		/// </summary>
+		public class InvariantsViolated : ReconfigurationReason, IEquatable<InvariantsViolated>
 		{
-			if (ReferenceEquals(other, null))
-				return false;
-			return ViolatedPredicates.SequenceEqual(other.ViolatedPredicates);
+			/// <summary>
+			///   The violated predicates.
+			/// </summary>
+			[NotNull, ItemNotNull]
+			public InvariantPredicate[] ViolatedPredicates { get; }
+
+			public InvariantsViolated([NotNull, ItemNotNull] InvariantPredicate[] violatedPredicates)
+			{
+				if (violatedPredicates == null)
+					throw new ArgumentNullException(nameof(violatedPredicates));
+
+				ViolatedPredicates = violatedPredicates;
+			}
+
+			#region equality
+
+			public override bool Equals(object obj) => Equals(obj as InvariantsViolated);
+
+			public override bool Equals(ReconfigurationReason other) => Equals(other as InvariantsViolated);
+
+			public bool Equals(InvariantsViolated other)
+			{
+				if (ReferenceEquals(other, null))
+					return false;
+				return ViolatedPredicates.SequenceEqual(other.ViolatedPredicates);
+			}
+
+			public override int GetHashCode() => ViolatedPredicates.Sum(x => x.GetHashCode());
+
+			#endregion
 		}
-
-		public override int GetHashCode() => ViolatedPredicates.Sum(x => x.GetHashCode());
-
-		#endregion
 	}
 }

@@ -59,7 +59,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			ReconfigurationReason = reconfiguration.Reason;
 
-			var participationRequest = reconfiguration.Reason as ParticipationRequested;
+			var participationRequest = reconfiguration.Reason as ReconfigurationReason.ParticipationRequested;
 			if (participationRequest != null)
 			{
 				var source = (CoalitionReconfigurationAgent)participationRequest.RequestingAgent;
