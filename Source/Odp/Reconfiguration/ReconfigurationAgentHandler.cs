@@ -1,5 +1,4 @@
-﻿
-// The MIT License (MIT)
+﻿// The MIT License (MIT)
 // 
 // Copyright (c) 2014-2016, Institute for Software & Systems Engineering
 // 
@@ -29,11 +28,24 @@ namespace SafetySharp.Odp.Reconfiguration
 	using System.Threading.Tasks;
 	using Modeling;
 
+	/// <summary>
+	///   An <see cref="IReconfigurationStrategy"/> that manages (partially) distributed reconfigurations
+	///   using communicating reconfiguration agents.
+	/// </summary>
+	/// <remarks>One instance of this class is associated to exactly one <see cref="BaseAgent"/>.</remarks>
 	public class ReconfigurationAgentHandler : IReconfigurationStrategy
 	{
+		// the BaseAgent the handler is associated to
 		private readonly BaseAgent _baseAgent;
+
+		// a factory for new reconfiguration agents
 		private readonly Func<BaseAgent, ReconfigurationAgentHandler, ITask, IReconfigurationAgent> _createReconfAgent;
 
+		/// <summary>
+		///   Creates a new handler.
+		/// </summary>
+		/// <param name="baseAgent">The agent the handler belongs to.</param>
+		/// <param name="createReconfAgent">A factory for new reconfiguration agents.</param>
 		public ReconfigurationAgentHandler(
 			BaseAgent baseAgent,
 			Func<BaseAgent, ReconfigurationAgentHandler, ITask, IReconfigurationAgent> createReconfAgent
@@ -46,14 +58,20 @@ namespace SafetySharp.Odp.Reconfiguration
 		// Reconfiguration always completes within one step, hence the dictionaries should
 		// always be empty during serialization. Thus there is no need to include space
 		// for the elements in the state vector, or to set a predefined capacity.
+
+		// associates ITask instances with existing reconfiguration agents
 		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly Dictionary<ITask, IReconfigurationAgent> _tasksUnderReconstruction = new Dictionary<ITask, IReconfigurationAgent>();
 
+		// associates ITask instances with TaskCompletionSources
+		// The source's Task represents the reconfiguration process for the task, and the source is used to mark it as complete.
 		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly Dictionary<ITask, TaskCompletionSource<object>> _reconfigurationProcesses =
 			new Dictionary<ITask, TaskCompletionSource<object>>();
 
-
+		/// <summary>
+		///   cf. <see cref="IReconfigurationStrategy.Reconfigure"/>.
+		/// </summary>
 		public async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
 		{
 			var newReconfigurations = new List<Task>();
@@ -79,6 +97,19 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		#region interface presented to reconfiguration agent
+
+		/// <summary>
+		///   Called by a reconfiguration agent once it knows the roles its <see cref="BaseAgent"/>
+		///   will lose or receive.
+		/// </summary>
+		/// <param name="task">The task being reconfigured by the calling agent.</param>
+		/// <param name="config">The configuration changes to be applied to the <see cref="BaseAgent"/>.</param>
+		/// <remarks>
+		///   <list type="bullet">
+		///     <item><description><paramref name="config"/> may include changes for other agents, which will simply be ignored.</description></item>
+		///     <item><description>This method will call <see cref="IReconfigurationAgent.Acknowledge"/> when done.</description></item>
+		///   </list>
+		/// </remarks>
 		public virtual void UpdateAllocatedRoles(ITask task, ConfigurationUpdate config)
 		{
             _baseAgent.PrepareReconfiguration(task);
@@ -90,19 +121,29 @@ namespace SafetySharp.Odp.Reconfiguration
 			_tasksUnderReconstruction[task].Acknowledge();
 		}
 
+		/// <summary>
+		///   Called by a reconfiguration agent to notify the handler the newly applied configuration is ready to be used.
+		/// </summary>
+		/// <param name="task">The <see cref="ITask"/> reconfigured by the calling agent.</param>
 		public virtual void Go(ITask task)
 		{
 			LockAllocatedRoles(task, false);
 		}
 
+		/// <summary>
+		///   Called by a reconfiguration agent to notify the handler it has fully ompleted the reconfiguration.
+		/// </summary>
+		/// <param name="task">The <see cref="ITask"/> reconfigured by the calling agent.</param>
 		public virtual void Done(ITask task)
 		{
 			_tasksUnderReconstruction.Remove(task);
 			_reconfigurationProcesses[task].SetResult(null);
 			_reconfigurationProcesses.Remove(task);
 		}
+
 		#endregion
 
+		// Locks (or unlocks) all base agent roles for the given task.
 		private void LockAllocatedRoles(ITask task, bool locked = true)
 		{
 			_baseAgent.LockRoles(_baseAgent.AllocatedRoles.Where(role => role.Task == task), locked);
