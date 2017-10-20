@@ -30,24 +30,61 @@ namespace Tests.OrganicDesignPattern.UnitTests
 
 	public class RoleExecutorTest
 	{
-		[Fact]
-		public void TestResetAfterExecution()
+		private readonly ITask _task;
+		private readonly BaseAgent _agent;
+		private readonly Role _role;
+
+		private readonly RoleExecutor _executor;
+
+		public RoleExecutorTest()
 		{
-			var task = Substitute.For<ITask>();
-			task.RequiredCapabilities.Returns(new ICapability[] { new ProduceCapability(), new ConsumeCapability() });
+			_task = Substitute.For<ITask>();
+			_task.RequiredCapabilities.Returns(new ICapability[] { new ProduceCapability(), new ConsumeCapability() });
 
-			var agent = Substitute.For<BaseAgent, ICapabilityHandler<ProduceCapability>, ICapabilityHandler<ConsumeCapability>>();
-			var role = new Role(new Condition(task, 0), new Condition(task, task.RequiredCapabilities.Length));
+			_agent = Substitute.For<BaseAgent, ICapabilityHandler<ProduceCapability>, ICapabilityHandler<ConsumeCapability>>();
+			_role = new Role(new Condition(_task, 0), new Condition(_task, _task.RequiredCapabilities.Length));
 
-			var executor = new RoleExecutor(agent);
+			_executor = new RoleExecutor(_agent);
+		}
 
-			executor.BeginExecution(role);
-			while (!executor.IsCompleted)
-				executor.ExecuteStep();
-			executor.EndExecution();
+		[Fact]
+		public void BeginExecutionInitializes()
+		{
+			_executor.IsExecuting.ShouldBeFalse();
+			_executor.IsCompleted.ShouldBeFalse();
 
-			executor.BeginExecution(role);
-			executor.IsCompleted.ShouldBeFalse();
+			_executor.BeginExecution(_role);
+
+			_executor.IsExecuting.ShouldBeTrue();
+			_executor.IsCompleted.ShouldBeFalse();
+		}
+
+		[Fact]
+		public void ExecuteStepExecutesExactNumberOfSteps()
+		{
+			_executor.BeginExecution(_role);
+			_executor.IsCompleted.ShouldBeFalse();
+
+			_executor.ExecuteStep();
+			_executor.IsCompleted.ShouldBeFalse();
+
+			_executor.ExecuteStep();
+			_executor.IsCompleted.ShouldBeTrue();
+		}
+
+		[Fact]
+		public void EndExecutionResets()
+		{
+			_executor.BeginExecution(_role);
+			while (!_executor.IsCompleted)
+				_executor.ExecuteStep();
+
+			_executor.EndExecution();
+			_executor.IsExecuting.ShouldBeFalse();
+			_executor.IsCompleted.ShouldBeFalse();
+
+			_executor.BeginExecution(_role);
+			_executor.IsCompleted.ShouldBeFalse();
 		}
 	}
 }
