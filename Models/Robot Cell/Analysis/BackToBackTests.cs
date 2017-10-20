@@ -24,6 +24,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
 	using System.Collections;
+	using System.Diagnostics;
 	using System.Linq;
 
 	using SafetySharp.Analysis;
@@ -38,6 +39,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[TestCaseSource(nameof(CreateConfigurationsCoalition))]
 		public void DccaWithHeuristics(Model model)
 		{
+			Debug.Listeners.Clear();
             Dcca(model,
 				hazard: model.ReconfigurationMonitor.ReconfigurationFailure,
 				enableHeuristics: true);
