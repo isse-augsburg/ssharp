@@ -41,8 +41,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		}
 
 		public Coalition CurrentCoalition { get; set; }
-		public InvariantPredicate[] ViolatedPredicates { get; private set; } = { };
-		public bool IsInitialConfiguration { get; private set; }
+		public ReconfigurationReason ReconfigurationReason { get; private set; }
 
 		private TaskCompletionSource<object> _acknowledgment;
 
@@ -58,8 +57,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		private async Task ReconfigureAsync(ReconfigurationRequest reconfiguration)
 		{
-			ViolatedPredicates = (reconfiguration.Reason as InvariantsViolated)?.ViolatedPredicates ?? new InvariantPredicate[0];
-			IsInitialConfiguration = reconfiguration.Reason is InitialReconfiguration;
+			ReconfigurationReason = reconfiguration.Reason;
 
 			var participationRequest = reconfiguration.Reason as ParticipationRequested;
 			if (participationRequest != null)
