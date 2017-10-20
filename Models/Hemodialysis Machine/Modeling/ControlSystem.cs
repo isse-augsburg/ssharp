@@ -151,8 +151,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 					to: TherapyPhase.InitiationPhase,
 					guard: TimeStepsLeft > 0 && !VenousSafetyDetector.DetectedGasOrContaminatedBlood,
 					action: StepOfMainTherapy
-				);
-			CurrentTherapyPhase
+				)
 				.Transition(
 					from: TherapyPhase.InitiationPhase,
 					to: TherapyPhase.EndingPhase,

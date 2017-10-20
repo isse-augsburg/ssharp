@@ -31,6 +31,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 	using System.Globalization;
 	using System.IO;
 	using FluentAssertions;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.Modeling;
@@ -68,6 +69,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.AllowFaultsOnInitialTransitions = false;
+			tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.AtStepBeginning;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 		}
 
