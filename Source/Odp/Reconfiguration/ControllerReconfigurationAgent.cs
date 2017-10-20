@@ -60,17 +60,17 @@ namespace SafetySharp.Odp.Reconfiguration
 			_task = reconfiguration.Task;
 
 			var participationRequest = reconfiguration.Reason as ParticipationRequested;
-			if (participationRequest != null) // a reconfiguration has already been already started
-			{
-				_roleCalculationAgent = (RoleCalculationAgent)participationRequest.RequestingAgent; // may already have this value, if reconfiguration initiated by this instance
-				_roleCalculationAgent.AcknowledgeReconfigurationRequest(_task, this, _baseAgent);
-			}
-			else
+			if (participationRequest == null)
 			{
 				Debug.Assert(reconfiguration.Reason is InvariantsViolated || reconfiguration.Reason is InitialReconfiguration);
 
 				_roleCalculationAgent = new RoleCalculationAgent(_controller);
 				_roleCalculationAgent.StartCentralReconfiguration(_task, _baseAgent);
+			}
+			else // a reconfiguration has already been already started
+			{
+				_roleCalculationAgent = (RoleCalculationAgent)participationRequest.RequestingAgent; // may already have this value, if reconfiguration initiated by this instance
+				_roleCalculationAgent.AcknowledgeReconfigurationRequest(_task, this, _baseAgent);
 			}
 		}
 
