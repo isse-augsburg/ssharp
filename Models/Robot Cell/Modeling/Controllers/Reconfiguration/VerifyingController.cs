@@ -103,19 +103,24 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			if (!seenRobots.Add(source))
 				return false;
 
-			foreach (var output in source.Outputs)
+			foreach (var cart in GetConnectedOutputs(source))
 			{
-				foreach (var output2 in output.Outputs)
+				foreach (var robot in GetConnectedOutputs(cart))
 				{
-					if (output2 == target)
+					if (robot == target)
 						return true;
 
-					if (IsConnected((RobotAgent)output2, target, seenRobots))
+					if (IsConnected((RobotAgent)robot, target, seenRobots))
 						return true;
 				}
 			}
 
 			return false;
+		}
+
+		private static IEnumerable<BaseAgent> GetConnectedOutputs(BaseAgent agent)
+		{
+			return agent.Outputs.Where(output => output.Inputs.Contains(agent));
 		}
 	}
 }
