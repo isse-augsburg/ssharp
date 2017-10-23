@@ -24,6 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using Modeling;
@@ -33,7 +34,7 @@ namespace SafetySharp.Odp.Reconfiguration
 	///   using communicating reconfiguration agents.
 	/// </summary>
 	/// <remarks>One instance of this class is associated to exactly one <see cref="BaseAgent"/>.</remarks>
-	public class ReconfigurationAgentHandler : IReconfigurationStrategy
+	public class ReconfigurationAgentHandler : Component, IReconfigurationStrategy
 	{
 		// the BaseAgent the handler is associated to
 		private readonly BaseAgent _baseAgent;
@@ -53,6 +54,18 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 			_baseAgent = baseAgent;
 			_createReconfAgent = createReconfAgent;
+		}
+
+		protected override void Initialize()
+		{
+			Debug.WriteLine("Resetting {0} for agent {1}", nameof(ReconfigurationAgentHandler), _baseAgent.Id);
+
+			// Because these dictionaries are marked as non-discoverable, S# does not reset them when it resets the model.
+			// Usually, this is no problem, since they should be empty at the end of each step anyway.
+			// However, if an exception is thrown and the step is aborted, this is not the case.
+			// Hence, in the next step the dictionaries are non-empty and cause further errors or incorrect behaviour.
+			_tasksUnderReconstruction.Clear();
+			_reconfigurationProcesses.Clear();
 		}
 
 		// Reconfiguration always completes within one step, hence the dictionaries should

@@ -60,7 +60,7 @@ namespace SafetySharp.Odp
 		///  The state described by this <see cref="Condition"/>, i.e., the sequence of capabilities already applied to a <see cref="Resource"/>
 		///  in this condition.
 		/// </summary>
-		[NotNull]
+		[NotNull, ItemNotNull]
 		public IEnumerable<ICapability> State => Task.RequiredCapabilities.Take(_statePrefixLength);
 
 		/// <summary>
@@ -72,6 +72,7 @@ namespace SafetySharp.Odp
 		///  Compares two conditions to see if their state matches, i.e., they have the same <see cref="ITask"/> and state.
 		///  Ignores the conditions' ports.
 		/// </summary>
+		[Pure]
 		public bool StateMatches(Condition other)
 		{
 			return Task == other.Task
@@ -104,8 +105,8 @@ namespace SafetySharp.Odp
 		/// <summary>
 		///  Returns a copy of the condition with the given <paramref name="port"/>.
 		/// </summary>
-		[MustUseReturnValue]
-		public Condition WithPort(BaseAgent port)
+		[MustUseReturnValue, Pure]
+		public Condition WithPort([CanBeNull] BaseAgent port)
 		{
 			return new Condition(Task, _statePrefixLength, port);
 		}
@@ -117,9 +118,12 @@ namespace SafetySharp.Odp
 		///  The given <paramref name="capability"/> is not the next to be applied,
 		///  according to the <see cref="Task"/>.
 		/// </exception>
-		[MustUseReturnValue]
-		public Condition WithCapability(ICapability capability)
+		[MustUseReturnValue, Pure]
+		public Condition WithCapability([NotNull] ICapability capability)
 		{
+			if (capability == null)
+				throw new ArgumentNullException(nameof(capability));
+
 			if (_statePrefixLength >= Task.RequiredCapabilities.Length)
 				throw new InvalidOperationException("All required capabilities already applied.");
 			if (!Task.RequiredCapabilities[_statePrefixLength].Equals(capability))

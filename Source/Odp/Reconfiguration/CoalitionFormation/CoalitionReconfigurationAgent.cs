@@ -38,6 +38,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			BaseAgent = baseAgent;
 			_reconfAgentHandler = reconfAgentHandler;
 			_controller = controller;
+
+			Debug.WriteLine("{0} created for agent {1}", nameof(CoalitionReconfigurationAgent), baseAgent.Id);
+			Debug.Flush();
 		}
 
 		public Coalition CurrentCoalition { get; set; }
@@ -63,13 +66,21 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			if (participationRequest != null)
 			{
 				var source = (CoalitionReconfigurationAgent)participationRequest.RequestingAgent;
-				if (CurrentCoalition != null && CurrentCoalition.Leader != source)
+				Debug.WriteLine("Agent {0} received a participation request from agent {1}", BaseAgent.Id, source.BaseAgent.Id);
+
+				if (CurrentCoalition != null)
 				{
+					Debug.WriteLine("Agent {0} is already part of a coalition with leader {1}", BaseAgent.Id, CurrentCoalition.Leader.BaseAgent.Id);
+					Debug.Assert(CurrentCoalition.Leader != source, "Invited agent that is already a coalition member.");
+
 					CurrentCoalition.MergeCoalition(source);
 					source.CurrentCoalition.AwaitRendezvous(invitedAgent: this, leader: CurrentCoalition.Leader);
 				}
 				else
+				{
+					Debug.WriteLine("Agent {0} is joining coalition with leader {1}", BaseAgent.Id, source.BaseAgent.Id);
 					source.ReceiveResponse(respondingAgent: this);
+				}
 			}
 			else
 			{
