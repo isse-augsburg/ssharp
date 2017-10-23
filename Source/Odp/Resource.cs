@@ -39,7 +39,7 @@ namespace SafetySharp.Odp
 		/// <summary>
 		///  The <see cref="ITask"/> according to which the resource is processed.
 		/// </summary>
-		/// <remarks>For resources in production, this must never by <c>null</c>.</remarks>
+		/// <remarks>For resources in production, this must never be <c>null</c>.</remarks>
 		public ITask Task { get; protected set; }
 
 		/// <summary>
