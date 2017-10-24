@@ -34,7 +34,7 @@ namespace SafetySharp.Odp
 	/// <summary>
 	///   Represents an agent in the self-organizing system.
 	/// </summary>
-	public abstract partial class BaseAgent : Component, IAgent
+	public abstract class BaseAgent : Component, IAgent
 	{
 		// configuration options
 		public static int MaximumAgentCount = 20;
@@ -507,6 +507,7 @@ namespace SafetySharp.Odp
 #if DEBUG
 			foreach (var role in roles)
 			{
+				Debug.Assert(role.IsValid);
 				if (_allocatedRoles.Any(r => r.PreCondition.StateMatches(role.PreCondition)))
 					throw new Exception("Duplicate precondition");
 				if (_allocatedRoles.Any(r => r.PostCondition.StateMatches(role.PostCondition)))

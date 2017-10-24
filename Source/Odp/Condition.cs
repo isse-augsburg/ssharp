@@ -79,6 +79,11 @@ namespace SafetySharp.Odp
 				   && _statePrefixLength == other._statePrefixLength;
 		}
 
+		/// <summary>
+		///  Indicates if the <see cref="Condition"/> is valid or not.
+		/// </summary>
+		public bool IsValid => Task != null && _statePrefixLength <= Task.RequiredCapabilities.Length;
+
 		#endregion
 
 		#region (copy) constructors
@@ -96,6 +101,7 @@ namespace SafetySharp.Odp
 				throw new ArgumentNullException(nameof(task));
 
 			Debug.Assert(stateLength >= 0 && stateLength <= byte.MaxValue);
+			Debug.Assert(stateLength <= task.RequiredCapabilities.Length);
 
 			Port = port;
 			Task = task;

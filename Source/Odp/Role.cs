@@ -90,6 +90,15 @@ namespace SafetySharp.Odp
 		[CanBeNull]
 		public BaseAgent Output => PostCondition.Port;
 
+		/// <summary>
+		///  Indicates if the <see cref="Role"/> is valid or not.
+		/// </summary>
+		public bool IsValid => PreCondition.IsValid && PostCondition.IsValid
+							   && PostCondition.StateLength >= PreCondition.StateLength
+							   && PostCondition.StateLength > 0
+							   && (PreCondition.Port == null) == (PreCondition.StateLength == 0)
+							   && (PostCondition.Port == null) == (PostCondition.StateLength == Task.RequiredCapabilities.Length);
+
 		#endregion
 
 		#region (copy) constructors
