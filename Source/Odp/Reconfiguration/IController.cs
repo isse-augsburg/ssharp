@@ -41,7 +41,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// </summary>
 		/// <param name="context">An arbitrary context object some controllers may assign meaning to, while others may not.</param>
 		/// <param name="task">The task for which configurations should be updated.</param>
-		[NotNull, ItemCanBeNull] Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task);
+		[NotNull, ItemNotNull] Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task);
 
 		/// <summary>
 		///  Raised when the controller has calculated configurations, just before <see cref="CalculateConfigurationsAsync"/> returns.
