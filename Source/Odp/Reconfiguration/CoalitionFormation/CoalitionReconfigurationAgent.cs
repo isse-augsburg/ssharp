@@ -63,37 +63,45 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			ReconfigurationReason = reconfiguration.Reason;
 
 			var participationRequest = reconfiguration.Reason as ReconfigurationReason.ParticipationRequested;
-			if (participationRequest != null)
+			if (participationRequest == null) // start own reconfiguration
 			{
-				var source = (CoalitionReconfigurationAgent)participationRequest.RequestingAgent;
-				Debug.WriteLine("Agent {0} received a participation request from agent {1}", BaseAgent.Id, source.BaseAgent.Id);
+				await PerformReconfiguration(reconfiguration);
+				return;
+			}
 
-				if (CurrentCoalition != null)
-				{
-					Debug.WriteLine("Agent {0} is already part of a coalition with leader {1}", BaseAgent.Id, CurrentCoalition.Leader.BaseAgent.Id);
-					Debug.Assert(CurrentCoalition.Leader != source, "Invited agent that is already a coalition member.");
+			var source = (CoalitionReconfigurationAgent)participationRequest.RequestingAgent;
+			Debug.WriteLine("Agent {0} received a participation request from agent {1}", BaseAgent.Id, source.BaseAgent.Id);
 
-					CurrentCoalition.MergeCoalition(source);
-					source.CurrentCoalition.AwaitRendezvous(invitedAgent: this, leader: CurrentCoalition.Leader);
-				}
-				else
-				{
-					Debug.WriteLine("Agent {0} is joining coalition with leader {1}", BaseAgent.Id, source.BaseAgent.Id);
-					source.ReceiveResponse(respondingAgent: this);
-				}
+			if (CurrentCoalition != null)
+			{
+				Debug.WriteLine("Agent {0} is already part of a coalition with leader {1}", BaseAgent.Id, CurrentCoalition.Leader.BaseAgent.Id);
+				Debug.Assert(CurrentCoalition.Leader != source, "Invited agent that is already a coalition member.");
+
+				CurrentCoalition.MergeCoalition(source);
+				source.CurrentCoalition.AwaitRendezvous(invitedAgent: this, leader: CurrentCoalition.Leader);
 			}
 			else
 			{
-				var configs = await _controller.CalculateConfigurationsAsync(this, reconfiguration.Task);
-				if (configs != null)
-				{
-					await Task.WhenAll(CurrentCoalition.Members
-													   .Select(member => member.UpdateConfiguration(configs)));
-
-					foreach (var member in CurrentCoalition.Members)
-						member.ConcludeReconfiguration();
-				}
+				Debug.WriteLine("Agent {0} is joining coalition with leader {1}", BaseAgent.Id, source.BaseAgent.Id);
+				source.ReceiveResponse(respondingAgent: this);
 			}
+		}
+
+		private async Task PerformReconfiguration(ReconfigurationRequest reconfiguration)
+		{
+			var configs = await _controller.CalculateConfigurationsAsync(this, reconfiguration.Task);
+
+			// Check whether reconf was successful or if the coalition was merged into another one and disbanded.
+			// In the latter case, do nothing and wait for the merged coalition to complete.
+			if (CurrentCoalition.Leader != this)
+				return;
+
+			// Reconfiguration was successful -- apply new configuration to members
+			await Task.WhenAll(CurrentCoalition.Members
+											   .Select(member => member.UpdateConfiguration(configs)));
+
+			foreach (var member in CurrentCoalition.Members)
+				member.ConcludeReconfiguration();
 		}
 
 		/// <summary>
