@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace Tests.OrganicDesignPattern.UnitTests
+namespace Tests.OrganicDesignPattern.UnitTests.Reconfiguration
 {
 	using System;
 	using Task = System.Threading.Tasks.Task;
