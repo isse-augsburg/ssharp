@@ -159,7 +159,7 @@ namespace SafetySharp.Odp
 				.Transition( // work is done -- pass resource on
 					from: States.ExecuteRole,
 					to: States.Output,
-					guard: RoleExecutor.IsCompleted && RoleExecutor.Output != null,
+					guard: RoleExecutor.IsCompleted && RoleExecutor.Output != null && RoleExecutor.CanHandover, // if cannot (yet) handover, wait
 					action: () => RoleExecutor.Output.ResourceReady(this, RoleExecutor.Role.Value.PostCondition))
 				.Transition( // resource has been consumed
 					from: States.ExecuteRole,
@@ -302,6 +302,18 @@ namespace SafetySharp.Odp
 		}
 
 		/// <summary>
+		///   Checks if the agent is currently able to receive and process a resource
+		///   in the given <paramref name="condition"/> from the given <paramref name="agent"/>.
+		/// </summary>
+		public bool CanReceive([NotNull] BaseAgent agent, Condition condition)
+		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
+
+			return GetRoles(agent, condition).Length > 0;
+		}
+
+		/// <summary>
 		///   Called to notify the agent that another agent wants to send it a resource.
 		///   Creates and queues the appropriate <see cref="ResourceRequest"/>.
 		/// </summary>
@@ -314,7 +326,7 @@ namespace SafetySharp.Odp
 
 			var roles = GetRoles(agent, condition);
 			if (roles.Length == 0)
-				throw new InvalidOperationException("no role found for resource request: invariant violated!");
+				throw new InvalidOperationException($"Agent {Id}: no role found for resource request - invariant violated!");
 
 			foreach (var role in roles)
 				_resourceRequests.Add(new ResourceRequest(agent, role));
