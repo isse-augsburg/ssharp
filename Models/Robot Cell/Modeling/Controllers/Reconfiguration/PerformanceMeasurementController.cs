@@ -59,6 +59,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
         public async Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
         {
 	        var tuple = await AsyncPerformance.Measure(() => _actingController.CalculateConfigurationsAsync(context, task));
+			Debug.WriteLine("Reconfiguration measured");
 	        var resultingTasks = tuple.Item1;
 	        var reconfTime = tuple.Item2;
 
@@ -68,6 +69,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
                 CollectedTimeValues[agent.Id].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatchs[agent.Id].Elapsed-reconfTime.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
                 _stopwatchs[agent.Id].Restart();
             }
+			Debug.WriteLine("Reconfiguration measurement complete");
             return resultingTasks;
         }
 

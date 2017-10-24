@@ -90,8 +90,11 @@ namespace SafetySharp.Odp
 
 		protected virtual async Task UpdateAsync()
 		{
+			Debug.WriteLine("Agent {0}: Observe", Id);
 			await Observe();
+			Debug.WriteLine("Agent {0}: Work", Id);
 			Work();
+			Debug.WriteLine("Agent {0}: Done", Id);
 		}
 
 		#region functional part

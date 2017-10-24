@@ -66,6 +66,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				{
 					var request = _mergeRequests.First.Value;
 					_mergeRequests.RemoveFirst();
+					Debug.WriteLine("Coalition with leader {0} is processing merge request (received when leader was {1}) from coalition with leader {2}",
+						_coalition.Leader.BaseAgent.Id,
+						request.OriginalLeader.BaseAgent.Id,
+						request.OpposingLeader.BaseAgent.Id);
 
 					ExecuteCoalitionMerge(request);
 					_cancel.ThrowIfCancellationRequested();
@@ -83,6 +87,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				// The coalition might already have been merged & disbanded
 				_cancel.ThrowIfCancellationRequested();
 
+				Debug.WriteLine("Coalition with leader {0} waiting for merges to complete.", _coalition.Leader.BaseAgent.Id);
 				while (_pendingCoalitionMerge != null && !_pendingCoalitionMerge.Task.IsCompleted)
 				{
 					// wait for some time, then do the deadlock check
@@ -90,15 +95,21 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 					// The coalition might have been disbanded
 					_cancel.ThrowIfCancellationRequested();
+
 					// detect deadlock
 					if (_mergeRequests.All(request => request.OpposingLeader != _awaitingRendezvousFrom))
 						continue;
 
+					Debug.WriteLine("Coalition with leader {0}: merge-deadlock detected");
 					// determine which agent has to break the deadlock
 					var deadlockBreaker = DetermineLeader(_coalition.Leader, _awaitingRendezvousFrom);
 					if (deadlockBreaker != _coalition.Leader)
+					{
+						Debug.WriteLine("Deadlock must be broken by other coalition");
 						continue;
+					}
 
+					Debug.WriteLine("Breaking deadlock!");
 					// break the deadlock
 					_awaitingRendezvousFrom = null;
 					_pendingCoalitionMerge = null;
@@ -108,6 +119,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					ExecuteCoalitionMerge(deadlockRequest);
 					_cancel.ThrowIfCancellationRequested(); // The coalition might have been disbanded
 				}
+				Debug.WriteLine("Coalition with leader {0}: merges have completed", _coalition.Leader.BaseAgent.Id);
 			}
 
 			/// <summary>
@@ -117,6 +129,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <remarks>May be called from any execution context.</remarks>
 			public void MergeCoalition(CoalitionReconfigurationAgent source)
 			{
+				Debug.WriteLine("Coalition with leader {0} received merge request from coalition with leader {1}", _coalition.Leader.BaseAgent.Id, source.BaseAgent.Id);
 				_mergeRequests.AddLast(new MergeRequest(_coalition.Leader, source));
 			}
 
@@ -128,6 +141,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <remarks>May be called from any execution context.</remarks>
 			public void AwaitRendezvous(CoalitionReconfigurationAgent invitedAgent, CoalitionReconfigurationAgent leader)
 			{
+				Debug.WriteLine("Coalition with leader {0} awaiting rendezvous from coalition with leader {1}",
+					_coalition.Leader.BaseAgent.Id,
+					leader.BaseAgent.Id);
 				_awaitingRendezvousFrom = leader;
 				_pendingCoalitionMerge = new TaskCompletionSource<object>();
 
@@ -146,6 +162,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			{
 				Debug.Assert(_awaitingRendezvousFrom == inNameOf,
 					$"Awaiting rendezvous from agent #{_awaitingRendezvousFrom.BaseAgent.Id}, but received from agent #{inNameOf.BaseAgent.Id}.");
+				Debug.WriteLine("Coalition with leader {0} received rendezvous request in name of {1}",
+					_coalition.Leader.BaseAgent.Id,
+					inNameOf.BaseAgent.Id
+				);
 				_awaitingRendezvousFrom = null;
 
 				if (chosenCoalition == _coalition)
@@ -156,6 +176,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				}
 
 				// actual merge
+				Debug.WriteLine("Merging coalition with leader {0} into coalition with leader {1}", _coalition.Leader.BaseAgent.Id, chosenCoalition.Leader.BaseAgent.Id);
 				foreach (var member in _coalition.Members)
 					chosenCoalition.Join(member);
 
@@ -164,6 +185,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				_pendingCoalitionMerge = null;
 				_cancellation.Cancel();
 
+				Debug.WriteLine("Sending coalition information to the other coalition");
 				chosenCoalition.Merger.ReceiveCoalitionInformation(_mergeRequests, _coalition.ViolatedPredicates, _coalition.IsInitialConfiguration);
 			}
 
@@ -191,9 +213,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			private void ExecuteCoalitionMerge(MergeRequest request)
 			{
 				if (request.OpposingLeader.CurrentCoalition == _coalition)
+				{
+					Debug.WriteLine("Ignoring merge request: coalitions already merged");
 					return;
+				}
 
 				var leader = DetermineLeader(_coalition.Leader, request.OpposingLeader);
+				Debug.WriteLine("Leader of merged coalition will be {0}", leader.BaseAgent.Id);
 				request.OpposingMerger.RendezvousRequest(chosenCoalition: leader.CurrentCoalition, inNameOf: request.OriginalLeader);
 			}
 

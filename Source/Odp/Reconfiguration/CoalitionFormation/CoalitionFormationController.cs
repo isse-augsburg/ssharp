@@ -66,10 +66,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		protected async Task<ConfigurationUpdate> CalculateConfigurations(Coalition coalition)
 		{
+			Debug.WriteLine("Begin coalition-based reconfiguration");
 			try
 			{
 				ConfigurationUpdate config;
 
+				Debug.WriteLine("Recruiting necessary agents");
 				var fragmentComputations = new List<Task<TaskFragment>>();
                 // recruit for initial reconfigurations
                 if (coalition.IsInitialConfiguration)
@@ -82,31 +84,41 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
                 // merge minimal fragments from all strategies
                 var minTfr = TaskFragment.Merge(coalition.Task, fragments);
 
+				Debug.WriteLine("Inviting CTF agents");
 				coalition.MergeCtf(minTfr);
 				await coalition.InviteCtfAgents();
 
 				do
 				{
+					Debug.WriteLine("Calculating distributions");
 					foreach (var distribution in CalculateCapabilityDistributions(coalition))
 					{
+						Debug.WriteLine("Distribution found");
 						var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
 
 						// compute tfr, edge, core agents
 						reconfSuggestion.ComputeTfr(minTfr);
+						Debug.WriteLine("Inviting edge agents");
 						foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
 							await coalition.Invite(edgeAgent);
 
 						// use dijkstra to find resource flow
+						Debug.WriteLine("Computing resource flow");
 						var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
+						Debug.WriteLine("ResourceFlow {0} found", (object)(resourceFlow == null ? "not" : "indeed"));
 						if (resourceFlow != null)
 						{
+							Debug.WriteLine("Computing role allocations");
 							config = ComputeRoleAllocations(reconfSuggestion, resourceFlow.ToArray());
                             config.RecordInvolvement(coalition.BaseAgents);
 							OnConfigurationsCalculated(coalition.Task, config);
+							Debug.WriteLine("Reconfiguration complete");
 							return config;
 						}
+						Debug.WriteLine("No luck with this distribution.");
 					}
 
+					Debug.WriteLine("Inviting arbitrary neighbour");
                     // still no solution found: recruit an arbitrary known agent, try again
 				    if (coalition.HasNeighbours)
 				        await coalition.InviteNeighbour();
@@ -121,11 +133,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			catch (OperationCanceledException)
 			{
 				// operation was canceled (e.g. because coalition was merged into another coalition), so produce no updates
+				Debug.WriteLine("Controller for coalition with leader {0} cancelled", coalition.Leader.BaseAgent.Id);
 				return new ConfigurationUpdate();
 			}
 			catch (RestartReconfigurationException)
 			{
 				// restart reconfiguration, e.g. because another coalition was just merged into the current one
+				Debug.WriteLine("Controller for coalition with leader {0} restarted", coalition.Leader.BaseAgent.Id);
 				return await CalculateConfigurations(coalition);
 			}
 		}

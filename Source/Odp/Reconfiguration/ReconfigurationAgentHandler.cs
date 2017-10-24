@@ -105,6 +105,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			}
 
 			await Task.WhenAll(newReconfigurations);
+			Debug.WriteLine("{0}: Reconfiguration at {1} completed", nameof(ReconfigurationAgentHandler), _baseAgent.Id);
 		}
 
 		#region interface presented to reconfiguration agent

@@ -24,6 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
 
@@ -55,11 +56,14 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <returns>A <see cref="TaskFragment"/> that must be included in the TFR because of this role.</returns>
 		private static async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition, BaseAgent agent, Role affectedRole)
 		{
+			Debug.WriteLine("{0}: recruiting agents for role", nameof(BrokenIoStrategy));
+
 			// predecessor
 			var currentRole = affectedRole;
 			var currentAgent = agent;
 			var previousAgent = currentRole.Input;
 
+			Debug.WriteLine("Finding non-empty predecessor");
 			while (previousAgent != null && previousAgent.IsAlive && !currentRole.CapabilitiesToApply.Any())
 			{
 				await coalition.Invite(previousAgent);
@@ -76,6 +80,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			currentAgent = agent;
 			var nextAgent = currentRole.Output;
 
+			Debug.WriteLine("Finding non-empty successor");
 			while (nextAgent != null && nextAgent.IsAlive && !currentRole.CapabilitiesToApply.Any())
 			{
 				await coalition.Invite(nextAgent);
