@@ -68,7 +68,7 @@ namespace SafetySharp.Odp
 		/// <summary>
 		///  The capabilities applied during execution of this <see cref="Role"/>.
 		/// </summary>
-		[NotNull]
+		[NotNull, ItemNotNull]
 		public IEnumerable<ICapability> CapabilitiesToApply => Task.RequiredCapabilities
 				.Skip(PreCondition.StateLength)
 				.Take(PostCondition.StateLength - PreCondition.StateLength);
@@ -114,7 +114,7 @@ namespace SafetySharp.Odp
 		/// <summary>
 		///  Returns a copy of the resource that is locked iff <paramref name="locked"/> is <c>true</c>.
 		/// </summary>
-		[MustUseReturnValue]
+		[MustUseReturnValue, Pure]
 		public Role Lock(bool locked = true)
 		{
 			return new Role(PreCondition, PostCondition, locked);
@@ -124,8 +124,8 @@ namespace SafetySharp.Odp
 		///  Returns a copy of the <see cref="Role"/> with the given <see cref="port"/> as <see cref="Input"/>.
 		///  Updates the <see cref="PreCondition"/> accordingly.
 		/// </summary>
-		[MustUseReturnValue]
-		public Role WithInput(BaseAgent port)
+		[MustUseReturnValue, Pure]
+		public Role WithInput([CanBeNull] BaseAgent port)
 		{
 			return new Role(PreCondition.WithPort(port), PostCondition, IsLocked);
 		}
@@ -134,8 +134,8 @@ namespace SafetySharp.Odp
 		///  Returns a copy of the <see cref="Role"/> with the given <see cref="port"/> as <see cref="Output"/>.
 		///  Updates the <see cref="PostCondition"/> accordingly.
 		/// </summary>
-		[MustUseReturnValue]
-		public Role WithOutput(BaseAgent port)
+		[MustUseReturnValue, Pure]
+		public Role WithOutput([CanBeNull] BaseAgent port)
 		{
 			return new Role(PreCondition, PostCondition.WithPort(port), IsLocked);
 		}
@@ -144,8 +144,8 @@ namespace SafetySharp.Odp
 		///  Returns a copy of the <see cref="Role"/> that additionally applies the given <paramref name="capability"/>.
 		///  Updates the <see cref="PostCondition"/> accordingly.
 		/// </summary>
-		[MustUseReturnValue]
-		public Role WithCapability(ICapability capability)
+		[MustUseReturnValue, Pure]
+		public Role WithCapability([NotNull] ICapability capability)
 		{
 			return new Role(PreCondition, PostCondition.WithCapability(capability), IsLocked);
 		}

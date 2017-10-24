@@ -151,6 +151,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// and the coalitions is disbanded (merged into another coalition).</exception>
 		public async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent)
 		{
+			Debug.WriteLine("Coalition with leader {0} inviting agent {1}", Leader.BaseAgent.Id, agent.Id);
+
 			// sanity check: algorithm should never attempt to invite dead agents
 			if (!agent.IsAlive)
 				throw new InvalidOperationException("Cannot contact dead agents");
@@ -162,7 +164,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			// Do not re-invite current members.
 			var existingMember = Members.FirstOrDefault(member => member.BaseAgent == agent);
 			if (existingMember != null)
+			{
+				Debug.WriteLine("Agent {0} is already a coalition member. No invite issued.", agent.Id);
 				return existingMember;
+			}
+			Debug.WriteLine("No existing member for agent {0} found.", agent.Id);
 
 			// Invite the agent.
 			_invitations[agent] = new TaskCompletionSource<CoalitionReconfigurationAgent>();
@@ -172,6 +178,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			// be swallowed. Thus, schedule the call. MicrostepScheduler handles swallowed
 			// exceptions.
 			MicrostepScheduler.Schedule(() => agent.RequestReconfiguration(Leader, Task));
+			Debug.WriteLine("Invitation issued to agent {0}", agent.Id);
 
 			var newMember = await _invitations[agent].Task; // wait for the invited agent to respond
 
