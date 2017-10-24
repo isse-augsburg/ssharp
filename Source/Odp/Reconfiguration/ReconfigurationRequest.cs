@@ -23,21 +23,52 @@
 namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
-	using System.Collections.Generic;
-	using System.Threading.Tasks;
 	using JetBrains.Annotations;
 
 	/// <summary>
-	///   Handles reconfigurations of agents.
+	///   Represents a <see cref="BaseAgent"/>'s request for a reconfiguration.
 	/// </summary>
-	public interface IReconfigurationStrategy
+	public struct ReconfigurationRequest
 	{
 		/// <summary>
-		///   Performs the requested reconfigurations.
+		///   The task that should be reconfigured.
 		/// </summary>
-		/// <param name="reconfigurations">A list of reconfiguration requests.</param>
-		/// <returns>A task that completes when all requested reconfigurations have completed.</returns>
 		[NotNull]
-		Task Reconfigure(IEnumerable<ReconfigurationRequest> reconfigurations);
+		public ITask Task { get; }
+
+		/// <summary>
+		///   The reason for the reconfiguration.
+		/// </summary>
+		[NotNull]
+		public ReconfigurationReason Reason { get; }
+
+		/// <summary>
+		///   Creates a new request. always use this instead of the default constructor.
+		/// </summary>
+		public ReconfigurationRequest([NotNull] ITask task, [NotNull] ReconfigurationReason reason)
+		{
+			if (task == null)
+				throw new ArgumentNullException(nameof(task));
+			if (reason == null)
+				throw new ArgumentNullException(nameof(reason));
+
+			Task = task;
+			Reason = reason;
+		}
+
+		public static ReconfigurationRequest Initial(ITask task)
+		{
+			return new ReconfigurationRequest(task, ReconfigurationReason.InitialReconfiguration.Instance);
+		}
+
+		public static ReconfigurationRequest Request(ITask task, IAgent agent)
+		{
+			return new ReconfigurationRequest(task, new ReconfigurationReason.ParticipationRequested(agent));
+		}
+
+		public static ReconfigurationRequest Violation(ITask task, InvariantPredicate[] predicates)
+		{
+			return new ReconfigurationRequest(task, new ReconfigurationReason.InvariantsViolated(predicates));
+		}
 	}
 }

@@ -55,19 +55,22 @@ namespace SafetySharp.Odp.Reconfiguration
 			_roleCalculationAgent.Acknowledge(_task);
 		}
 
-		public void StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
+		public void StartReconfiguration(ReconfigurationRequest reconfiguration)
 		{
-			_task = task;
+			_task = reconfiguration.Task;
 
-			if (agent == _baseAgent) // invariant violation detected
+			var participationRequest = reconfiguration.Reason as ReconfigurationReason.ParticipationRequested;
+			if (participationRequest == null)
 			{
+				Debug.Assert(reconfiguration.Reason is ReconfigurationReason.InvariantsViolated || reconfiguration.Reason is ReconfigurationReason.InitialReconfiguration);
+
 				_roleCalculationAgent = new RoleCalculationAgent(_controller);
-				_roleCalculationAgent.StartCentralReconfiguration(task, _baseAgent, baseAgentState);
+				_roleCalculationAgent.StartCentralReconfiguration(_task, _baseAgent);
 			}
 			else // a reconfiguration has already been already started
 			{
-				_roleCalculationAgent = (RoleCalculationAgent)agent; // may already have this value, if reconfiguration initiated by this instance
-				_roleCalculationAgent.AcknowledgeReconfigurationRequest(task, this, baseAgentState);
+				_roleCalculationAgent = (RoleCalculationAgent)participationRequest.RequestingAgent; // may already have this value, if reconfiguration initiated by this instance
+				_roleCalculationAgent.AcknowledgeReconfigurationRequest(_task, this, _baseAgent);
 			}
 		}
 
@@ -104,7 +107,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				_functioningAgents = _controller.Agents.Where(agent => agent.IsAlive).ToArray();
 			}
 
-			public void StartCentralReconfiguration(ITask task, BaseAgent agent, object bastate)
+			public void StartCentralReconfiguration(ITask task, BaseAgent agent)
 			{
 				_stateMachine.Transition(
 					from: State.Idle,
@@ -116,12 +119,12 @@ namespace SafetySharp.Odp.Reconfiguration
 				);
 			}
 
-			public void AcknowledgeReconfigurationRequest(ITask task, ControllerReconfigurationAgent agent, BaseAgent.State baseAgentState)
+			public void AcknowledgeReconfigurationRequest(ITask task, ControllerReconfigurationAgent agent, BaseAgent baseAgent)
 			{
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,
 					to: State.GatherGlobalKnowledge,
-					action: () => _reconfAgents.Add(baseAgentState.Id, agent)
+					action: () => _reconfAgents.Add(baseAgent.Id, agent)
 				);
 				_stateMachine.Transition(
 					from: State.GatherGlobalKnowledge,

@@ -68,9 +68,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		    }
 
 			if (TaskQueue?.Count > 0)
-				await PerformReconfiguration(new[] {
-					Tuple.Create(TaskQueue.Dequeue() as ITask, new State(this, null, true))
-				});
+				await PerformReconfiguration(new[] { ReconfigurationRequest.Initial(TaskQueue.Dequeue()) });
+
 			await base.UpdateAsync();
 		}
 
