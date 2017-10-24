@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 	using System.Threading.Tasks;
 	using SafetySharp.Modeling;
 	using Odp;
+	using Odp.Reconfiguration;
 
 	/// <summary>
 	///   A production station that modifies containers.
@@ -51,9 +52,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		protected override async Task UpdateAsync()
 		{
 			if (RecipeQueue.Count > 0)
-				await PerformReconfiguration(new[] {
-					Tuple.Create((ITask)RecipeQueue.Dequeue(), new State(this))
-				});
+				await PerformReconfiguration(new[] { ReconfigurationRequest.Initial(RecipeQueue.Dequeue()) });
 
 			await base.UpdateAsync();
 		}

@@ -29,6 +29,7 @@ namespace SafetySharp.Odp
 	using System.Threading.Tasks;
 	using JetBrains.Annotations;
 	using Modeling;
+	using Reconfiguration;
 
 	/// <summary>
 	///   Represents an agent in the self-organizing system.
@@ -415,16 +416,15 @@ namespace SafetySharp.Odp
 
 			await PerformReconfiguration(
 				from vio in violations
-				let state = new State(this, null, false, vio.Value.ToArray())
-				select Tuple.Create(vio.Key, state)
+				select ReconfigurationRequest.Violation(vio.Key, vio.Value.ToArray())
 			);
 		}
 
 		/// <summary>
 		///   Performs a reconfiguration of the given tasks.
 		/// </summary>
-		/// <param name="reconfigurations">A list of tuples, each containing a task to be reconfigured and a description of the agent's state.</param>
-		protected async Task PerformReconfiguration([NotNull] [ItemNotNull] IEnumerable<Tuple<ITask, State>> reconfigurations)
+		/// <param name="reconfigurations">A list of reconfiguration requests.</param>
+		protected async Task PerformReconfiguration([NotNull] IEnumerable<ReconfigurationRequest> reconfigurations)
 		{
 			if (reconfigurations == null)
 				throw new ArgumentNullException(nameof(reconfigurations));
@@ -493,9 +493,7 @@ namespace SafetySharp.Odp
 			if (task == null)
 				throw new ArgumentNullException(nameof(task));
 
-			return PerformReconfiguration(new[] {
-				Tuple.Create(task, new State(this, agent))
-			});
+			return PerformReconfiguration(new[] { ReconfigurationRequest.Request(task, agent) });
 		}
 
 		/// <summary>

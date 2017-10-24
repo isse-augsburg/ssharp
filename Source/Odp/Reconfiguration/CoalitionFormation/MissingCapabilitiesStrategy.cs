@@ -35,7 +35,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		public async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition)
 		{
 			var availableCapabilities = new HashSet<ICapability>(
-				coalition.Members.SelectMany(member => member.BaseAgentState.AvailableCapabilities)
+				coalition.Members.SelectMany(member => member.BaseAgent.AvailableCapabilities)
 			);
 
 			foreach (var agent in new AgentQueue(coalition))
@@ -44,7 +44,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					break;
 
 				var newMember = await coalition.Invite(agent);
-				availableCapabilities.UnionWith(newMember.BaseAgentState.AvailableCapabilities);
+				availableCapabilities.UnionWith(newMember.BaseAgent.AvailableCapabilities);
 			}
 
 			// return empty fragment - positions where capability allocations change are included anyway

@@ -110,13 +110,13 @@ namespace Tests.OrganicDesignPattern.SimulationTests
 		        if (!_initialized)
 		        {
 		            _initialized = true;
-		            await PerformReconfiguration(new[] { Tuple.Create(_task, new State(this)) });
+		            await PerformReconfiguration(new[] { ReconfigurationRequest.Initial(_task) });
                 }
 		        else if (_justRestored)
 		        {
 		            _justRestored = false;
 		            foreach (var task in _monitor.GetTasksToContinue())
-		                await PerformReconfiguration(new[] { Tuple.Create(task, new State(this)) });
+		                await PerformReconfiguration(new[] { ReconfigurationRequest.Initial(task) });
 		        }
 		        await base.UpdateAsync();
 		    }

@@ -36,9 +36,9 @@ namespace SafetySharp.Odp.Reconfiguration
 			_controller = controller;
 		}
 
-		public virtual async Task Reconfigure(IEnumerable<Tuple<ITask, BaseAgent.State>> reconfigurations)
+		public virtual async Task Reconfigure(IEnumerable<ReconfigurationRequest> reconfigurations)
 		{
-			var tasks = reconfigurations.Select(tuple => tuple.Item1).ToArray();
+			var tasks = reconfigurations.Select(request => request.Task).ToArray();
 
 			foreach (var task in tasks)
 			{

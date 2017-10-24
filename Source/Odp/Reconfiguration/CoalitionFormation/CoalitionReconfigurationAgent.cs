@@ -44,7 +44,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		}
 
 		public Coalition CurrentCoalition { get; set; }
-		public BaseAgent.State BaseAgentState { get; private set; }
+		public ReconfigurationReason ReconfigurationReason { get; private set; }
 
 		private TaskCompletionSource<object> _acknowledgment;
 
@@ -53,18 +53,19 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			_acknowledgment?.SetResult(null);
 		}
 
-		void IReconfigurationAgent.StartReconfiguration(ITask task, IAgent agent, BaseAgent.State baseAgentState)
+		void IReconfigurationAgent.StartReconfiguration(ReconfigurationRequest reconfiguration)
 		{
-			MicrostepScheduler.Schedule(() => ReconfigureAsync(task, agent, baseAgentState));
+			MicrostepScheduler.Schedule(() => ReconfigureAsync(reconfiguration));
 		}
 
-		public async Task ReconfigureAsync(ITask task, IAgent agent, BaseAgent.State baseAgentState)
+		private async Task ReconfigureAsync(ReconfigurationRequest reconfiguration)
 		{
-			BaseAgentState = baseAgentState;
+			ReconfigurationReason = reconfiguration.Reason;
 
-			if (baseAgentState.ReconfRequestSource != null)
+			var participationRequest = reconfiguration.Reason as ReconfigurationReason.ParticipationRequested;
+			if (participationRequest != null)
 			{
-				var source = (CoalitionReconfigurationAgent)baseAgentState.ReconfRequestSource;
+				var source = (CoalitionReconfigurationAgent)participationRequest.RequestingAgent;
 				Debug.WriteLine("Agent {0} received a participation request from agent {1}", BaseAgent.Id, source.BaseAgent.Id);
 
 				if (CurrentCoalition != null)
@@ -83,7 +84,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 			else
 			{
-				var configs = await _controller.CalculateConfigurationsAsync(this, task);
+				var configs = await _controller.CalculateConfigurationsAsync(this, reconfiguration.Task);
 				if (configs != null)
 				{
 					await Task.WhenAll(CurrentCoalition.Members
