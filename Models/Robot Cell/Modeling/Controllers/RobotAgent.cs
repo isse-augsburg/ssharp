@@ -295,7 +295,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			protected override bool CheckInput(Agent agent) => false;
 			protected override bool CheckOutput(Agent agent) => false;
 
-			public override IEnumerable<ICapability> AvailableCapabilities { get; } = new ICapability[0];
+			public override IEnumerable<ICapability> AvailableCapabilities => Enumerable.Empty<ICapability>();
 		}
 
 		[FaultEffect]
