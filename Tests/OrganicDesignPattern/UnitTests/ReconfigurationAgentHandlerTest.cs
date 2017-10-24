@@ -40,10 +40,9 @@ namespace Tests.OrganicDesignPattern.UnitTests
 			// arrange
 			var task = Substitute.For<ITask>();
 			var agent = Substitute.For<BaseAgent>();
-			var state = Substitute.For<BaseAgent.State>(agent, null, false, new InvariantPredicate[0]);
 
 			var handler = new ReconfigurationAgentHandler(agent, (a, h, t) => Substitute.For<IReconfigurationAgent>());
-			var reconfs = new[] { Tuple.Create(task, state) };
+			var reconfs = new[] { ReconfigurationRequest.Initial(task) };
 
 			// act
 			var reconf1 = handler.Reconfigure(reconfs);
@@ -71,10 +70,9 @@ namespace Tests.OrganicDesignPattern.UnitTests
 
 			var task = Substitute.For<ITask>();
 			var agent = Substitute.For<BaseAgent>();
-			var state = Substitute.For<BaseAgent.State>(agent, null, false, new InvariantPredicate[0]);
 
 			var handler = new ReconfigurationAgentHandler(agent, createReconfAgent);
-			var reconfs = new[] { Tuple.Create(task, state) };
+			var reconfs = new[] { ReconfigurationRequest.Initial(task) };
 
 			// act
 			var firstReconf = handler.Reconfigure(reconfs);
@@ -97,17 +95,16 @@ namespace Tests.OrganicDesignPattern.UnitTests
 
 			var task = Substitute.For<ITask>();
 			var agent = Substitute.For<BaseAgent>();
-			var state = Substitute.For<BaseAgent.State>(agent, null, false, new InvariantPredicate[0]);
 
 			var handler = new ReconfigurationAgentHandler(agent, (a, h, t) => reconfAgent);
-			var reconfs = new[] { Tuple.Create(task, state) };
+			var reconfs = new[] { ReconfigurationRequest.Initial(task) };
 
 			// act - assert
 			handler.Reconfigure(reconfs);
-			reconfAgent.Received(1).StartReconfiguration(task, agent, state);
+			reconfAgent.Received(1).StartReconfiguration(reconfs[0]);
 
 			handler.Reconfigure(reconfs);
-			reconfAgent.Received(2).StartReconfiguration(task, agent, state);
+			reconfAgent.Received(2).StartReconfiguration(reconfs[0]);
 		}
 
 		[Fact]
@@ -119,10 +116,9 @@ namespace Tests.OrganicDesignPattern.UnitTests
 			var config = Substitute.For<ConfigurationUpdate>();
 			var task = Substitute.For<ITask>();
 			var agent = Substitute.For<BaseAgent>();
-			var state = Substitute.For<BaseAgent.State>(agent, null, false, new InvariantPredicate[0]);
 
 			var handler = new ReconfigurationAgentHandler(agent, (a, h, t) => reconfAgent);
-			var reconfs = new[] { Tuple.Create(task, state) };
+			var reconfs = new[] { ReconfigurationRequest.Initial(task) };
 
 			// act
 			handler.Reconfigure(reconfs);
