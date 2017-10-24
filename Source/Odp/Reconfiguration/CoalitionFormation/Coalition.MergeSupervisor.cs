@@ -22,14 +22,19 @@
 
 namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading;
 	using System.Threading.Tasks;
+	using JetBrains.Annotations;
 
 	partial class Coalition
 	{
+		/// <summary>
+		///   Handles coalition merges for a <see cref="Coalition"/>.
+		/// </summary>
 		private class MergeSupervisor
 		{
 			private readonly LinkedList<MergeRequest> _mergeRequests = new LinkedList<MergeRequest>();
@@ -42,7 +47,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			private readonly CancellationToken _cancel;
 
-
 			private readonly Coalition _coalition;
 
 			public MergeSupervisor(Coalition coalition)
@@ -52,9 +56,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 
 			/// <summary>
-			/// Handles merge requests created when members are invited by another coalition.
+			///   Handles merge requests created when members are invited by another coalition.
 			/// </summary>
-			/// <exception cref="System.OperationCanceledException">Thrown if a merge results in dissolution of the coalition.</exception>
+			/// <exception cref="OperationCanceledException">Thrown if a merge results in dissolution of the coalition.</exception>
+			/// <remarks>Must be executed in this instance's <see cref="_coalition"/>'s execution context.</remarks>
 			public void ProcessMergeRequests()
 			{
 				while (_mergeRequests.Count > 0)
@@ -68,19 +73,23 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 
 			/// <summary>
-			/// Waits for a pending merge (if any) to complete,
-			/// while at the same time avoiding deadlocks due to cyclic merge requests.
+			///   Waits for a pending merge (if any) to complete,
+			///   while at the same time avoiding deadlocks due to cyclic merge requests.
 			/// </summary>
+			/// <exception cref="OperationCanceledException">Thrown if a merge results in dissolution of the coalition.</exception>
+			/// <remarks>Must be executed in this instance's <see cref="_coalition"/>'s execution context.</remarks>
 			public async Task WaitForMergeCompletion()
 			{
-				if (_pendingCoalitionMerge == null || _pendingCoalitionMerge.Task.IsCompleted)
-					return;
+				// The coalition might already have been merged & disbanded
+				_cancel.ThrowIfCancellationRequested();
 
-				while (!_pendingCoalitionMerge.Task.IsCompleted)
+				while (_pendingCoalitionMerge != null && !_pendingCoalitionMerge.Task.IsCompleted)
 				{
 					// wait for some time, then do the deadlock check
 					await System.Threading.Tasks.Task.Yield();
 
+					// The coalition might have been disbanded
+					_cancel.ThrowIfCancellationRequested();
 					// detect deadlock
 					if (_mergeRequests.All(request => request.OpposingLeader != _awaitingRendezvousFrom))
 						continue;
@@ -94,29 +103,29 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					_awaitingRendezvousFrom = null;
 					_pendingCoalitionMerge = null;
 
-					var deadlockRequest = _mergeRequests.FirstOrDefault(request => request.OpposingLeader == _awaitingRendezvousFrom);
+					var deadlockRequest = _mergeRequests.First(request => request.OpposingLeader == _awaitingRendezvousFrom);
 					_mergeRequests.Remove(deadlockRequest);
 					ExecuteCoalitionMerge(deadlockRequest);
 					_cancel.ThrowIfCancellationRequested(); // The coalition might have been disbanded
-
-					break;
 				}
 			}
 
 			/// <summary>
-			/// Called by members to notify the coalition they have been invited by another coalition.
+			///   Called by members to notify the coalition they have been invited by another coalition.
 			/// </summary>
 			/// <param name="source">The agent that invited a member, i.e. the leader of the other coalition.</param>
+			/// <remarks>May be called from any execution context.</remarks>
 			public void MergeCoalition(CoalitionReconfigurationAgent source)
 			{
 				_mergeRequests.AddLast(new MergeRequest(_coalition.Leader, source));
 			}
 
 			/// <summary>
-			/// Notifies the coalition an invited agent already belongs to a different coalition,
-			/// and that it will receive a <see cref="RendezvousRequest(Coalition, CoalitionReconfigurationAgent)"/> from
-			/// the opposing <paramref name="leader"/>.
+			///   Notifies the coalition that an invited agent already belongs to a different coalition,
+			///   and that it will receive a <see cref="RendezvousRequest(Coalition, CoalitionReconfigurationAgent)"/> from
+			///   the opposing <paramref name="leader"/>.
 			/// </summary>
+			/// <remarks>May be called from any execution context.</remarks>
 			public void AwaitRendezvous(CoalitionReconfigurationAgent invitedAgent, CoalitionReconfigurationAgent leader)
 			{
 				_awaitingRendezvousFrom = leader;
@@ -132,6 +141,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <param name="chosenCoalition">The coalition which will take over, i.e., either this instance or the other coalition.</param>
 			/// <param name="inNameOf">The agent who lead the other coalition when the <see cref="AwaitRendezvous"/>
 			/// message was sent.</param>
+			/// <remarks>Called from the opposite coalition's execution context.</remarks>
 			private void RendezvousRequest(Coalition chosenCoalition, CoalitionReconfigurationAgent inNameOf)
 			{
 				Debug.Assert(_awaitingRendezvousFrom == inNameOf,
@@ -148,23 +158,27 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				// actual merge
 				foreach (var member in _coalition.Members)
 					chosenCoalition.Join(member);
-				chosenCoalition.Merger.ReceiveCoalitionInformation(_mergeRequests, _coalition.ViolatedPredicates, _coalition.IsInitialConfiguration);
 
 				// stop controller from continuing
 				_pendingCoalitionMerge.SetResult(null);
 				_pendingCoalitionMerge = null;
-				_cancellation.Cancel(throwOnFirstException: true);
+				_cancellation.Cancel();
+
+				chosenCoalition.Merger.ReceiveCoalitionInformation(_mergeRequests, _coalition.ViolatedPredicates, _coalition.IsInitialConfiguration);
 			}
 
 			/// <summary>
 			/// Passes meta-information from a coalition that is merged into this instance.
 			/// </summary>
+			/// <exception cref="RestartReconfigurationException">Always thrown.</exception>
+			/// <remarks>Must be executed in this instance's <see cref="_coalition"/>'s execution context.</remarks>
+			[ContractAnnotation("=> halt")]
 			private void ReceiveCoalitionInformation(IEnumerable<MergeRequest> mergeRequests, InvariantPredicate[] violatedPredicates, bool initialConf)
 			{
 				foreach (var request in mergeRequests)
 					_mergeRequests.AddLast(request);
 				_coalition.ViolatedPredicates = _coalition.ViolatedPredicates.Concat(violatedPredicates).ToArray();
-			    _coalition.IsInitialConfiguration = initialConf;
+			    _coalition.IsInitialConfiguration = _coalition.IsInitialConfiguration || initialConf;
 
 				throw new RestartReconfigurationException();
 			}
@@ -173,6 +187,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// Executes the merge of two coalitions.
 			/// </summary>
 			/// <param name="request">The <see cref="MergeRequest"/> being executed.</param>
+			/// <remarks>Must be executed in this instance's <see cref="_coalition"/>'s execution context.</remarks>
 			private void ExecuteCoalitionMerge(MergeRequest request)
 			{
 				if (request.OpposingLeader.CurrentCoalition == _coalition)
@@ -185,6 +200,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <summary>
 			/// Given two coalition leaders, determines which one will lead the merged coalition.
 			/// </summary>
+			/// <remarks>May be called from any execution context.</remarks>
+			[Pure]
 			private static CoalitionReconfigurationAgent DetermineLeader(CoalitionReconfigurationAgent leader1, CoalitionReconfigurationAgent leader2)
 			{
 				if (leader1.BaseAgent.Id < leader2.BaseAgent.Id)
@@ -197,8 +214,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// </summary>
 			private struct MergeRequest
 			{
-				public MergeRequest(CoalitionReconfigurationAgent originalLeader, CoalitionReconfigurationAgent opposingLeader)
+				public MergeRequest([NotNull] CoalitionReconfigurationAgent originalLeader, [NotNull] CoalitionReconfigurationAgent opposingLeader)
 				{
+					if (originalLeader == null)
+						throw new ArgumentNullException(nameof(originalLeader));
+					if (opposingLeader == null)
+						throw new ArgumentNullException(nameof(opposingLeader));
+
 					OriginalLeader = originalLeader;
 					OpposingLeader = opposingLeader;
 				}
@@ -206,13 +228,16 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				/// <summary>
 				/// Leader of the coalition that shall be merged.
 				/// </summary>
+				[NotNull]
 				public CoalitionReconfigurationAgent OpposingLeader { get; }
 
+				[NotNull]
 				public MergeSupervisor OpposingMerger => OpposingLeader.CurrentCoalition.Merger;
 
 				/// <summary>
 				/// The original leader of the coalition that first created the request.
 				/// </summary>
+				[NotNull]
 				public CoalitionReconfigurationAgent OriginalLeader { get; }
 			}
 		}
