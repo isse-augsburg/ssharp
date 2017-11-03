@@ -120,8 +120,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 					Debug.WriteLine("Inviting arbitrary neighbour");
                     // still no solution found: recruit an arbitrary known agent, try again
-				    if (coalition.HasNeighbours)
-				        await coalition.InviteNeighbour();
+					if (coalition.HasNeighbours)
+					{
+						await coalition.InviteNeighbour();
+						await coalition.InviteCtfAgents(); // CTF might have grown - make sure to fill all gaps if it has
+					}
 
 				} while (coalition.HasNeighbours);
 
