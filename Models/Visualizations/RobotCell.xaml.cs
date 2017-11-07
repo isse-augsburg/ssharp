@@ -15,14 +15,29 @@ using System.Windows.Shapes;
 
 namespace SafetySharp.CaseStudies.Visualizations
 {
+    using System;
+    using CaseStudies.RobotCell.Modeling;
+    using CaseStudies.RobotCell.Modeling.Controllers;
+    using CaseStudies.RobotCell.Modeling.Plants;
+    using Odp;
+
     /// <summary>
     /// Interaktionslogik für RobotCell.xaml
     /// </summary>
     public partial class RobotCell
-    { 
+    {
+        private Model _model;
         public RobotCell()
         {
             InitializeComponent();
+            SimulationControls.ModelStateChanged += (o, e) => UpdateModelState();
+            SimulationControls.Reset += (o, e) => OnModelStateReset();
+            SimulationControls.SetModel(new Model());
+
+            UpdateModelState();
+
+            SimulationControls.MaxSpeed = 64;
+            SimulationControls.ChangeSpeed(1);
         }
 
 

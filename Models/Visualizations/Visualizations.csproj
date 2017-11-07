@@ -158,6 +158,10 @@
     <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Source\Odp\Odp.csproj">
+      <Project>{56f7aec6-842d-4dfc-a217-51623facf1f0}</Project>
+      <Name>Odp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Source\SafetySharp\SafetySharp.csproj">
       <Project>{9b6c1fb4-3f1b-43ac-a0e0-eaed4088bf37}</Project>
       <Name>SafetySharp</Name>
@@ -177,6 +181,10 @@
     <ProjectReference Include="..\Pressure Tank\Pressure Tank.csproj">
       <Project>{2834343c-5d3a-4673-9f58-f869f4e3cc01}</Project>
       <Name>Pressure Tank</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Robot Cell\Robot Cell.csproj">
+      <Project>{07deade8-4700-4f51-af54-ee88878c0127}</Project>
+      <Name>Robot Cell</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
