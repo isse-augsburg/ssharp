@@ -68,6 +68,9 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="OwnRobot_Test.xaml.cs">
+      <DependentUpon>OwnRobot_Test.xaml</DependentUpon>
+    </Compile>
     <Compile Include="RailroadCrossing.xaml.cs">
       <DependentUpon>RailroadCrossing.xaml</DependentUpon>
     </Compile>
@@ -107,6 +110,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="OwnRobot_Test.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="RailroadCrossing.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

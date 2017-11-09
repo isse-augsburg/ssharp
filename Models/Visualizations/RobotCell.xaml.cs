@@ -44,10 +44,15 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         private void OnModelStateReset()
         {
+            _model = (Model)SimulationControls.Model;
 
+            if (SimulationControls.Simulator.IsReplay)
+                return;
         }
 
         private void UpdateModelState() {
+
+            //to be implemented
 
         }
     }
