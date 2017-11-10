@@ -50,7 +50,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	        = new HashSet<CoalitionReconfigurationAgent>();
 
 	    private readonly HashSet<BaseAgent> _baseAgents = new HashSet<BaseAgent>();
-		public IEnumerable<BaseAgent> BaseAgents => _baseAgents;
+		public ISet<BaseAgent> BaseAgents => _baseAgents;
 
 		private readonly Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>> _invitations
 			= new Dictionary<BaseAgent, TaskCompletionSource<CoalitionReconfigurationAgent>>();

@@ -168,51 +168,20 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			return _strategies[invariant].RecruitNecessaryAgents(coalition);
 		}
 
-		/// <summary>
-		/// Lazily calculates all possible distributions of the capabilities in CTF between the members of the coalition.
-		/// </summary>
-		protected IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
+		private IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
 		{
-			var distribution = new BaseAgent[coalition.CTF.Length];
-			return CalculateCapabilityDistributions(coalition, distribution, 0)
-				.OrderBy(newDistribution =>
-				{
-					var changedPositions = Enumerable.Range(0, newDistribution.Length)
-													 .Where(i => newDistribution[i] != coalition.RecoveredDistribution[i])
-													 .ToArray();
-					return changedPositions.Any() ? changedPositions.Max() - changedPositions.Min() : 0;
-				});
-		}
-
-		// enumerate all paths, but lazily! (depth-first search)
-		private IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition, BaseAgent[] distribution, int prefixLength)
-		{
-			// termination case: copy distribution and return it
-			if (prefixLength == distribution.Length)
+			DistributionCalculator calculator;
+			do
 			{
-				var result = new BaseAgent[distribution.Length];
-				Array.Copy(distribution, result, distribution.Length);
-				yield return result;
-				yield break;
-			}
+				calculator = new DistributionCalculator(coalition.CTF, coalition.RecoveredDistribution, coalition.BaseAgents);
+				using (var enumerator = calculator.CalculateDistributions().GetEnumerator())
+					while (enumerator.MoveNext() && calculator.Fragment.Equals(coalition.CTF))
+						yield return enumerator.Current;
 
-			// recursive case: iterate through all possible next agents, recurse, forward results
-			var eligibleAgents = coalition.Members
-										  .Select(member => member.BaseAgent)
-										  .Where(agent => CanSatisfyNext(agent, coalition, distribution, prefixLength));
-			foreach (var agent in eligibleAgents)
-			{
-				distribution[prefixLength] = agent;
-				foreach (var result in CalculateCapabilityDistributions(coalition, distribution, prefixLength + 1))
-					yield return result;
-			}
-		}
+				// continue with new calculator if the fragment changed,
+				// stop if calculator has no more distributions
+			} while (!calculator.Fragment.Equals(coalition.CTF));
 
-		// TODO: override for pill production
-		protected virtual bool CanSatisfyNext(BaseAgent agent, Coalition coalition, BaseAgent[] distribution, int prefixLength)
-		{
-			var capability = coalition.Task.RequiredCapabilities[coalition.CTF.Start + prefixLength];
-			return agent.AvailableCapabilities.Contains(capability);
 		}
 
 		protected async Task<IEnumerable<BaseAgent>> ComputeResourceFlow(ConfigurationSuggestion configurationSuggestion)
@@ -379,6 +348,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				Coalition = coalition;
 				CTF = coalition.CTF;
 				CtfDistribution = ctfDistribution;
+
+				Debug.Assert(CTF.Length == CtfDistribution.Length);
 			}
 
 			/// <summary>
