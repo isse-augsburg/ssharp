@@ -25,7 +25,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 	using System.Diagnostics;
 	using Odp;
 
-	[DebuggerDisplay("Process: {ProductionAction}")]
+	[DebuggerDisplay("Process: {" + nameof(ProductionAction) + "}")]
 	public class ProcessCapability : Capability<ProcessCapability>
 	{
 		public ProcessCapability(ProductionAction productionAction)

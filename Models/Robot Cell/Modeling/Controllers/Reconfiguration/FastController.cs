@@ -51,10 +51,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		protected override IEnumerable<int> GetShortestPath(int from, int to)
 		{
-			int previous = -1;
-			for (int current = from; current != to; current = _pathMatrix[current, to])
+			var previous = -1;
+			for (var current = from; current != to; current = _pathMatrix[current, to])
 			{
-				int agent = (_availableAgents[current] is CartAgent) ? GetPreferredCart(current, previous, to) : current;
+				var agent = (_availableAgents[current] is CartAgent) ? GetPreferredCart(current, previous, to) : current;
 				yield return agent;
 				previous = agent;
 			}

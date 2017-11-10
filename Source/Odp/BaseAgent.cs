@@ -399,7 +399,7 @@ namespace SafetySharp.Odp
 		///   The strategy used by the agent to reconfigure if configuration invariants are violated.
 		/// </summary>
 		[Hidden, NotNull]
-		public Reconfiguration.IReconfigurationStrategy ReconfigurationStrategy { get; set; }
+		public IReconfigurationStrategy ReconfigurationStrategy { get; set; }
 
 		/// <summary>
 		///   A set of configuration invariants that are consistently monitored for violations.

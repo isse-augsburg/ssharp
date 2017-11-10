@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Linq;
 	using System.Threading.Tasks;
@@ -43,9 +42,6 @@ namespace SafetySharp.Odp.Reconfiguration
 			foreach (var task in tasks)
 			{
 				var configs = await _controller.CalculateConfigurationsAsync(null, task);
-				if (configs == null)
-					continue;
-
 				foreach (var affectedAgent in configs.AffectedAgents)
 					affectedAgent.PrepareReconfiguration(task);
 				configs.Apply(_controller.Agents);

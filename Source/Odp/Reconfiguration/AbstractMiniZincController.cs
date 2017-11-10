@@ -116,7 +116,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			var role = default(Role);
 			BaseAgent lastAgent = null;
 
-			for (int i = 0; i < agentIds.Length; ++i)
+			for (var i = 0; i < agentIds.Length; ++i)
 			{
 				var agent = GetAgent(agentIds[i]);
 

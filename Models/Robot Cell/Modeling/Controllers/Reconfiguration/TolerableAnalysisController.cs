@@ -27,7 +27,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 	using Odp;
 	using Odp.Reconfiguration;
 
-	class TolerableAnalysisController : IController
+	public class TolerableAnalysisController : IController
 	{
 		private readonly IController _controller;
 

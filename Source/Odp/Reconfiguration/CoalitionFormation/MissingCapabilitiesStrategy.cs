@@ -26,7 +26,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	using System.Linq;
 	using System.Threading.Tasks;
 
-	class MissingCapabilitiesStrategy : IRecruitingStrategy
+	internal class MissingCapabilitiesStrategy : IRecruitingStrategy
 	{
 		private MissingCapabilitiesStrategy() { }
 

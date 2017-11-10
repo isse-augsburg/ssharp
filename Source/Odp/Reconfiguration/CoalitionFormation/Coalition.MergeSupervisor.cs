@@ -195,7 +195,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// <exception cref="RestartReconfigurationException">Always thrown.</exception>
 			/// <remarks>Must be executed in this instance's <see cref="_coalition"/>'s execution context.</remarks>
 			[ContractAnnotation("=> halt")]
-			private void ReceiveCoalitionInformation(IEnumerable<MergeRequest> mergeRequests, InvariantPredicate[] violatedPredicates, bool initialConf)
+			private void ReceiveCoalitionInformation(IEnumerable<MergeRequest> mergeRequests, IEnumerable<InvariantPredicate> violatedPredicates, bool initialConf)
 			{
 				foreach (var request in mergeRequests)
 					_mergeRequests.AddLast(request);

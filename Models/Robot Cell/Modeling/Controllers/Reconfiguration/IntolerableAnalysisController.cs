@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 	using Odp;
 	using Odp.Reconfiguration;
 
-	class IntolerableAnalysisController : Component, IController
+	public class IntolerableAnalysisController : Component, IController
 	{
 		public const int MaxSteps = 350;
 

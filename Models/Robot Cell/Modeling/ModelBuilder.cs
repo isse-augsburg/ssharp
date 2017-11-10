@@ -78,7 +78,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			{
 				Name = name,
 				IncorrectlyPositionedFault = { Name = $"{name}.IncorrectlyPositioned" },
-				ToolApplicationFailed = { Name = $"{name}.ToolApplicationFailed" },
+				ToolApplicationFailed = { Name = $"{name}.ToolApplicationFailed" }
 			};
 
 			_model.Workpieces.Add(workpiece);
@@ -153,7 +153,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public ModelBuilder ChooseController<T>() where T : IController
 		{
-			_model.Controller = (IController)Activator.CreateInstance(typeof(T), new[] { Agents.ToArray() });
+			_model.Controller = (IController)Activator.CreateInstance(typeof(T), new object[] { Agents.ToArray() });
 			if (_model.Controller is IComponent)
 				_model.AdditionalComponents.Add(_model.Controller as IComponent);
 			return this;

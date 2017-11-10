@@ -46,7 +46,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			_coalition = coalition;
 
-			var baseAgents = coalition.Members.Select(reconfAgent => reconfAgent.BaseAgent);
+			var baseAgents = coalition.BaseAgents;
 			_knownParticipants = new HashSet<BaseAgent>(baseAgents.SelectMany(GetNeighbouringParticipants));
 			_inputQueue = new LinkedList<BaseAgent>(baseAgents.SelectMany(agent => agent.Inputs).Where(agent => agent.IsAlive));
 			_outputQueue = new LinkedList<BaseAgent>(baseAgents.SelectMany(agent => agent.Outputs).Where(agent => agent.IsAlive));

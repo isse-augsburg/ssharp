@@ -99,7 +99,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
            * use the appropriate comparison.
            *
            * */
-	    private bool HasDuplicates(ICapability[] capabilities)
+	    private static bool HasDuplicates(ICapability[] capabilities)
 	    {
 	        var set = new HashSet<ICapability>();
 	        foreach (var cap in capabilities)

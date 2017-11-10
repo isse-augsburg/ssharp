@@ -24,7 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
 	using System;
 
-	class RestartReconfigurationException : Exception
+	internal class RestartReconfigurationException : Exception
 	{
 	}
 }

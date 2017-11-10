@@ -24,7 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
     using System.Threading.Tasks;
 
-    class NewTaskStrategy : IRecruitingStrategy
+    internal class NewTaskStrategy : IRecruitingStrategy
     {
         private NewTaskStrategy() { }
         public static NewTaskStrategy Instance { get; } = new NewTaskStrategy();

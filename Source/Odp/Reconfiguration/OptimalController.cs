@@ -40,7 +40,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			if (paths.Length == 0)
 				return null;
 
-			for (int i = 1; i < task.RequiredCapabilities.Length; ++i)
+			for (var i = 1; i < task.RequiredCapabilities.Length; ++i)
 			{
 				paths = (from path in paths
 						 from agent in identifiers

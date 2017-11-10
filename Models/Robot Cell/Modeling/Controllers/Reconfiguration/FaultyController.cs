@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 	using Odp;
 	using Odp.Reconfiguration;
 
-	class FaultyController : Component, IController
+	public class FaultyController : Component, IController
 	{
 		private readonly IController _controller;
 

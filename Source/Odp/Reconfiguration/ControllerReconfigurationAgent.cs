@@ -143,7 +143,6 @@ namespace SafetySharp.Odp.Reconfiguration
 				_stateMachine.Transition(
 					from: State.CalculateRoles,
 					to: State.AllocateRoles,
-					guard: configs != null,
 					action: () =>
 					{
 						foreach (var agent in _reconfAgents.Values)

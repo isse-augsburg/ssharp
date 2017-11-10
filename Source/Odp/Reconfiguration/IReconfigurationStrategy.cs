@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Threading.Tasks;
 	using JetBrains.Annotations;

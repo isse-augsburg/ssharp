@@ -141,7 +141,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			}
 			else // otherwise check connected agents
 			{
-				for (int next = 0; next < _availableAgents.Length; ++next) // go through all agents
+				for (var next = 0; next < _availableAgents.Length; ++next) // go through all agents
 				{
 					// if connected to last agent and can fulfill next capability
 					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(task, path, prefixLength, next))
@@ -202,7 +202,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			first = _availableAgents[connection[1]];
 			last = _availableAgents[connection[connection.Length - 2]];
 
-			BaseAgent previous = _availableAgents[from];
+			var previous = _availableAgents[from];
 
 			// for all agents between "from" and "to":
 			for (var i = 1; i < connection.Length - 1; ++i)
@@ -220,7 +220,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		protected virtual IEnumerable<int> GetShortestPath(int from, int to)
 		{
-			for (int current = from; current != to; current = _pathMatrix[current, to])
+			for (var current = from; current != to; current = _pathMatrix[current, to])
 				yield return current;
 			yield return to;
 		}
