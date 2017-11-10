@@ -22,63 +22,115 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Linq;
+	using JetBrains.Annotations;
 
+	/// <summary>
+	///   Represents a configuration change for several base agents, as produced by a reconfiguration.
+	/// </summary>
 	public class ConfigurationUpdate
 	{
 		private readonly Dictionary<BaseAgent, HashSet<Role>> _addedRoles = new Dictionary<BaseAgent, HashSet<Role>>();
 		private readonly Dictionary<BaseAgent, HashSet<Role>> _removedRoles = new Dictionary<BaseAgent, HashSet<Role>>();
 
+		/// <summary>
+		///   The agents whose configuration will change through application of this instance.
+		/// </summary>
+		[NotNull, ItemNotNull]
 		public BaseAgent[] AffectedAgents
 			=> _addedRoles.Keys.Concat(_removedRoles.Keys).Distinct().ToArray();
 
-        private readonly HashSet<BaseAgent> _involvedAgents = new HashSet<BaseAgent>();
-	    public IEnumerable<BaseAgent> InvolvedAgents => _involvedAgents;
+		/// <summary>
+		///   The set of agents involved in the reconfiguration that produced this update,
+		///   as recorded by its producer. This is always a superset of <see cref="AffectedAgents"/>.
+		/// </summary>
+		[NotNull, ItemNotNull]
+		public IEnumerable<BaseAgent> InvolvedAgents => _involvedAgents;
+		private readonly HashSet<BaseAgent> _involvedAgents = new HashSet<BaseAgent>();
 
-	    public bool Failed { get; private set; }
+		/// <summary>
+		///   Indicates if this update is the result of a failed reconfiguration.
+		/// </summary>
+		public bool Failed { get; private set; }
 
-		public void RemoveAllRoles(ITask task, params BaseAgent[] agents)
+		/// <summary>
+		///   Removes all roles for the given <paramref name="task"/> from the given <paramref name="agents"/>.
+		/// </summary>
+		public void RemoveAllRoles([NotNull] ITask task, [ItemNotNull] params BaseAgent[] agents)
 		{
+			if (task == null)
+				throw new ArgumentNullException(nameof(task));
+
 			foreach (var agent in agents)
 				RemoveRoles(agent, agent.AllocatedRoles.Where(role => role.Task == task).ToArray());
 		}
 
+		/// <summary>
+		///   Marks the reconfiguration producing this update as <see cref="Failed"/>.
+		/// </summary>
 		public void Fail()
 		{
 			Failed = true;
 		}
 
-		public void RemoveRoles(BaseAgent agent, params Role[] rolesToRemove)
+		/// <summary>
+		///   Removes the given <paramref name="rolesToRemove"/> from the given <paramref name="agent"/>
+		///   and records its involvement in the reconfiguration.
+		/// </summary>
+		public void RemoveRoles([NotNull] BaseAgent agent, params Role[] rolesToRemove)
 		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
+
 			if (!_removedRoles.ContainsKey(agent))
 				_removedRoles[agent] = new HashSet<Role>();
-		    if (!_involvedAgents.Contains(agent))
-		        _involvedAgents.Add(agent);
+			if (!_involvedAgents.Contains(agent))
+				_involvedAgents.Add(agent);
 			_removedRoles[agent].UnionWith(rolesToRemove);
 		}
 
-		public void AddRoles(BaseAgent agent, params Role[] rolesToAdd)
+		/// <summary>
+		///   Adds the given <paramref name="rolesToAdd"/> to the given <paramref name="agent"/>
+		///   and records its involvement in the reconfiguration.
+		/// </summary>
+		public void AddRoles([NotNull] BaseAgent agent, params Role[] rolesToAdd)
 		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
+
 			if (!_addedRoles.ContainsKey(agent))
 				_addedRoles[agent] = new HashSet<Role>();
-		    if (!_involvedAgents.Contains(agent))
-		        _involvedAgents.Add(agent);
-            _addedRoles[agent].UnionWith(rolesToAdd);
+			if (!_involvedAgents.Contains(agent))
+				_involvedAgents.Add(agent);
+			_addedRoles[agent].UnionWith(rolesToAdd);
 		}
 
-	    public void RecordInvolvement(IEnumerable<BaseAgent> involvedAgents)
-	    {
-	        _involvedAgents.UnionWith(involvedAgents);
-	    }
+		/// <summary>
+		///   Records the involvement of the given <paramref name="involvedAgents"/> in the reconfiguration producing this update.
+		/// </summary>
+		public void RecordInvolvement([NotNull, ItemNotNull] IEnumerable<BaseAgent> involvedAgents)
+		{
+			if (involvedAgents == null)
+				throw new ArgumentNullException(nameof(involvedAgents));
 
+			_involvedAgents.UnionWith(involvedAgents);
+		}
+
+		/// <summary>
+		///   Locks all roles that will be added to agents when applying this update.
+		/// </summary>
 		public void LockAddedRoles()
 		{
 			foreach (var id in _addedRoles.Keys.ToArray())
 				_addedRoles[id] = new HashSet<Role>(_addedRoles[id].Select(role => role.Lock()));
 		}
 
-		public void Apply(params BaseAgent[] agents)
+		/// <summary>
+		///   Applies the role changes recorded for the given <paramref name="agents"/> to those agents.
+		/// </summary>
+		public void Apply([ItemNotNull] params BaseAgent[] agents)
 		{
 			foreach (var agent in agents)
 			{
