@@ -86,22 +86,26 @@ namespace SafetySharp.Odp
 
 		public static IEnumerable<ITask> PrePostConditionConsistency(BaseAgent agent)
 		{
+			// The sendingRole and receivingRole may be locked in case the respective agent is at the moment of invariant-checking
+			// undergoing reconfiguration itself. If it is reconfigured separately, that reconfiguration should not affect agent,
+			// thus the respective roles should remain present, or at should be replaced by roles with equivalent pre- or postconditions,
+			// respectively. Otherwise these agents must be reconfigured together with agent.
+			// agent will check before handing resources over to the agent to which receivingRole is allocated, and wait until any
+			// reconfigurations affecting that agent & task are complete. Thus there won't be any run-time problems either.
 			return RoleInvariant(
 				agent,
 				role =>
 					// consistent input:
 					(role.Input == null // no input...
-					|| role.Input.AllocatedRoles.Any( // ... or there's a matching role at the input
-						sendingRole => !sendingRole.IsLocked
-							&& sendingRole.PostCondition.StateMatches(role.PreCondition)
+					|| role.Input.AllocatedRoles.Any( // ... or there's a matching role at the input (perhaps locked at the moment, but present)
+						 sendingRole => sendingRole.PostCondition.StateMatches(role.PreCondition)
 							&& sendingRole.Output == agent
 						)
 					)
 					// consistent output:
 					&& (role.Output == null // no output...
-					|| role.Output.AllocatedRoles.Any( // ... or there's a matching role at the output
-						receivingRole => !receivingRole.IsLocked
-							&& receivingRole.PreCondition.StateMatches(role.PostCondition)
+					|| role.Output.AllocatedRoles.Any( // ... or there's a matching role at the output (perhaps locked at the moment, but present)
+						receivingRole => receivingRole.PreCondition.StateMatches(role.PostCondition)
 							&& receivingRole.Input == agent
 						)
 					)

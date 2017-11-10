@@ -475,7 +475,7 @@ namespace SafetySharp.Odp
 		{
 			foreach (var predicate in MonitoringPredicates.Concat(ConsistencyPredicates))
 				if (predicate(this).Any())
-					throw new InvalidOperationException("New configuration violates invariant.");
+					throw new InvalidOperationException($"New configuration for agent {Id} violates invariant: {predicate.Method.Name}");
 		}
 
 		/// <summary>
