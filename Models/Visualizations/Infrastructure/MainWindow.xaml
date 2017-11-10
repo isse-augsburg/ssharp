@@ -24,6 +24,9 @@
             <TabItem Header="Hemodialysis Machine">
                 <visualization:HdMachine />
             </TabItem>
+            <TabItem Header="Robot Cell">
+                <visualization:RobotCell />
+            </TabItem>
         </TabControl>
     </Grid>
 </controls:MetroWindow>
