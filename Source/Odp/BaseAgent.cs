@@ -519,17 +519,18 @@ namespace SafetySharp.Odp
 			if (roles == null)
 				throw new ArgumentNullException(nameof(roles));
 
-#if DEBUG
 			foreach (var role in roles)
 			{
 				Debug.Assert(role.IsValid);
+#if DEBUG
 				if (_allocatedRoles.Any(r => r.PreCondition.StateMatches(role.PreCondition)))
 					throw new Exception("Duplicate precondition");
 				if (_allocatedRoles.Any(r => r.PostCondition.StateMatches(role.PostCondition)))
 					throw new Exception("Duplicate postcondition");
-			}
 #endif
-			_allocatedRoles.AddRange(roles);
+				_allocatedRoles.Add(role);
+			}
+
 			RoleSelector.OnRoleAllocationsChanged();
 		}
 
@@ -541,7 +542,7 @@ namespace SafetySharp.Odp
 			if (roles == null)
 				throw new ArgumentNullException(nameof(roles));
 
-			foreach (var role in roles.ToArray())
+			foreach (var role in roles)
 				_allocatedRoles.Remove(role);
 			RoleSelector.OnRoleAllocationsChanged();
 		}
