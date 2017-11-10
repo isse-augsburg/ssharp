@@ -22,10 +22,11 @@
 
 namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
 	using System.Linq;
-    using JetBrains.Annotations;
+	using JetBrains.Annotations;
 
 	/// <summary>
 	///  Represents a continuous fragment of a task.
@@ -75,6 +76,29 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// </summary>
 		public int Length => Math.Max(0, End - Start + 1);
 
+		/// <summary>
+		///   Tests if this fragment intersects with the given <paramref name="other"/> fragment.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown if the fragments do not belong to the same task.</exception>
+		[Pure]
+		public bool IntersectsWith(TaskFragment other)
+		{
+			if (Task != other.Task)
+				throw new InvalidOperationException("Cannot compare fragments of different tasks.");
+
+			return Start <= other.End && other.Start <= End;
+		}
+
+		/// <summary>
+		///   Tests if this fragment intersects with the fragment applied by the given <paramref name="role"/>.
+		/// </summary>
+		/// <exception cref="InvalidOperationException">Thrown if the fragment and the role do not belong to the same task.</exception>
+		[Pure]
+		public bool IntersectsWith(Role role)
+		{
+			return IntersectsWith(FromRole(role));
+		}
+
 		#endregion
 
 		/// <summary>
@@ -99,6 +123,16 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			End = end;
 		}
 
+		/// <summary>
+		///   Returns the task fragment applied by the given role.
+		/// </summary>
+		[Pure]
+		public static TaskFragment FromRole(Role role)
+		{
+			Debug.Assert(role.IsValid);
+			return new TaskFragment(role.Task, role.PreCondition.StateLength, role.PostCondition.StateLength - 1);
+		}
+
 		#region monoid operations
 
 		/// <summary>
@@ -106,7 +140,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// </summary>
 		/// <remarks>This operation is associative and commutative.</remarks>
 		/// <exception cref="InvalidOperationException">Thrown if the fragments do not belong to the same task.</exception>
-		[MustUseReturnValue]
+		[MustUseReturnValue, Pure]
 		public TaskFragment Merge(TaskFragment other)
 		{
 			if (Task != other.Task)
@@ -118,6 +152,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <summary>
 		///  Returns a task fragment that is the identity for the merge operation (among all fragments of the given <paramref name="task"/>).
 		/// </summary>
+		[Pure]
 		public static TaskFragment Identity(ITask task)
 		{
 			return new TaskFragment(task, task.RequiredCapabilities.Length - 1, 0);
@@ -126,6 +161,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <summary>
 		///  See <see cref="Merge(TaskFragment)"/>.
 		/// </summary>
+		[Pure]
 		public static TaskFragment Merge(TaskFragment a, TaskFragment b)
 		{
 			return a.Merge(b);
@@ -135,6 +171,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		///  Extension of <see cref="Merge(TaskFragment)"/>
 		///  to arbitrary sequences of operands (including the empty sequence).
 		/// </summary>
+		[Pure]
 		public static TaskFragment Merge(ITask task, IEnumerable<TaskFragment> fragments)
 		{
 			return fragments.Aggregate(Identity(task), Merge);
