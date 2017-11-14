@@ -121,19 +121,29 @@ namespace SafetySharp.Odp
 		// accepts, processes and relays resources
 		private void Work()
 		{
-			_stateMachine.Transition( // abort work if current task has configuration issues
-				from: new[] { States.ChooseRole, States.WaitingForResource, States.ExecuteRole, States.Output, States.ResourceGiven },
-				to: States.Idle,
-				guard: RoleExecutor.IsExecuting && _deficientConfiguration,
-				action: () =>
-				{
-					if (Resource != null)
-						DropResource();
-					RoleExecutor.EndExecution();
-					_deficientConfiguration = false;
-				});
-
 			_stateMachine
+				.Transition( // abort work if current task has configuration issues
+					from: new[] { States.ChooseRole, States.WaitingForResource, States.ExecuteRole, States.ResourceGiven },
+					to: States.Idle,
+					guard: RoleExecutor.IsExecuting && _deficientConfiguration,
+					action: () =>
+					{
+						if (Resource != null)
+							DropResource();
+						RoleExecutor.EndExecution();
+						_deficientConfiguration = false;
+					})
+				.Transition( // if currently in Output state, additionally cancel resource request at successor
+					from: States.Output,
+					to: States.Idle,
+					guard: _deficientConfiguration,
+					action: () =>
+					{
+						DropResource();
+						RoleExecutor.Output.CancelResourceRequest(this, RoleExecutor.Role.Value.PostCondition);
+						RoleExecutor.EndExecution();
+						_deficientConfiguration = false;
+					})
 				.Transition( // see if there is work to do
 					from: States.Idle,
 					to: States.ChooseRole,
@@ -165,7 +175,7 @@ namespace SafetySharp.Odp
 					from: States.ExecuteRole,
 					to: States.Idle,
 					guard: RoleExecutor.IsCompleted && Resource == null && RoleExecutor.Output == null,
-					action: () => RoleExecutor.EndExecution());
+					action: RoleExecutor.EndExecution);
 		}
 
 		/// <summary>
@@ -330,6 +340,26 @@ namespace SafetySharp.Odp
 
 			foreach (var role in roles)
 				_resourceRequests.Add(new ResourceRequest(agent, role));
+		}
+
+		/// <summary>
+		///   Called to notify the agent an agent that previously invoked <see cref="ResourceReady"/>
+		///   no longer wishes to send a resource.
+		/// </summary>
+		/// <param name="agent">The agent passed to <see cref="ResourceReady"/>.</param>
+		/// <param name="condition">The <see cref="Condition"/> passed to <see cref="ResourceReady"/>.</param>
+		private void CancelResourceRequest([NotNull] BaseAgent agent, Condition condition)
+		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
+
+			_resourceRequests.RemoveAll(request => request.Source == agent && request.Role.PreCondition.StateMatches(condition));
+			_stateMachine.Transition(
+				from: new[] { States.ChooseRole, States.WaitingForResource },
+				to: States.Idle,
+				guard: RoleExecutor.IsExecuting && RoleExecutor.Role.Value.PreCondition.StateMatches(condition),
+				action: RoleExecutor.EndExecution
+			);
 		}
 
 		/// <summary>

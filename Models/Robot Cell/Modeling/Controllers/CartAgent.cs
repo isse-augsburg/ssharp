@@ -48,6 +48,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 		protected override void TransferResource()
 		{
+			Debug.Assert(RoleExecutor.IsExecuting);
+			Debug.Assert(RoleExecutor.IsCompleted);
+			Debug.Assert(RoleExecutor.Output != null);
+			Debug.Assert(Resource != null);
+
 			var agent = (RobotAgent)RoleExecutor.Output;
 
 			// If we fail to move to the robot, the cart loses its route
