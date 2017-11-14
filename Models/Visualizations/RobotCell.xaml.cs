@@ -15,7 +15,6 @@ using System.Windows.Shapes;
 
 namespace SafetySharp.CaseStudies.Visualizations
 {
-    using System;
     using CaseStudies.RobotCell.Modeling;
     using CaseStudies.RobotCell.Modeling.Controllers;
     using CaseStudies.RobotCell.Modeling.Plants;

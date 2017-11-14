@@ -1,0 +1,65 @@
+﻿<UserControl x:Name="Own_Robot" x:Class="SafetySharp.CaseStudies.Visualizations.OwnRobot"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SafetySharp.CaseStudies.Visualizations"
+      xmlns:infrastructure="clr-namespace:SafetySharp.CaseStudies.Visualizations.Infrastructure"
+      mc:Ignorable="d" 
+      d:DesignHeight="280" d:DesignWidth="210">
+
+    <DockPanel>
+        <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
+        <Viewbox StretchDirection="Both" Stretch="Uniform" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+            <Grid>
+                <Canvas Name="svg3884" Width="210" Height="280">
+                    <Canvas.RenderTransform>
+                        <TranslateTransform X="0" Y="0"/>
+                    </Canvas.RenderTransform>
+                    <Canvas.Resources/>
+                    <Canvas Name="layer1">
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="35.721436" Canvas.Top="237.65218" Width="124.81857" Height="29.109715" Name="rect3892" Fill="#FFFFFF" StrokeThickness="0.44349048"/>
+                        <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="1.5" Width="74.9" Canvas.Top="94" Height="77" Name="path3896" Fill="#FFFFFF" StrokeThickness="0.32612109"/>
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="27" Canvas.Top="153" Width="30" Height="113" Name="rect3900" Fill="#FFFFFF" StrokeThickness="0.37394294">
+                            <Rectangle.RenderTransform>
+                                <MatrixTransform Matrix="0.99836446 0.05716998 0.50551147 0.86281988 0 0"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="173" Canvas.Top="47" Width="29" Height="143" Name="rect39006" Fill="#FFFFFF" StrokeThickness="0.41774467">
+                            <Rectangle.RenderTransform>
+                                <MatrixTransform Matrix="0.70842089 0.70579023 -0.93529367 0.35387251 0 0"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="175" Canvas.Top="66" Width="17" Height="33" Name="rect3924" Fill="#FFFFFF" StrokeThickness="0.32612109"/>
+                        <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="18.6" Width="37.4" Canvas.Top="115.3" Height="34" Name="path3930" Fill="#000000" StrokeThickness="0.32612109"/>
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="156" Canvas.Top="120" Width="7" Height="34" Name="rect3936" Fill="#FFFFFF" StrokeThickness="0.32612583">
+                            <Rectangle.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleY="1.0000000030716045" ScaleX="0.999970894265179"/>
+                                    <SkewTransform AngleY="-0.43714830422861439"/>
+                                    <RotateTransform Angle="-18.146"/>
+                                    <TranslateTransform/>
+                                </TransformGroup>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="175" Canvas.Top="92" Width="8" Height="35" Name="rect39369" Fill="#FFFFFF" StrokeThickness="0.32613873">
+                            <Rectangle.RenderTransform>
+                                <MatrixTransform Matrix="0.80660257 0.59109415 -0.57916744 0.81520861 0 0"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="185" Canvas.Top="96" Width="8" Height="35" Name="rect39364" Fill="#FFFFFF" StrokeThickness="0.32613799">
+                            <Rectangle.RenderTransform>
+                                <MatrixTransform Matrix="0.82367763 -0.56705834 0.55514238 0.83175533 0 0"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                        <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="203" Canvas.Top="117" Width="8" Height="35" Name="rect39360" Fill="#FFFFFF" StrokeThickness="0.32613117">
+                            <Rectangle.RenderTransform>
+                                <MatrixTransform Matrix="0.91881845 0.39468044 -0.38443842 0.92315064 0 0"/>
+                            </Rectangle.RenderTransform>
+                        </Rectangle>
+                    </Canvas>
+                </Canvas>
+            </Grid>
+        </Viewbox>
+    </DockPanel>
+</UserControl>

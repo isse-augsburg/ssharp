@@ -15,10 +15,14 @@ using System.Windows.Shapes;
 
 namespace SafetySharp.CaseStudies.Visualizations
 {
+    using CaseStudies.RobotCell.Modeling;
+    using CaseStudies.RobotCell.Modeling.Controllers;
+    using CaseStudies.RobotCell.Modeling.Plants;
+    using Odp;
     /// <summary>
     /// Interaktionslogik für OwnRobot.xaml
     /// </summary>
-    public partial class OwnRobot : Page
+    public partial class OwnRobot
     {
         public OwnRobot()
         {
