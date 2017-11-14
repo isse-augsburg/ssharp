@@ -42,8 +42,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		///   Creates a new instance.
 		/// </summary>
 		/// <param name="fragment">The fragment for which distributions shall be calculated.</param>
-		/// <param name="recoveredDistribution">The previous distribution, as far as recovered. Later updates to this array will be picked up.</param>
-		/// <param name="agents">The set of available agents. Later updates to this collection will be picked up.</param>
+		/// <param name="recoveredDistribution">The previous distribution, as far as recovered.</param>
+		/// <param name="agents">The set of available agents.</param>
 		public DistributionCalculator(TaskFragment fragment, [NotNull, ItemCanBeNull] BaseAgent[] recoveredDistribution, [NotNull, ItemNotNull] ISet<BaseAgent> agents)
 		{
 			if (recoveredDistribution == null)

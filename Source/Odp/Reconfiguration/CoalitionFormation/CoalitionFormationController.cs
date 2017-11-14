@@ -171,16 +171,20 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		private IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
 		{
 			DistributionCalculator calculator;
+			int agentCount;
+
 			do
 			{
 				calculator = new DistributionCalculator(coalition.CTF, coalition.RecoveredDistribution, coalition.BaseAgents);
+				agentCount = coalition.BaseAgents.Count;
+
 				using (var enumerator = calculator.CalculateDistributions().GetEnumerator())
-					while (enumerator.MoveNext() && calculator.Fragment.Equals(coalition.CTF))
+					while (enumerator.MoveNext() && calculator.Fragment.Equals(coalition.CTF) && coalition.BaseAgents.Count == agentCount)
 						yield return enumerator.Current;
 
-				// continue with new calculator if the fragment changed,
+				// continue with new calculator if the fragment / the agents changed,
 				// stop if calculator has no more distributions
-			} while (!calculator.Fragment.Equals(coalition.CTF));
+			} while (!calculator.Fragment.Equals(coalition.CTF) || coalition.BaseAgents.Count != agentCount);
 
 		}
 
