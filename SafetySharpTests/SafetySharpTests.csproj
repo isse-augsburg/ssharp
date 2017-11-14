@@ -235,6 +235,8 @@
     <Compile Include="Analysis\StateConstraints\single removed state.cs" />
     <Compile Include="Analysis\StateConstraints\deterministic through constraints.cs" />
     <Compile Include="Analysis\StateConstraints\deadlock.cs" />
+    <Compile Include="Bayesian\ConstraintBasedStructureLearnerTests.cs" />
+    <Compile Include="Bayesian\DagPatternTests.cs" />
     <Compile Include="Diagnostics\Bindings\Invalid\events.cs" />
     <Compile Include="Analysis\Probabilistic\custom probability of transient fault.cs" />
     <Compile Include="Analysis\Probabilistic\emulate dice with coin.cs" />
