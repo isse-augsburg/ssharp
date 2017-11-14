@@ -100,7 +100,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					if (_mergeRequests.All(request => request.OpposingLeader != _awaitingRendezvousFrom))
 						continue;
 
-					Debug.WriteLine("Coalition with leader {0}: merge-deadlock detected");
+					Debug.WriteLine("Coalition with leader {0}: merge-deadlock detected", _coalition.Leader.BaseAgent.Id);
 					// determine which agent has to break the deadlock
 					var deadlockBreaker = DetermineLeader(_coalition.Leader, _awaitingRendezvousFrom);
 					if (deadlockBreaker != _coalition.Leader)
@@ -109,13 +109,14 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						continue;
 					}
 
-					Debug.WriteLine("Breaking deadlock!");
 					// break the deadlock
+					Debug.WriteLine("Breaking deadlock!");
+					var deadlockRequest = _mergeRequests.First(request => request.OpposingLeader == _awaitingRendezvousFrom);
+					_mergeRequests.Remove(deadlockRequest);
+
 					_awaitingRendezvousFrom = null;
 					_pendingCoalitionMerge = null;
 
-					var deadlockRequest = _mergeRequests.First(request => request.OpposingLeader == _awaitingRendezvousFrom);
-					_mergeRequests.Remove(deadlockRequest);
 					ExecuteCoalitionMerge(deadlockRequest);
 					_cancel.ThrowIfCancellationRequested(); // The coalition might have been disbanded
 				}
