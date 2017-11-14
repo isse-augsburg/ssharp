@@ -63,6 +63,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\BayesianAnalysis.cs" />
     <Compile Include="Analysis\HazardProbabilityRangeTests.cs" />
     <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
