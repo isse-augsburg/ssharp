@@ -46,6 +46,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bayesian\DualKeyDictionary.cs" />
+    <Compile Include="Bayesian\MinimalCriticalSet.cs" />
+    <Compile Include="Bayesian\ProbabilityDistribution.cs" />
+    <Compile Include="Bayesian\RandomVariable.cs" />
+    <Compile Include="Bayesian\RandomVariableFactory.cs" />
+    <Compile Include="Bayesian\SubsetUtils.cs" />
     <Compile Include="ModelChecking\SafetySharpCounterExampleSerialization.cs" />
     <Compile Include="ModelChecking\SafetySharpSimulator.cs" />
     <Compile Include="ModelChecking\ModelChecking.cs" />
@@ -150,5 +156,6 @@
       <Name>SafetyChecking</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
