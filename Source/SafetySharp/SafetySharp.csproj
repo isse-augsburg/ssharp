@@ -37,6 +37,10 @@
       <HintPath>..\..\Dependencies\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -59,6 +63,7 @@
     <Compile Include="Bayesian\ProbabilityDistribution.cs" />
     <Compile Include="Bayesian\RandomVariable.cs" />
     <Compile Include="Bayesian\RandomVariableFactory.cs" />
+    <Compile Include="Bayesian\ScoreBasedStructureLearner.cs" />
     <Compile Include="Bayesian\SubsetUtils.cs" />
     <Compile Include="ModelChecking\SafetySharpCounterExampleSerialization.cs" />
     <Compile Include="ModelChecking\SafetySharpSimulator.cs" />
@@ -156,6 +161,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Bayesian\StructureLearning.R" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

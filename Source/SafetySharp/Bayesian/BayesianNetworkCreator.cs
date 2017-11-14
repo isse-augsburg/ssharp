@@ -56,6 +56,24 @@
             return bayesianNetwork;
         }
 
+        /// <summary>
+        /// Learn a bayesian network for the given hazard, states and faults with a model selection learning algorithm.
+        /// </summary>
+        /// <param name="numberOfSimulations">The number of simulation data rows to generate for learning the bayesian network</param>
+        /// <param name="hazard">The hazard expression which should be analyzed</param>
+        /// <param name="states">An optional dictionary for arbitrary named state expressions that should be analyzed</param>
+        /// <param name="faults">An optional fault list to restrict the analyzed set</param>
+        /// <returns>A learning bayesian network including a DAG and a fully calculated probability distribution</returns>
+        public BayesianNetwork LearnScoreBasedBayesianNetwork(int numberOfSimulations, Func<bool> hazard, Dictionary<string, Func<bool>> states = null, IList<Fault> faults = null)
+        {
+            CreateRandomVariables(hazard, states, faults);
+            var structureLearning = new ScoreBasedStructureLearner(_model, _stepBounds);
+            var bayesianNetwork = structureLearning.LearnBayesianNetwork(_faultVars, _mcsVars, _states, _hazardVar, numberOfSimulations);
+            PrintBayesianNetwork(bayesianNetwork);
+            CheckResultingNetwork(bayesianNetwork);
+            return bayesianNetwork;
+        }
+
         private void CreateRandomVariables(Func<bool> hazard, Dictionary<string, Func<bool>> states, IList<Fault> faults)
         {
             var usedFaults = faults ?? _model.Faults;
