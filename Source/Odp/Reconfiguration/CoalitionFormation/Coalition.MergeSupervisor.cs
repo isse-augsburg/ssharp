@@ -153,11 +153,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 
 			/// <summary>
-			/// Informs the coalition of a merge with another coalition.
+			///   Informs the coalition of a merge with another coalition.
 			/// </summary>
 			/// <param name="chosenCoalition">The coalition which will take over, i.e., either this instance or the other coalition.</param>
-			/// <param name="inNameOf">The agent who lead the other coalition when the <see cref="AwaitRendezvous"/>
-			/// message was sent.</param>
+			/// <param name="inNameOf">The agent who lead the other coalition when the <see cref="AwaitRendezvous"/> message was sent.</param>
 			/// <remarks>Called from the opposite coalition's execution context.</remarks>
 			private void RendezvousRequest(Coalition chosenCoalition, CoalitionReconfigurationAgent inNameOf)
 			{

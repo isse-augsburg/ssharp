@@ -27,6 +27,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using JetBrains.Annotations;
 	using Modeling;
 
 	public partial class Coalition
@@ -143,14 +144,20 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		}
 
 		/// <summary>
-		/// Invites a new agent into the coalition. Merge requests from other coalitions are handled first.
+		///   Invites a new agent into the coalition. Merge requests from other coalitions are handled first.
 		/// </summary>
 		/// <param name="agent">The <see cref="BaseAgent"/> that is invited.</param>
 		/// <returns>The <see cref="CoalitionReconfigurationAgent"/> belonging to <paramref name="agent"/>.</returns>
-		/// <exception cref="OperationCanceledException">Thrown if processing of pre-existing merge requests or the invite lead to a coalition merge,
-		/// and the coalitions is disbanded (merged into another coalition).</exception>
-		public async Task<CoalitionReconfigurationAgent> Invite(BaseAgent agent)
+		/// <exception cref="OperationCanceledException">
+		///   Thrown if processing of pre-existing merge requests or the invite lead to a coalition merge,
+		///   and the coalitions is disbanded (merged into another coalition).
+		/// </exception>
+		[NotNull, ItemNotNull, MustUseReturnValue]
+		public async Task<CoalitionReconfigurationAgent> Invite([NotNull] BaseAgent agent)
 		{
+			if (agent == null)
+				throw new ArgumentNullException(nameof(agent));
+
 			Debug.WriteLine("Coalition with leader {0} inviting agent {1}", Leader.BaseAgent.Id, agent.Id);
 
 			// sanity check: algorithm should never attempt to invite dead agents
@@ -170,33 +177,42 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			}
 			Debug.WriteLine("No existing member for agent {0} found.", agent.Id);
 
-			// Invite the agent.
-			_invitations[agent] = new TaskCompletionSource<CoalitionReconfigurationAgent>();
+			// Do not re-invite members currently invited
+			if (!_invitations.ContainsKey(agent))
+			{
+				// Invite the agent.
+				_invitations[agent] = new TaskCompletionSource<CoalitionReconfigurationAgent>();
 
-			// Do NOT await this call. Await the invitation response instead (see below),
-			// otherwise a deadlock occurs. Don't ignore task either, or any exception would
-			// be swallowed. Thus, schedule the call. MicrostepScheduler handles swallowed
-			// exceptions.
-			MicrostepScheduler.Schedule(() => agent.RequestReconfiguration(Leader, Task));
-			Debug.WriteLine("Invitation issued to agent {0}", agent.Id);
+				// Do NOT await this call. Await the invitation response instead (see below),
+				// otherwise a deadlock occurs. Don't ignore task either, or any exception would
+				// be swallowed. Thus, schedule the call. MicrostepScheduler handles swallowed
+				// exceptions.
+				MicrostepScheduler.Schedule(() => agent.RequestReconfiguration(Leader, Task));
+				Debug.WriteLine("Invitation issued to agent {0}", agent.Id);
+			}
 
-			var newMember = await _invitations[agent].Task; // wait for the invited agent to respond
+			// wait for the invited agent to respond
+			var newMember = await _invitations[agent].Task;
+			Debug.WriteLine("Waiting for invitation response from {0} completed", agent.Id);
 
 			// If the invited agent already belongs to a coalition, a merge was initiated.
 			// Wait for such a merge to complete, but avoid deadlocks when two leaders invite each other.
 			await Merger.WaitForMergeCompletion();
 
+			Debug.Assert(newMember != null);
 			return newMember;
 		}
 
 		private void ReceiveInvitationResponse(CoalitionReconfigurationAgent invitedAgent)
 		{
+			Debug.WriteLine("Invitation to coalition with leader {0} accepted by agent {1}", Leader.BaseAgent.Id, invitedAgent.BaseAgent.Id);
 			_invitations[invitedAgent.BaseAgent].SetResult(invitedAgent);
 			_invitations.Remove(invitedAgent.BaseAgent);
 		}
 
 		private void CancelInvitations()
 		{
+			Debug.WriteLine("Cancelling all invitations into coalition with leader {0}", Leader.BaseAgent.Id);
 			foreach (var invitation in _invitations.Values)
 				invitation.SetResult(null);
 			_invitations.Clear();
