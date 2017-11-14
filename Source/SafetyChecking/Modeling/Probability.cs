@@ -46,8 +46,12 @@ namespace ISSE.SafetyChecking.Modeling
 		{
 			return new Probability(p1.Value + p2.Value);
 		}
+        public static Probability operator -(Probability p1, Probability p2)
+        {
+            return new Probability(p1.Value - p2.Value);
+        }
 
-		public static Probability operator *(Probability p1, int p2)
+        public static Probability operator *(Probability p1, int p2)
 		{
 			return new Probability(p1.Value * p2);
 		}
@@ -84,8 +88,8 @@ namespace ISSE.SafetyChecking.Modeling
 		
 		public bool Is(double expected, double tolerance)
 		{
-			var minimum = Math.Max(expected - tolerance, 0.0);
-			var maximum = Math.Min(expected + tolerance, 1.0);
+			var minimum = expected - tolerance;
+			var maximum = expected + tolerance;
 			return (Value >= minimum && Value <= maximum);
 		}
 

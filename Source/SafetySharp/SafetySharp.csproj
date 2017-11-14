@@ -46,8 +46,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bayesian\BayesianLearningConfiguration.cs" />
+    <Compile Include="Bayesian\BayesianNetwork.cs" />
+    <Compile Include="Bayesian\BayesianNetworkCreator.cs" />
+    <Compile Include="Bayesian\ConstraintBasedStructureLearner.cs" />
+    <Compile Include="Bayesian\DagPattern.cs" />
     <Compile Include="Bayesian\DualKeyDictionary.cs" />
+    <Compile Include="Bayesian\IndependencyCalculator.cs" />
+    <Compile Include="Bayesian\IProbabilityDistributionCalculator.cs" />
     <Compile Include="Bayesian\MinimalCriticalSet.cs" />
+    <Compile Include="Bayesian\OnDemandProbabilityDistributionCalculator.cs" />
     <Compile Include="Bayesian\ProbabilityDistribution.cs" />
     <Compile Include="Bayesian\RandomVariable.cs" />
     <Compile Include="Bayesian\RandomVariableFactory.cs" />
