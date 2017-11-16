@@ -20,11 +20,11 @@ namespace SafetySharp.CaseStudies.Visualizations
     using CaseStudies.RobotCell.Modeling.Plants;
     using Odp;
     /// <summary>
-    /// Interaktionslogik für OwnRobot.xaml
+    /// Interaktionslogik für RobotControl.xaml
     /// </summary>
-    public partial class OwnRobot
+    public partial class RobotControl
     {
-        public OwnRobot()
+        public RobotControl()
         {
             InitializeComponent();
         }
