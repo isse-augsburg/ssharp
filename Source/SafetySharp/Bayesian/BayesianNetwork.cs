@@ -76,5 +76,16 @@ namespace SafetySharp.Bayesian
             Dag = dag;
             Distributions = new Dictionary<RandomVariable, ProbabilityDistribution>();
         }
+
+        public void PrintBayesianNetwork()
+        {
+            Console.Out.WriteLine("Bayesian Network:");
+            Dag.ExportToGraphviz();
+            foreach (var distribution in Distributions.Values)
+            {
+                Console.Out.WriteLine(distribution.ToMoreReadableString());
+            }
+        }
+
     }
 }

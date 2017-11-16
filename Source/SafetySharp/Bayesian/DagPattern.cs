@@ -10,7 +10,7 @@
     /// </summary>
     public class DagPattern<T>
     {
-        private readonly int[,] _edges;
+        public int[,] Edges { get; }
         public IList<T> Nodes { get; }
         public int Size => Nodes.Count;
 
@@ -35,18 +35,18 @@
         private DagPattern(IList<T> nodes, int initValue)
         {
             Nodes = nodes;
-            _edges = new int[Nodes.Count, Nodes.Count];
+            Edges = new int[Nodes.Count, Nodes.Count];
             for (var i = 0; i < Nodes.Count; i++)
             {
                 for (var j = 0; j < Nodes.Count; j++)
                 {
                     if (i != j)
                     {
-                        _edges[i, j] = initValue;
+                        Edges[i, j] = initValue;
                     }
                     else
                     {
-                        _edges[i, j] = 0;
+                        Edges[i, j] = 0;
                     }
                 }
             }
@@ -55,7 +55,7 @@
         private DagPattern(IList<T> nodes, int[,] adjacencyMatrix)
         {
             Nodes = nodes;
-            _edges = adjacencyMatrix;
+            Edges = adjacencyMatrix;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@
         /// </summary>
         public void AddEdge(T a, T b)
         {
-            _edges[Nodes.IndexOf(a), Nodes.IndexOf(b)] = 1;
+            Edges[Nodes.IndexOf(a), Nodes.IndexOf(b)] = 1;
         }
 
         /// <summary>
@@ -71,7 +71,7 @@
         /// </summary>
         public void RemoveEdge(T a, T b)
         {
-            _edges[Nodes.IndexOf(a), Nodes.IndexOf(b)] = 0;
+            Edges[Nodes.IndexOf(a), Nodes.IndexOf(b)] = 0;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@
             var nodeB = Nodes.IndexOf(b);
             if (IsUndirectedEdge(nodeA, nodeB))
             {
-                _edges[nodeB, nodeA] = 0;
+                Edges[nodeB, nodeA] = 0;
             }
             else
             {
@@ -105,7 +105,7 @@
 
         private bool IsUndirectedEdge(int a, int b)
         {
-            return _edges[a, b] > 0 && _edges[b, a] > 0;
+            return Edges[a, b] > 0 && Edges[b, a] > 0;
         }
 
         /// <summary>
@@ -120,7 +120,7 @@
 
         private bool IsDirectedEdge(int a, int b)
         {
-            return _edges[a, b] > 0 && _edges[b, a] == 0;
+            return Edges[a, b] > 0 && Edges[b, a] == 0;
         }
 
         /// <summary>
@@ -288,15 +288,15 @@
             {
                 for (var j = i + 1; j < Nodes.Count; j++)
                 {
-                    if (_edges[i, j] > 0 && _edges[j, i] > 0)
+                    if (Edges[i, j] > 0 && Edges[j, i] > 0)
                     {
                         Console.Out.WriteLine($"{i} -> {j} [dir=\"none\"];");
                     }
-                    else if (_edges[i, j] > 0)
+                    else if (Edges[i, j] > 0)
                     {
                         Console.Out.WriteLine($"{i} -> {j};");
                     }
-                    else if (_edges[j, i] > 0)
+                    else if (Edges[j, i] > 0)
                     {
                         Console.Out.WriteLine($"{j} -> {i};");
                     }
@@ -311,7 +311,7 @@
         /// </summary>
         public bool EqualsAdjacencyMatrix(int[,] matrix)
         {
-            if (matrix.Rank != 2 || matrix.GetLength(0) != _edges.GetLength(0) || matrix.GetLength(1) != _edges.GetLength(1))
+            if (matrix.Rank != 2 || matrix.GetLength(0) != Edges.GetLength(0) || matrix.GetLength(1) != Edges.GetLength(1))
             {
                 return false;
             }
@@ -319,7 +319,7 @@
             {
                 for (var j = 0; j < matrix.GetLength(1); j++)
                 {
-                    if (matrix[i, j] != _edges[i, j])
+                    if (matrix[i, j] != Edges[i, j])
                     {
                         return false;
                     }
@@ -330,20 +330,20 @@
 
         private int[] Row(int rowIndex)
         {
-            var row = new int[_edges.GetLength(1)];
-            for (var i = 0; i < _edges.GetLength(1); i++)
+            var row = new int[Edges.GetLength(1)];
+            for (var i = 0; i < Edges.GetLength(1); i++)
             {
-                row[i] = _edges[rowIndex, i];
+                row[i] = Edges[rowIndex, i];
             }
             return row;
         }
 
         private int[] Column(int columnIndex)
         {
-            var column = new int[_edges.GetLength(0)];
-            for (var i = 0; i < _edges.GetLength(0); i++)
+            var column = new int[Edges.GetLength(0)];
+            for (var i = 0; i < Edges.GetLength(0); i++)
             {
-                column[i] = _edges[i, columnIndex];
+                column[i] = Edges[i, columnIndex];
             }
             return column;
         }

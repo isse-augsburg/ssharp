@@ -29,10 +29,9 @@
                                (model.Train.Position <= Model.CrossingPosition &&
                                 model.Train.Position + model.Train.Speed > Model.CrossingPosition);
 
-            var bayesianCreator = new BayesianNetworkCreator(model, 50);
-            var config = BayesianNetworkCreator.Config;
+            var config = BayesianLearningConfiguration.Default;
             config.MaxConditionSize = 1;
-            BayesianNetworkCreator.Config = config;
+            var bayesianCreator = new BayesianNetworkCreator(model, 50, config);
             bayesianCreator.LearnConstraintBasedBayesianNetwork(hazard);
         }
 
@@ -54,10 +53,9 @@
                                (model.Train.Position <= Model.CrossingPosition &&
                                 model.Train.Position + model.Train.Speed > Model.CrossingPosition);
 
-            var bayesianCreator = new BayesianNetworkCreator(model, 50);
-            var config = BayesianNetworkCreator.Config;
+            var config = BayesianLearningConfiguration.Default;
             config.UseRealProbabilitiesForSimulation = false;
-            BayesianNetworkCreator.Config = config;
+            var bayesianCreator = new BayesianNetworkCreator(model, 50, config);
             bayesianCreator.LearnScoreBasedBayesianNetwork(20000000, hazard);
         }
     }

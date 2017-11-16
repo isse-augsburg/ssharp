@@ -2,15 +2,17 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using ISSE.SafetyChecking.Modeling;
     using Modeling;
+    using Newtonsoft.Json;
 
     public class BayesianNetworkCreator
     {
         private const double Tolerance = 0.000000001;
 
-        public static BayesianLearningConfiguration Config = BayesianLearningConfiguration.Default;
+        public BayesianLearningConfiguration Config { get; set; }
 
         private readonly ModelBase _model;
         private readonly int _stepBounds;
@@ -19,8 +21,9 @@
         private IList<McsRandomVariable> _mcsVars;
         private IList<BooleanRandomVariable> _states;
 
-        public BayesianNetworkCreator(ModelBase model, int stepBounds)
+        public BayesianNetworkCreator(ModelBase model, int stepBounds, BayesianLearningConfiguration? config = null)
         {
+            Config = config ?? BayesianLearningConfiguration.Default;
             _model = model;
             _stepBounds = stepBounds;
         }
@@ -36,9 +39,9 @@
         {
             CreateRandomVariables(hazard, states, faults);
             var allVars = AllRandomVariables();
-            var probCalculator = new OnDemandProbabilityDistributionCalculator(_model, allVars, _stepBounds, Tolerance);
+            var probCalculator = new OnDemandProbabilityDistributionCalculator(_model, allVars, _stepBounds, Tolerance, Config);
 
-            var independenceCalculator = new IndependencyCalculator(probCalculator, Tolerance);
+            var independenceCalculator = new IndependencyCalculator(probCalculator, Tolerance, Config);
             var independencies = independenceCalculator.FindIndependencies(_faultVars, _mcsVars, _states, _hazardVar);
             independenceCalculator.PrettyPrintIndependencies();
 
@@ -49,9 +52,10 @@
             Console.Out.WriteLine($"Calculated {probCalculator.NumberOfCalculatedDistributions()} out of {probCalculator.NumberOfMaxDistributions()} possible distributions");
 
             var bayesianNetwork = BayesianNetwork.FromDagPattern(dag, probCalculator);
-            PrintBayesianNetwork(bayesianNetwork);
+            bayesianNetwork.PrintBayesianNetwork();
             Console.Out.WriteLine($"Calculated {probCalculator.NumberOfCalculatedDistributions()} out of {probCalculator.NumberOfMaxDistributions()} possible distributions");
             CheckResultingNetwork(bayesianNetwork);
+            StoreBayesianNetwork(bayesianNetwork);
 
             return bayesianNetwork;
         }
@@ -67,10 +71,11 @@
         public BayesianNetwork LearnScoreBasedBayesianNetwork(int numberOfSimulations, Func<bool> hazard, Dictionary<string, Func<bool>> states = null, IList<Fault> faults = null)
         {
             CreateRandomVariables(hazard, states, faults);
-            var structureLearning = new ScoreBasedStructureLearner(_model, _stepBounds);
+            var structureLearning = new ScoreBasedStructureLearner(_model, _stepBounds, Config);
             var bayesianNetwork = structureLearning.LearnBayesianNetwork(_faultVars, _mcsVars, _states, _hazardVar, numberOfSimulations);
-            PrintBayesianNetwork(bayesianNetwork);
+            bayesianNetwork.PrintBayesianNetwork();
             CheckResultingNetwork(bayesianNetwork);
+            StoreBayesianNetwork(bayesianNetwork);
             return bayesianNetwork;
         }
 
@@ -98,12 +103,7 @@
 
         private void PrintBayesianNetwork(BayesianNetwork bayesianNetwork)
         {
-            Console.Out.WriteLine("Bayesian Network:");
-            bayesianNetwork.Dag.ExportToGraphviz();
-            foreach (var distribution in bayesianNetwork.Distributions.Values)
-            {
-                Console.Out.WriteLine(distribution.ToMoreReadableString());
-            }
+            bayesianNetwork.PrintBayesianNetwork();
         }
 
         /// <summary>
@@ -122,6 +122,24 @@
                 if (!network.Dag.IsDirectedEdge(criticalSet, _hazardVar))
                     Console.Out.WriteLine($"WARNING: There was no edge from {criticalSet} to {_hazardVar}! {message}");
             }
+        }
+
+        private void StoreBayesianNetwork(BayesianNetwork bayesianNetwork)
+        {
+            if (!string.IsNullOrWhiteSpace(Config.BayesianNetworkSerializationPath))
+            {
+                File.WriteAllText(Config.BayesianNetworkSerializationPath, JsonConvert.SerializeObject(bayesianNetwork, new BayesianNetworkConverter(bayesianNetwork.RandomVariables)));
+            }
+        }
+
+        public BayesianNetwork FromJson(string file, Func<bool> hazard, Dictionary<string, Func<bool>> states = null, IList<Fault> faults = null)
+        {
+            CreateRandomVariables(hazard, states, faults);
+            var allVars = AllRandomVariables();
+            var network = JsonConvert.DeserializeObject<BayesianNetwork>(File.ReadAllText(@"D:\Sonstiges\SafetySharpSimulation\network.txt"),
+                new BayesianNetworkConverter(allVars));
+            PrintBayesianNetwork(network);
+            return network;
         }
 
     }

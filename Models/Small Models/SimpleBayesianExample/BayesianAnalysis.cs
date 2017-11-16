@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Analysis;
     using Bayesian;
     using ISSE.SafetyChecking;
@@ -20,13 +19,9 @@
             Func<bool> hazard = () => model.Component.Hazard;
             Func<bool> state = () => model.Component.NoDataAvailable || model.Component.SubsystemError;
             var states = new Dictionary<string, Func<bool>> { /*["State"] = state*/ };
-            var bayesianCreator = new BayesianNetworkCreator(model, 10);
 
-            var config = BayesianNetworkCreator.Config;
-            config.UseDccaResultsForLearning = true;
-            config.UseRealProbabilitiesForSimulation = true;
-            BayesianNetworkCreator.Config = config;
-
+            var config = BayesianLearningConfiguration.Default;
+            var bayesianCreator = new BayesianNetworkCreator(model, 10, config);
             var result = bayesianCreator.LearnScoreBasedBayesianNetwork(100000, hazard, states);
         }
 
@@ -35,15 +30,30 @@
         {
             var model = new SimpleBayesianExampleModel();
             Func<bool> hazard = () => model.Component.Hazard;
-            Func<bool> state = () => model.Component.NoDataAvailable || model.Component.SubsystemError;
+            Func<bool> state = () => true;
             var states = new Dictionary<string, Func<bool>> { /*["State"] = state*/ };
-            var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10);
+            
 
-            var config = BayesianNetworkCreator.Config;
-            config.UseDccaResultsForLearning = true;
-            BayesianNetworkCreator.Config = config;
-
+            var config = BayesianLearningConfiguration.Default;
+            var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10, config);
             var result = bayesianNetworkCreator.LearnConstraintBasedBayesianNetwork(hazard, states, new[] { model.Component.FL, model.Component.FS, model.Component.FV });
+        }
+
+        [Test]
+        public void SerializeAndDeserializeBayesianNetwork()
+        {
+            const string filePath = @"D:\Sonstiges\SafetySharpSimulation\network.txt";
+            var model = new SimpleBayesianExampleModel();
+            Func<bool> hazard = () => model.Component.Hazard;
+            Func<bool> state = () => true;
+
+            var config = BayesianLearningConfiguration.Default;
+            config.BayesianNetworkSerializationPath = filePath;
+            var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10, config);
+            var result = bayesianNetworkCreator.LearnConstraintBasedBayesianNetwork(hazard, null, new[] { model.Component.FL, model.Component.FS, model.Component.FV });
+
+            bayesianNetworkCreator = new BayesianNetworkCreator(model, 10);
+            var network = bayesianNetworkCreator.FromJson(filePath, hazard);
         }
 
         [Test]

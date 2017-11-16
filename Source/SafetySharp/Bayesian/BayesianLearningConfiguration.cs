@@ -20,11 +20,29 @@
         /// </summary>
         public bool UseRealProbabilitiesForSimulation { get; set; }
 
+        /// <summary>
+        /// Optional file path for serializing the calculated probabilites while modelchecking
+        /// </summary>
+        public string ProbabilitySerializationFilePath { get; set; }
+
+        /// <summary>
+        /// Optional file path for deserializing already known probabilities for modelchecking
+        /// </summary>
+        public string ProbabilityDeserializationFilePath { get; set; }
+
+        /// <summary>
+        /// Optional file path for serializing the bayesian network result
+        /// </summary>
+        public string BayesianNetworkSerializationPath { get; set; }
+
         public static BayesianLearningConfiguration Default => new BayesianLearningConfiguration
         {
             UseDccaResultsForLearning = true,
             MaxConditionSize = int.MaxValue,
-            UseRealProbabilitiesForSimulation = true
+            UseRealProbabilitiesForSimulation = true,
+            ProbabilitySerializationFilePath = "",
+            ProbabilityDeserializationFilePath = "",
+            BayesianNetworkSerializationPath = ""
         };
 
     }

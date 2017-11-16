@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.InteropServices;
     using System.Text;
     using ISSE.SafetyChecking.Modeling;
 
@@ -20,14 +19,17 @@
         private BooleanRandomVariable _hazard;
         private DualKeyDictionary<RandomVariable, ICollection<ISet<RandomVariable>>> _conditionalIndependencies;
         private readonly IProbabilityDistributionCalculator _probCalculator;
+        private readonly BayesianLearningConfiguration _config;
 
         /// <summary>
         /// Creates a new IndependencyCalculator
         /// </summary>
         /// <param name="probCalculator">Provider for probability distributions</param>
         /// <param name="tolerance">Tolerance level for double calculations</param>
-        public IndependencyCalculator(IProbabilityDistributionCalculator probCalculator, double tolerance)
+        /// <param name="config">BayesianLearningConfiguration object for optional settings</param>
+        public IndependencyCalculator(IProbabilityDistributionCalculator probCalculator, double tolerance, BayesianLearningConfiguration? config = null)
         {
+            _config = config ?? BayesianLearningConfiguration.Default;
             _probCalculator = probCalculator;
             _tolerance = tolerance;
         }
@@ -46,7 +48,7 @@
             var variablesForCalculation = GetVariablesForCalculation();
             CalculatePairIndependencies(variablesForCalculation);
 
-            if (BayesianNetworkCreator.Config.UseDccaResultsForLearning && _minimalCriticalSets.Count > 0)
+            if (_config.UseDccaResultsForLearning && _minimalCriticalSets.Count > 0)
             {
                 GenerateDccaIndependencies();
                 CalculateFurtherDccaIndependencies();
@@ -63,12 +65,12 @@
             var variables = new List<RandomVariable>();
             variables.AddRange(_faults);
             variables.AddRange(_states);
-            if (!BayesianNetworkCreator.Config.UseDccaResultsForLearning)
+            if (!_config.UseDccaResultsForLearning)
             {
                 variables.AddRange(_minimalCriticalSets);
                 variables.Add(_hazard);
             }
-            if (BayesianNetworkCreator.Config.UseDccaResultsForLearning && _minimalCriticalSets.Count == 0)
+            if (_config.UseDccaResultsForLearning && _minimalCriticalSets.Count == 0)
             {
                 variables.Add(_hazard);
             }
@@ -91,7 +93,7 @@
                         Console.Out.WriteLine($"Variables {first.Name} and {second.Name} are independent");
                         AddIndependency(first, second);
                     }
-                    for (var k = 1; k < variablesToUse.Count - 1 && k <= BayesianNetworkCreator.Config.MaxConditionSize; k++)
+                    for (var k = 1; k < variablesToUse.Count - 1 && k <= _config.MaxConditionSize; k++)
                     {
                         var subsets =
                             SubsetUtils.AllSubsets(
@@ -170,7 +172,7 @@
                     AddIndependency(_hazard, faultOrState, _minimalCriticalSets);
                 }
 
-                for (var k = 1; k < faultsInNoMcsAndStates.Count - 1 && k <= BayesianNetworkCreator.Config.MaxConditionSize; k++)
+                for (var k = 1; k < faultsInNoMcsAndStates.Count - 1 && k <= _config.MaxConditionSize; k++)
                 {
                     var subsets =
                         SubsetUtils.AllSubsets(
@@ -247,6 +249,10 @@
             if (conditions != null)
             {
                 _conditionalIndependencies[first, second].Add(new HashSet<RandomVariable>(conditions));
+            }
+            else
+            {
+                _conditionalIndependencies[first, second].Add(new HashSet<RandomVariable>());
             }
         }
 

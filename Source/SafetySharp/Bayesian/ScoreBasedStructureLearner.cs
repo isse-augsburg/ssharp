@@ -25,6 +25,7 @@
         private ICollection<McsRandomVariable> _mcs;
         private ICollection<BooleanRandomVariable> _states;
         private BooleanRandomVariable _hazard;
+        private readonly BayesianLearningConfiguration _config;
 
         private const string RPath = "Rscript.exe";
         // TODO: define this path correctly relative to the project
@@ -42,8 +43,10 @@
         /// </summary>
         /// <param name="model">The model for which a bayesian network will be learned</param>
         /// <param name="stepBounds">The maximal number of steps for a trace in a simulation step</param>
-        public ScoreBasedStructureLearner(ModelBase model, int stepBounds)
+        /// <param name="config">BayesianLearningConfiguration for further optional settings</param>
+        public ScoreBasedStructureLearner(ModelBase model, int stepBounds, BayesianLearningConfiguration? config = null)
         {
+            _config = config ?? BayesianLearningConfiguration.Default;
             _model = model;
             _stepBounds = stepBounds;
         }
@@ -78,7 +81,7 @@
         {
             var allVariables = AllRandomVariables();
             var allFormulas = CreateAllFormulas();
-            SafetySharpProbabilisticSimulator.Configuration.UseOptionProbabilitiesInSimulation = BayesianNetworkCreator.Config.UseRealProbabilitiesForSimulation;
+            SafetySharpProbabilisticSimulator.Configuration.UseOptionProbabilitiesInSimulation = _config.UseRealProbabilitiesForSimulation;
             var simulator = new SafetySharpProbabilisticSimulator(_model, allFormulas.Values.ToArray());
 
             using (var w = new StreamWriter(DataPath))
@@ -135,7 +138,7 @@
                 {
                     blacklist.WriteLine($"{_hazard.Name},{criticalSet.Name}");
                 }
-                if (!BayesianNetworkCreator.Config.UseDccaResultsForLearning)
+                if (!_config.UseDccaResultsForLearning)
                 {
                     return;
                 }

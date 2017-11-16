@@ -10,6 +10,7 @@ namespace SafetySharp.Bayesian
     using ISSE.SafetyChecking.Formula;
     using ISSE.SafetyChecking.Modeling;
     using Modeling;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Class for calculating arbitrary probabilities and probability distributions on a given set of random variables via model checking.
@@ -28,14 +29,21 @@ namespace SafetySharp.Bayesian
         private readonly int _stepBounds;
         private readonly ModelBase _model;
         private readonly double _tolerance;
+        private readonly BayesianLearningConfiguration _config;
 
-        public OnDemandProbabilityDistributionCalculator(ModelBase model, ICollection<RandomVariable> variables, int stepBounds, double tolerance)
+        public OnDemandProbabilityDistributionCalculator(ModelBase model, ICollection<RandomVariable> variables, int stepBounds, double tolerance, BayesianLearningConfiguration? config = null)
         {
+            _config = config ?? BayesianLearningConfiguration.Default;
             _randomVariables = variables.ToList();
             _probs = new Dictionary<int, Probability>();
             _stepBounds = stepBounds;
             _model = model;
             _tolerance = tolerance;
+
+            if (!string.IsNullOrWhiteSpace(_config.ProbabilityDeserializationFilePath))
+            {
+                DeserializeProbabilities();
+            }
         }
 
         /// <summary>
@@ -50,6 +58,10 @@ namespace SafetySharp.Bayesian
             if (!_probs.ContainsKey(index))
             {
                 _probs[index] = CalculateProbability(variables.ToList());
+                if (!string.IsNullOrWhiteSpace(_config.ProbabilitySerializationFilePath))
+                {
+                    SerializeCurrentProbabilities();
+                }   
             }
             return _probs[index];
         }
@@ -85,6 +97,7 @@ namespace SafetySharp.Bayesian
         /// </summary>
         private Probability CalculateProbability(IList<RandomVariable> variables)
         {
+            Console.Out.WriteLine($"Modelchecking joint probability of: {string.Join(",", variables)}.");
             var tc = SafetySharpModelChecker.TraversalConfiguration;
             tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
             tc.DefaultTraceOutput = TextWriter.Null;
@@ -106,6 +119,7 @@ namespace SafetySharp.Bayesian
             {
                 variables[0].Probability = new[] { probability, probability.Complement() };
             }
+            Console.Out.WriteLine($"Finished modelchecking. Result is: {probability}");
             return probability;
         }
 
@@ -263,5 +277,45 @@ namespace SafetySharp.Bayesian
         {
             return 1 << _randomVariables.Count;
         }
+
+        private void SerializeCurrentProbabilities()
+        {
+            using (var file = File.CreateText(_config.ProbabilitySerializationFilePath))
+            {
+                var toSerialize = new ProbabilitySerialization
+                {
+                    RandomVariables = _randomVariables.Select(rvar => rvar.Name).ToArray(),
+                    Probs = _probs
+                };
+                var serializer = new JsonSerializer();
+                serializer.Serialize(file, toSerialize);
+            }
+        }
+
+        private void DeserializeProbabilities()
+        {
+            using (var file = File.OpenText(_config.ProbabilityDeserializationFilePath))
+            {
+                var serializer = new JsonSerializer();
+                var probs = (ProbabilitySerialization) serializer.Deserialize(file, typeof(ProbabilitySerialization));
+                foreach (var keyValuePair in probs.Probs)
+                {
+                    var storedIndex = keyValuePair.Key;
+                    var storedRandomVariables = SubsetUtils.FromIndex(probs.RandomVariables, storedIndex);
+                    var realRandomVariables = _randomVariables.Where(rvar => storedRandomVariables.Contains(rvar.Name)).ToList();
+                    _probs[SubsetUtils.GetIndex(realRandomVariables, _randomVariables)] = keyValuePair.Value;
+                    if (realRandomVariables.Count == 1)
+                    {
+                        realRandomVariables[0].Probability = new[] { keyValuePair.Value, keyValuePair.Value.Complement() };
+                    }
+                }
+            }
+        }
+    }
+
+    public class ProbabilitySerialization
+    {
+        public string[] RandomVariables { get; set; }
+        public Dictionary<int, Probability> Probs { get; set; }
     }
 }
