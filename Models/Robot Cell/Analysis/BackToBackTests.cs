@@ -77,9 +77,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	    internal static IFaultSetHeuristic RedundancyHeuristic(Model model)
 	    {
-	        var cartFaults = model.Carts.Select(cart => cart.Broken)
-	                              .Concat(model.Carts.Select(cart => cart.Lost))
-	                              .Concat(model.CartAgents.Select(cartAgent => cartAgent.ConfigurationUpdateFailed));
+	        var cartFaults = model.Carts.SelectMany(cart => new[] { cart.Broken, cart.Lost })
+	                              .Concat(model.CartAgents.SelectMany(cartAgent => new [] { cartAgent.ConfigurationUpdateFailed, cartAgent.Broken }));
 
 	        return new MinimalRedundancyHeuristic(
 	            model.Faults.Except(cartFaults).ToArray(),
