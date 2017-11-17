@@ -23,8 +23,9 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 {
 	using SafetySharp.Modeling;
-    using System.Collections.Generic;
-    using Odp;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using Odp;
 	using Plants;
 
 	public class CartAgent : Agent
