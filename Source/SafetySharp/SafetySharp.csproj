@@ -64,6 +64,7 @@
     <Compile Include="Bayesian\ProbabilityDistribution.cs" />
     <Compile Include="Bayesian\RandomVariable.cs" />
     <Compile Include="Bayesian\RandomVariableFactory.cs" />
+    <Compile Include="Bayesian\RandomVariableSimulator.cs" />
     <Compile Include="Bayesian\ScoreBasedStructureLearner.cs" />
     <Compile Include="Bayesian\SubsetUtils.cs" />
     <Compile Include="ModelChecking\SafetySharpCounterExampleSerialization.cs" />

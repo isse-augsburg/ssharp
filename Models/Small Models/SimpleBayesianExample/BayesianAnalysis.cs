@@ -22,7 +22,7 @@
 
             var config = BayesianLearningConfiguration.Default;
             var bayesianCreator = new BayesianNetworkCreator(model, 10, config);
-            var result = bayesianCreator.LearnScoreBasedBayesianNetwork(100000, hazard, states);
+            var result = bayesianCreator.LearnScoreBasedBayesianNetwork(@"D:\Sonstiges\SafetySharpSimulation\", 100000, hazard, states);
         }
 
         [Test]

@@ -56,7 +56,7 @@
             var config = BayesianLearningConfiguration.Default;
             config.UseRealProbabilitiesForSimulation = false;
             var bayesianCreator = new BayesianNetworkCreator(model, 50, config);
-            bayesianCreator.LearnScoreBasedBayesianNetwork(20000000, hazard);
+            bayesianCreator.LearnScoreBasedBayesianNetwork(@"D:\Sonstiges\SafetySharpSimulation", 20000000, hazard);
         }
     }
 }

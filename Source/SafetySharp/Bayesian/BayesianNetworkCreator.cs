@@ -63,16 +63,22 @@
         /// <summary>
         /// Learn a bayesian network for the given hazard, states and faults with a model selection learning algorithm.
         /// </summary>
+        /// <param name="pathForGeneratedFiles">Path to use for generated file creation</param>
         /// <param name="numberOfSimulations">The number of simulation data rows to generate for learning the bayesian network</param>
         /// <param name="hazard">The hazard expression which should be analyzed</param>
         /// <param name="states">An optional dictionary for arbitrary named state expressions that should be analyzed</param>
         /// <param name="faults">An optional fault list to restrict the analyzed set</param>
         /// <returns>A learning bayesian network including a DAG and a fully calculated probability distribution</returns>
-        public BayesianNetwork LearnScoreBasedBayesianNetwork(int numberOfSimulations, Func<bool> hazard, Dictionary<string, Func<bool>> states = null, IList<Fault> faults = null)
+        public BayesianNetwork LearnScoreBasedBayesianNetwork(string pathForGeneratedFiles, int numberOfSimulations, Func<bool> hazard, Dictionary<string, Func<bool>> states = null, IList<Fault> faults = null)
         {
             CreateRandomVariables(hazard, states, faults);
-            var structureLearning = new ScoreBasedStructureLearner(_model, _stepBounds, Config);
-            var bayesianNetwork = structureLearning.LearnBayesianNetwork(_faultVars, _mcsVars, _states, _hazardVar, numberOfSimulations);
+            var variableSimulator = new RandomVariableSimulator(_model, _stepBounds, pathForGeneratedFiles, Config);
+            var dataFile = variableSimulator.GenerateSimulationData(_faultVars, _mcsVars, _states, _hazardVar, numberOfSimulations);
+            var dataFiles = new List<string>{ dataFile };
+            dataFiles.AddRange(Config.FurtherSimulationDataFiles);
+
+            var structureLearning = new ScoreBasedStructureLearner(dataFiles, pathForGeneratedFiles, Config);
+            var bayesianNetwork = structureLearning.LearnBayesianNetwork(_faultVars, _mcsVars, _states, _hazardVar);
             bayesianNetwork.PrintBayesianNetwork();
             CheckResultingNetwork(bayesianNetwork);
             StoreBayesianNetwork(bayesianNetwork);

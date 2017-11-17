@@ -10,13 +10,13 @@
     internal class BayesianNetworkConverter : JsonConverter
     {
         private readonly IList<RandomVariable> _randomVariables; 
-        private const string dagProperty = "dag";
-        private const string edgesProperty = "edges";
-        private const string nodesProperty = "nodes";
-        private const string randomVariableProperty = "randomVariable";
-        private const string conditionsProperty = "conditions";
-        private const string distributionProperty = "distribution";
-        private const string distributionsProperty = "distributions";
+        private const string DagProperty = "dag";
+        private const string EdgesProperty = "edges";
+        private const string NodesProperty = "nodes";
+        private const string RandomVariableProperty = "randomVariable";
+        private const string ConditionsProperty = "conditions";
+        private const string DistributionProperty = "distribution";
+        private const string DistributionsProperty = "distributions";
 
         public BayesianNetworkConverter(IList<RandomVariable> randomVariables)
         {
@@ -31,10 +31,10 @@
             // write DagPattern
             var dag = new JObject
             {
-                new JProperty(edgesProperty, network.Dag.Edges),
-                new JProperty(nodesProperty, network.Dag.Nodes.Select(node => node.Name).ToList())
+                new JProperty(EdgesProperty, network.Dag.Edges),
+                new JProperty(NodesProperty, network.Dag.Nodes.Select(node => node.Name).ToList())
             };
-            json.Add(new JProperty(dagProperty, dag));
+            json.Add(new JProperty(DagProperty, dag));
 
             // write probability distributions
             var probObjects = new JArray();
@@ -42,13 +42,13 @@
             {
                 var distObject = new JObject
                 {
-                    new JProperty(randomVariableProperty, distribution.Value.RandomVariable.Name),
-                    new JProperty(conditionsProperty, distribution.Value.Conditions.Select(rvar => rvar.Name)),
-                    new JProperty(distributionProperty, distribution.Value.Distribution.Select(prob => prob.Value))
+                    new JProperty(RandomVariableProperty, distribution.Value.RandomVariable.Name),
+                    new JProperty(ConditionsProperty, distribution.Value.Conditions.Select(rvar => rvar.Name)),
+                    new JProperty(DistributionProperty, distribution.Value.Distribution.Select(prob => prob.Value))
                 };
                 probObjects.Add(distObject);
             }
-            json.Add(new JProperty(distributionsProperty, probObjects));
+            json.Add(new JProperty(DistributionsProperty, probObjects));
 
             json.WriteTo(writer);
         }
@@ -64,9 +64,9 @@
             var json = JObject.Load(reader);
 
             // construct DagPattern
-            var dag = json.Property(dagProperty);
-            var edges = dag.Value.Value<JArray>(edgesProperty).ToObject<int[]>();
-            var nodes = dag.Value.Value<JArray>(nodesProperty).ToObject<string[]>();
+            var dag = json.Property(DagProperty);
+            var edges = dag.Value.Value<JArray>(EdgesProperty).ToObject<int[]>();
+            var nodes = dag.Value.Value<JArray>(NodesProperty).ToObject<string[]>();
             var realEdges = new int[nodes.Length, nodes.Length];
             for(var i = 0; i < nodes.Length; i++)
             {
@@ -79,15 +79,15 @@
             var dagPattern = DagPattern<RandomVariable>.InitDagWithMatrix(_randomVariables, realEdges);
 
             // construct probability distributions
-            var distributions = json.Property(distributionsProperty).Value.Children();
+            var distributions = json.Property(DistributionsProperty).Value.Children();
             var realDistributions = new List<ProbabilityDistribution>();
             foreach (var distribution in distributions)
             {
-                var randomVariable = distribution.Value<string>(randomVariableProperty);
+                var randomVariable = distribution.Value<string>(RandomVariableProperty);
                 var realRandomVariable = randomVariableMapping[randomVariable];
-                var conditions = distribution.Value<JArray>(conditionsProperty).ToObject<string[]>();
+                var conditions = distribution.Value<JArray>(ConditionsProperty).ToObject<string[]>();
                 var realConditions = conditions.Select(condition => randomVariableMapping[condition]).ToList();
-                var distributionValues = distribution.Value<JArray>(distributionProperty).ToObject<double[]>();
+                var distributionValues = distribution.Value<JArray>(DistributionProperty).ToObject<double[]>();
                 var realDistributionValues = distributionValues.Select(distValue => new Probability(distValue)).ToList();
                 realDistributions.Add(new ProbabilityDistribution(realRandomVariable, realConditions, realDistributionValues));
             }

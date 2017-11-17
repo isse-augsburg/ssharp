@@ -1,4 +1,4 @@
-﻿# Load packages
+# Load packages
 for (package in c('bnlearn', 'jsonlite')) {
   if (!require(package, character.only=T, quietly=T)) {
     install.packages(package, repos="http://cran.rstudio.com/")
@@ -8,9 +8,14 @@ for (package in c('bnlearn', 'jsonlite')) {
 
 # Read necessary input files from command line arguments
 args <- commandArgs(trailingOnly = TRUE)
-data <- data.frame(read.csv(args[1], colClasses = c("factor")))
-white <- data.frame(read.csv(args[2]))
-black <- data.frame(read.csv(args[3]))
+white <- data.frame(read.csv(args[1]))
+black <- data.frame(read.csv(args[2]))
+
+load_data <- function(files) {
+  frames <- lapply(files, read.csv, colClasses = c("factor"))
+  do.call(rbind, frames)
+}
+data <- load_data(args[3:length(args)])
 
 if(!is.data.frame(white) || nrow(white) == 0) {
   white <- NULL

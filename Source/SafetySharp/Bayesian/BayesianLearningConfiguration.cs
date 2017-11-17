@@ -1,5 +1,7 @@
 ﻿namespace SafetySharp.Bayesian
 {
+    using System.Collections.Generic;
+
     /// <summary>
     /// Configurations for learning bayesian networks
     /// </summary>
@@ -35,6 +37,8 @@
         /// </summary>
         public string BayesianNetworkSerializationPath { get; set; }
 
+        public IList<string> FurtherSimulationDataFiles { get; set; } 
+
         public static BayesianLearningConfiguration Default => new BayesianLearningConfiguration
         {
             UseDccaResultsForLearning = true,
@@ -42,7 +46,8 @@
             UseRealProbabilitiesForSimulation = true,
             ProbabilitySerializationFilePath = "",
             ProbabilityDeserializationFilePath = "",
-            BayesianNetworkSerializationPath = ""
+            BayesianNetworkSerializationPath = "",
+            FurtherSimulationDataFiles = new List<string>()
         };
 
     }

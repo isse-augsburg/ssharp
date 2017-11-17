@@ -5,10 +5,7 @@
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using Analysis;
-    using ISSE.SafetyChecking.Formula;
     using ISSE.SafetyChecking.Modeling;
-    using Modeling;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -17,54 +14,47 @@
     class ScoreBasedStructureLearner
     {
 
-        private readonly ModelBase _model;
-        private readonly int _stepBounds;
-        private int _numberOfSimulations;
-
         private ICollection<FaultRandomVariable> _faults;
         private ICollection<McsRandomVariable> _mcs;
         private ICollection<BooleanRandomVariable> _states;
         private BooleanRandomVariable _hazard;
         private readonly BayesianLearningConfiguration _config;
 
+        private readonly IList<string> _dataFiles;
+        private readonly string _path;
+
         private const string RPath = "Rscript.exe";
         // TODO: define this path correctly relative to the project
-        private const string ScriptPath = @"C:\Users\frits\Documents\Visual Studio 2015\Projects\ssharp\Source\SafetySharp\Bayesian\";
-        //TODO: define this path for generation data correctly
-        private const string Path = @"D:\Sonstiges\SafetySharpSimulation\";
+        private const string ScriptPath = @"C:\Users\frits\Documents\Visual Studio 2015\Projects\bayessharp\ssharp\Source\SafetySharp\Bayesian\";
 
         private const string RScript = ScriptPath + "StructureLearning.R";
-        private const string DataPath = Path + "simulationData.csv";
-        private const string WhitelistPath = Path + "whitelist.csv";
-        private const string BlacklistPath = Path + "blacklist.csv";
+        private string WhitelistPath => _path + "whitelist.csv";
+        private string BlacklistPath => _path + "blacklist.csv";
 
         /// <summary>
         /// Creates a new ScoreBasedStructureLearner instance
         /// </summary>
-        /// <param name="model">The model for which a bayesian network will be learned</param>
-        /// <param name="stepBounds">The maximal number of steps for a trace in a simulation step</param>
+        /// <param name="dataFiles">Path to the data files</param>
+        /// <param name="pathToUse">Path where further files are created</param>
         /// <param name="config">BayesianLearningConfiguration for further optional settings</param>
-        public ScoreBasedStructureLearner(ModelBase model, int stepBounds, BayesianLearningConfiguration? config = null)
+        public ScoreBasedStructureLearner(IList<string> dataFiles, string pathToUse, BayesianLearningConfiguration? config = null)
         {
+            _dataFiles = dataFiles;
+            _path = pathToUse;
             _config = config ?? BayesianLearningConfiguration.Default;
-            _model = model;
-            _stepBounds = stepBounds;
         }
 
         /// <summary>
         /// Learn the best fitting DAG structure and probability distributions by using simulation data
         /// </summary>
         public BayesianNetwork LearnBayesianNetwork(ICollection<FaultRandomVariable> faults, ICollection<McsRandomVariable> mcs,
-                                                    ICollection<BooleanRandomVariable> states, BooleanRandomVariable hazard, int numberOfSimulations)
+                                                    ICollection<BooleanRandomVariable> states, BooleanRandomVariable hazard)
         {
             _faults = faults;
             _mcs = mcs;
             _hazard = hazard;
             _states = states;
-            _numberOfSimulations = numberOfSimulations;
 
-            Console.Out.WriteLine("Create simulation data...");
-            CreateSimulationData();
             Console.Out.WriteLine("Generate data for reducing model domain...");
             CreateWhiteAndBlacklist();
             Console.Out.WriteLine("Call R script for learning the network...");
@@ -72,50 +62,6 @@
             var result = JsonConvert.DeserializeObject<BayesianNetworkResult>(jsonResult);
 
             return ToBayesianNetwork(result);
-        }
-
-        /// <summary>
-        /// Simulates the model and writes the results as a CSV file. Checks the occurence of every random variable.
-        /// </summary>
-        private void CreateSimulationData()
-        {
-            var allVariables = AllRandomVariables();
-            var allFormulas = CreateAllFormulas();
-            SafetySharpProbabilisticSimulator.Configuration.UseOptionProbabilitiesInSimulation = _config.UseRealProbabilitiesForSimulation;
-            var simulator = new SafetySharpProbabilisticSimulator(_model, allFormulas.Values.ToArray());
-
-            using (var w = new StreamWriter(DataPath))
-            {
-                w.WriteLine(string.Join(",", allVariables.Select(randomVariable => randomVariable.Name)));
-                for (var currentStep = 0; currentStep < _numberOfSimulations; currentStep++)
-                {
-                    if (_numberOfSimulations > 100 && currentStep % (_numberOfSimulations / 100) == 0)
-                    {
-                        Console.Out.WriteLine($"{(double)currentStep / _numberOfSimulations:P0} done.");
-                    }
-
-                    simulator.SimulateSteps(_stepBounds);
-                    var results = new bool[allVariables.Count];
-                    for (var varIndex = 0; varIndex < allVariables.Count; varIndex++)
-                    {
-                        var currentVariable = allVariables[varIndex];
-                        // cut sets cannot be checked for a given state, so check the occurence of its faults
-                        if (currentVariable is McsRandomVariable)
-                        {
-                            var cutSet = (McsRandomVariable)currentVariable;
-                            results[varIndex] =
-                                cutSet.FaultVariables.All(fault => simulator.GetCountOfSatisfiedOnTrace(allFormulas[fault]) > 0);
-                        }
-                        // check the occurence of the random variable
-                        else
-                        {
-                            results[varIndex] = simulator.GetCountOfSatisfiedOnTrace(allFormulas[currentVariable]) > 0;
-                        }
-                    }
-                    w.WriteLine(string.Join(",", results.Select(res => res ? 'T' : 'F')));
-                }
-                w.Flush();
-            }
         }
 
         private void CreateWhiteAndBlacklist()
@@ -160,12 +106,12 @@
             }
         }
 
-        private static string CallRLearningScript()
+        private string CallRLearningScript()
         {
             var startInfo = new ProcessStartInfo
             {
                 FileName = RPath,
-                Arguments = $"\"{RScript}\" \"{DataPath}\" \"{WhitelistPath}\" \"{BlacklistPath}\"",
+                Arguments = $"\"{RScript}\" \"{WhitelistPath}\" \"{BlacklistPath}\" \"{string.Join("\" \"", _dataFiles)}\"",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 CreateNoWindow = true,
@@ -239,31 +185,6 @@
             }
             dictionary[_hazard.Name] = _hazard;
             return dictionary;
-        }
-
-        private IList<RandomVariable> AllRandomVariables()
-        {
-            var allVariables = new List<RandomVariable>();
-            allVariables.AddRange(_faults);
-            allVariables.AddRange(_mcs);
-            allVariables.AddRange(_states);
-            allVariables.Add(_hazard);
-            return allVariables;
-        }
-
-        private Dictionary<RandomVariable, Formula> CreateAllFormulas()
-        {
-            var allFormulas = new Dictionary<RandomVariable, Formula>();
-            foreach (var faultVar in _faults)
-            {
-                allFormulas[faultVar] = faultVar.ToFormula();
-            }
-            foreach (var state in _states)
-            {
-                allFormulas[state] = state.ToFormula();
-            }
-            allFormulas[_hazard] = _hazard.ToFormula();
-            return allFormulas;
         }
     }
 
