@@ -168,10 +168,19 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			return _strategies[invariant].RecruitNecessaryAgents(coalition);
 		}
 
-		private IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
+		/// <summary>
+		///   Semi-lazily calculates the best capability distributions for the CTF.
+		///   Agents recruited or changes to the CTF between two yielded distributions are tacken into account.
+		/// </summary>
+		/// <param name="coalition">The coalition used to find distributions.</param>
+		/// <returns>A lazily computed sequence of distributions, so that each distribution's length equals the CTF length at that moment.</returns>
+		private static IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
 		{
 			DistributionCalculator calculator;
 			int agentCount;
+
+			// keep track of previous distributions to prevent an endless loop
+			var previousDistributions = new HashSet<BaseAgent[]>(ArrayEqualityComparer<BaseAgent>.Default);
 
 			do
 			{
@@ -180,12 +189,19 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 				using (var enumerator = calculator.CalculateDistributions().GetEnumerator())
 					while (enumerator.MoveNext() && calculator.Fragment.Equals(coalition.CTF) && coalition.BaseAgents.Count == agentCount)
-						yield return enumerator.Current;
+					{
+						var distribution = enumerator.Current;
+						if (previousDistributions.Add(distribution)) // only yield new distributions
+							yield return distribution;
+					}
+
+				// If the fragment changes, the distribution length changes - there's no chance that previous distributions reoccur
+				if (!calculator.Fragment.Equals(coalition.CTF))
+					previousDistributions.Clear();
 
 				// continue with new calculator if the fragment / the agents changed,
-				// stop if calculator has no more distributions
+				// stop if calculator has no more (new) distributions
 			} while (!calculator.Fragment.Equals(coalition.CTF) || coalition.BaseAgents.Count != agentCount);
-
 		}
 
 		protected async Task<IEnumerable<BaseAgent>> ComputeResourceFlow(ConfigurationSuggestion configurationSuggestion)
