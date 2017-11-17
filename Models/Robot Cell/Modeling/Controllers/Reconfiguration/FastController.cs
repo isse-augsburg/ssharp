@@ -34,7 +34,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 	///   An <see cref="IController" /> implementation that is much faster than
 	///   the MiniZinc implementation.
 	/// </summary>
-	internal class FastController : Odp.Reconfiguration.FastController
+	internal class FastController : Odp.Reconfiguration.FastController, IController
 	{
 		protected override bool PreferCapabilityAccumulation => false;
 

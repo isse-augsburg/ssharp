@@ -28,7 +28,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using Controllers;
 	using Plants;
 
-	internal partial class ModelBuilder
+	public partial class ModelBuilder
 	{
 		private static class RouteHelper
 		{

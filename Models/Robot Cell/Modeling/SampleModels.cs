@@ -29,7 +29,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
     using Odp.Reconfiguration;
     using static ModelBuilderHelper;
 
-    internal static class SampleModels
+    public static class SampleModels
     {
         private static readonly Func<ModelBuilder, ModelBuilder>[] _defaultConfigurations =
             { Ictss1, Ictss2, Ictss3, Ictss4, Ictss5, Ictss6, Ictss7 };

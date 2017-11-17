@@ -36,7 +36,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	using Plants;
 	using Resource = Controllers.Resource;
 
-	internal partial class ModelBuilder
+	public partial class ModelBuilder
 	{
 		private readonly Model _model;
 
