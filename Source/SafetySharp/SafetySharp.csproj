@@ -54,6 +54,7 @@
     <Compile Include="Bayesian\BayesianNetwork.cs" />
     <Compile Include="Bayesian\BayesianNetworkConverter.cs" />
     <Compile Include="Bayesian\BayesianNetworkCreator.cs" />
+    <Compile Include="Bayesian\BayesianNetworkProbabilityDistributionCalculator.cs" />
     <Compile Include="Bayesian\ConstraintBasedStructureLearner.cs" />
     <Compile Include="Bayesian\DagPattern.cs" />
     <Compile Include="Bayesian\DualKeyDictionary.cs" />

@@ -45,7 +45,6 @@
             const string filePath = @"D:\Sonstiges\SafetySharpSimulation\network.txt";
             var model = new SimpleBayesianExampleModel();
             Func<bool> hazard = () => model.Component.Hazard;
-            Func<bool> state = () => true;
 
             var config = BayesianLearningConfiguration.Default;
             config.BayesianNetworkSerializationPath = filePath;
@@ -54,6 +53,20 @@
 
             bayesianNetworkCreator = new BayesianNetworkCreator(model, 10);
             var network = bayesianNetworkCreator.FromJson(filePath, hazard);
+        }
+
+        [Test]
+        public void CalculateBayesianNetworkProbabilities()
+        {
+            const string filePath = @"D:\Sonstiges\SafetySharpSimulation\network.txt";
+            var model = new SimpleBayesianExampleModel();
+            Func<bool> hazard = () => model.Component.Hazard;
+            var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10);
+            var network = bayesianNetworkCreator.FromJson(filePath, hazard);
+
+            var calculator = new BayesianNetworkProbabilityDistributionCalculator(network, 0.0000000001);
+            var result = calculator.CalculateProbabilityDistribution(new [] { "FL", "FS", "FV" });
+            Console.Out.WriteLine(string.Join("\n", result));
         }
 
         [Test]
