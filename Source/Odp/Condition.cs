@@ -75,8 +75,7 @@ namespace SafetySharp.Odp
 		[Pure]
 		public bool StateMatches(Condition other)
 		{
-			return Task == other.Task
-				   && _statePrefixLength == other._statePrefixLength;
+			return _statePrefixLength == other._statePrefixLength && Equals(Task, other.Task);
 		}
 
 		/// <summary>
