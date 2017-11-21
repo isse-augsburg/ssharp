@@ -56,7 +56,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <returns>A <see cref="TaskFragment"/> that must be included in the TFR because of this role.</returns>
 		private static async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition, BaseAgent agent, Role affectedRole)
 		{
-			Debug.WriteLine("{0}: recruiting agents for role", nameof(BrokenIoStrategy));
+			Debug.WriteLine("recruiting agents for role", nameof(BrokenIoStrategy));
 
 			// predecessor
 			var currentRole = affectedRole;
@@ -103,7 +103,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <returns>The affected roles and the agents to which they are allocated.</returns>
 		private static async Task<Tuple<BaseAgent, Role>[]> FindDisconnectedRoles(Coalition coalition)
 		{
-			var affectedRoles = new List<Tuple<BaseAgent, Role>>();
+			Debug.WriteLine("finding disconnected roles (both sides)", nameof(BrokenIoStrategy));
+			var affectedRoles = new HashSet<Tuple<BaseAgent, Role>>();
 
 			var members = coalition.Members.ToList(); // use list because coalition.Members is modified during iteration
 			for (var i = 0; i < members.Count; ++i)
@@ -119,19 +120,29 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					if (role.Input != null && !agent.Inputs.Contains(role.Input))
 					{
 						affected = true;
-						if (!coalition.Contains(role.Input) && role.Input.IsAlive)
+						if (role.Input.IsAlive)
 						{
-							var newMember = await coalition.Invite(role.Input);
-							members.Add(newMember);
+							if (!coalition.Contains(role.Input))
+								members.Add(await coalition.Invite(role.Input));
+
+							// find corresponding role of disconnected agent - it is affected as well
+							var correspondingRole =
+								role.Input.AllocatedRoles.Single(inputRole => inputRole.PostCondition.StateMatches(role.PreCondition) && inputRole.Output == agent);
+							affectedRoles.Add(Tuple.Create(role.Input, correspondingRole));
 						}
 					}
 					if (role.Output != null && !agent.Outputs.Contains(role.Output))
 					{
 						affected = true;
-						if (!coalition.Contains(role.Output) && role.Output.IsAlive)
+						if (role.Output.IsAlive)
 						{
-							var newMember = await coalition.Invite(role.Output);
-							members.Add(newMember);
+							if (!coalition.Contains(role.Output))
+								members.Add(await coalition.Invite(role.Output));
+
+							// find corresponding role of disconnected agent - it is affected as well
+							var correspondingRole =
+								role.Output.AllocatedRoles.Single(outputRole => outputRole.PreCondition.StateMatches(role.PostCondition) && outputRole.Input == agent);
+							affectedRoles.Add(Tuple.Create(role.Output, correspondingRole));
 						}
 					}
 
