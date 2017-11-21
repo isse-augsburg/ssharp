@@ -62,6 +62,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="CartControl.xaml.cs">
+      <DependentUpon>CartControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HeightControlSystem.xaml.cs">
       <DependentUpon>HeightControlSystem.xaml</DependentUpon>
     </Compile>
@@ -90,6 +93,10 @@
     <Compile Include="RobotControl.xaml.cs">
       <DependentUpon>RobotControl.xaml</DependentUpon>
     </Compile>
+    <Page Include="CartControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="HeightControlSystem.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

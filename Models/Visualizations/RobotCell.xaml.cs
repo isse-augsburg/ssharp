@@ -58,22 +58,11 @@ namespace SafetySharp.CaseStudies.Visualizations
             _builder.CentralReconfiguration();
 
             Model = _builder.Build();
-
-            //Mybe a shorter alternative, but currently triggers an exception 
+            
+            //Maybe a shorter alternative, but currently triggers an exception 
             //Model = _builder.Ictss6().Build();
 
-            /// <summary> 
-            /// Notes and other attempts:
-            /// </summary>
-            //IController ac = new AbstractController();
-            //AbstractController
-            //IController c = FastController;
-
-            //Model = SampleModels.PerformanceMeasurement1();
-
-            //Model = SampleModels.Ictss6;
-
-            UpdateModelState();
+            //UpdateModelState();
 
             SimulationControls.MaxSpeed = 64;
             SimulationControls.ChangeSpeed(1);
@@ -94,7 +83,61 @@ namespace SafetySharp.CaseStudies.Visualizations
         {
             var robotCount = _model.RobotAgents.Count;
 
-            //...
+            //Create grid for robots and carts
+            double widthToHeightRatio = 2;
+            var gridHeigth = Math.Max((int)Math.Ceiling(Math.Sqrt(robotCount/ widthToHeightRatio)), 1);
+            var gridWidth = (int)(widthToHeightRatio * gridHeigth);
+
+            //Console.Out.WriteLine("<HEIGHT> " + gridHeigth + "  <WIDTH> " + gridWidth);
+
+            visualizationArea.RowDefinitions.Clear();
+            visualizationArea.ColumnDefinitions.Clear();
+
+            for (int i = 0; i < gridHeigth; i++) {
+                CreateRow(1);
+                CreateRow(3);
+                CreateRow(1);
+            }
+            for (int i = 0; i < gridWidth; i++) {
+                CreateColumn(1);
+                CreateColumn(3);
+                CreateColumn(1);
+            }
+
+            //Create and place robots
+            for (int i = 0; i < robotCount; i++) {
+                var robot = new RobotControl(_model.RobotAgents[i]);
+                _robots.Add(_model.RobotAgents[i].Id, robot);
+                visualizationArea.Children.Add(robot);
+
+                var row = 3 * (i / gridWidth) + 1;
+                var col = 3 * (i % gridWidth) + 1;
+
+                Grid.SetRow(robot, row);
+                Grid.SetColumn(robot, col);
+            }
+
+            ////Create and place carts
+            //for (int i = 0; i < 1; i++) {
+
+            //}
+
+        }
+
+        internal void GetFreePosition(RobotAgent robot, out int row, out int col) {
+            var ctrl = _robots[robot.Id];
+            var robotRow = Grid.GetRow(ctrl);
+            var robotColumn = Grid.GetColumn(ctrl);
+
+            var pos = new[] { robotRow - 1, robotRow, robotRow + 1 }
+                .Zip(new[] { robotColumn - 1, robotColumn, robotColumn + 1 }, Tuple.Create)
+                .First(coords => IsFreePosition(coords.Item1, coords.Item2));
+            row = pos.Item1;
+            col = pos.Item2;
+        }
+
+        private bool IsFreePosition(int row, int col) {
+            return !visualizationArea.Children.Cast<UIElement>().Any(ctrl => Grid.GetRow(ctrl) == row && Grid.GetColumn(ctrl) == col);
         }
 
         private void OnModelStateReset()
@@ -107,9 +150,39 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         private void UpdateModelState()
         {
+            foreach (var robot in _model.RobotAgents) {
+                _robots[robot.Id].Update(robot);
+            }
 
-            //to be implemented
+            //Here carts
 
+            InvalidateArrange();
+            InvalidateVisual();
+            UpdateLayout();
+
+            visualizationArea.InvalidateArrange();
+            visualizationArea.InvalidateVisual();
+        }
+
+        public void CreateRow(double height) {
+            var row = new RowDefinition() { Height = new GridLength(height, GridUnitType.Star) };
+            visualizationArea.RowDefinitions.Add(row);
+        }
+
+        public void CreateColumn(double width)
+        {
+            var col = new ColumnDefinition() { Width = new GridLength(width, GridUnitType.Star) };
+            visualizationArea.ColumnDefinitions.Add(col);
+        }
+
+        internal static string GetState(BaseAgent agent) {
+            var agentType = typeof(BaseAgent);
+            var machineField = agentType.GetField("_stateMachine", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+            var machine = machineField.GetValue(agent);
+
+            var machineType = machine.GetType();
+            var stateField = machineType.GetProperty("State");
+            return stateField.GetValue(machine).ToString();
         }
     }
 }

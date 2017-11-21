@@ -11,11 +11,13 @@
         <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
     
         <Grid>
+            
             <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Right" Margin="0,240,10,10" Stroke="Black" Width="240">
                 <Rectangle.OpacityMask>
                     <VisualBrush Visual="{DynamicResource appbar_forklift}"/>
                 </Rectangle.OpacityMask>
             </Rectangle>
+            <!--    
             <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Right" Margin="0,240,450,10" Stroke="Black" Width="240">
                 <Rectangle.OpacityMask>
                     <VisualBrush Visual="{DynamicResource appbar_robot}"/>
@@ -26,7 +28,7 @@
                     <VisualBrush Visual="{DynamicResource appbar_robot_arm_test}"/>
                 </Rectangle.OpacityMask>
             </Rectangle>
-            
+            -->
             <Grid x:Name="visualizationArea" ShowGridLines="True">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"/>
@@ -46,7 +48,6 @@
             </Grid.ColumnDefinitions>
         </Grid>
             <Rectangle x:Name="itemArea" Margin="433,370,187,50" Stroke="#FFFFA200" StrokeThickness="5" Width="80"/>
-            <TextBlock x:Name="state" HorizontalAlignment="Left" Height="29.861" Margin="10,10,0,0" TextWrapping="Wrap" Text="StateText" VerticalAlignment="Top" Width="91.624" Foreground="White" FontSize="20" FontWeight="Bold"/>
         </Grid>
 
 
