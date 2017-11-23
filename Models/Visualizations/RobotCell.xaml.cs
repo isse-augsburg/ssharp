@@ -1,24 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace SafetySharp.CaseStudies.Visualizations
 {
-    using CaseStudies.RobotCell.Analysis;
     using CaseStudies.RobotCell.Modeling;
     using CaseStudies.RobotCell.Modeling.Controllers;
-    using CaseStudies.RobotCell.Modeling.Plants;
     using Odp;
     using Odp.Reconfiguration;
 
@@ -31,7 +20,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         private ModelBuilder _builder;
 
         private readonly Dictionary<uint, RobotControl> _robots = new Dictionary<uint, RobotControl>();
-        //private readonly Dictionary<uint, CartControl> _carts = new Dictionary<uint, CartControl>();
+        private readonly Dictionary<uint, CartControl> _carts = new Dictionary<uint, CartControl>();
         public RobotCell()
         {
             /// <summary>
@@ -59,9 +48,6 @@ namespace SafetySharp.CaseStudies.Visualizations
 
             Model = _builder.Build();
             
-            //Maybe a shorter alternative, but currently triggers an exception 
-            //Model = _builder.Ictss6().Build();
-
             //UpdateModelState();
 
             SimulationControls.MaxSpeed = 64;
@@ -94,14 +80,14 @@ namespace SafetySharp.CaseStudies.Visualizations
             visualizationArea.ColumnDefinitions.Clear();
 
             for (int i = 0; i < gridHeigth; i++) {
-                CreateRow(1);
+                //CreateRow(1);
                 CreateRow(3);
-                CreateRow(1);
+                CreateRow(2);
             }
             for (int i = 0; i < gridWidth; i++) {
-                CreateColumn(1);
+                //CreateColumn(1);
                 CreateColumn(3);
-                CreateColumn(1);
+                CreateColumn(2);
             }
 
             //Create and place robots
@@ -110,18 +96,35 @@ namespace SafetySharp.CaseStudies.Visualizations
                 _robots.Add(_model.RobotAgents[i].Id, robot);
                 visualizationArea.Children.Add(robot);
 
-                var row = 3 * (i / gridWidth) + 1;
-                var col = 3 * (i % gridWidth) + 1;
+                var row = 2 * (i / gridWidth);
+                var col = 2 * (i % gridWidth);
+
+                //Console.Out.WriteLine("<WIDTH> " + gridWidth + "<ROW> " + row + "<COLUMN>" + col);
 
                 Grid.SetRow(robot, row);
                 Grid.SetColumn(robot, col);
             }
 
-            ////Create and place carts
-            //for (int i = 0; i < 1; i++) {
+            //Create and place carts
+            for (int i = 0; i < _model.CartAgents.Count; i++)
+            {
+                var agent = _model.CartAgents[i];
+                var cart = new CartControl(agent, this);
+                _carts.Add(agent.Id, cart);
+                visualizationArea.Children.Add(cart);
 
-            //}
+                var robot = _model.RobotAgents.First(r => agent.Cart.IsPositionedAt(r.Robot));
+                int row, column;
+                GetFreePosition(robot, out row, out column);
+                
+                row += 2;
+                column += 2;
 
+                Grid.SetRow(cart, row);
+                Grid.SetColumn(cart, column);
+            }
+
+            //to-do: display tasks
         }
 
         internal void GetFreePosition(RobotAgent robot, out int row, out int col) {
@@ -154,7 +157,9 @@ namespace SafetySharp.CaseStudies.Visualizations
                 _robots[robot.Id].Update(robot);
             }
 
-            //Here carts
+            foreach (var cart in _model.CartAgents) {
+                _carts[cart.Id].Update(cart);
+            }
 
             InvalidateArrange();
             InvalidateVisual();
@@ -165,7 +170,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         }
 
         public void CreateRow(double height) {
-            var row = new RowDefinition() { Height = new GridLength(height, GridUnitType.Star) };
+            var row = new RowDefinition() { Height = new GridLength(height, GridUnitType.Star) }; 
             visualizationArea.RowDefinitions.Add(row);
         }
 

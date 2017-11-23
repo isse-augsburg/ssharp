@@ -15,9 +15,9 @@
         <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
     -->
     <Viewbox StretchDirection="Both" Stretch="Uniform" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-        <Grid>
-            <TextBlock x:Name="state" Width="100" Height="20" Foreground="White" Margin="5,190,220,0" FontSize="20"/>
-            <!---->
+        <Grid Height="428.571" Width="302.857">
+            <TextBlock x:Name="state" Foreground="White" Margin="18.163,0,19.059,19.184" FontSize="48" Height="57.143" VerticalAlignment="Bottom" d:LayoutOverrides="HorizontalAlignment"/>
+            <!--
                 <ListBox x:Name="availableCapabilityList" Margin="230,10,5,120" Width="75">
                     <ListBox.Resources>
                         <DataTemplate DataType="{x:Type odp:ProduceCapability}">
@@ -30,9 +30,9 @@
                             <TextBlock FontSize="16" Text="Consume"/>
                         </DataTemplate>
                     </ListBox.Resources>
-                </ListBox>  
-                <!---->
-            <Canvas Name="svg3884" Width="210" Height="280">
+                </ListBox>  -->
+            <!---->
+            <Canvas Name="svg3884" Margin="44.388,39.796,34.184,92.652">
                 <Canvas.RenderTransform>
                     <TranslateTransform X="0" Y="0"/>
                 </Canvas.RenderTransform>

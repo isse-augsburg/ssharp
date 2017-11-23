@@ -13,7 +13,8 @@
                     <VisualBrush Visual="{DynamicResource appbar_forklift}"/>
                 </Rectangle.OpacityMask>
             </Rectangle>
-            <Rectangle x:Name="itemArea" Width="100" Height="100" Margin="10,120,190,40" Stroke="#FFFFA200" StrokeThickness="5"/>
+            <!---->
+            <Rectangle x:Name="itemArea" Width="100" Height="100" Margin="10,120,190,40" Stroke="#00000000" StrokeThickness="5"/>
             <TextBlock x:Name="state" HorizontalAlignment="Left" Height="29.861" Margin="10,10,0,0" TextWrapping="Wrap" Text="StateText" VerticalAlignment="Top" Width="91.624" Foreground="White" FontSize="20" FontWeight="Bold"/>
         </Grid>
     </Viewbox>
