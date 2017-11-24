@@ -17,9 +17,10 @@
     <Viewbox StretchDirection="Both" Stretch="Uniform" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
         <Grid Height="428.571" Width="302.857">
             <TextBlock x:Name="state" Foreground="White" Margin="18.163,0,19.059,19.184" FontSize="48" Height="57.143" VerticalAlignment="Bottom" d:LayoutOverrides="HorizontalAlignment"/>
-            <!--
-                <ListBox x:Name="availableCapabilityList" Margin="230,10,5,120" Width="75">
-                    <ListBox.Resources>
+
+            <ListBox x:Name="availableCapabilityList" Margin="150.306,0,0,130" d:LayoutOverrides="HorizontalAlignment" FontSize="24">
+                <ListBox.Resources>
+                    <!--
                         <DataTemplate DataType="{x:Type odp:ProduceCapability}">
                             <TextBlock FontSize="16" Text="Produce"/>
                         </DataTemplate>
@@ -29,10 +30,11 @@
                         <DataTemplate DataType="{x:Type odp:ConsumeCapability}">
                             <TextBlock FontSize="16" Text="Consume"/>
                         </DataTemplate>
-                    </ListBox.Resources>
-                </ListBox>  -->
+                    -->
+                </ListBox.Resources>
+            </ListBox>  
             <!---->
-            <Canvas Name="svg3884" Margin="44.388,39.796,34.184,92.652">
+            <Canvas Name="svg3884" Margin="44.388,51.121,34.184,81.327">
                 <Canvas.RenderTransform>
                     <TranslateTransform X="0" Y="0"/>
                 </Canvas.RenderTransform>
