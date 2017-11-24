@@ -180,8 +180,7 @@ namespace SafetySharp.Bayesian
             var negProb = CalculateUnionOfIntersectionSets(negVars);
 
             // if the difference of trueProb and negProb is below the tolerance level, it is actually Zero
-            var diff = trueProb - negProb;
-            return diff.Is(0.0, _tolerance) ? Probability.Zero : diff;
+            return trueProb - negProb;
         }
 
         /// <summary>
@@ -224,24 +223,28 @@ namespace SafetySharp.Bayesian
         /// <returns>A probability array of the distribution, the iteration order is last condition to first and to the variable</returns>
         public IList<Probability> CalculateConditionalProbabilityDistribution(RandomVariable randomVariable, IList<RandomVariable> conditions)
         {
-            var matrixSize = 1 << (conditions.Count + 1);
-            var probResults = new Probability[matrixSize];
-            var jointResults = CalculateProbabilityDistribution(new List<RandomVariable> { randomVariable }.Union(conditions).ToList());
+            return CalculateConditionalProbabilityDistribution(new List<RandomVariable> { randomVariable }, conditions);
+        }
 
+        public IList<Probability> CalculateConditionalProbabilityDistribution(IList<RandomVariable> randomVariables, IList<RandomVariable> conditions)
+        {
+            var jointResults = CalculateProbabilityDistribution(randomVariables.Union(conditions).ToList());
             // if the condition set is empty, return the distribution of the random variable
             if (conditions.Count == 0)
             {
                 return jointResults;
             }
 
+            var matrixSize = jointResults.Count;
+            var probResults = new Probability[matrixSize];
             var conditionResults = CalculateProbabilityDistribution(conditions);
             // iterate again over the binary indices,
             // from left to right, 0 at position i means the ith random variable is positive, 1 means negative
             for (var i = 0; i < matrixSize; i++)
             {
-                var indexAsBits = Convert.ToString(i, 2).PadLeft(conditions.Count + 1, '0');
+                var indexAsBits = Convert.ToString(i, 2).PadLeft(randomVariables.Count + conditions.Count, '0');
                 // remove the first bit for only iterating the conditions
-                var condIndex = Convert.ToInt32(indexAsBits.Remove(0, 1), 2);
+                var condIndex = Convert.ToInt32(indexAsBits.Remove(0, randomVariables.Count), 2);
 
                 var curJointProb = jointResults[i];
                 var curCondProb = conditionResults[condIndex];

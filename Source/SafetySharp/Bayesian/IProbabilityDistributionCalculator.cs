@@ -8,8 +8,9 @@ namespace SafetySharp.Bayesian
     /// </summary>
     public interface IProbabilityDistributionCalculator
     {
-        IList<Probability> CalculateConditionalProbabilityDistribution(RandomVariable randomVariable, IList<RandomVariable> conditions);
         Probability CalculateProbability(ICollection<RandomVariable> positive, ICollection<RandomVariable> negative);
         IList<Probability> CalculateProbabilityDistribution(IList<RandomVariable> variables);
+        IList<Probability> CalculateConditionalProbabilityDistribution(RandomVariable randomVariable, IList<RandomVariable> conditions);
+        IList<Probability> CalculateConditionalProbabilityDistribution(IList<RandomVariable> randomVariables, IList<RandomVariable> conditions);
     }
 }

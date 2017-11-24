@@ -142,7 +142,7 @@
         {
             CreateRandomVariables(hazard, states, faults);
             var allVars = AllRandomVariables();
-            var network = JsonConvert.DeserializeObject<BayesianNetwork>(File.ReadAllText(@"D:\Sonstiges\SafetySharpSimulation\network.txt"),
+            var network = JsonConvert.DeserializeObject<BayesianNetwork>(File.ReadAllText(file),
                 new BayesianNetworkConverter(allVars));
             PrintBayesianNetwork(network);
             return network;

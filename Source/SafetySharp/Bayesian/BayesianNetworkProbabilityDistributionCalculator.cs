@@ -22,8 +22,8 @@ namespace SafetySharp.Bayesian
 
         public Probability CalculateProbability(ICollection<string> positiveNames, ICollection<string> negativeNames)
         {
-            var positive = positiveNames.Select(name => GetRandomVariableByName(name)).ToList();
-            var negative = negativeNames.Select(name => GetRandomVariableByName(name)).ToList();
+            var positive = GetRandomVariablesByName(positiveNames);
+            var negative = GetRandomVariablesByName(negativeNames);
             return CalculateProbability(positive, negative);
         }
 
@@ -37,12 +37,13 @@ namespace SafetySharp.Bayesian
 
         public IList<Probability> CalculateProbabilityDistribution(IList<string> variableNames)
         {
-            var variables = variableNames.Select(GetRandomVariableByName).ToList();
+            var variables = GetRandomVariablesByName(variableNames);
             return CalculateProbabilityDistribution(variables);
         }
 
         public IList<Probability> CalculateProbabilityDistribution(IList<RandomVariable> variables)
         {
+            var naNCounts = 0;
             var missingVariables = _randomVariables.Except(variables).ToList();
             var allVariablesInGivenOrder = new List<RandomVariable>();
             allVariablesInGivenOrder.AddRange(variables);
@@ -68,41 +69,64 @@ namespace SafetySharp.Bayesian
                         var realIndex = _randomVariables.IndexOf(allVariablesInGivenOrder[currentVarIndex]);
                         realBits[realIndex] = allBits[currentVarIndex];
                     }
-                    currentProb += CalculateJointProbabilityInstance(new string(realBits));
+                    var instanceProb = CalculateJointProbabilityInstance(new string(realBits));
+                    if (!double.IsNaN(instanceProb.Value))
+                    {
+                        currentProb += instanceProb;
+                    }
+                    else
+                    {
+                        naNCounts++;
+                    }
+                    
                 }
                 probs[i] = currentProb;
             }
-
+            if (naNCounts > 0)
+            {
+                Console.Out.WriteLine($"Warning: Dicarded {naNCounts} NaN results.");
+            }
             return probs;
         }
 
         public IList<Probability> CalculateConditionalProbabilityDistribution(string randomVariableName, IList<string> conditionNames)
         {
             var randomVariable = GetRandomVariableByName(randomVariableName);
-            var conditions = conditionNames.Select(GetRandomVariableByName).ToList();
+            var conditions = GetRandomVariablesByName(conditionNames);
+            return CalculateConditionalProbabilityDistribution(randomVariable, conditions);
+        }
+
+        public IList<Probability> CalculateConditionalProbabilityDistribution(IList<string> randomVariableNames, IList<string> conditionNames)
+        {
+            var randomVariable = GetRandomVariablesByName(randomVariableNames);
+            var conditions = GetRandomVariablesByName(conditionNames);
             return CalculateConditionalProbabilityDistribution(randomVariable, conditions);
         }
 
         public IList<Probability> CalculateConditionalProbabilityDistribution(RandomVariable randomVariable, IList<RandomVariable> conditions)
         {
-            var matrixSize = 1 << (conditions.Count + 1);
-            var probResults = new Probability[matrixSize];
-            var jointResults = CalculateProbabilityDistribution(new List<RandomVariable> { randomVariable }.Union(conditions).ToList());
+            return CalculateConditionalProbabilityDistribution(new List<RandomVariable> {randomVariable}, conditions );
+        }
 
+        public IList<Probability> CalculateConditionalProbabilityDistribution(IList<RandomVariable> randomVariables, IList<RandomVariable> conditions)
+        {
+            var jointResults = CalculateProbabilityDistribution(randomVariables.Union(conditions).ToList());
             // if the condition set is empty, return the distribution of the random variable
             if (conditions.Count == 0)
             {
                 return jointResults;
             }
 
+            var matrixSize = jointResults.Count;
+            var probResults = new Probability[matrixSize];
             var conditionResults = CalculateProbabilityDistribution(conditions);
             // iterate again over the binary indices,
             // from left to right, 0 at position i means the ith random variable is positive, 1 means negative
             for (var i = 0; i < matrixSize; i++)
             {
-                var indexAsBits = Convert.ToString(i, 2).PadLeft(conditions.Count + 1, '0');
+                var indexAsBits = Convert.ToString(i, 2).PadLeft(randomVariables.Count + conditions.Count, '0');
                 // remove the first bit for only iterating the conditions
-                var condIndex = Convert.ToInt32(indexAsBits.Remove(0, 1), 2);
+                var condIndex = Convert.ToInt32(indexAsBits.Remove(0, randomVariables.Count), 2);
 
                 var curJointProb = jointResults[i];
                 var curCondProb = conditionResults[condIndex];
@@ -144,5 +168,10 @@ namespace SafetySharp.Bayesian
         {
             return _randomVariables.First(rvar => rvar.Name == name);
         }
+
+        private IList<RandomVariable> GetRandomVariablesByName(IEnumerable<string> names)
+        {
+            return names.Select(GetRandomVariableByName).ToList();
+        } 
     }
 }
