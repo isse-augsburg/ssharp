@@ -53,7 +53,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// <param name="coalition">The coalition used for reconfiguration.</param>
 		/// <param name="agent">The agent to which the <paramref name="affectedRole"/> is allocated.</param>
 		/// <param name="affectedRole">The role whose output / input port is defect.</param>
-		/// <returns>A <see cref="TaskFragment"/> that must be included in the TFR because of this role.</returns>
+		/// <returns>A <see cref="TaskFragment"/> that must be included in the ReconfiguredTaskFragment because of this role.</returns>
 		private static async Task<TaskFragment> RecruitNecessaryAgents(Coalition coalition, BaseAgent agent, Role affectedRole)
 		{
 			Debug.WriteLine("recruiting agents for role", nameof(BrokenIoStrategy));

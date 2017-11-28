@@ -99,6 +99,11 @@ namespace SafetySharp.Odp
 							   && (PreCondition.Port == null) == (PreCondition.StateLength == 0)
 							   && (PostCondition.Port == null) == (PostCondition.StateLength == Task.RequiredCapabilities.Length);
 
+		/// <summary>
+		///   Indicates if the capability with the given <paramref name="index"/> is applied by this role.
+		/// </summary>
+		public bool IncludesCapability(int index) => PreCondition.StateLength <= index && index < PostCondition.StateLength;
+
 		#endregion
 
 		#region (copy) constructors
@@ -157,6 +162,20 @@ namespace SafetySharp.Odp
 		public Role WithCapability([NotNull] ICapability capability)
 		{
 			return new Role(PreCondition, PostCondition.WithCapability(capability), IsLocked);
+		}
+
+		/// <summary>
+		///   Returns a copy of the <see cref="Role"/> that additionally applies the capabilities applied by the given <see cref="Role"/>.
+		///   Does not affect condition ports.
+		/// </summary>
+		/// <param name="other">The role whose capabilities shall be appended.</param>
+		/// <exception cref="InvalidOperationException">Thrown if this instance's <see cref="PostCondition"/> and <paramref name="other"/>'s <see cref="PreCondition"/> do not have matching states.</exception>
+		public Role AppendCapabilities(Role other)
+		{
+			if (!PostCondition.StateMatches(other.PreCondition))
+				throw new InvalidOperationException("Cannot append two roles whose pre-/postconditions do not match.");
+
+			return other.CapabilitiesToApply.Aggregate(this, (role, capability) => role.WithCapability(capability));
 		}
 
 		#endregion
