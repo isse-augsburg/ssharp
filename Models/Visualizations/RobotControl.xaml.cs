@@ -6,12 +6,15 @@
     using CaseStudies.RobotCell.Modeling;
     using CaseStudies.RobotCell.Modeling.Controllers;
     using Odp;
+    using System.Windows;
+
     /// <summary>
     /// Interaktionslogik für RobotControl.xaml
     /// </summary>
     public partial class RobotControl
     {
         private RobotAgent _robotAgent;
+        private readonly RobotCell _container;
         public RobotControl(RobotAgent robotAgent)
         {
             InitializeComponent();
@@ -22,84 +25,58 @@
             _robotAgent = robotAgent;
             state.Text = RobotCell.GetState(robotAgent);
 
-            //Not sure if this will stay...causes an error in the xaml 
-            //availableCapabilityList.ItemsSource = _robotAgent.AvailableCapabilities;
-
             //IEnumerable<ICapability> enumerator = _robotAgent.AvailableCapabilities;
             List<ICapability> capList = _robotAgent.AvailableCapabilities.ToList();
             List<string> stringCapList = new List<string>();
 
-            //for (int i = 0; i < capList.Count; i++) {
-            //    Console.WriteLine("<Listenelement " + i + "> " + capList.ElementAt(i));
-            //    Type type = capList.ElementAt(i).GetType();
-
-            //    string show = "", str = "", str1 = "", str2 = "";
-
-            //    if (type == typeof(ProcessCapability))
-            //    {
-            //        str = "<PROCESS CAPABILITY>"+type.Name +"    ";
-            //        ProcessCapability procCap = CastToProcessCapability(type);
-            //        //availableCapabilityList.ItemsSource = "Produce";
-
-            //        Console.WriteLine("\n"+"<PRODUCTION ACTION> " + procCap.ProductionAction+ "\n");
-                    
-            //    }
-            //    else if (type == typeof(ProduceCapability))
-            //    {
-            //        str1 = "<PRODUCE CAPABILITY>" + type.Name + "    ";
-            //        ProduceCapability prodCap = CastToProduceCapability(type);
-            //    }
-            //    else if (type == typeof(ConsumeCapability))
-            //    {
-            //        str2 = "<CONSUME CAPABILITY>" + type.Name + "    ";
-            //    }
-            //    show = str + str1 + str2;
-            //    Console.WriteLine(show);
-
-            //    IEnumerable<ICapability> num = capList;
-            //    availableCapabilityList.ItemsSource = num;
-            //}
-
             foreach (var cap in capList)
             {
                 if (cap.GetType() == typeof(ProduceCapability)) {
-                    ProduceCapability prod = (ProduceCapability) cap;
+                    ProduceCapability prod = (ProduceCapability)cap;
                     stringCapList.Add(prod.CapabilityType.ToString());
 
-                    Console.WriteLine("\n<Produce Capability> : " + prod.CapabilityType);
+                    //Console.WriteLine("\n<Produce Capability> : " + prod.CapabilityType);
                 }
 
                 if (cap.GetType() == typeof(ProcessCapability)) {
-                    ProcessCapability proc = (ProcessCapability) cap;
+                    ProcessCapability proc = (ProcessCapability)cap;
                     stringCapList.Add(proc.ProductionAction.ToString());
 
-                    Console.WriteLine("\n<Process Capability> : " + proc.CapabilityType);
-                    Console.WriteLine("<PC: Production Action> : " + proc.ProductionAction);
+                    //Console.WriteLine("\n<Process Capability> : " + proc.CapabilityType);
+                    //Console.WriteLine("<PC: Production Action> : " + proc.ProductionAction);
                 }
 
                 if (cap.GetType() == typeof(ConsumeCapability)) {
-                    ConsumeCapability cons = (ConsumeCapability) cap;
+                    ConsumeCapability cons = (ConsumeCapability)cap;
                     stringCapList.Add(cons.CapabilityType.ToString());
 
-                    Console.WriteLine("\n<Consume Capability> : " + cons.CapabilityType + "\n");
+                    //Console.WriteLine("\n<Consume Capability> : " + cons.CapabilityType + "\n");
                 }
             }
 
-            IEnumerable<string> num = stringCapList;
-            availableCapabilityList.ItemsSource = num;
+            //IEnumerable<string> num = stringCapList;
+            availableCapabilityList.ItemsSource = stringCapList;
 
             InvalidateArrange();
             InvalidateVisual();
             UpdateLayout();
         }
 
-        public ProduceCapability CastToProduceCapability(object obj) {
-            return (ProduceCapability)obj;
+        private void OnBrokenFault(object sender, RoutedEventArgs e) {
+            //to-do
+            //maybe with RobotCell in Constructor
         }
 
-        public ProcessCapability CastToProcessCapability(object obj)
-        {
-            return (ProcessCapability)obj;
+        private void OnSwitchFault(object sender, RoutedEventArgs e) {
+            //to-do
+        }
+
+        private void OnSwitchToWrongToolFault(object sender, RoutedEventArgs e) {
+            //to-do
+        }
+
+        private void OnResourceTransportFault(object sender, RoutedEventArgs e) {
+            //to-do
         }
     }
 }

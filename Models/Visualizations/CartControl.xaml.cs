@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using System.Windows.Controls;
 using SafetySharp.CaseStudies.RobotCell.Modeling.Controllers;
+using System.Windows;
+using SafetySharp.Modeling;
 
 namespace SafetySharp.CaseStudies.Visualizations
 { 
@@ -48,6 +50,11 @@ namespace SafetySharp.CaseStudies.Visualizations
 
             Grid.SetRow(this, row);
             Grid.SetColumn(this, column);
+        }
+
+        private void OnBroken(object sender, RoutedEventArgs e) {
+            //to-do, currently just for the first cart of the Carts-list
+            _container.Model.Carts.First().Broken.ToggleActivationMode();
         }
     }
 }

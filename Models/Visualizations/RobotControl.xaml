@@ -10,31 +10,24 @@
       mc:Ignorable="d" 
       d:DesignHeight="280" d:DesignWidth="210">
 
-    <!--
-    <DockPanel>
-        <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
-    -->
     <Viewbox StretchDirection="Both" Stretch="Uniform" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
         <Grid Height="428.571" Width="302.857">
             <TextBlock x:Name="state" Foreground="White" Margin="18.163,0,19.059,19.184" FontSize="48" Height="57.143" VerticalAlignment="Bottom" d:LayoutOverrides="HorizontalAlignment"/>
 
-            <ListBox x:Name="availableCapabilityList" Margin="150.306,0,0,130" d:LayoutOverrides="HorizontalAlignment" FontSize="24">
+            <ListBox x:Name="availableCapabilityList" Margin="-16.327,0,89.082,0" d:LayoutOverrides="HorizontalAlignment" FontSize="48" Height="141.429" VerticalAlignment="Top">
                 <ListBox.Resources>
-                    <!--
-                        <DataTemplate DataType="{x:Type odp:ProduceCapability}">
-                            <TextBlock FontSize="16" Text="Produce"/>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type controllers:ProcessCapability}">
-                            <TextBlock FontSize="16" Text="{Binding ProductionAction}"/>
-                        </DataTemplate>
-                        <DataTemplate DataType="{x:Type odp:ConsumeCapability}">
-                            <TextBlock FontSize="16" Text="Consume"/>
-                        </DataTemplate>
-                    -->
                 </ListBox.Resources>
-            </ListBox>  
+            </ListBox>
             <!---->
-            <Canvas Name="svg3884" Margin="44.388,51.121,34.184,81.327">
+            <Canvas Name="svg3884" Margin="42.347,71.883,36.225,60.565">
+                <Canvas.ContextMenu>
+                    <ContextMenu StaysOpen="True">
+                        <MenuItem x:Name="BrokenFault" Header="'BrokenFault'" IsCheckable="True" Click="OnBrokenFault"/>
+                        <MenuItem x:Name="SwitchFault" Header="'SwitchFault'" IsCheckable="True" Click="OnSwitchFault"/>
+                        <MenuItem x:Name="SwitchToWrongToolFault" Header="'SwitchToWrongToolFault'" IsCheckable="True" Click="OnSwitchToWrongToolFault"/>
+                        <MenuItem x:Name="ResourceTransportFault" Header="'ResourceTransportFault'" IsCheckable="True" Click="OnResourceTransportFault"/>
+                    </ContextMenu>
+                </Canvas.ContextMenu>
                 <Canvas.RenderTransform>
                     <TranslateTransform X="0" Y="0"/>
                 </Canvas.RenderTransform>
