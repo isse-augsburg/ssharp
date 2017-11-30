@@ -8,6 +8,9 @@
     using ISSE.SafetyChecking.Formula;
     using Modeling;
 
+    /// <summary>
+    /// Class for generating simulation data from a model.
+    /// </summary>
     internal class RandomVariableSimulator
     {
         private readonly ModelBase _model;

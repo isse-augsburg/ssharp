@@ -6,6 +6,9 @@ namespace SafetySharp.Bayesian
     using System.Linq;
     using ISSE.SafetyChecking.Modeling;
 
+    /// <summary>
+    /// Class for calculating arbitrary probabilities by unoptimized inference in a given BayesianNetwork.
+    /// </summary>
     public class BayesianNetworkProbabilityDistributionCalculator : IProbabilityDistributionCalculator
     {
 
@@ -20,6 +23,11 @@ namespace SafetySharp.Bayesian
             _tolerance = tolerance;
         }
 
+        /// <summary>
+        /// Calculates the probability of P(p1, ..., pi, n1, ..., nj)
+        /// for p1,...,pi are all 'positive' values of binary random variables and n1,..,nj 'negative' ones.
+        /// RandomVariables will be identified by name.
+        /// </summary>
         public Probability CalculateProbability(ICollection<string> positiveNames, ICollection<string> negativeNames)
         {
             var positive = GetRandomVariablesByName(positiveNames);
@@ -27,6 +35,10 @@ namespace SafetySharp.Bayesian
             return CalculateProbability(positive, negative);
         }
 
+        /// <summary>
+        /// Calculates the probability of P(p1, ..., pi, n1, ..., nj)
+        /// for p1,...,pi are all 'positive' values of binary random variables and n1,..,nj 'negative' ones.
+        /// </summary>
         public Probability CalculateProbability(ICollection<RandomVariable> positive, ICollection<RandomVariable> negative)
         {
             var distribution = CalculateProbabilityDistribution(positive.Union(negative).ToList());
@@ -35,12 +47,23 @@ namespace SafetySharp.Bayesian
             return distribution[index];
         }
 
+        /// <summary>
+        /// Calculate the complete probability distribution of the given random variables
+        /// e.g. for variables A,B: P(a,b), P(a,!b), P(!a,b) and P(!a,!b).
+        /// RandomVariables will be identified by name.
+        /// </summary>
+        /// <returns>A probability array of the distribution, the iteration order is last to first</returns>
         public IList<Probability> CalculateProbabilityDistribution(IList<string> variableNames)
         {
             var variables = GetRandomVariablesByName(variableNames);
             return CalculateProbabilityDistribution(variables);
         }
 
+        /// <summary>
+        /// Calculate the complete probability distribution of the given random variables
+        /// e.g. for variables A,B: P(a,b), P(a,!b), P(!a,b) and P(!a,!b).
+        /// </summary>
+        /// <returns>A probability array of the distribution, the iteration order is last to first</returns>
         public IList<Probability> CalculateProbabilityDistribution(IList<RandomVariable> variables)
         {
             var naNCounts = 0;
@@ -89,6 +112,12 @@ namespace SafetySharp.Bayesian
             return probs;
         }
 
+        /// <summary>
+        /// Calculate the conditional probability distribution of a random variable A given condition variables B1,...,Bn
+        /// e.g. P(A|B,C) as [ P(a|b,c), P(a|b,!c), P(a|!b,c) P(a|!b!c), ...]
+        /// RandomVariables will be identified by name.
+        /// </summary>
+        /// <returns>A probability array of the distribution, the iteration order is last condition to first and to the variable</returns>
         public IList<Probability> CalculateConditionalProbabilityDistribution(string randomVariableName, IList<string> conditionNames)
         {
             var randomVariable = GetRandomVariableByName(randomVariableName);
@@ -96,6 +125,12 @@ namespace SafetySharp.Bayesian
             return CalculateConditionalProbabilityDistribution(randomVariable, conditions);
         }
 
+        /// <summary>
+        /// Calculate the conditional probability distribution of random variables A1,...,Am given condition variables B1,...,Bn
+        /// e.g. P(A|B,C) as [ P(a|b,c), P(a|b,!c), P(a|!b,c) P(a|!b!c), ...]
+        /// RandomVariables will be identified by name.
+        /// </summary>
+        /// <returns>A probability array of the distribution, the iteration order is last condition to first and to the variable</returns>
         public IList<Probability> CalculateConditionalProbabilityDistribution(IList<string> randomVariableNames, IList<string> conditionNames)
         {
             var randomVariable = GetRandomVariablesByName(randomVariableNames);
@@ -103,11 +138,21 @@ namespace SafetySharp.Bayesian
             return CalculateConditionalProbabilityDistribution(randomVariable, conditions);
         }
 
+        /// <summary>
+        /// Calculate the conditional probability distribution of a random variable A given condition variables B1,...,Bn
+        /// e.g. P(A|B,C) as [ P(a|b,c), P(a|b,!c), P(a|!b,c) P(a|!b!c), ...]
+        /// </summary>
+        /// <returns>A probability array of the distribution, the iteration order is last condition to first and to the variable</returns>
         public IList<Probability> CalculateConditionalProbabilityDistribution(RandomVariable randomVariable, IList<RandomVariable> conditions)
         {
             return CalculateConditionalProbabilityDistribution(new List<RandomVariable> {randomVariable}, conditions );
         }
 
+        /// <summary>
+        /// Calculate the conditional probability distribution of random variables A1,...,Am given condition variables B1,...,Bn
+        /// e.g. P(A|B,C) as [ P(a|b,c), P(a|b,!c), P(a|!b,c) P(a|!b!c), ...]
+        /// </summary>
+        /// <returns>A probability array of the distribution, the iteration order is last condition to first and to the variable</returns>
         public IList<Probability> CalculateConditionalProbabilityDistribution(IList<RandomVariable> randomVariables, IList<RandomVariable> conditions)
         {
             var jointResults = CalculateProbabilityDistribution(randomVariables.Union(conditions).ToList());
@@ -145,6 +190,9 @@ namespace SafetySharp.Bayesian
             return probResults;
         }
 
+        /// <summary>
+        /// Calculate the joint probability distribution value of the random variables. The instance is given by binary representation.
+        /// </summary>
         private Probability CalculateJointProbabilityInstance(string randomVariableBits)
         {
             var currentProb = Probability.One;

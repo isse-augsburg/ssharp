@@ -226,6 +226,11 @@ namespace SafetySharp.Bayesian
             return CalculateConditionalProbabilityDistribution(new List<RandomVariable> { randomVariable }, conditions);
         }
 
+        /// <summary>
+        /// Calculate the conditional probability distribution of random variables A1,...,Am given condition variables B1,...,Bn
+        /// e.g. P(A|B,C) as [ P(a|b,c), P(a|b,!c), P(a|!b,c) P(a|!b!c), ...]
+        /// </summary>
+        /// <returns>A probability array of the distribution, the iteration order is last condition to first and to the variable</returns>
         public IList<Probability> CalculateConditionalProbabilityDistribution(IList<RandomVariable> randomVariables, IList<RandomVariable> conditions)
         {
             var jointResults = CalculateProbabilityDistribution(randomVariables.Union(conditions).ToList());

@@ -6,7 +6,7 @@
     /// <summary>
     /// Utility methods for using subsets
     /// </summary>
-    internal static class SubsetUtils
+    public static class SubsetUtils
     {
         /// <summary>
         /// Get the index in the subsets array for the given variables
@@ -47,7 +47,7 @@
         /// Gets all subsets of an arbitrary set with given size.
         /// For example: for elements = {1,..,n} and size 2 it will return all pairs {1,2}, {1,3}, ..., {2,3}, ... {n-1, n}
         /// </summary>
-        public static IEnumerable<HashSet<T>> AllSubsets<T>(List<T> elements, int size)
+        public static IEnumerable<HashSet<T>> AllSubsets<T>(IList<T> elements, int size)
         {
             var allSubsets = new List<HashSet<T>>();
             for (var i = 1; i < (1 << elements.Count); i++)

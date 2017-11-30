@@ -130,6 +130,9 @@
             }
         }
 
+        /// <summary>
+        /// Store the given BayesianNetwork in the file path of the config, if it is defined there
+        /// </summary>
         private void StoreBayesianNetwork(BayesianNetwork bayesianNetwork)
         {
             if (!string.IsNullOrWhiteSpace(Config.BayesianNetworkSerializationPath))
@@ -138,6 +141,14 @@
             }
         }
 
+        /// <summary>
+        /// Create a BayesianNetwork from a JSON file.
+        /// </summary>
+        /// <param name="file">Path to the JSON file</param>
+        /// <param name="hazard">Hazard that was used in the bayesian network</param>
+        /// <param name="states">Boolen states that were used in the bayesian network</param>
+        /// <param name="faults">Faults that were used in the bayesian network</param>
+        /// <returns>a BayesianNetwork instance created from the given JSON file</returns>
         public BayesianNetwork FromJson(string file, Func<bool> hazard, Dictionary<string, Func<bool>> states = null, IList<Fault> faults = null)
         {
             CreateRandomVariables(hazard, states, faults);

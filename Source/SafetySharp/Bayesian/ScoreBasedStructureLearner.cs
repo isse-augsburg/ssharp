@@ -25,7 +25,7 @@
 
         private const string RPath = "Rscript.exe";
         // TODO: define this path correctly relative to the project
-        private const string ScriptPath = @"C:\Users\frits\Documents\Visual Studio 2015\Projects\bayessharp\ssharp\Source\SafetySharp\Bayesian\";
+        private const string ScriptPath = @"ssharp\Source\SafetySharp\Bayesian\";
 
         private const string RScript = ScriptPath + "StructureLearning.R";
         private string WhitelistPath => _path + "whitelist.csv";

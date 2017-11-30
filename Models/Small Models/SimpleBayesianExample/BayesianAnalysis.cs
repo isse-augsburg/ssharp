@@ -22,7 +22,7 @@
 
             var config = BayesianLearningConfiguration.Default;
             var bayesianCreator = new BayesianNetworkCreator(model, 10, config);
-            var result = bayesianCreator.LearnScoreBasedBayesianNetwork(@"D:\Sonstiges\SafetySharpSimulation\", 100000, hazard, states);
+            var result = bayesianCreator.LearnScoreBasedBayesianNetwork(@"C:\SafetySharpSimulation\", 100000, hazard, states);
         }
 
         [Test]
@@ -42,7 +42,7 @@
         [Test]
         public void SerializeAndDeserializeBayesianNetwork()
         {
-            const string filePath = @"D:\Sonstiges\SafetySharpSimulation\network.txt";
+            const string filePath = "network.json";
             var model = new SimpleBayesianExampleModel();
             Func<bool> hazard = () => model.Component.Hazard;
 
@@ -57,15 +57,15 @@
 
         [Test]
         public void CalculateBayesianNetworkProbabilities()
-        {
-            const string filePath = @"D:\Sonstiges\SafetySharpSimulation\network.txt";
+        { 
+            const string filePath = "network.json";
             var model = new SimpleBayesianExampleModel();
             Func<bool> hazard = () => model.Component.Hazard;
             var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10);
             var network = bayesianNetworkCreator.FromJson(filePath, hazard);
 
             var calculator = new BayesianNetworkProbabilityDistributionCalculator(network, 0.0000000001);
-            var result = calculator.CalculateProbabilityDistribution(new [] { "FL", "FS", "FV" });
+            var result = calculator.CalculateConditionalProbabilityDistribution(new[] { "FS" }, new[] { "FV", "FL" });
             Console.Out.WriteLine(string.Join("\n", result));
         }
 
