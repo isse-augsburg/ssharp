@@ -29,6 +29,21 @@
             List<ICapability> capList = _robotAgent.AvailableCapabilities.ToList();
             List<string> stringCapList = new List<string>();
 
+
+            //List<List<string>> taskList = _robotAgent.GetTasks();
+
+            //for (int i = 0; i < taskList.Count; i++) {
+            //    Console.WriteLine("\n<TASK Element "+ i + "> " + taskList.ElementAt(i));
+            //}
+
+            //foreach (var task in taskList) {
+            //    int i = 0;
+            //    foreach (var req in task.ElementAt(i)) {
+            //        Console.WriteLine("\n<TASK Element " + i + "> " + req);
+            //        i++;
+            //    }
+            //}
+
             foreach (var cap in capList)
             {
                 if (cap.GetType() == typeof(ProduceCapability)) {

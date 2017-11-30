@@ -189,5 +189,13 @@ namespace SafetySharp.CaseStudies.Visualizations
             var stateField = machineType.GetProperty("State");
             return stateField.GetValue(machine).ToString();
         }
+
+        private string GetTask() {
+            //var agentType = typeof(BaseAgent);
+            //var machineField = agentType.GetField("");
+
+
+            throw new NotImplementedException();
+        }
     }
 }

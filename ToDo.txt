@@ -1,0 +1,6 @@
+﻿- Task anzeigen (Über das Workpiece gehen)
+- Rollen der Objekte anzeigen
+- Anzeigen welcher RoboterAgent gerade an der Reihe ist ( Wer ist in ExecuteRole?)
+- Anzeigen wo das Workpiece ist
+- Routen der Carts anzeigen: Wo kann ein Cart hinfahren?
+- Faults anzeigen (Welcher Fault? Durch Anzeigen der Roles sollte das gut zu sehen sein)
