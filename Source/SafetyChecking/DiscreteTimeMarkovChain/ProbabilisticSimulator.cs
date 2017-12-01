@@ -86,7 +86,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_activateIndependentFaultsAtStepBeginning =
 				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
 			
-			_choiceResolver = new ProbabilisticSimulatorChoiceResolver(configuration.UseOptionProbabilitiesInSimulation);
+			_choiceResolver = new ProbabilisticSimulatorChoiceResolver(configuration.UseOptionProbabilitiesInSimulation, (int) DateTime.Now.Ticks);
 
 			RuntimeModel.SetChoiceResolver(_choiceResolver);
 		}

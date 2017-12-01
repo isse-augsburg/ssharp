@@ -63,6 +63,7 @@
     <Compile Include="..\..\Source\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Analysis\BayesianAnalysis.cs" />
     <Compile Include="Analysis\HazardProbabilityRangeTests.cs" />
     <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Analysis\SafetyAnalysisTests.cs" />
@@ -96,6 +97,11 @@
   <ItemGroup>
     <Analyzer Include="$(OutDir)\SafetySharp.Modeling.dll" />
     <Analyzer Include="$(OutDir)\SafetySharp.Compiler.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Analysis\network.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="../../Source/SafetySharp.targets" />

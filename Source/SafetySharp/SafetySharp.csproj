@@ -37,6 +37,10 @@
       <HintPath>..\..\Dependencies\JetBrains.Annotations.10.0.0\lib\net20\JetBrains.Annotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
@@ -46,6 +50,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bayesian\BayesianLearningConfiguration.cs" />
+    <Compile Include="Bayesian\BayesianNetwork.cs" />
+    <Compile Include="Bayesian\BayesianNetworkConverter.cs" />
+    <Compile Include="Bayesian\BayesianNetworkCreator.cs" />
+    <Compile Include="Bayesian\BayesianNetworkProbabilityDistributionCalculator.cs" />
+    <Compile Include="Bayesian\ConstraintBasedStructureLearner.cs" />
+    <Compile Include="Bayesian\DagPattern.cs" />
+    <Compile Include="Bayesian\DualKeyDictionary.cs" />
+    <Compile Include="Bayesian\IndependencyCalculator.cs" />
+    <Compile Include="Bayesian\IProbabilityDistributionCalculator.cs" />
+    <Compile Include="Bayesian\MinimalCriticalSet.cs" />
+    <Compile Include="Bayesian\OnDemandProbabilityDistributionCalculator.cs" />
+    <Compile Include="Bayesian\ProbabilityDistribution.cs" />
+    <Compile Include="Bayesian\RandomVariable.cs" />
+    <Compile Include="Bayesian\RandomVariableFactory.cs" />
+    <Compile Include="Bayesian\RandomVariableSimulator.cs" />
+    <Compile Include="Bayesian\ScoreBasedStructureLearner.cs" />
+    <Compile Include="Bayesian\SubsetUtils.cs" />
     <Compile Include="ModelChecking\SafetySharpCounterExampleSerialization.cs" />
     <Compile Include="ModelChecking\SafetySharpSimulator.cs" />
     <Compile Include="ModelChecking\ModelChecking.cs" />
@@ -142,6 +164,7 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Bayesian\StructureLearning.R" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -150,5 +173,6 @@
       <Name>SafetyChecking</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
