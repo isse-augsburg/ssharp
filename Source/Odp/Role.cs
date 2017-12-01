@@ -165,17 +165,40 @@ namespace SafetySharp.Odp
 		}
 
 		/// <summary>
+		///   Returns a copy of the <see cref="Role"/> that additionally applies the given <paramref name="capabilities"/>.
+		///   Updates the <see cref="PostCondition"/> accordingly.
+		/// </summary>
+		[MustUseReturnValue, Pure]
+		public Role WithCapabilities([NotNull, ItemNotNull] IEnumerable<ICapability> capabilities)
+		{
+			if (capabilities == null)
+				throw new ArgumentNullException(nameof(capabilities));
+
+			return capabilities.Aggregate(this, (role, capability) => role.WithCapability(capability));
+		}
+
+		/// <summary>
 		///   Returns a copy of the <see cref="Role"/> that additionally applies the capabilities applied by the given <see cref="Role"/>.
 		///   Does not affect condition ports.
 		/// </summary>
 		/// <param name="other">The role whose capabilities shall be appended.</param>
 		/// <exception cref="InvalidOperationException">Thrown if this instance's <see cref="PostCondition"/> and <paramref name="other"/>'s <see cref="PreCondition"/> do not have matching states.</exception>
+		[MustUseReturnValue, Pure]
 		public Role AppendCapabilities(Role other)
 		{
 			if (!PostCondition.StateMatches(other.PreCondition))
 				throw new InvalidOperationException("Cannot append two roles whose pre-/postconditions do not match.");
 
-			return other.CapabilitiesToApply.Aggregate(this, (role, capability) => role.WithCapability(capability));
+			return WithCapabilities(other.CapabilitiesToApply);
+		}
+
+		/// <summary>
+		///   Returns a role with the given <paramref name="condition"/> that applies no capabilities.
+		/// </summary>
+		[MustUseReturnValue, Pure]
+		public static Role Empty(Condition condition, bool locked = false)
+		{
+			return new Role(condition, condition, locked);
 		}
 
 		#endregion
