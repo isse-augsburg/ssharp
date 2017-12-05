@@ -34,6 +34,7 @@ namespace SafetySharp.Odp
 	/// <summary>
 	///   Represents an agent in the self-organizing system.
 	/// </summary>
+	[DebuggerDisplay("Agent #{Id}")]
 	public abstract class BaseAgent : Component, IAgent
 	{
 		// configuration options
@@ -552,6 +553,7 @@ namespace SafetySharp.Odp
 			foreach (var role in roles)
 			{
 				Debug.Assert(role.IsValid);
+				Debug.WriteLine($"Agent {Id} allocating role {role}");
 #if DEBUG
 				// Check for duplicate condition states between roles. While not really a problem for ODP (use case: load distribution), current
 				// reconfiguration algorithms shouldn't produce such configurations. Hence this check to indicate potential problems.
@@ -579,7 +581,10 @@ namespace SafetySharp.Odp
 				throw new ArgumentNullException(nameof(roles));
 
 			foreach (var role in roles)
+			{
+				Debug.WriteLine($"Agent {Id} deallocating role {role}");
 				_allocatedRoles.Remove(role);
+			}
 			RoleSelector.OnRoleAllocationsChanged();
 		}
 

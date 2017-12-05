@@ -239,5 +239,17 @@ namespace SafetySharp.Odp
 		}
 
 		#endregion
+
+#if DEBUG
+		// for debugging purposes
+		public override string ToString()
+		{
+			var interval = (PreCondition.StateLength < PostCondition.StateLength)
+				? $"[{PreCondition.StateLength}, {PostCondition.StateLength - 1}]"
+				: "[]";
+			return
+				$"{PreCondition.Port?.Id.ToString() ?? "#"}@{PreCondition.StateLength} -> {interval} -> {PostCondition.Port?.Id.ToString() ?? "#"}@{PostCondition.StateLength}{(IsLocked ? " [locked]" : "")}";
+		}
+#endif
 	}
 }
