@@ -270,9 +270,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 			Robot?.ConsumeWorkpiece();
 			(Resource.Task as Task).IsResourceInProduction = false;
 			Resource = null;
+
+			ResourceConsumed?.Invoke();
 		}
 
-
+		/// <summary>
+		///   Invoked whenever the agent consumes a completely processed resource. Can be used to count processed resources.
+		///   CAUTION: This can only be used during simulation runs, not during model checking!
+		/// </summary>
+		[NonSerializable]
+		public event Action ResourceConsumed;
 		
 
 		// robot delegation methods

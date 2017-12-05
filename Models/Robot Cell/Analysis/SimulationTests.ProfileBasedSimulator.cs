@@ -45,12 +45,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			private readonly Model _model;
 			private Tuple<Fault, ReliabilityAttribute, IComponent>[] _faults;
 			private readonly Simulator _simulator;
+			private int _throughput;
 
 			public ProfileBasedSimulator(Model model)
 			{
 				_simulator = new Simulator(model);
 				_model = (Model)_simulator.Model;
 				CollectFaults();
+				RegisterListeners();
 			}
 
 			private void CollectFaults()
@@ -67,6 +69,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 						faultInfo.Add(info);
 				});
 				_faults = faultInfo.ToArray();
+			}
+
+			private void RegisterListeners()
+			{
+				_model.VisitPostOrder(component =>
+				{
+					var robotAgent = component as RobotAgent;
+					if (robotAgent != null)
+						robotAgent.ResourceConsumed += () => _throughput++;
+				});
 			}
 
 			public void Simulate(int numberOfSteps)
@@ -99,8 +111,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					}
 					_simulator.SimulateStep();
 				}
-				var throughput = _model.Resources.Select(w => w.IsComplete).Count();
-			    ExportStats(throughput, (IPerformanceMeasurementController)_model.Controller);
+
+				Console.WriteLine("THROUGHPUT: " + _throughput);
+			    ExportStats(_throughput, (IPerformanceMeasurementController)_model.Controller);
 			}
 
 		    private static void ExportStats(int throughput, IPerformanceMeasurementController modelController)
