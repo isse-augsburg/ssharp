@@ -179,5 +179,21 @@ namespace SafetySharp.Modeling
 			ModelBinder.DiscoverRoots(this);
 			ModelBinder.Bind(this);
 		}
+
+		/// <summary>
+		///   Rebinds the model.
+		///   Call this in cases where changes to a model were made after it was bound but before simulation or model checking.
+		/// </summary>
+		public void Rebind()
+		{
+			_components = null;
+			_roots = null;
+			_faults = null;
+			_referencedObjects = null;
+			RangeMetadata.Clear();
+
+			ModelBinder.DiscoverRoots(this);
+			ModelBinder.Bind(this);
+		}
 	}
 }

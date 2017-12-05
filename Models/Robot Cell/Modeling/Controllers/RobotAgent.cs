@@ -275,10 +275,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 		}
 
 		/// <summary>
-		///   Invoked whenever the agent consumes a completely processed resource. Can be used to count processed resources.
-		///   CAUTION: This can only be used during simulation runs, not during model checking!
+		///   Invoked whenever the agent consumes a completely processed resource.
 		/// </summary>
-		[NonSerializable]
 		public event Action ResourceConsumed;
 		
 

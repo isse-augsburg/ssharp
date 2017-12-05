@@ -33,26 +33,31 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling.Controllers.Reconfiguration;
 	using Modeling.Plants;
 
+	using Odp;
+	using Odp.Reconfiguration;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-
-	using RDotNet;
 
 	public partial class SimulationTests
 	{
 		internal class ProfileBasedSimulator
 		{
+			private readonly Simulator _simulator;
 			private readonly Model _model;
 			private Tuple<Fault, ReliabilityAttribute, IComponent>[] _faults;
-			private readonly Simulator _simulator;
+			private int _step;
+
 			private int _throughput;
+			private readonly Dictionary<uint, List<int>> _agentReconfigurations = new Dictionary<uint, List<int>>();
 
 			public ProfileBasedSimulator(Model model)
 			{
+				RegisterListeners(model);
+				model.Rebind();
+
 				_simulator = new Simulator(model);
 				_model = (Model)_simulator.Model;
 				CollectFaults();
-				RegisterListeners();
 			}
 
 			private void CollectFaults()
@@ -71,33 +76,43 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				_faults = faultInfo.ToArray();
 			}
 
-			private void RegisterListeners()
+			private void RegisterListeners(Model model)
 			{
-				_model.VisitPostOrder(component =>
+				model.VisitPostOrder(component =>
 				{
 					var robotAgent = component as RobotAgent;
 					if (robotAgent != null)
-						robotAgent.ResourceConsumed += () => _throughput++;
+						robotAgent.ResourceConsumed += StaticListener.Create(() => _throughput++);
+				});
+				model.Controller.ConfigurationsCalculated += StaticListener.Create<ITask, ConfigurationUpdate>((task, config) =>
+				{
+					foreach (var agent in config.InvolvedAgents)
+					{
+						if (!_agentReconfigurations.ContainsKey(agent.Id))
+							_agentReconfigurations.Add(agent.Id, new List<int>());
+						_agentReconfigurations[agent.Id].Add(_step);
+					}
 				});
 			}
 
 			public void Simulate(int numberOfSteps)
 			{
-				var seed = Environment.TickCount;
+				Simulate(numberOfSteps, seed: Environment.TickCount);
+			}
+
+			public void Simulate(int numberOfSteps, int seed)
+			{
 				Console.WriteLine("SEED: " + seed);
 				var rd = new Random(seed);
-//				using (var sw = new StreamWriter("testRD.csv", true))
-//				{
-//					sw.WriteLine("currentRDFail; currentDistValueFail; currentRDRepair; currentDistValueRepair; failed; repaired");
-//				}
-				for (var x = 0; x < numberOfSteps; x++)
+
+				for (_step = 0; _step < numberOfSteps; _step++)
 				{
 					foreach (var fault in _faults)
 					{
 						if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToFail())
 						{
 							fault.Item1.ForceActivation();
-							Console.WriteLine("Activation of: " + fault.Item1.Name + " at time " + x);
+							Console.WriteLine("Activation of: " + fault.Item1.Name + " at time " + _step);
 							fault.Item2.ResetDistributionToFail();
 						}
 						else if (fault.Item2?.MTTR > 0 && fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToRepair())
@@ -105,26 +120,51 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 							fault.Item1.SuppressActivation();
 							Debug.Assert(fault.Item3 is Agent);
 							((Agent)fault.Item3).Restore(fault.Item1);
-							Console.WriteLine("Deactivation of: " + fault.Item1.Name + " at time " + x);
+							Console.WriteLine("Deactivation of: " + fault.Item1.Name + " at time " + _step);
 							fault.Item2.ResetDistributionToRepair();
 						}
 					}
 					_simulator.SimulateStep();
 				}
 
-				Console.WriteLine("THROUGHPUT: " + _throughput);
-			    ExportStats(_throughput, (IPerformanceMeasurementController)_model.Controller);
+			    ExportStats((IPerformanceMeasurementController)_model.Controller);
 			}
 
-		    private static void ExportStats(int throughput, IPerformanceMeasurementController modelController)
+		    private void ExportStats(IPerformanceMeasurementController modelController)
 		    {
+				// log:
+				//   seed, model
+				//   throughput
+				//   start and stop time
+				//   total number of steps
+				//   step, duration, end time, failed/success and involved agents for each reconfiguration
+				//
+				// interesting (derived) properties:
+				//   # reconfigurations global / per agent (avg, median, max, min, ...)
+				//   intervals between an agent's reconfigurations (avg, median, ...) in steps and in time
+				//   size of reconf agent sets (coalitions) (avg, median, max, min ...)
+				//   required time for reconfigurations (avg, median, max, min ...)
+				//   throughput
+				//   compare to other algorithm with same seed
 
-		        var timeValueData = modelController.CollectedTimeValues;
+				Console.WriteLine("=============================================");
+				Console.WriteLine($"Throughput: {_throughput}");
+				Console.WriteLine("Reconfigurations:");
+				foreach (var agent in _agentReconfigurations.Keys)
+					Console.WriteLine($"\tAgent #{agent}: Steps " + string.Join(", ", _agentReconfigurations[agent]));
+				Console.WriteLine("=============================================");
+
+				if (!Directory.Exists("performance-reports"))
+					Directory.CreateDirectory("performance-reports");
+				var reportsDirectory = Path.Combine("performance-reports", DateTime.UtcNow.Ticks.ToString());
+				Directory.CreateDirectory(reportsDirectory);
+
+				var timeValueData = modelController.CollectedTimeValues;
 		        foreach (var key in timeValueData.Keys)
 		        {
 		            var reconfTime = timeValueData[key].Select(tuple => (int)tuple.Item2.Ticks).ToArray();
 		            var productionTime = timeValueData[key].Select(tuple => (int)tuple.Item1.Ticks).ToArray();
-                    using (var sw = new StreamWriter("Agent" + key + "Export" + System.DateTime.Now.Ticks + ".csv", true))
+                    using (var sw = new StreamWriter(Path.Combine(reportsDirectory, "Agent" + key + ".csv"), true))
 		            {
                         sw.WriteLine("ReconfTime; ProductionTime");
 		                for (var i = 0; i < reconfTime.Length; i++)
@@ -133,64 +173,45 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		                }
 		            }
                 }
-
-                
 		    }
 
-			private static void CreateStats(int throughput, IPerformanceMeasurementController modelController)
+			private static class StaticListener
 			{
-				Debug.Assert(throughput != 0);
-				Debug.Assert(modelController.CollectedTimeValues != null);
+				private static readonly List<Delegate> _listeners = new List<Delegate>();
 
-				//init the R engine
-				try
+				public static Action Create(Action listener)
 				{
-					REngine.SetEnvironmentVariables();
-				}
-				catch (ApplicationException e)
-				{
-					Console.WriteLine("Cannot use R: " + e.Message);
-					return;
+					var id = AddListener(listener);
+					return () => OnCall(id);
 				}
 
-				var engine = REngine.GetInstance();
-				engine.Initialize();
+				public static Action<T1, T2> Create<T1, T2>(Action<T1, T2> listener)
+				{
+					var id = AddListener(listener);
+					return (a, b) => OnCall(id, a, b);
+				}
 
-				//prepare data
-				var timeValueData = modelController.CollectedTimeValues;
-				var reconfTimeOfAgents = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item2.Ticks)).ToArray();
-				var productionTimeOfAgents = timeValueData.Values.SelectMany(t => t.Select(a => (double)a.Item1.Ticks)).ToArray();
+				private static int AddListener(Delegate listener)
+				{
+					int id;
+					lock (_listeners)
+					{
+						id = _listeners.Count;
+						_listeners.Add(listener);
+					}
+					return id;
+				}
 
-				var measurePointsVector = engine.CreateNumericVector(reconfTimeOfAgents);
-				var reconfTimeOfAgentsNumericVector = engine.CreateNumericVector(reconfTimeOfAgents);
-				var productionTimeOfAgentsNumericVector = engine.CreateNumericVector(productionTimeOfAgents);
-				var throughputVector = engine.CreateIntegerVector(new[] { throughput });
-
-				engine.SetSymbol("reconfTimeOfAgents", reconfTimeOfAgentsNumericVector);
-				engine.SetSymbol("productionTimeOfAgents", productionTimeOfAgentsNumericVector);
-				engine.SetSymbol("measurePoints", measurePointsVector);
-				engine.SetSymbol("throughput", throughputVector);
-				engine.SetSymbol("maxThroughput", engine.CreateIntegerVector(new[] { 10 }));
-				engine.SetSymbol("w", engine.CreateNumericVector(new[] { 0.5 }));
-
-				//prepare data
-				const string fileName = "myplot.pdf";
-
-				//calculate
-				engine.Evaluate("performanceValueVector <- productionTimeOfAgents/reconfTimeOfAgents");
-				engine.Evaluate("overallPerformanceTimeValue <- mean(perfomranceValueVector)");
-				engine.Evaluate("relativeCostValue <- throughput/maxThroughput");
-				engine.Evaluate("overallPerformanceValue <- overallPerformanceTimeValue + w * relativeCostValue");
-
-				var fileNameVector = engine.CreateCharacterVector(new[] { fileName });
-				engine.SetSymbol("fileName", fileNameVector);
-
-				engine.Evaluate("cairo_pdf(filename=fileName, width=6, height=6, bg='transparent')");
-				engine.Evaluate("plot(performanceValueVector~measurePoints)");
-				engine.Evaluate("dev.off()");
-
-				//clean up
-				engine.Dispose();
+				private static void OnCall(int id, params object[] parameters)
+				{
+					Delegate listener = null;
+					lock (_listeners)
+					{
+						if (_listeners.Count > id)
+							listener = _listeners[id];
+					}
+					listener?.DynamicInvoke(parameters);
+				}
 			}
 		}
 	}
