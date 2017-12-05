@@ -34,6 +34,7 @@ namespace SafetySharp.Odp
 	/// <summary>
 	///   Represents an agent in the self-organizing system.
 	/// </summary>
+	[DebuggerDisplay("Agent #{Id}")]
 	public abstract class BaseAgent : Component, IAgent
 	{
 		// configuration options
@@ -552,11 +553,18 @@ namespace SafetySharp.Odp
 			foreach (var role in roles)
 			{
 				Debug.Assert(role.IsValid);
+				Debug.WriteLine($"Agent {Id} allocating role {role}");
 #if DEBUG
-				if (_allocatedRoles.Any(r => r.PreCondition.StateMatches(role.PreCondition)))
-					throw new Exception("Duplicate precondition");
-				if (_allocatedRoles.Any(r => r.PostCondition.StateMatches(role.PostCondition)))
-					throw new Exception("Duplicate postcondition");
+				// Check for duplicate condition states between roles. While not really a problem for ODP (use case: load distribution), current
+				// reconfiguration algorithms shouldn't produce such configurations. Hence this check to indicate potential problems.
+
+				var index = _allocatedRoles.FindIndex(r => r.PreCondition.StateMatches(role.PreCondition));
+				if (index != -1)
+					throw new Exception($"Duplicate precondition at agent {Id}: pre-existing role {_allocatedRoles[index]} and new role {role}");
+
+				index = _allocatedRoles.FindIndex(r => r.PostCondition.StateMatches(role.PostCondition));
+				if (index != -1)
+					throw new Exception($"Duplicate postcondition at agent {Id}: pre-existing role {_allocatedRoles[index]} and new role {role}");
 #endif
 				_allocatedRoles.Add(role);
 			}
@@ -573,7 +581,10 @@ namespace SafetySharp.Odp
 				throw new ArgumentNullException(nameof(roles));
 
 			foreach (var role in roles)
+			{
+				Debug.WriteLine($"Agent {Id} deallocating role {role}");
 				_allocatedRoles.Remove(role);
+			}
 			RoleSelector.OnRoleAllocationsChanged();
 		}
 

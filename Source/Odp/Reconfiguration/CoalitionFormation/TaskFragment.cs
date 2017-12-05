@@ -99,6 +99,24 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			return IntersectsWith(FromRole(role));
 		}
 
+		/// <summary>
+		///   Checks if this task fragment immediately precedes the fragment specified by the given <paramref name="role"/>.
+		/// </summary>
+		[Pure]
+		public bool Precedes(Role role)
+		{
+			return Equals(Task, role.Task) && End + 1 == role.PreCondition.StateLength;
+		}
+
+		/// <summary>
+		///   Checks if this task fragment immediately follows the fragment specified by the given <paramref name="role"/>.
+		/// </summary>
+		[Pure]
+		public bool Succeedes(Role role)
+		{
+			return Equals(Task, role.Task) && role.PostCondition.StateLength == Start;
+		}
+
 		#endregion
 
 		/// <summary>

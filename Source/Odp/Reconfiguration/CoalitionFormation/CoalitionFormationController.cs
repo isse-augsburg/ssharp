@@ -25,8 +25,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
+	using JetBrains.Annotations;
 
 	/// <summary>
 	/// A decentralized, local reconfiguration algorithm based on coalition formation.
@@ -97,8 +99,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
 
 						// compute tfr, edge, core agents
-						reconfSuggestion.ComputeTfr(minTfr);
+						reconfSuggestion.ComputeReconfiguredTaskFragment(minTfr);
+
 						Debug.WriteLine("Inviting edge agents");
+						await reconfSuggestion.FindEdgeAgents();
 						foreach (var edgeAgent in reconfSuggestion.EdgeAgents)
 							await coalition.Invite(edgeAgent);
 
@@ -206,10 +210,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		protected async Task<IEnumerable<BaseAgent>> ComputeResourceFlow(ConfigurationSuggestion configurationSuggestion)
 		{
-			var resourceFlow = new List<BaseAgent>();
-			var agents = configurationSuggestion.AgentsToConnect;
+			var agents = configurationSuggestion.ComputeAgentsToConnect();
+			Debug.Assert(agents.Length > 0);
 
-			for (var i = 1; i < agents.Count; ++i)
+			var resourceFlow = new List<BaseAgent> { agents[0] };
+
+			for (var i = 1; i < agents.Length; ++i)
 			{
 				var shortestPaths = ComputeShortestPaths(configurationSuggestion, agents[i - 1]);
 				IEnumerable<BaseAgent> connection = shortestPaths.GetPathFromSource(destination: agents[i]);
@@ -224,12 +230,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					Debug.Assert(connection != null);
 				}
 
-				if (resourceFlow.Count > 0)
-					connection = connection.Skip(1); // connection.first == resourceFlow.last => don't duplicate it
+				connection = connection.Skip(1); // connection.first == resourceFlow.last => don't duplicate it
 				resourceFlow.AddRange(connection);
 				configurationSuggestion.AddResourceFlowAgents(connection);
 			}
 
+			Debug.Assert(resourceFlow.Count >= agents.Length);
 			return resourceFlow;
 		}
 
@@ -277,72 +283,94 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			return false;
 		}
 
+		// TODO: refactor and move role allocation to own class
+		// postcondition:
+		//   result allocates each agent i in resourceFlow a role r_i with input resourceFlow[i-1] and output resourceFlow[i+1], if defined, and those have been allocated connecting roles.
+		//   if suggestion.EntryEdgeAgent != null, it has a role r so that it previously had role s with r.precondition = s.precondition. s has been deallocated.
+		//   if suggestion.ExitEdgeAgent != null, it has a role r so that it previously had a role s with r.postcondition = s.postcondition. s has been deallocated.
+		//   (r_0 + r_1 + ... + r_n).capabilities = suggestion.TFR.capabilities, where n = resourceFlow.Length
+		//   if c = r_i.capabilities[k], then suggestion.CtfDistribution[suggestion.TFR.Start - suggestion.CTF.Start + r_i.precondition.stateLength + k] = resourceFlow[i]
 		protected ConfigurationUpdate ComputeRoleAllocations(ConfigurationSuggestion suggestion, BaseAgent[] resourceFlow)
 		{
-			Debug.Assert(resourceFlow.Length >= 2);
-			var config = new ConfigurationUpdate();
-			var task = suggestion.Coalition.Task;
+			// preconditions
+			Debug.Assert(resourceFlow.Length >= 1);
+			Debug.Assert(suggestion.EntryEdgeAgent == null || suggestion.EntryEdgeAgent == resourceFlow[0]);
+			Debug.Assert(suggestion.ExitEdgeAgent == null || suggestion.ExitEdgeAgent == resourceFlow[resourceFlow.Length - 1]);
 
+			var task = suggestion.Coalition.Task;
+			var config = new ConfigurationUpdate();
+			var roles = new Role?[resourceFlow.Length];
+
+			// handle entry edge agent: set input, add capabilities before ReconfiguredTaskFragment
+			if (suggestion.EntryEdgeAgent != null)
+			{
+				var previousEntryRole = suggestion.EntryEdgeAgent.AllocatedRoles.Single(role =>
+					role.Task == task && (role.IncludesCapability(suggestion.ReconfiguredTaskFragment.Start) || suggestion.ReconfiguredTaskFragment.Succeedes(role)));
+				config.RemoveRoles(suggestion.EntryEdgeAgent, previousEntryRole);
+
+				var prefixCapabilities = previousEntryRole.CapabilitiesToApply.Take(suggestion.ReconfiguredTaskFragment.Start - previousEntryRole.PreCondition.StateLength);
+				roles[0] = Role.Empty(previousEntryRole.PreCondition).WithCapabilities(prefixCapabilities);
+			}
+
+			var currentState = suggestion.ReconfiguredTaskFragment.Start;
+			for (var i = 0; i < resourceFlow.Length; ++i)
+			{
+				var lastRole = i == 0 ? null : roles[i - 1];
+				var lastAgent = i == 0 ? null : resourceFlow[i - 1];
+				var nextAgent = i + 1 < resourceFlow.Length ? resourceFlow[i + 1] : null;
+				var agent = resourceFlow[i];
+
+				var initialRole = roles[i] ?? GetRole(task, lastAgent, lastRole?.PostCondition);
+				roles[i] = CollectCapabilities(suggestion, ref currentState, agent, initialRole).WithOutput(nextAgent);
+			}
+			Debug.Assert(currentState == suggestion.ReconfiguredTaskFragment.End + 1, "Every capability in the ReconfiguredTaskFragment must be included in a role.");
+
+			// handle exit edge agent: set ouput, add capabilities after ReconfiguredTaskFragment
+			if (suggestion.ExitEdgeAgent != null)
+			{
+				var previousExitRole = suggestion.ExitEdgeAgent.AllocatedRoles.Single(role =>
+					role.Task == task && (role.IncludesCapability(suggestion.ReconfiguredTaskFragment.End) || suggestion.ReconfiguredTaskFragment.Precedes(role)));
+				config.RemoveRoles(suggestion.ExitEdgeAgent, previousExitRole);
+
+				var initialRole = roles[roles.Length - 1];
+				Debug.Assert(initialRole.HasValue, "Uninitialized role encountered!");
+
+				var suffixCapabilities = previousExitRole.CapabilitiesToApply.Skip(suggestion.ReconfiguredTaskFragment.End + 1 - previousExitRole.PreCondition.StateLength);
+				roles[roles.Length - 1] = initialRole.Value.WithCapabilities(suffixCapabilities).WithOutput(previousExitRole.Output);
+
+				Debug.Assert(roles[roles.Length - 1].Value.PostCondition == previousExitRole.PostCondition, "Exit agent's postcondition must not change.");
+			}
+
+			// allocate new roles
+			for (var i = 0; i < resourceFlow.Length; ++i)
+			{
+				Debug.Assert(roles[i].HasValue, "Uninitialized role encountered!");
+				config.AddRoles(resourceFlow[i], roles[i].Value);
+			}
 			// clear old roles from core agents
 			foreach (var agent in suggestion.CoreAgents)
 			{
-				// roles that intersect with TFR:
-				var obsoleteRoles = agent.AllocatedRoles.Where(suggestion.TFR.IntersectsWith);
+				var obsoleteRoles = agent.AllocatedRoles.Where(suggestion.ReconfiguredTaskFragment.IntersectsWith);
 				config.RemoveRoles(agent, obsoleteRoles.ToArray());
 			}
-
-			// initialize with no predecessor (TFR starts at 0, no entry edge agent exists)
-			BaseAgent previousAgent = null;
-			Condition? preCondition = null;
-
-			var firstCoreAgent = suggestion.HasEntryEdgeAgent ? 1 : 0;
-			if (suggestion.HasEntryEdgeAgent)
-			{
-				// handle entry edge agent: set output port
-				previousAgent = resourceFlow[0];
-				var previousRole = previousAgent.AllocatedRoles
-												.Single(role => role.Task == task && role.PostCondition.StateLength == suggestion.TFR.Start);
-				config.RemoveRoles(previousAgent, previousRole); // remove old role
-
-				var updatedRole = previousRole.WithOutput(resourceFlow[firstCoreAgent]);
-				config.AddRoles(previousAgent, updatedRole); // re-add updated role
-
-				preCondition = updatedRole.PostCondition;
-			}
-
-			var lastCoreAgent = suggestion.HasExitEdgeAgent ? resourceFlow.Length - 2 : resourceFlow.Length - 1;
-			if (suggestion.HasExitEdgeAgent)
-			{
-				// handle exit edge agent: set input port
-				var exitEdgeAgent = resourceFlow[resourceFlow.Length - 1];
-				var lastRole = exitEdgeAgent.AllocatedRoles
-											.Single(role => role.Task == task && role.PreCondition.StateLength == suggestion.TFR.End + 1);
-				config.RemoveRoles(exitEdgeAgent, lastRole); // remove old role
-
-				var updatedRole = lastRole.WithInput(resourceFlow[lastCoreAgent]);
-				config.AddRoles(exitEdgeAgent, updatedRole); // re-add updated role
-			}
-
-			// handle core agents: set capabilities & connections
-			var currentState = suggestion.TFR.Start;
-			var offset = suggestion.CTF.Start;
-			var end = suggestion.TFR.End;
-
-			for (var i = firstCoreAgent; i <= lastCoreAgent; ++i)
-			{
-				var agent = resourceFlow[i];
-				var role = GetRole(task, previousAgent, preCondition)
-							.WithOutput(i < resourceFlow.Length - 1 ? resourceFlow[i + 1] : null);
-
-				while (currentState <= end && suggestion.CtfDistribution[currentState - offset] == agent)
-					role = role.WithCapability(task.RequiredCapabilities[currentState++]);
-
-				config.AddRoles(agent, role);
-				previousAgent = agent;
-				preCondition = role.PostCondition;
-			}
+			// clear old transport roles
+			foreach (var agentRoleGroup in suggestion.EdgeTransportRoles.GroupBy(t => t.Item1))
+				config.RemoveRoles(agentRoleGroup.Key, agentRoleGroup.Select(t => t.Item2).ToArray());
 
 			return config;
+		}
+
+		private static Role CollectCapabilities(ConfigurationSuggestion suggestion, ref int currentState, BaseAgent agent, Role initialRole)
+		{
+			var offset = suggestion.CTF.Start;
+			var end = suggestion.ReconfiguredTaskFragment.End;
+			Debug.Assert(initialRole.PostCondition.StateLength == currentState);
+
+			var role = initialRole;
+			while (currentState <= end && suggestion.CtfDistribution[currentState - offset] == agent)
+				role = role.WithCapability(suggestion.Coalition.Task.RequiredCapabilities[currentState++]);
+
+			return role;
 		}
 
 		protected class ConfigurationSuggestion
@@ -351,18 +379,25 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			public BaseAgent[] CtfDistribution { get; }
 
 			public TaskFragment CTF { get; }
-			public TaskFragment TFR { get; private set; }
+			public TaskFragment ReconfiguredTaskFragment { get; private set; }
 
 			public ISet<BaseAgent> CoreAgents { get; } = new HashSet<BaseAgent>();
 			public ISet<BaseAgent> EdgeAgents { get; } = new HashSet<BaseAgent>();
+
 			private readonly HashSet<BaseAgent> _resourceFlowAgents = new HashSet<BaseAgent>();
 
-			public bool HasEntryEdgeAgent { get; private set; }
-			public bool HasExitEdgeAgent { get; private set; }
+			[CanBeNull]
+			public BaseAgent EntryEdgeAgent { get; private set; }
+			[CanBeNull]
+			public BaseAgent ExitEdgeAgent { get; private set; }
 
-			public List<BaseAgent> AgentsToConnect { get; } = new List<BaseAgent>();
+			public BaseAgent FirstCoreAgent => CtfDistribution[ReconfiguredTaskFragment.Start - CTF.Start];
+			public BaseAgent LastCoreAgent => CtfDistribution[ReconfiguredTaskFragment.End - CTF.Start];
 
-			public ConfigurationSuggestion(Coalition coalition, BaseAgent[] ctfDistribution)
+			public List<Tuple<BaseAgent, Role>> EdgeTransportRoles { get; } = new List<Tuple<BaseAgent, Role>>();
+
+
+			public ConfigurationSuggestion(Coalition coalition, [NotNull, ItemNotNull] BaseAgent[] ctfDistribution)
 			{
 				Coalition = coalition;
 				CTF = coalition.CTF;
@@ -375,130 +410,169 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// Identifies the task fragment to reconfigure, i.e. the minimal subfragment of CTF
 			/// where old and suggested new capability distribution differ.
 			/// </summary>
-			public void ComputeTfr(TaskFragment minimalTfr)
+			public void ComputeReconfiguredTaskFragment(TaskFragment minimalTfr)
 			{
-				// TODO: handle branches in resource flow (non-unique distribution, TFR start & end, edge agents)
+				// TODO: handle branches in resource flow (non-unique distribution);
 
-				var offset = CTF.Start;
-				var oldDistribution = Coalition.RecoveredDistribution;
+				// extend ReconfiguredTaskFragment with modified capability allocations
+				ReconfiguredTaskFragment = ModifiedTaskFragment().Merge(minimalTfr);
 
-				// extend TFR with modified capability allocations
-				TFR = CTF.CapabilityIndices
-						 .Where(i => CtfDistribution[i - CTF.Start] != oldDistribution[i]) // includes oldDistribution[i] == null because agent dead
-						 .Select(i => new TaskFragment(Coalition.Task, i, i))
-						 .Aggregate(minimalTfr, TaskFragment.Merge);
+				// populate core agents
+				CoreAgents.UnionWith(FindCoreAgents());
 
-				// round TFR to role boundaries (include capabilities applied by same agent, either before or after reconfiguration)
-				var start = TFR.Start;
-				while (start > CTF.Start && (CtfDistribution[start - 1 - offset] == CtfDistribution[start - offset] || oldDistribution[start - 1] == oldDistribution[start]))
-					start--;
-
-				var end = TFR.End;
-				while (end < CTF.End && (CtfDistribution[end + 1 - offset] == CtfDistribution[end - offset] || oldDistribution[end + 1] == oldDistribution[end]))
-					end++;
-
-				TFR = new TaskFragment(Coalition.Task, start, end);
-
-				// populate agent sets
-				BaseAgent startEdgeAgent, endEdgeAgent;
-				FindCoreAgents();
-				FindEdgeAgents(out startEdgeAgent, out endEdgeAgent);
-
-				// compute sequence of agents to be connected by resource flow
-				if (startEdgeAgent != null)
-				{
-					AgentsToConnect.Add(startEdgeAgent);
-					HasEntryEdgeAgent = true;
-				}
-
-				var coreAgents = CtfDistribution.Slice(TFR.Start - offset, TFR.End - offset).ToArray();
-				AgentsToConnect.AddRange(coreAgents.Where((t, i) => i == 0 || coreAgents[i - 1] != t));
-
-				if (endEdgeAgent != null)
-				{
-					AgentsToConnect.Add(endEdgeAgent);
-					HasExitEdgeAgent = true;
-				}
+				Debug.WriteLine($"ReconfiguredTaskFragment: [{ReconfiguredTaskFragment.Start}, {ReconfiguredTaskFragment.End}]");
 			}
 
-			private void FindCoreAgents()
+			private TaskFragment ModifiedTaskFragment()
+			{
+				var oldDistribution = Coalition.RecoveredDistribution;
+				var modifiedIndices = CTF.CapabilityIndices.Where(i => CtfDistribution[i - CTF.Start] != oldDistribution[i]).ToArray(); // includes oldDistribution[i] == null because agent dead
+
+				if (modifiedIndices.Length > 0)
+					return new TaskFragment(Coalition.Task, modifiedIndices[0], modifiedIndices[modifiedIndices.Length - 1]);
+				return TaskFragment.Identity(Coalition.Task);
+			}
+
+			[NotNull, ItemNotNull]
+			public BaseAgent[] ComputeAgentsToConnect()
+			{
+				var agents = new List<BaseAgent>();
+
+				if (EntryEdgeAgent != null)
+					agents.Add(EntryEdgeAgent);
+
+				agents.AddRange(from index in ReconfiguredTaskFragment.CapabilityIndices
+								let ctfIndex = index - CTF.Start
+								select CtfDistribution[ctfIndex]);
+
+				if (ExitEdgeAgent != null)
+					agents.Add(ExitEdgeAgent);
+
+				return agents.Where((agent, i) => i == 0 || !Equals(agents[i-1], agent)).ToArray();
+			}
+
+			[NotNull, MustUseReturnValue]
+			private ISet<BaseAgent> FindCoreAgents()
 			{
 				// core agents are:
-				//  (1) agents that will receive new roles, as indicated in CtfDistribution (restricted to TFR)
-				//  (2) agents that will lose roles, because they either previously applied a capability in TFR
+				//  (1) agents that will receive new roles, as indicated in CtfDistribution (restricted to ReconfiguredTaskFragment)
+				//  (2) agents that will lose roles, because they either previously applied a capability in ReconfiguredTaskFragment
 				//      or transported resources between such agents
 
-				CoreAgents.UnionWith(
-					CtfDistribution.Slice(TFR.Start - CTF.Start, TFR.End - CTF.Start) // (1)
+				var coreAgents = new HashSet<BaseAgent>(
+					CtfDistribution.Slice(ReconfiguredTaskFragment.Start - CTF.Start, ReconfiguredTaskFragment.End - CTF.Start) // (1)
 				);
 
-				// (2): go along the resource flow path, from TFR.Start to TFR.End
-				var current = Coalition.RecoveredDistribution[TFR.Start];
-				var currentPos = TFR.Start;
-				while (currentPos <= TFR.End)
+				// (2): go along the resource flow path, from ReconfiguredTaskFragment.Start to ReconfiguredTaskFragment.End
+				var current = Coalition.RecoveredDistribution[ReconfiguredTaskFragment.Start];
+				var currentPos = ReconfiguredTaskFragment.Start;
+				while (currentPos <= ReconfiguredTaskFragment.End)
 				{
 					Role currentRole;
 
 					if (current == null || !current.IsAlive)
 					{
 						// if agent is dead: find next known agent that isn't
-						while ((current == null || !current.IsAlive) && currentPos <= TFR.End)
+						while ((current == null || !current.IsAlive) && currentPos <= ReconfiguredTaskFragment.End)
 						{
 							currentPos++;
-							if (currentPos <= TFR.End)
+							if (currentPos <= ReconfiguredTaskFragment.End)
 								current = Coalition.RecoveredDistribution[currentPos];
 						}
-						if (currentPos > TFR.End)
+						if (currentPos > ReconfiguredTaskFragment.End)
 							break; // all further agents are dead
 						Debug.Assert(current != null && current.IsAlive);
 						
 						// otherwise, go back until just after dead agent
-						currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
+						currentRole = current.AllocatedRoles.Single(role => role.Task == Coalition.Task && (role.IncludesCapability(currentPos) || role.PreCondition.StateLength == currentPos));
 						while (currentRole.Input != null && currentRole.Input.IsAlive)
 						{
 							current = currentRole.Input;
 							currentPos = currentRole.PreCondition.StateLength;
-							currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PostCondition.StateLength == currentPos);
+							currentRole = current.AllocatedRoles.Single(role => role.Task == Coalition.Task && role.PostCondition.StateLength == currentPos);
 						}
 						currentPos = currentRole.PreCondition.StateLength;
 					}
 
 					CoreAgents.Add(current);
-					currentRole = current.AllocatedRoles.First(role => role.Task == Coalition.Task && role.PreCondition.StateLength == currentPos);
+					currentRole = current.AllocatedRoles.Single(role => role.Task == Coalition.Task && (role.IncludesCapability(currentPos) || role.PreCondition.StateLength == currentPos));
 					currentPos = currentRole.PostCondition.StateLength;
 					current = currentRole.Output;
 				}
+
+				return coreAgents;
 			}
 
-			private void FindEdgeAgents(out BaseAgent startEdgeAgent, out BaseAgent endEdgeAgent)
+			public async Task FindEdgeAgents()
 			{
-				startEdgeAgent = endEdgeAgent = null;
-
-				if (TFR.Start > 0)
+				if (ReconfiguredTaskFragment.Start > 0)
 				{
-					// find first role in TFR (or after, if TFR is empty) in old distribution
-					var firstRole = FindRoleForCapability(TFR.Start);
-					startEdgeAgent = firstRole.Input;
-					Debug.Assert(startEdgeAgent != null);
-					EdgeAgents.Add(startEdgeAgent);
+					Debug.Assert(Coalition.RecoveredDistribution[ReconfiguredTaskFragment.Start] != null, "Dead agents should be surrounded in TFR.");
+
+					if (CtfDistribution[ReconfiguredTaskFragment.Start - CTF.Start] == Coalition.RecoveredDistribution[ReconfiguredTaskFragment.Start])
+						// first agent to apply a capability is the same -> can serve as edge agent
+						EntryEdgeAgent = Coalition.RecoveredDistribution[ReconfiguredTaskFragment.Start];
+					else // otherwise agent that applied capability ReconfiguredTaskFragment.Start-1 is chosen as edge agent
+					{
+						var currentAgent = Coalition.RecoveredDistribution[ReconfiguredTaskFragment.Start];
+						var currentRole = FindRoleForCapability(ReconfiguredTaskFragment.Start);
+
+						while (!currentRole.IncludesCapability(ReconfiguredTaskFragment.Start - 1))
+						{
+							EdgeTransportRoles.Add(Tuple.Create(currentAgent, currentRole));
+
+							var nextAgent = currentRole.Input;
+							Debug.Assert(nextAgent != null && nextAgent.IsAlive); // otherwise coalition merge would have occurred.
+							await Coalition.Invite(nextAgent);
+
+							currentRole = nextAgent.AllocatedRoles.Single(ReconfiguredTaskFragment.Succeedes);
+							currentAgent = nextAgent;
+						}
+
+						EntryEdgeAgent = currentAgent;
+					}
+
+					Debug.Assert(EntryEdgeAgent != null && EntryEdgeAgent.IsAlive);
+					EdgeAgents.Add(EntryEdgeAgent);
 				}
 
-				if (TFR.End < Coalition.Task.RequiredCapabilities.Length - 1)
+				if (ReconfiguredTaskFragment.End < Coalition.Task.RequiredCapabilities.Length - 1)
 				{
-					// find last role in TFR (or before, if TFR is empty) in old distribution
-					var lastRole = FindRoleForCapability(TFR.End);
-					endEdgeAgent = lastRole.Output;
-					Debug.Assert(endEdgeAgent != null);
-					EdgeAgents.Add(endEdgeAgent);
+					Debug.Assert(Coalition.RecoveredDistribution[ReconfiguredTaskFragment.End] != null, "Dead agents should be surrounded in TFR.");
+
+					if (CtfDistribution[ReconfiguredTaskFragment.End - CTF.Start] == Coalition.RecoveredDistribution[ReconfiguredTaskFragment.End])
+						// last agent to apply a capability is the same -> can serve as edge agent
+						ExitEdgeAgent = Coalition.RecoveredDistribution[ReconfiguredTaskFragment.End];
+					else // otherwise agent that applied capability ReconfiguredTaskFragment.End+1 is chosen as edge agent
+					{
+						var currentAgent = Coalition.RecoveredDistribution[ReconfiguredTaskFragment.End];
+						var currentRole = FindRoleForCapability(ReconfiguredTaskFragment.End);
+
+						while (!currentRole.IncludesCapability(ReconfiguredTaskFragment.End + 1))
+						{
+							EdgeTransportRoles.Add(Tuple.Create(currentAgent, currentRole));
+
+							var nextAgent = currentRole.Output;
+							Debug.Assert(nextAgent != null && nextAgent.IsAlive); // otherwise coalition merge would have occurred.
+							await Coalition.Invite(nextAgent);
+
+							currentRole = nextAgent.AllocatedRoles.Single(ReconfiguredTaskFragment.Precedes);
+							currentAgent = nextAgent;
+						}
+
+						ExitEdgeAgent = currentAgent;
+					}
+
+					Debug.Assert(ExitEdgeAgent != null && ExitEdgeAgent.IsAlive);
+					EdgeAgents.Add(ExitEdgeAgent);
 				}
 			}
 
 			private Role FindRoleForCapability(int capabilityIndex)
 			{
 				return Coalition.RecoveredDistribution[capabilityIndex]
-								.AllocatedRoles.Single(role => role.Task == Coalition.Task &&
-															   role.PreCondition.StateLength <= capabilityIndex &&
-															   capabilityIndex <= role.PostCondition.StateLength);
+								.AllocatedRoles
+								.Single(role => role.Task == Coalition.Task && role.IncludesCapability(capabilityIndex));
 			}
 
 			/// <summary>

@@ -152,7 +152,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		///   Thrown if processing of pre-existing merge requests or the invite lead to a coalition merge,
 		///   and the coalitions is disbanded (merged into another coalition).
 		/// </exception>
-		[NotNull, ItemNotNull, MustUseReturnValue]
+		[NotNull, ItemNotNull]
 		public async Task<CoalitionReconfigurationAgent> Invite([NotNull] BaseAgent agent)
 		{
 			if (agent == null)
