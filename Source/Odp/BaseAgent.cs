@@ -553,16 +553,14 @@ namespace SafetySharp.Odp
 			{
 				Debug.Assert(role.IsValid);
 #if DEBUG
-				// Check for duplicate conditions between roles. While not really a problem for ODP (use case: load distribution), current
+				// Check for duplicate condition states between roles. While not really a problem for ODP (use case: load distribution), current
 				// reconfiguration algorithms shouldn't produce such configurations. Hence this check to indicate potential problems.
-				// Previously only checked for conditions with the same state, instead of exactly the same. This check is currently too strict,
-				// since the coalition algorithm sometimes produces such configurations - although inefficient, they are still valid.
 
-				var index = _allocatedRoles.FindIndex(r => r.PreCondition == role.PreCondition);
+				var index = _allocatedRoles.FindIndex(r => r.PreCondition.StateMatches(role.PreCondition));
 				if (index != -1)
 					throw new Exception($"Duplicate precondition at agent {Id}: pre-existing role {_allocatedRoles[index]} and new role {role}");
 
-				index = _allocatedRoles.FindIndex(r => r.PostCondition == role.PostCondition);
+				index = _allocatedRoles.FindIndex(r => r.PostCondition.StateMatches(role.PostCondition));
 				if (index != -1)
 					throw new Exception($"Duplicate postcondition at agent {Id}: pre-existing role {_allocatedRoles[index]} and new role {role}");
 #endif
