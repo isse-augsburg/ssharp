@@ -272,6 +272,64 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return matrix;
         }
 
+        private static bool IsConnected(RobotAgent source, RobotAgent target, HashSet<RobotAgent> seenRobots)
+        {
+            if (source == target)
+                return true;
+
+            if (!seenRobots.Add(source))
+                return false;
+
+            foreach (var output in source.Outputs)
+            {
+                foreach (var output2 in output.Outputs)
+                {
+                    if (output2 == target)
+                        return true;
+
+                    if (IsConnected((RobotAgent)output2, target, seenRobots))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsReconfigurationPossible(ITask task, RobotAgent[] robotsAgents)
+        {
+            var matrix = GetConnectionMatrix(robotsAgents);
+
+            var isReconfPossible = task.RequiredCapabilities.All(capability => robotsAgents.Any(agent => agent.AvailableCapabilities.Contains(capability)));
+            if (!isReconfPossible)
+                return false;
+
+            var candidates = robotsAgents.Where(agent => agent.AvailableCapabilities.Contains(task.RequiredCapabilities.First())).ToArray();
+
+            for (var i = 0; i < task.RequiredCapabilities.Length - 1 && isReconfPossible; i++)
+            {
+                candidates = candidates.SelectMany(r => matrix[r])
+                                       .Where(r => r.AvailableCapabilities.Contains(task.RequiredCapabilities[i + 1]))
+                                       .ToArray();
+                isReconfPossible &= candidates.Length > 0;
+                Debug.WriteLine(i);
+            }
+
+            return isReconfPossible;
+        }
+
+        private static Dictionary<RobotAgent, List<RobotAgent>> GetConnectionMatrix(IEnumerable<RobotAgent> robotAgents)
+        {
+            var matrix = new Dictionary<RobotAgent, List<RobotAgent>>();
+
+            foreach (var robot in robotAgents)
+            {
+                var list = new List<RobotAgent>(robotAgents.Where(r => IsConnected(robot, r, new HashSet<RobotAgent>())));
+                matrix.Add(robot, list);
+            }
+
+            return matrix;
+        }
+
 
         public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
         {
