@@ -76,9 +76,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			console.WriteLine($"Testing with {cores} cores.");
 			var workers = new EvaluationWorker[cores];
 
+			var reportsDirectory = Path.Combine("performance-reports", TestContext.CurrentContext.Test.Name);
 			for (var i = 0; i < cores; ++i)
 			{
-				workers[i] = new EvaluationWorker(ctx);
+				workers[i] = new EvaluationWorker(ctx, reportsDirectory);
 				workers[i].Start();
 			}
 
@@ -146,11 +147,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			private const int TimeLimitMs = 300000; // TODO: adapt for different models
 
 			private readonly Context _ctx;
+			private readonly string _reportsDirectory;
 			private Thread _thread;
 
-			public EvaluationWorker(Context ctx)
+			public EvaluationWorker(Context ctx, string reportsDirectory)
 			{
 				_ctx = ctx;
+				_reportsDirectory = reportsDirectory;
 			}
 
 			public void Start()
@@ -171,7 +174,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				ProfileBasedSimulator simulator;
 				while (_ctx.GetTask(out simulator))
 				{
-					var task = Task.Run(() => simulator.Simulate(NumberOfSteps));
+					var task = Task.Run(() => WriteSimulationData(simulator.Simulate(NumberOfSteps)));
 					try
 					{
 						task.Wait(TimeLimitMs);
@@ -180,6 +183,44 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					catch
 					{
 						_ctx.Failed();
+					}
+				}
+			}
+
+			private void WriteSimulationData(ProfileBasedSimulator.SimulationReport report)
+			{
+				if (!Directory.Exists(_reportsDirectory))
+					Directory.CreateDirectory(_reportsDirectory);
+				var subdirectory = Path.Combine(_reportsDirectory, $"{report.Seed}_{report.Model}_{report.SimulationStart.Ticks}");
+				Directory.CreateDirectory(subdirectory);
+
+				// write global data
+				using (var globalWriter = new StreamWriter(Path.Combine(subdirectory, "simulation")))
+				{
+					globalWriter.WriteLine("Seed;Model;Steps;Start;End;Throughput");
+					globalWriter.WriteLine($"{report.Seed};{report.Model};{report.Steps};{report.SimulationStart.Ticks};{report.SimulationEnd.Ticks};{report.Throughput}");
+				}
+
+				// write reconf data
+				using (var reconfWriter = new StreamWriter(Path.Combine(subdirectory, "reconfigurations")))
+				{
+					reconfWriter.WriteLine("Step;Duration;End;Failed;InvolvedAgents;AffectedAgents");
+					foreach (var reconfiguration in report.Reconfigurations)
+					{
+						var involved = string.Join(" ", reconfiguration.ConfigUpdate.InvolvedAgents.Select(a => a.Id));
+						var affected = string.Join(" ", reconfiguration.ConfigUpdate.AffectedAgents.Select(a => a.Id));
+						reconfWriter.WriteLine(
+							$"{reconfiguration.Step};{reconfiguration.Duration.Ticks};{reconfiguration.End.Ticks};{reconfiguration.ConfigUpdate.Failed};{involved};{affected}");
+					}
+				}
+
+				// write agent-reconf data
+				using (var agentWriter = new StreamWriter(Path.Combine(subdirectory, "agent-reconfigurations")))
+				{
+					agentWriter.Write("Step;Agent;Duration");
+					foreach (var reconfiguration in report.AgentReconfigurations)
+					{
+						agentWriter.WriteLine($"{reconfiguration.Step};{reconfiguration.Agent};{reconfiguration.Duration.Ticks}");
 					}
 				}
 			}
