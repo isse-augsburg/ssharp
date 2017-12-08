@@ -20,57 +20,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
+namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration.PerformanceMeasurement
 {
     using System;
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading.Tasks;
 
     using Odp;
     using Odp.Reconfiguration;
     using SafetySharp.Modeling;
 
-    internal interface IPerformanceMeasurementController
-    {
-        Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>> CollectedTimeValues { get; }
-    }
-
-    public class PerformanceMeasurementController : IController, IPerformanceMeasurementController
+    public class PerformanceMeasurementController : IController
     {
         private readonly IController _actingController;
-
-        [NonDiscoverable, Hidden(HideElements = true)]
-        public Dictionary<uint, List<Tuple<TimeSpan,TimeSpan, long>>> CollectedTimeValues { get; } = new Dictionary<uint, List<Tuple<TimeSpan, TimeSpan, long>>>();
-
-        [NonDiscoverable, Hidden(HideElements = true)]
-        private readonly Dictionary<uint, Stopwatch> _stopwatchs = new Dictionary<uint, Stopwatch>();
         
         public PerformanceMeasurementController(IController actingController)
         {
             _actingController = actingController;
-            foreach (var agent in Agents)
-            {
-                CollectedTimeValues.Add(agent.Id, new List<Tuple<TimeSpan, TimeSpan, long>>());
-                _stopwatchs.Add(agent.Id, Stopwatch.StartNew());
-            }
         }
+
+		public event Action<ITask, ConfigurationUpdate, TimeSpan> MeasuredConfigurationCalculation;
 
         public async Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
         {
 	        var tuple = await AsyncPerformance.Measure(() => _actingController.CalculateConfigurationsAsync(context, task));
-			Debug.WriteLine("Reconfiguration measured");
-	        var resultingTasks = tuple.Item1;
+	        var configUpdate = tuple.Item1;
 	        var reconfTime = tuple.Item2;
 
-            foreach (var agent in resultingTasks.InvolvedAgents)
-            {
-                _stopwatchs[agent.Id].Stop();
-                CollectedTimeValues[agent.Id].Add(new Tuple<TimeSpan, TimeSpan, long>(_stopwatchs[agent.Id].Elapsed-reconfTime.Elapsed, reconfTime.Elapsed, DateTime.Now.Ticks));
-                _stopwatchs[agent.Id].Restart();
-            }
-			Debug.WriteLine("Reconfiguration measurement complete");
-            return resultingTasks;
+			MeasuredConfigurationCalculation?.Invoke(task, configUpdate, reconfTime.Elapsed);
+            return configUpdate;
         }
 
         public BaseAgent[] Agents => _actingController.Agents;
