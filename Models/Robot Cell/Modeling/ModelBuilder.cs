@@ -32,6 +32,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 	using Controllers;
 	using Controllers.Reconfiguration;
+	using Controllers.Reconfiguration.PerformanceMeasurement;
 	using Odp.Reconfiguration.CoalitionFormation;
 	using Plants;
 	using Resource = Controllers.Resource;
@@ -169,6 +170,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	    public ModelBuilder EnablePerformanceMeasurement()
 	    {
 	        _model.Controller = new PerformanceMeasurementController(_model.Controller);
+			foreach (var agent in Agents)
+				agent.ReconfigurationStrategy = new PerformanceMeasurementReconfigurationStrategy(agent.ReconfigurationStrategy);
 	        return this;
 	    }
 
