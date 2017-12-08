@@ -24,23 +24,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
 	using System.Collections;
-	using System.Collections.Generic;
 	using System.Diagnostics;
+	using System.IO;
 	using System.Linq;
-	using System.Reflection;
+	using System.Threading;
+	using System.Threading.Tasks;
 
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-
 	using Modeling;
-	using Modeling.Controllers;
-	using Modeling.Controllers.Reconfiguration;
-	using Modeling.Plants;
 
 	using NUnit.Framework;
-	using RDotNet;
 
-    public partial class SimulationTests
+	public partial class SimulationTests
 	{
 	    [Test]
 	    public void TempTestSystemGeneratorTest()
@@ -66,7 +62,130 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             profileBasedSimulator.Simulate(numberOfSteps: 1000);
         }
 
-	    private static IEnumerable PerformanceMeasurementConfigurations()
+		[Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
+		public void PerformanceEvaluation(Model model)
+		{
+			var console = Console.Out;
+			Console.SetOut(TextWriter.Null);
+			Debug.Listeners.Clear();
+
+			const int simulationsPerModel = 100;
+			var ctx = new Context(simulationsPerModel, model, console);
+
+			var cores = Environment.ProcessorCount;
+			console.WriteLine($"Testing with {cores} cores.");
+			var workers = new EvaluationWorker[cores];
+
+			for (var i = 0; i < cores; ++i)
+			{
+				workers[i] = new EvaluationWorker(ctx);
+				workers[i].Start();
+			}
+
+			for (var i = 0; i < cores; ++i)
+				workers[i].Wait();
+		}
+
+		private class Context
+		{
+			private readonly int _numRuns;
+			private readonly Model _model;
+			private readonly TextWriter _output;
+
+			public Context(int numRuns, Model model, TextWriter output)
+			{
+				_numRuns = numRuns;
+				_model = model;
+				_output = output;
+			}
+
+			private int _running = 0;
+			private int _successful = 0;
+			private int _seed = 0;
+
+			public bool GetTask(out ProfileBasedSimulator simulator)
+			{
+				lock (_model)
+				{
+					if (_running + _successful >= _numRuns)
+					{
+						simulator = null;
+						return false;
+					}
+
+					_output.WriteLine($"Starting test {_seed}");
+					_running++;
+					simulator = new ProfileBasedSimulator(_model, _seed++);
+				}
+				return true;
+			}
+
+			public void Failed()
+			{
+				lock (_model)
+				{
+					_running--;
+					_output.WriteLine("Test failed or aborted.");
+				}
+			}
+
+			public void Success()
+			{
+				lock (_model)
+				{
+					_running--;
+					_successful++;
+					_output.WriteLine("Test succeeded.");
+				}
+			}
+		}
+
+		private class EvaluationWorker
+		{
+			private const int NumberOfSteps = 1000;
+			private const int TimeLimitMs = 300000; // TODO: adapt for different models
+
+			private readonly Context _ctx;
+			private Thread _thread;
+
+			public EvaluationWorker(Context ctx)
+			{
+				_ctx = ctx;
+			}
+
+			public void Start()
+			{
+				if (_thread != null)
+					return;
+				_thread = new Thread(Evaluate);
+				_thread.Start();
+			}
+
+			public void Wait()
+			{
+				_thread?.Join();
+			}
+
+			private void Evaluate()
+			{
+				ProfileBasedSimulator simulator;
+				while (_ctx.GetTask(out simulator))
+				{
+					var task = Task.Run(() => simulator.Simulate(NumberOfSteps));
+					try
+					{
+						task.Wait(TimeLimitMs);
+						_ctx.Success();
+					}
+					catch
+					{
+						_ctx.Failed();
+					}
+				}
+			}
+		}
+
+		private static IEnumerable PerformanceMeasurementConfigurations()
 	    {
 		    return SampleModels.CreatePerformanceEvaluationConfigurationsCentralized()
 							   .Select(model => new TestCaseData(model).SetName(model.Name + " (Centralized)"))
@@ -109,7 +228,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			Debug.WriteLine(line.ToString());
 #if !DEBUG
-			Console.WriteLine(line.ToString());
+			System.Console.WriteLine(line.ToString());
 #endif
 		}
         
