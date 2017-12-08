@@ -70,158 +70,87 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Debug.Listeners.Clear();
 
 			const int simulationsPerModel = 100;
-			var ctx = new Context(simulationsPerModel, model, console);
-
-			var cores = Environment.ProcessorCount;
-			console.WriteLine($"Testing with {cores} cores.");
-			var workers = new EvaluationWorker[cores];
+			const int numberOfSteps = 100000;
+			const int timeLimitMs = 300000;
 
 			var reportsDirectory = Path.Combine("performance-reports", TestContext.CurrentContext.Test.Name);
-			for (var i = 0; i < cores; ++i)
+
+			var successful = 0;
+			for (var seed = 0; successful <= simulationsPerModel; ++seed)
 			{
-				workers[i] = new EvaluationWorker(ctx, reportsDirectory);
-				workers[i].Start();
-			}
+				console.WriteLine($"Test {seed}");
+				console.WriteLine("\tInitializing...");
+				var simulator = new ProfileBasedSimulator(model);
 
-			for (var i = 0; i < cores; ++i)
-				workers[i].Wait();
-		}
+				console.WriteLine("\tSimulating...");
 
-		private class Context
-		{
-			private readonly int _numRuns;
-			private readonly Model _model;
-			private readonly TextWriter _output;
+				Exception exception = null;
+				ProfileBasedSimulator.SimulationReport report = null;
 
-			public Context(int numRuns, Model model, TextWriter output)
-			{
-				_numRuns = numRuns;
-				_model = model;
-				_output = output;
-			}
-
-			private int _running = 0;
-			private int _successful = 0;
-			private int _seed = 0;
-
-			public bool GetTask(out ProfileBasedSimulator simulator)
-			{
-				lock (_model)
+				var thread = new Thread(() =>
 				{
-					if (_running + _successful >= _numRuns)
-					{
-						simulator = null;
-						return false;
-					}
-
-					_output.WriteLine($"Starting test {_seed}");
-					_running++;
-					simulator = new ProfileBasedSimulator(_model, _seed++);
-				}
-				return true;
-			}
-
-			public void Failed()
-			{
-				lock (_model)
-				{
-					_running--;
-					_output.WriteLine("Test failed or aborted.");
-				}
-			}
-
-			public void Success()
-			{
-				lock (_model)
-				{
-					_running--;
-					_successful++;
-					_output.WriteLine("Test succeeded.");
-				}
-			}
-		}
-
-		private class EvaluationWorker
-		{
-			private const int NumberOfSteps = 1000;
-			private const int TimeLimitMs = 300000; // TODO: adapt for different models
-
-			private readonly Context _ctx;
-			private readonly string _reportsDirectory;
-			private Thread _thread;
-
-			public EvaluationWorker(Context ctx, string reportsDirectory)
-			{
-				_ctx = ctx;
-				_reportsDirectory = reportsDirectory;
-			}
-
-			public void Start()
-			{
-				if (_thread != null)
-					return;
-				_thread = new Thread(Evaluate);
-				_thread.Start();
-			}
-
-			public void Wait()
-			{
-				_thread?.Join();
-			}
-
-			private void Evaluate()
-			{
-				ProfileBasedSimulator simulator;
-				while (_ctx.GetTask(out simulator))
-				{
-					var task = Task.Run(() => WriteSimulationData(simulator.Simulate(NumberOfSteps)));
 					try
 					{
-						task.Wait(TimeLimitMs);
-						_ctx.Success();
+						report = simulator.Simulate(numberOfSteps, seed);
 					}
-					catch
+					catch (Exception e)
 					{
-						_ctx.Failed();
+						exception = e;
 					}
+				});
+				thread.Start();
+				var completed = thread.Join(timeLimitMs);
+
+				if (!completed)
+				{
+					thread.Abort();
+					console.WriteLine("\tTest timed out.");
+				}
+				else if (exception != null)
+					console.WriteLine($"\tTest failed with exception {exception.GetType().Name}: '{exception.Message}'.");
+				else
+				{
+					successful++;
+					console.WriteLine($"\tTest succeeded after {(report.SimulationEnd-report.SimulationStart).TotalSeconds}s of simulation.");
+					WriteSimulationData(reportsDirectory, report);
+				}
+			}
+		}
+
+		private static void WriteSimulationData(string reportsDirectory, ProfileBasedSimulator.SimulationReport report)
+		{
+			if (!Directory.Exists(reportsDirectory))
+				Directory.CreateDirectory(reportsDirectory);
+			var subdirectory = Path.Combine(reportsDirectory, $"{report.Seed}_{report.Model}_{report.SimulationStart.Ticks}");
+			Directory.CreateDirectory(subdirectory);
+
+			// write global data
+			using (var globalWriter = new StreamWriter(Path.Combine(subdirectory, "simulation.csv")))
+			{
+				globalWriter.WriteLine("Seed;Model;Steps;Start;End;Throughput");
+				globalWriter.WriteLine($"{report.Seed};{report.Model};{report.Steps};{report.SimulationStart.Ticks};{report.SimulationEnd.Ticks};{report.Throughput}");
+			}
+
+			// write reconf data
+			using (var reconfWriter = new StreamWriter(Path.Combine(subdirectory, "reconfigurations.csv")))
+			{
+				reconfWriter.WriteLine("Step;Duration;End;Failed;InvolvedAgents;AffectedAgents");
+				foreach (var reconfiguration in report.Reconfigurations)
+				{
+					var involved = string.Join(" ", reconfiguration.ConfigUpdate.InvolvedAgents.Select(a => a.Id));
+					var affected = string.Join(" ", reconfiguration.ConfigUpdate.AffectedAgents.Select(a => a.Id));
+					reconfWriter.WriteLine(
+						$"{reconfiguration.Step};{reconfiguration.Duration.Ticks};{reconfiguration.End.Ticks};{reconfiguration.ConfigUpdate.Failed};{involved};{affected}");
 				}
 			}
 
-			private void WriteSimulationData(ProfileBasedSimulator.SimulationReport report)
+			// write agent-reconf data
+			using (var agentWriter = new StreamWriter(Path.Combine(subdirectory, "agent-reconfigurations.csv")))
 			{
-				if (!Directory.Exists(_reportsDirectory))
-					Directory.CreateDirectory(_reportsDirectory);
-				var subdirectory = Path.Combine(_reportsDirectory, $"{report.Seed}_{report.Model}_{report.SimulationStart.Ticks}");
-				Directory.CreateDirectory(subdirectory);
-
-				// write global data
-				using (var globalWriter = new StreamWriter(Path.Combine(subdirectory, "simulation")))
+				agentWriter.WriteLine("Step;Agent;Duration");
+				foreach (var reconfiguration in report.AgentReconfigurations)
 				{
-					globalWriter.WriteLine("Seed;Model;Steps;Start;End;Throughput");
-					globalWriter.WriteLine($"{report.Seed};{report.Model};{report.Steps};{report.SimulationStart.Ticks};{report.SimulationEnd.Ticks};{report.Throughput}");
-				}
-
-				// write reconf data
-				using (var reconfWriter = new StreamWriter(Path.Combine(subdirectory, "reconfigurations")))
-				{
-					reconfWriter.WriteLine("Step;Duration;End;Failed;InvolvedAgents;AffectedAgents");
-					foreach (var reconfiguration in report.Reconfigurations)
-					{
-						var involved = string.Join(" ", reconfiguration.ConfigUpdate.InvolvedAgents.Select(a => a.Id));
-						var affected = string.Join(" ", reconfiguration.ConfigUpdate.AffectedAgents.Select(a => a.Id));
-						reconfWriter.WriteLine(
-							$"{reconfiguration.Step};{reconfiguration.Duration.Ticks};{reconfiguration.End.Ticks};{reconfiguration.ConfigUpdate.Failed};{involved};{affected}");
-					}
-				}
-
-				// write agent-reconf data
-				using (var agentWriter = new StreamWriter(Path.Combine(subdirectory, "agent-reconfigurations")))
-				{
-					agentWriter.Write("Step;Agent;Duration");
-					foreach (var reconfiguration in report.AgentReconfigurations)
-					{
-						agentWriter.WriteLine($"{reconfiguration.Step};{reconfiguration.Agent};{reconfiguration.Duration.Ticks}");
-					}
+					agentWriter.WriteLine($"{reconfiguration.Step};{reconfiguration.Agent};{reconfiguration.Duration.Ticks}");
 				}
 			}
 		}
