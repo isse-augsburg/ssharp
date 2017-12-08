@@ -18,7 +18,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
         public AgentCapabilityGenerator(int capsPerAgent, HashSet<DummyAgent> agents, List<DummyCapability> task)
         {
-            Debug.Assert(agents.Count() == (task.Count()));
+            //Debug.Assert(agents.Count() == (task.Count()));
 
             _capsPerAgent = capsPerAgent;
             _task = task;
@@ -35,14 +35,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             foreach (var anAgent in _agents)
             {
                 anAgent.GetCapabilities().Clear();
-                var cap = _task[anAgent.GetId()];
+                var cap = _task[anAgent.GetId() % _task.Count];
                 anAgent.AddCapability(cap);
                 capsToUsage[cap] = capsToUsage[cap] + 1;
 //                capsToUsage.Add(cap, capsToUsage[cap] + 1);
                 if (capsToUsage[cap] >= _capsPerAgent)
                     capsToUsage.Remove(cap);
 
-                capToAgent.Add(cap, anAgent);
+                capToAgent[cap] = anAgent;
                 anAgent.SetAgentTypeId(anAgent.GetId());
             }
 
@@ -56,7 +56,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                         ? 1
                         : 0);
 
-                while (true)
+				var rnd = new Random();
+				while (true)
                 {
                     var agentsToRemove = new HashSet<DummyAgent>();
 
@@ -66,12 +67,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     {
                         var remainingCapsLocal = new List<DummyCapability>(remainingCaps);
                         remainingCapsLocal.RemoveAll(capability => anAgent.GetCapabilities().Contains(capability));
+						var remainingTaskCaps = _task.Except(anAgent.GetCapabilities()).ToList();
 
-                        var rnd = new Random();
-                        var rdm = rnd.Next(0, remainingCapsLocal.Count() - 1);
-                        var cap = remainingCapsLocal[rdm];
+						DummyCapability cap;
+						if (remainingCapsLocal.Count == 0)
+						{
+							var index = rnd.Next(0, remainingTaskCaps.Count - 1);
+							cap = remainingTaskCaps[index];
+						}
+						else
+						{
+							var rdm = rnd.Next(0, remainingCapsLocal.Count - 1);
+							cap = remainingCapsLocal[rdm];
+						}
 
-                        anAgent.AddCapability(cap);
+						anAgent.AddCapability(cap);
                     }
 
                     foreach (var cap in anAgent.GetCapabilities())

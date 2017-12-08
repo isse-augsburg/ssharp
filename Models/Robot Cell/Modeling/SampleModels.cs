@@ -172,13 +172,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int ioCount = 15;
             const int numberOfCarts = 5;
             const int numWorkpieces = 5;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
+			const int taskLength = 15;
+            return GenerateSystem(builder, capCount, sysSize, taskLength, ioCount, numberOfCarts, numWorkpieces);
         }
 
-        private static ModelBuilder GenerateSystem(this ModelBuilder builder, int capCount, int sysSize, int ioCount, int numberOfCarts, int numWorkpieces)
+        private static ModelBuilder GenerateSystem(this ModelBuilder builder, int capCount, int sysSize, int taskLength, int ioCount, int numberOfCarts, int numWorkpieces)
         {
             var tsg = new TestSystemGenerator();
-            var generatedSystem = tsg.Generate(sysSize, capCount, ioCount);
+            var generatedSystem = tsg.Generate(sysSize, capCount, taskLength, ioCount);
             Debug.Assert(capCount <= Enum.GetNames(typeof(ProductionAction)).Length && Enum.GetNames(typeof(ProductionAction)).Length >= sysSize);
 
             var currentCapa = generatedSystem.Item2;
@@ -294,17 +295,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
             return false;
         }
-        
 
-        public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
+		public static ModelBuilder VeryManyAgentsHighRedundancy(this ModelBuilder builder)
+		{
+			const int capCount = 10;
+			const int sysSize = 200;
+			const int ioCount = 150;
+			const int numberOfCarts = 150;
+			const int numWorkpieces = 50;
+			const int taskLength = 20;
+			return GenerateSystem(builder, capCount, sysSize, taskLength, ioCount, numberOfCarts, numWorkpieces);
+		}
+
+		public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
         {
             const int capCount = 20;
             const int sysSize = 20;
             const int ioCount = 15;
             const int numberOfCarts = 15;
             const int numWorkpieces = 5;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
-        }
+			const int taskLength = 15;
+			return GenerateSystem(builder, capCount, sysSize, taskLength, ioCount, numberOfCarts, numWorkpieces);
+		}
 
         public static ModelBuilder MediumSizePerformanceMeasurementModel(this ModelBuilder builder)
         {
@@ -313,8 +325,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int ioCount = 10;
             const int numberOfCarts = 3;
             const int numWorkpieces = 5;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
-        }
+			const int taskLength = 10;
+			return GenerateSystem(builder, capCount, sysSize, taskLength, ioCount, numberOfCarts, numWorkpieces);
+		}
 
         public static ModelBuilder Ictss1(this ModelBuilder builder)
         {

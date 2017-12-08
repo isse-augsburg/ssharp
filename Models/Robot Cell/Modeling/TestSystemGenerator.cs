@@ -6,11 +6,15 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
-    public class TestSystemGenerator
+	using System.Diagnostics;
+
+	public class TestSystemGenerator
     {
 
-        public Tuple<HashSet<DummyAgent>, List<DummyCapability>> Generate(int sysSize, int capCount, int ioCount)
+        public Tuple<HashSet<DummyAgent>, List<DummyCapability>> Generate(int sysSize, int capCount, int taskLength, int ioCount)
         {
+			Debug.Assert(taskLength <= sysSize * capCount);
+
             // generate agents
             var agentSet = new HashSet<DummyAgent>();
             for (var i = 0; i < sysSize; i++)
@@ -18,7 +22,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
             // generate task
             var task = new List<DummyCapability>();
-            for (var i = 0; i < sysSize; i++)
+            for (var i = 0; i < taskLength; i++)
             {
                 var p1 = "";
                 var p0 = ((char)('A' + (i % 26))).ToString();
