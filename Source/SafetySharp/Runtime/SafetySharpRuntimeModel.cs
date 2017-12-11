@@ -173,8 +173,12 @@ namespace SafetySharp.Runtime
 
 			_restrictRanges();
 		}
-		
-		
+
+		public override void WriteOptimizedStateVectorLayout(TextWriter textWriter)
+		{
+			textWriter.WriteLine(StateVectorLayout);
+		}
+
 		/// <summary>
 		///   Disposes the object, releasing all managed and unmanaged resources.
 		/// </summary>
@@ -215,6 +219,7 @@ namespace SafetySharp.Runtime
 			Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
 
 			Func<int,SafetySharpRuntimeModel> creatorFunc;
+			Action<TextWriter> writeFullStateVectorLayout;
 
 			// serializer.Serialize has potentially a side effect: Model binding. The model gets bound when it isn't
 			// bound already. The lock ensures that this binding is only made by one thread because model.EnsureIsBound 
@@ -226,9 +231,10 @@ namespace SafetySharp.Runtime
 				serializer.Serialize(model, formulasToCheckInBaseModel);
 
 				creatorFunc = serializer.Load;
+				writeFullStateVectorLayout = textWriter => textWriter.WriteLine(serializer.StateVector);
 			}
 			var faults = model.Faults;
-			return new CoupledExecutableModelCreator<SafetySharpRuntimeModel>(creatorFunc, model, formulasToCheckInBaseModel, faults);
+			return new CoupledExecutableModelCreator<SafetySharpRuntimeModel>(creatorFunc, writeFullStateVectorLayout, model, formulasToCheckInBaseModel, faults);
 		}
 
 		public static ExecutableModelCreator<SafetySharpRuntimeModel> CreateExecutedModelFromFormulasCreator(ModelBase model)

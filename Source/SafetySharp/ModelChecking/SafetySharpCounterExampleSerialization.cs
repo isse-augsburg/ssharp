@@ -66,7 +66,7 @@ namespace SafetySharp.Analysis
 
 				var endsWithException = reader.ReadBoolean();
 				var serializedRuntimeModel = reader.ReadBytes(reader.ReadInt32());
-				var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel);
+				var modelData = RuntimeModelSerializer.LoadSerializedData(serializedRuntimeModel).Load();
 
 				foreach (var fault in modelData.ObjectTable.OfType<Fault>().Where(fault => fault.IsUsed))
 					fault.Activation = (Activation)reader.ReadInt32();

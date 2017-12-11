@@ -116,6 +116,11 @@ namespace ISSE.SafetyChecking
 		public bool WriteGraphvizModels { get; set; }
 
 		/// <summary>
+		///   Write the layout of the state vector.
+		/// </summary>
+		public bool WriteStateVectorLayout { get; set; }
+
+		/// <summary>
 		///   The default configuration.
 		/// </summary>
 		public static readonly AnalysisConfiguration Default = new AnalysisConfiguration
@@ -127,6 +132,7 @@ namespace ISSE.SafetyChecking
 			ProgressReportsOnly = false,
 			DefaultTraceOutput = Console.Out,
 			WriteGraphvizModels = false,
+			WriteStateVectorLayout = false,
 			ModelCapacity = _defaultModelCapacity,
 			StackCapacity = DefaultStackCapacity,
 			SuccessorCapacity = DefaultSuccessorStateCapacity,

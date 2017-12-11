@@ -34,6 +34,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		{
 			var model = new Model();
 
+			SafetySharpModelChecker.TraversalConfiguration.WriteStateVectorLayout = true;
 			var result = SafetySharpModelChecker.CheckInvariant(model, true);
 			result.FormulaHolds.Should().BeTrue();
 		}

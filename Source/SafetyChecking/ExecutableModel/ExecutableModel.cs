@@ -336,6 +336,8 @@ namespace ISSE.SafetyChecking.ExecutableModel
 			return notificationsSent;
 		}
 
+		public abstract void WriteOptimizedStateVectorLayout(System.IO.TextWriter textWriter);
+
 		public abstract CounterExampleSerialization<TExecutableModel> CounterExampleSerialization { get; }
 		
 

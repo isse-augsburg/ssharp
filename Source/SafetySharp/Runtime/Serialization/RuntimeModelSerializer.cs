@@ -39,7 +39,7 @@ namespace SafetySharp.Runtime.Serialization
 		private readonly object _syncObject = new object();
 		private OpenSerializationDelegate _deserializer;
 		private byte[] _serializedModel;
-		private StateVectorLayout _stateVector;
+		internal StateVectorLayout StateVector { get; private set; }
 
 		#region Serialization
 
@@ -88,12 +88,12 @@ namespace SafetySharp.Runtime.Serialization
 			// Prepare the serialization of the model's initial state
 			lock (_syncObject)
 			{
-				_stateVector = SerializationRegistry.Default.GetStateVectorLayout(model, objectTable, SerializationMode.Full);
+				StateVector = SerializationRegistry.Default.GetStateVectorLayout(model, objectTable, SerializationMode.Full);
 				_deserializer = null;
 			}
 
-			var stateVectorSize = _stateVector.SizeInBytes;
-			var serializer = _stateVector.CreateSerializer(objectTable);
+			var stateVectorSize = StateVector.SizeInBytes;
+			var serializer = StateVector.CreateSerializer(objectTable);
 
 			// Serialize the object table
 			SerializeObjectTable(objectTable, writer);
@@ -151,18 +151,17 @@ namespace SafetySharp.Runtime.Serialization
 		///   Loads a <see cref="SerializedRuntimeModel" /> from the <paramref name="serializedModel" />.
 		/// </summary>
 		/// <param name="serializedModel">The serialized model that should be loaded.</param>
-		public static SerializedRuntimeModel LoadSerializedData(byte[] serializedModel)
+		public static RuntimeModelSerializer LoadSerializedData(byte[] serializedModel)
 		{
 			Requires.NotNull(serializedModel, nameof(serializedModel));
 
-			var serializer = new RuntimeModelSerializer { _serializedModel = serializedModel };
-			return serializer.LoadSerializedData();
+			return new RuntimeModelSerializer { _serializedModel = serializedModel };
 		}
 
 		/// <summary>
 		///   Loads a <see cref="SerializedRuntimeModel" /> instance.
 		/// </summary>
-		public SerializedRuntimeModel LoadSerializedData()
+		public SerializedRuntimeModel Load()
 		{
 			Requires.That(_serializedModel != null, "No model is loaded that could be serialized.");
 
@@ -175,7 +174,7 @@ namespace SafetySharp.Runtime.Serialization
 		/// </summary>
 		public SafetySharpRuntimeModel Load(int stateHeaderBytes)
 		{
-			return new SafetySharpRuntimeModel(LoadSerializedData(), stateHeaderBytes);
+			return new SafetySharpRuntimeModel(Load(), stateHeaderBytes);
 		}
 
 		/// <summary>
@@ -203,11 +202,11 @@ namespace SafetySharp.Runtime.Serialization
 			OpenSerializationDelegate deserializer;
 			lock (_syncObject)
 			{
-				if (_stateVector == null)
-					_stateVector = SerializationRegistry.Default.GetStateVectorLayout(model, objectTable, SerializationMode.Full);
+				if (StateVector == null)
+					StateVector = SerializationRegistry.Default.GetStateVectorLayout(model, objectTable, SerializationMode.Full);
 
 				if (_deserializer == null)
-					_deserializer = _stateVector.CreateDeserializer();
+					_deserializer = StateVector.CreateDeserializer();
 
 				deserializer = _deserializer;
 			}

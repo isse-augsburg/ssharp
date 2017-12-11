@@ -38,6 +38,8 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		// The parameter of Create are the stateHeaderBytes (the number of reserved bytes at the beginning of each state vector)
 		public Func<int,TExecutableModel> Create { get; }
 
+		public Action<System.IO.TextWriter> WriteFullStateVectorLayout { get; }
+
 		// Contains the source model. Depending on TExecutableModel, it might be a class instance or a string to a file name, or whatever.
 		// Code in ISSE.SafetyChecking does not depend on it.
 		public object SourceModel{ get; }
@@ -51,9 +53,10 @@ namespace ISSE.SafetyChecking.ExecutableModel
 		// A transfer with TransferFormulaToNewExecutedModelInstanceVisitor might be necessary!
 		public Formula[] StateFormulasToCheckInBaseModel;
 
-		public CoupledExecutableModelCreator(Func<int, TExecutableModel> creator, object sourceModel, Formula[] stateFormulasToCheckInBaseModel, Fault[] faultsInBaseModel)
+		public CoupledExecutableModelCreator(Func<int, TExecutableModel> creator, Action<System.IO.TextWriter> writeFullStateVectorLayout, object sourceModel, Formula[] stateFormulasToCheckInBaseModel, Fault[] faultsInBaseModel)
 		{
 			Create = creator;
+			WriteFullStateVectorLayout = writeFullStateVectorLayout;
 			SourceModel = sourceModel;
 			StateFormulasToCheckInBaseModel = stateFormulasToCheckInBaseModel;
 			FaultsInBaseModel = faultsInBaseModel;

@@ -102,6 +102,7 @@ matrix_t StateLabelMatrix;
 ref struct Globals
 {
 	static ActivationMinimalExecutedModel<SafetySharpRuntimeModel^>^ ExecutedModel;
+	static StateVectorLayout^ StateVectorLayout;
 	static SafetySharpRuntimeModel^ RuntimeModel;
 	static LtsMin^ LtsMin;
 	static const char* ModelFile;
@@ -129,13 +130,19 @@ SafetySharpRuntimeModel^ CreateModel(int dummyStateHeaderBytes)
 	return Globals::RuntimeModel;
 }
 
+void WriteFullStateVectorLayout(TextWriter^ textWriter)
+{
+	textWriter->WriteLine(Globals::StateVectorLayout);
+}
+
 CoupledExecutableModelCreator<SafetySharpRuntimeModel^>^ CreateModelCreator()
 {
 	auto createModelFunc = gcnew Func<int,SafetySharpRuntimeModel^>(&CreateModel);
+	auto writeFullStateVectorLayout = gcnew Action<TextWriter^>(&WriteFullStateVectorLayout);
 	auto model = Globals::RuntimeModel->Model;
 	auto formulas = Globals::RuntimeModel->Formulas;
 	auto faults = Globals::RuntimeModel->Faults;
-	auto creator = gcnew CoupledExecutableModelCreator<SafetySharpRuntimeModel^>(createModelFunc,model,formulas, faults);
+	auto creator = gcnew CoupledExecutableModelCreator<SafetySharpRuntimeModel^>(createModelFunc, writeFullStateVectorLayout, model, formulas, faults);
 	return creator;
 }
 
@@ -145,8 +152,11 @@ void LoadModel(model_t model, const char* modelFile)
 	try
 	{
 		int stateHeaderBytes = sizeof(int32_t);
-		auto modelData = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
+
+		auto serializer = RuntimeModelSerializer::LoadSerializedData(File::ReadAllBytes(gcnew String(modelFile)));
+		auto modelData = serializer->Load();
 		Globals::RuntimeModel = gcnew SafetySharpRuntimeModel(modelData, stateHeaderBytes);
+		Globals::StateVectorLayout = serializer->StateVector;
 
 		auto configuration = AnalysisConfiguration::Default;
 		configuration.SuccessorCapacity = 1 << 16;

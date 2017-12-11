@@ -28,6 +28,7 @@ using ISSE.SafetyChecking.Utilities;
 
 namespace Tests.SimpleExecutableModel
 {
+	using System.IO;
 	using System.Linq;
 	using Formula = ISSE.SafetyChecking.Formula.Formula;
 
@@ -110,9 +111,14 @@ namespace Tests.SimpleExecutableModel
 				var simpleExecutableModel=new SimpleExecutableModel(serializedModelWithFormulas);
 				return simpleExecutableModel;
 			};
+			Action<TextWriter> writeOptimizedStateVectorLayout = (textWriter) =>
+			{
+				textWriter.WriteLine("bytes[0-4] state: int");
+				textWriter.WriteLine("bytes[5-12] permanent faults: long");
+			};
 			
 			var faults = inputModel.Faults;
-			return new CoupledExecutableModelCreator<SimpleExecutableModel>(creatorFunc, inputModel, formulasToCheckInBaseModel, faults);
+			return new CoupledExecutableModelCreator<SimpleExecutableModel>(creatorFunc, writeOptimizedStateVectorLayout, inputModel, formulasToCheckInBaseModel, faults);
 		}
 
 		public static ExecutableModelCreator<SimpleExecutableModel> CreateExecutedModelFromFormulasCreator(SimpleModelBase model)
@@ -137,6 +143,13 @@ namespace Tests.SimpleExecutableModel
 			}
 
 			throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use SimpleAtomarProposition instead.");
+		}
+
+		public override void WriteOptimizedStateVectorLayout(TextWriter textWriter)
+		{
+			textWriter.WriteLine("bytes[0-4] state: int");
+			textWriter.WriteLine("bytes[5-12] permanent faults: long");
+
 		}
 	}
 }

@@ -28,31 +28,15 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	using AnalysisModelTraverser;
 	using Modeling;
 	using Utilities;
+	using System.IO;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="Runtime.RuntimeModel" />.
 	/// </summary>
 	internal abstract unsafe class ExecutedModel<TExecutableModel> : AnalysisModel where TExecutableModel : ExecutableModel<TExecutableModel>
 	{
-		/// <summary>
-		///   Initializes a new instance.
-		/// </summary>
-		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
-		/// <param name="configuration">The analysis configuration that should be used.</param>
-		/// <param name="stateHeaderBytes">
-		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
-		/// </param>
-		internal ExecutedModel(CoupledExecutableModelCreator<TExecutableModel> createModel, int stateHeaderBytes, AnalysisConfiguration configuration)
-		{
-			Requires.NotNull(createModel, nameof(createModel));
-
-			RuntimeModelCreator = createModel;
-			RuntimeModel = createModel.Create(stateHeaderBytes);
-			TemporaryStateStorage = new TemporaryStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
-		}
-
 		protected readonly TemporaryStateStorage TemporaryStateStorage;
-
+		
 		/// <summary>
 		///   Gets the runtime model that is directly or indirectly analyzed by this <see cref="AnalysisModel" />.
 		/// </summary>
@@ -74,6 +58,35 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		/// </summary>
 		public sealed override int ModelStateVectorSize => RuntimeModel.StateVectorSize;
 		
+		/// <summary>
+		///   Initializes a new instance.
+		/// </summary>
+		/// <param name="createModel">A factory function that creates the model instance that should be executed.</param>
+		/// <param name="configuration">The analysis configuration that should be used.</param>
+		/// <param name="stateHeaderBytes">
+		///   The number of bytes that should be reserved at the beginning of each state vector for the model checker tool.
+		/// </param>
+		internal ExecutedModel(CoupledExecutableModelCreator<TExecutableModel> createModel, int stateHeaderBytes, AnalysisConfiguration configuration)
+		{
+			Requires.NotNull(createModel, nameof(createModel));
+
+			RuntimeModelCreator = createModel;
+			RuntimeModel = createModel.Create(stateHeaderBytes);
+			TemporaryStateStorage = new TemporaryStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
+
+			if (configuration.WriteStateVectorLayout)
+				WriteStateVectorLayout(configuration.DefaultTraceOutput);
+		}
+
+		private void WriteStateVectorLayout(TextWriter defaultTraceOutput)
+		{
+			defaultTraceOutput.WriteLine("Full StateVectorLayout");
+			RuntimeModelCreator.WriteFullStateVectorLayout(defaultTraceOutput);
+			defaultTraceOutput.WriteLine();
+			defaultTraceOutput.WriteLine("Optimized StateVectorLayout");
+			RuntimeModel.WriteOptimizedStateVectorLayout(defaultTraceOutput);
+		}
+
 		/// <summary>
 		///   Updates the activation states of the worker's faults.
 		/// </summary>
