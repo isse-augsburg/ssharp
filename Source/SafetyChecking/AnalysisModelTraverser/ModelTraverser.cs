@@ -85,6 +85,9 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 				transitionSize = firstModel.TransitionSize;
 			}
 
+			if (configuration.WriteStateVectorLayout)
+				firstModel.WriteStateVectorLayout(configuration.DefaultTraceOutput);
+
 			var modelCapacity = configuration.ModelCapacity.DeriveModelByteSize(firstModel.ModelStateVectorSize, transitionSize);
 			Context.ModelCapacity = modelCapacity;
 			if (configuration.UseCompactStateStorage)

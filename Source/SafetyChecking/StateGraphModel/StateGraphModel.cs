@@ -145,5 +145,11 @@ namespace ISSE.SafetyChecking.StateGraphModel
 
 			return _stateGraph.RuntimeModel.CreateCounterExample(_stateGraph.RuntimeModelCreator, modelPath, endsWithException);
 		}
+
+		internal override void WriteStateVectorLayout(System.IO.TextWriter defaultTraceOutput)
+		{
+			defaultTraceOutput.WriteLine("StateVectorLayout");
+			defaultTraceOutput.WriteLine("State Vector consists of an integer representing the entry in StateGraphs stateMap");
+		}
 	}
 }

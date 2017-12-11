@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 {
+	using System.IO;
 	using System.Linq.Expressions;
 	using System.Runtime.CompilerServices;
 	using AnalysisModel;
@@ -226,6 +227,12 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public override CounterExample CreateCounterExample(byte[][] path, bool endsWithException)
 		{
 			throw new NotImplementedException();
+		}
+
+		internal override void WriteStateVectorLayout(TextWriter defaultTraceOutput)
+		{
+			defaultTraceOutput.WriteLine("StateVectorLayout");
+			defaultTraceOutput.WriteLine("State Vector consists of an integer representing the state number of the LTMC");
 		}
 	}
 }

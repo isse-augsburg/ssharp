@@ -73,12 +73,9 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			RuntimeModelCreator = createModel;
 			RuntimeModel = createModel.Create(stateHeaderBytes);
 			TemporaryStateStorage = new TemporaryStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
-
-			if (configuration.WriteStateVectorLayout)
-				WriteStateVectorLayout(configuration.DefaultTraceOutput);
 		}
 
-		private void WriteStateVectorLayout(TextWriter defaultTraceOutput)
+		internal override void WriteStateVectorLayout(TextWriter defaultTraceOutput)
 		{
 			defaultTraceOutput.WriteLine("Full StateVectorLayout");
 			RuntimeModelCreator.WriteFullStateVectorLayout(defaultTraceOutput);

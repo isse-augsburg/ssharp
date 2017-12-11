@@ -71,5 +71,10 @@ namespace ISSE.SafetyChecking.AnalysisModel
 		/// </param>
 		/// <param name="endsWithException">Indicates whether the counter example ends with an exception.</param>
 		public abstract CounterExample CreateCounterExample(byte[][] path, bool endsWithException);
+		
+		/// <summary>
+		///   Writes internal details about the state vector (the state vector layout) />.
+		/// </summary>
+		internal abstract void WriteStateVectorLayout(System.IO.TextWriter defaultTraceOutput);
 	}
 }
