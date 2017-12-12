@@ -158,6 +158,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			var config = new ConfigurationUpdate();
 			config.Fail();
+			config.RecordInvolvement(coalition.BaseAgents);
 			config.RemoveAllRoles(coalition.Task, coalition.BaseAgents.ToArray());
 			return config;
 		}
