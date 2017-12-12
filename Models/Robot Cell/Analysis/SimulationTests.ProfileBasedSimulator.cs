@@ -39,29 +39,32 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	public partial class SimulationTests
 	{
-		internal class ProfileBasedSimulator
+		internal class ProfileBasedSimulator : IDisposable
 		{
 			private readonly Simulator _simulator;
 			private readonly Model _model;
-			private readonly int _seed;
 			private readonly Tuple<Fault, ReliabilityAttribute, IComponent>[] _faults;
 
 			private int _step;
 			private int _throughput;
 			private SimulationReport _report;
 
-			public ProfileBasedSimulator(Model model) : this(model, Environment.TickCount) { }
-
-			public ProfileBasedSimulator(Model model, int seed)
+			public ProfileBasedSimulator(Model model)
 			{
-				_seed = seed;
-
 				RegisterListeners(model);
 				model.Rebind();
 
 				_simulator = new Simulator(model);
 				_model = (Model)_simulator.Model;
 				_faults = CollectFaults();
+			}
+
+			public void Reset()
+			{
+				_simulator.Reset();
+				_step = 0;
+				_throughput = 0;
+				_report = null;
 			}
 
 			private Tuple<Fault, ReliabilityAttribute, IComponent>[] CollectFaults()
@@ -111,10 +114,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 			public SimulationReport Simulate(int numberOfSteps)
 			{
-				_report = new SimulationReport(_model.Name, _seed, DateTime.Now, numberOfSteps);
+				return Simulate(numberOfSteps, Environment.TickCount);
+			}
 
-				Console.WriteLine("SEED: " + _seed);
-				var rd = new Random(_seed);
+			public SimulationReport Simulate(int numberOfSteps, int seed)
+			{
+				_report = new SimulationReport(_model.Name, seed, DateTime.Now, numberOfSteps);
+
+				Console.WriteLine("SEED: " + seed);
+				var rd = new Random(seed);
 
 				for (_step = 0; _step < numberOfSteps; _step++)
 				{
@@ -140,7 +148,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 				_report.Throughput = _throughput;
 				_report.SimulationEnd = DateTime.Now;
-				return _report;
+
+				var report = _report;
+				_report = null;
+
+				return report;
+			}
+
+			public void Dispose()
+			{
+				((IDisposable)_simulator).Dispose();
 			}
 
 			public class SimulationReport
