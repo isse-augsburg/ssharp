@@ -157,6 +157,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 			public void Dispose()
 			{
+				StaticListener.Clear();
 				((IDisposable)_simulator).Dispose();
 			}
 
@@ -234,6 +235,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			private static class StaticListener
 			{
 				private static readonly List<Delegate> _listeners = new List<Delegate>();
+
+				public static void Clear()
+				{
+					lock (_listeners)
+						_listeners.Clear();
+				}
 
 				public static Action Create(Action listener)
 				{

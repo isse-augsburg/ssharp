@@ -71,7 +71,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 			const int simulationsPerModel = 100;
 			const int numberOfSteps = 10000;
-			const int timeLimitMs = 300000;
+			const int timeLimitMs = 600000;
 
 			var reportsDirectory = Path.Combine("performance-reports", TestContext.CurrentContext.Test.Name);
 
