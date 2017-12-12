@@ -21,13 +21,16 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         private readonly Dictionary<uint, RobotControl> _robots = new Dictionary<uint, RobotControl>();
         private readonly Dictionary<uint, CartControl> _carts = new Dictionary<uint, CartControl>();
+        private readonly Dictionary<uint, WorkpieceControl> _workpieces = new Dictionary<uint, WorkpieceControl>();
+        private List<string> _task;
+
         public RobotCell()
         {
             /// <summary>
             /// Ictss6 manually, because of problems with the SampleModels-file
             /// </summary>
             _builder = new ModelBuilder("model builder");
-            _builder.DefineTask(5, ModelBuilderHelper.Produce, ModelBuilderHelper.Drill, ModelBuilderHelper.Produce, ModelBuilderHelper.Tighten, ModelBuilderHelper.Consume);
+            _builder.DefineTask(5, ModelBuilderHelper.Produce, ModelBuilderHelper.Drill, ModelBuilderHelper.Insert, ModelBuilderHelper.Tighten, ModelBuilderHelper.Consume);
 
             InitializeComponent();
             
@@ -47,8 +50,10 @@ namespace SafetySharp.CaseStudies.Visualizations
             _builder.CentralReconfiguration();
 
             Model = _builder.Build();
-            
-            //UpdateModelState();
+
+            //Initialize/Update task
+            _task = UpdateTask();
+            PrintTask();
 
             SimulationControls.MaxSpeed = 64;
             SimulationControls.ChangeSpeed(1);
@@ -124,6 +129,10 @@ namespace SafetySharp.CaseStudies.Visualizations
                 Grid.SetColumn(cart, column);
             }
 
+            //Display tasks 
+            _task = UpdateTask();
+            DisplayTask();
+
             //to-do: display tasks
         }
 
@@ -161,6 +170,9 @@ namespace SafetySharp.CaseStudies.Visualizations
                 _carts[cart.Id].Update(cart);
             }
 
+            _task = UpdateTask();
+            PrintTask();
+
             InvalidateArrange();
             InvalidateVisual();
             UpdateLayout();
@@ -190,12 +202,61 @@ namespace SafetySharp.CaseStudies.Visualizations
             return stateField.GetValue(machine).ToString();
         }
 
-        private string GetTask() {
-            //var agentType = typeof(BaseAgent);
-            //var machineField = agentType.GetField("");
+        private List<string> UpdateTask()
+        {
+            Task task = _model.Tasks.First();
+            ICapability[] capabilities = task.RequiredCapabilities;
+            List<string> stringCapabilities = new List<string>();
 
+            foreach (var cap in capabilities)
+            {
+                if (cap.GetType() == typeof(ProduceCapability) || cap.GetType() == typeof(ConsumeCapability))
+                {
+                    stringCapabilities.Add(cap.CapabilityType.ToString());
+                }
 
-            throw new NotImplementedException();
+                if (cap.GetType() == typeof(ProcessCapability))
+                {
+                    var proc = (ProcessCapability)cap;
+                    stringCapabilities.Add(proc.ProductionAction.ToString());
+                }
+            }
+
+            return stringCapabilities;
+        }
+
+        private void PrintTask()
+        {
+            string str = "Task: ";
+            for (int i = 0; i < _task.Count; i++)
+            {
+                if (i < _task.Count - 1)
+                    str += _task.ElementAt(i).ToString() + ", ";
+                else
+                    str += _task.ElementAt(i).ToString();
+            }
+            Console.WriteLine(str);
+        }
+
+        private void DisplayTask() {
+            ListBox lbox = new ListBox();
+            lbox.Visibility = Visibility.Visible;
+            lbox.Items.Add("Aktueller Task:");  //Maybe: Drawing the item myself and changing the background color
+
+            //if (_task != null)
+            foreach (var cap in _task)
+            {
+                lbox.Items.Add(cap);
+            }
+
+            var row = visualizationArea.RowDefinitions.Count - 2;
+            var col = visualizationArea.ColumnDefinitions.Count - 2;
+
+            if (IsFreePosition(row, col)) {
+                visualizationArea.Children.Add(lbox);
+                Grid.SetColumn(lbox, col);
+                Grid.SetRow(lbox, row);
+            }
         }
     }
 }

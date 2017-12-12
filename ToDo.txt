@@ -1,5 +1,5 @@
 ﻿- Task anzeigen (Über das Workpiece gehen)
-- Rollen der Objekte anzeigen
+- Rollen der Roboter anzeigen
 - Anzeigen welcher RoboterAgent gerade an der Reihe ist ( Wer ist in ExecuteRole?)
 - Anzeigen wo das Workpiece ist
 - Routen der Carts anzeigen: Wo kann ein Cart hinfahren?

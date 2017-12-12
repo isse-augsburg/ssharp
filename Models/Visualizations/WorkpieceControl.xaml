@@ -1,0 +1,19 @@
+﻿<UserControl x:Name="Workpiece_Control" x:Class="SafetySharp.CaseStudies.Visualizations.WorkpieceControl"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:SafetySharp.CaseStudies.Visualizations"
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300">
+
+    <Viewbox StretchDirection="Both" Stretch="Uniform">
+        <Grid>
+            <Rectangle Fill="Red">
+                <Rectangle.OpacityMask>
+                    <VisualBrush Visual="{DynamicResource appbar_box}"/>
+                </Rectangle.OpacityMask>
+            </Rectangle>
+        </Grid>
+    </Viewbox>
+</UserControl>
