@@ -80,39 +80,40 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			{
 				console.WriteLine($"Test {seed}");
 				console.WriteLine("\tInitializing...");
-				var simulator = new ProfileBasedSimulator(model);
-
-				console.WriteLine("\tSimulating...");
-
-				Exception exception = null;
-				ProfileBasedSimulator.SimulationReport report = null;
-
-				var thread = new Thread(() =>
+				using (var simulator = new ProfileBasedSimulator(model))
 				{
-					try
+					Exception exception = null;
+					ProfileBasedSimulator.SimulationReport report = null;
+
+					var thread = new Thread(() =>
 					{
-						report = simulator.Simulate(numberOfSteps, seed);
-					}
-					catch (Exception e)
-					{
-						exception = e;
-					}
-				});
-				thread.Start();
-				var completed = thread.Join(timeLimitMs);
+						try
+						{
+							report = simulator.Simulate(numberOfSteps, seed);
+						}
+						catch (Exception e)
+						{
+							exception = e;
+						}
+					});
 
-				if (!completed)
-				{
-					thread.Abort();
-					console.WriteLine("\tTest timed out.");
-				}
-				else if (exception != null)
-					console.WriteLine($"\tTest failed with exception {exception.GetType().Name}: '{exception.Message}'.");
-				else
-				{
-					successful++;
-					console.WriteLine($"\tTest succeeded after {(report.SimulationEnd-report.SimulationStart).TotalSeconds}s of simulation.");
-					WriteSimulationData(reportsDirectory, report);
+					console.WriteLine("\tSimulating...");
+					thread.Start();
+					var completed = thread.Join(timeLimitMs);
+
+					if (!completed)
+					{
+						thread.Abort();
+						console.WriteLine("\tTest timed out.");
+					}
+					else if (exception != null)
+						console.WriteLine($"\tTest failed with exception {exception.GetType().Name}: '{exception.Message}'.");
+					else
+					{
+						successful++;
+						console.WriteLine($"\tTest succeeded after {(report.SimulationEnd - report.SimulationStart).TotalSeconds}s of simulation.");
+						WriteSimulationData(reportsDirectory, report);
+					}
 				}
 			}
 		}
