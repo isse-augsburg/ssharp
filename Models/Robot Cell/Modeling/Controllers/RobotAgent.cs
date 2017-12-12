@@ -59,8 +59,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
         public readonly Fault GenericEBroken = new TransientFault();
         [Reliability(mttf: 1000, mttr: 100)]
         public readonly Fault GenericFBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericGBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericHBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericIBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericJBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericKBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericLBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericMBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericNBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericOBroken = new TransientFault();
+		[Reliability(mttf: 1000, mttr: 100)]
+		public readonly Fault GenericPBroken = new TransientFault();
 
-        private ICapability _currentCapability;
+		private ICapability _currentCapability;
 
 		[Hidden(HideElements = true)]
 		private readonly List<Task> _tasks;
@@ -99,8 +119,18 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             GenericDBroken.Name = $"{Name}.{nameof(GenericDBroken)}";
             GenericEBroken.Name = $"{Name}.{nameof(GenericEBroken)}";
             GenericFBroken.Name = $"{Name}.{nameof(GenericFBroken)}";
+			GenericGBroken.Name = $"{Name}.{nameof(GenericGBroken)}";
+			GenericHBroken.Name = $"{Name}.{nameof(GenericHBroken)}";
+			GenericIBroken.Name = $"{Name}.{nameof(GenericIBroken)}";
+			GenericJBroken.Name = $"{Name}.{nameof(GenericJBroken)}";
+			GenericKBroken.Name = $"{Name}.{nameof(GenericKBroken)}";
+			GenericLBroken.Name = $"{Name}.{nameof(GenericLBroken)}";
+			GenericMBroken.Name = $"{Name}.{nameof(GenericMBroken)}";
+			GenericNBroken.Name = $"{Name}.{nameof(GenericNBroken)}";
+			GenericOBroken.Name = $"{Name}.{nameof(GenericOBroken)}";
+			GenericPBroken.Name = $"{Name}.{nameof(GenericPBroken)}";
 
-            AddTolerableFaultEffects();
+			AddTolerableFaultEffects();
 		}
  
 	    /* TODO: agents cannot have duplicate capabilities
@@ -309,12 +339,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
                 GenericDBroken.AddEffect<GenericDBrokenEffect>(this);
                 GenericEBroken.AddEffect<GenericEBrokenEffect>(this);
                 GenericFBroken.AddEffect<GenericFBrokenEffect>(this);
+				GenericGBroken.AddEffect<GenericGBrokenEffect>(this);
+				GenericHBroken.AddEffect<GenericHBrokenEffect>(this);
+				GenericIBroken.AddEffect<GenericIBrokenEffect>(this);
+				GenericJBroken.AddEffect<GenericJBrokenEffect>(this);
+				GenericKBroken.AddEffect<GenericKBrokenEffect>(this);
+				GenericLBroken.AddEffect<GenericLBrokenEffect>(this);
+				GenericMBroken.AddEffect<GenericMBrokenEffect>(this);
+				GenericNBroken.AddEffect<GenericNBrokenEffect>(this);
+				GenericOBroken.AddEffect<GenericOBrokenEffect>(this);
+				GenericPBroken.AddEffect<GenericPBrokenEffect>(this);
 
-                Broken.Subsumes(DrillBroken, InsertBroken, TightenBroken, PolishBroken, GenericABroken, GenericBBroken, GenericCBroken, GenericDBroken, GenericEBroken, GenericFBroken);
+				Broken.Subsumes(DrillBroken, InsertBroken, TightenBroken, PolishBroken, GenericABroken, GenericBBroken, GenericCBroken, GenericDBroken, GenericEBroken, GenericFBroken);
 			}
 		}
 
-		[FaultEffect, Priority(5)]
+		[FaultEffect, Priority(21)]
 		public class BrokenEffect : RobotAgent
 		{
 			protected override bool ApplyCurrentCapability() => false;
@@ -427,7 +467,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
                    && base.ApplyCurrentCapability();
         }
 
-        [FaultEffect, Priority(8)]
+        [FaultEffect, Priority(9)]
         public class GenericEBrokenEffect : RobotAgent
         {
             protected override bool CanApply(ProcessCapability capability)
@@ -436,18 +476,127 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
             protected override bool ApplyCurrentCapability()
                 => (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericE
                    && base.ApplyCurrentCapability();
-        }
+		}
 
-        [FaultEffect, Priority(9)]
-        public class GenericFBrokenEffect : RobotAgent
+		[FaultEffect, Priority(10)]
+		public class GenericFBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericF && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericF
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(11)]
+        public class GenericGBrokenEffect : RobotAgent
         {
             protected override bool CanApply(ProcessCapability capability)
-                => capability.ProductionAction != ProductionAction.GenericF && base.CanApply(capability);
+                => capability.ProductionAction != ProductionAction.GenericG && base.CanApply(capability);
 
             protected override bool ApplyCurrentCapability()
-                => (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericF
+                => (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericG
                    && base.ApplyCurrentCapability();
-        }
+		}
 
-    }
+		[FaultEffect, Priority(12)]
+		public class GenericHBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericH && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericH
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(13)]
+		public class GenericIBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericI && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericI
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(14)]
+		public class GenericJBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericJ && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericJ
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(15)]
+		public class GenericKBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericK && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericK
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(16)]
+		public class GenericLBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericL && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericL
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(17)]
+		public class GenericMBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericM && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericM
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(18)]
+		public class GenericNBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericN && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericN
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(19)]
+		public class GenericOBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericO && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericO
+				   && base.ApplyCurrentCapability();
+		}
+
+		[FaultEffect, Priority(20)]
+		public class GenericPBrokenEffect : RobotAgent
+		{
+			protected override bool CanApply(ProcessCapability capability)
+				=> capability.ProductionAction != ProductionAction.GenericP && base.CanApply(capability);
+
+			protected override bool ApplyCurrentCapability()
+				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.GenericP
+				   && base.ApplyCurrentCapability();
+		}
+	}
 }
