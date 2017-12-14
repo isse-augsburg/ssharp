@@ -15,12 +15,13 @@ using System.Windows.Shapes;
 
 namespace SafetySharp.CaseStudies.Visualizations
 {
+    using CaseStudies.RobotCell.Modeling.Controllers;
     /// <summary>
     /// Interaktionslogik für WorkpieceControl.xaml
     /// </summary>
     public partial class WorkpieceControl
     {
-        public WorkpieceControl()
+        public WorkpieceControl(Resource resource)
         {
             InitializeComponent();
         }

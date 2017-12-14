@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Shapes;
+using System.Windows.Media;
 
 namespace SafetySharp.CaseStudies.Visualizations
 {
@@ -21,7 +23,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         private readonly Dictionary<uint, RobotControl> _robots = new Dictionary<uint, RobotControl>();
         private readonly Dictionary<uint, CartControl> _carts = new Dictionary<uint, CartControl>();
-        private readonly Dictionary<uint, WorkpieceControl> _workpieces = new Dictionary<uint, WorkpieceControl>();
+        private readonly List<WorkpieceControl> _workpieces = new List<WorkpieceControl>();
         private List<string> _task;
 
         public RobotCell()
@@ -45,6 +47,8 @@ namespace SafetySharp.CaseStudies.Visualizations
             
             _builder.AddCart(ModelBuilderHelper.Route(0, 1), ModelBuilderHelper.Route(0, 2));
             _builder.AddCart(ModelBuilderHelper.Route(1, 3), ModelBuilderHelper.Route(1, 4), ModelBuilderHelper.Route(1, 2));
+
+            //_builder.CreateWorkpiece( ModelBuilderHelper.Insert, ModelBuilderHelper.Drill, ModelBuilderHelper.Tighten);
 
             _builder.ChooseController<FastController>();
             _builder.CentralReconfiguration();
@@ -129,11 +133,69 @@ namespace SafetySharp.CaseStudies.Visualizations
                 Grid.SetColumn(cart, column);
             }
 
-            //Display tasks 
+            //Create resources
+            for (int i = 0; i < _model.Resources.Count; i++) {
+                var agent = _model.Resources[i];
+                var resource = new WorkpieceControl(agent);
+                _workpieces.Add(resource);
+            }
+
+            //Display task 
             _task = UpdateTask();
             DisplayTask();
 
-            //to-do: display tasks
+
+            //Place Workpiece/Resource
+            PlaceWorkpiece();
+
+            //Display the current role of a robot
+            DisplayRole();
+        }
+
+        private void DisplayRole() {
+            foreach (var robot in _robots) {
+                var agent = robot.Value.GetRobotAgent();
+                Console.WriteLine("'ROLE HAS VALUE' IS: "+agent.RoleExecutor.Role.HasValue);
+            }
+        }
+
+        private void PlaceWorkpiece() {
+            Rectangle rect = new Rectangle();
+            rect.Width = 25; rect.Height = 25;
+            visualizationArea.Children.Add(rect);
+            rect.Visibility = Visibility.Hidden;
+            SolidColorBrush brush = new SolidColorBrush(Colors.Orange);
+            rect.Stroke = brush;
+            rect.StrokeThickness = 2;
+
+            foreach (var robot in _robots)
+            {
+                var agent = robot.Value.GetRobotAgent();
+                if (agent.HasResource) {
+                    Console.WriteLine("<Robot with ID '"+ agent.Id +"' has the resource>");
+
+                    //var rowRob = Grid.GetRow(robot.Value);
+                    //var colRob = Grid.GetColumn(robot.Value) + 1;
+                    //var rowRect = Grid.GetRow(rect); 
+                    //var colRect = Grid.GetColumn(rect);
+
+                    //if (colRob != colRect || rowRob != rowRect) {
+                    //    rect.Visibility = Visibility.Collapsed;
+                    //    //visualizationArea.Children.Remove(rect);
+                        
+                    //    Console.WriteLine("\n\ncolRob != colRect is "+ (colRob != colRect));
+                    //    Console.WriteLine("rowRob != rowRect is " + (rowRob != rowRect) +"\n\n");
+
+                    //    Grid.SetRow(rect, Grid.GetRow(robot.Value));
+                    //    Grid.SetColumn(rect, Grid.GetColumn(robot.Value) + 1);
+                    //    rect.Visibility = Visibility.Visible;
+                    //}
+                    Grid.SetRow(rect, Grid.GetRow(robot.Value));
+                    Grid.SetColumn(rect, Grid.GetColumn(robot.Value) + 1);
+                    rect.Visibility = Visibility.Visible;
+                    
+                }
+            }
         }
 
         internal void GetFreePosition(RobotAgent robot, out int row, out int col) {
@@ -170,6 +232,8 @@ namespace SafetySharp.CaseStudies.Visualizations
                 _carts[cart.Id].Update(cart);
             }
 
+            PlaceWorkpiece();
+
             _task = UpdateTask();
             PrintTask();
 
@@ -204,7 +268,8 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         private List<string> UpdateTask()
         {
-            Task task = _model.Tasks.First();
+            //Task task = _model.Tasks.First();
+            Task task = (Task)_model.Resources.First().Task;
             ICapability[] capabilities = task.RequiredCapabilities;
             List<string> stringCapabilities = new List<string>();
 
@@ -241,7 +306,8 @@ namespace SafetySharp.CaseStudies.Visualizations
         private void DisplayTask() {
             ListBox lbox = new ListBox();
             lbox.Visibility = Visibility.Visible;
-            lbox.Items.Add("Aktueller Task:");  //Maybe: Drawing the item myself and changing the background color
+            //lbox.FontSize = 14;
+            lbox.Items.Add("Current Task:");  //Maybe: Drawing the item myself and changing the background color
 
             //if (_task != null)
             foreach (var cap in _task)

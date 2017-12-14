@@ -352,20 +352,5 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 				=> (_currentCapability as ProcessCapability)?.ProductionAction != ProductionAction.Polish
 					&& base.ApplyCurrentCapability();
 		}
-
-        //public List<List<string>> GetTasks() {
-        //    List<List<string>> stringTasks = new List<List<string>>();
-        //    List<string> reqCapabilities;
-
-        //    foreach (var task in _tasks) {
-        //        reqCapabilities = new List<string>();
-        //        foreach (var req in task.RequiredCapabilities)
-        //        {
-        //            reqCapabilities.Add(req.ToString());
-        //        }
-        //        stringTasks.Add(reqCapabilities);
-        //    }
-        //    return stringTasks;
-        //}
 	}
 }

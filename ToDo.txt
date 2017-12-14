@@ -1,6 +1,6 @@
-﻿- Task anzeigen (Über das Workpiece gehen)
+﻿- Task anzeigen (Über das Workpiece gehen)		(Zeigt gerade immer den aktuellen Task für das Workpiece an, das sich gerade in der Verarbeitung befindet; Add Resource zum ModelBuilder?)
 - Rollen der Roboter anzeigen
-- Anzeigen welcher RoboterAgent gerade an der Reihe ist ( Wer ist in ExecuteRole?)
-- Anzeigen wo das Workpiece ist
+- Anzeigen welcher RoboterAgent gerade an der Reihe ist (Wer ist in ExecuteRole?)
+- Anzeigen wo das Workpiece ist		(Statt Rectangle WorkpieceControl benutzen, nach Vorbild des Carts ^^)
 - Routen der Carts anzeigen: Wo kann ein Cart hinfahren?
 - Faults anzeigen (Welcher Fault? Durch Anzeigen der Roles sollte das gut zu sehen sein)
