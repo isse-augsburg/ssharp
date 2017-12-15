@@ -5,9 +5,9 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:SafetySharp.CaseStudies.Visualizations"
       mc:Ignorable="d" 
-      d:DesignHeight="280" d:DesignWidth="210">
+      d:DesignHeight="278" d:DesignWidth="241.333">
     <Viewbox StretchDirection="Both" Stretch="Uniform">
-        <Grid Height="398.095">
+        <Grid Height="398" Width="362">
             <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Right" Margin="0,121.429,10,10" Stroke="Black" Width="280">
                 <Rectangle.ContextMenu>
                     <ContextMenu StaysOpen="True">
@@ -19,7 +19,7 @@
                 </Rectangle.OpacityMask>
             </Rectangle>
             <!---->
-            <Rectangle x:Name="itemArea" Width="100" Height="100" Margin="10,120,190,40" Stroke="#00000000" StrokeThickness="5"/>
+            <Rectangle x:Name="workpiece" Width="100" Height="100" Margin="41,243,221,55" Stroke="Orange" StrokeThickness="5" Visibility="Visible"/>
             <TextBlock x:Name="state" Height="75.953" Margin="10,0" TextWrapping="Wrap" Text="StateText" VerticalAlignment="Top" Foreground="White" FontSize="50" FontWeight="Bold"/>
         </Grid>
     </Viewbox>

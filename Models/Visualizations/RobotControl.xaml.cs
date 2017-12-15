@@ -27,8 +27,7 @@
         public void Update(RobotAgent robotAgent) {
             _robotAgent = robotAgent;
             state.Text = RobotCell.GetState(robotAgent);
-
-            //IEnumerable<ICapability> enumerator = _robotAgent.AvailableCapabilities;
+            
             List<ICapability> capList = _robotAgent.AvailableCapabilities.ToList();
             List<string> stringCapList = new List<string>();
 
@@ -46,6 +45,7 @@
             
             availableCapabilityList.ItemsSource = stringCapList;
 
+
             if (_robotAgent.RoleExecutor.Role == null)
                 Console.WriteLine("<ROLE IS NULL!!!>");
             else {
@@ -53,6 +53,14 @@
             }
 
 
+            RoleExecutor executor = _robotAgent.RoleExecutor;
+
+            if (executor.IsExecuting && !executor.IsCompleted)
+                if (executor.ExecutionState.Count() > 0)
+                    Console.WriteLine("<Current Role>: " + _robotAgent.RoleExecutor.ExecutionState.Last());
+
+
+            
             //int i = 0;
             //foreach (var role in _robotAgent.AllocatedRoles) {
             //    foreach (var cap in role.CapabilitiesToApply) {
@@ -73,7 +81,7 @@
             UpdateLayout();
         }
 
-        //to-do: check the faults for working correctly
+        //to-do: check the faults for working correctly; functions are invoked
 
         private void OnBrokenFault(object sender, RoutedEventArgs e) {
             //maybe without RobotCell in Constructor

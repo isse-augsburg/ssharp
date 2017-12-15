@@ -24,6 +24,10 @@ namespace SafetySharp.CaseStudies.Visualizations
         private readonly Dictionary<uint, RobotControl> _robots = new Dictionary<uint, RobotControl>();
         private readonly Dictionary<uint, CartControl> _carts = new Dictionary<uint, CartControl>();
         private readonly List<WorkpieceControl> _workpieces = new List<WorkpieceControl>();
+
+        //private Rectangle workpiece = new Rectangle();
+        //SolidColorBrush brush_Orange = new SolidColorBrush(Colors.Orange);
+
         private List<string> _task;
 
         public RobotCell()
@@ -54,7 +58,7 @@ namespace SafetySharp.CaseStudies.Visualizations
             _builder.CentralReconfiguration();
 
             Model = _builder.Build();
-
+            
             //Initialize/Update task
             _task = UpdateTask();
             PrintTask();
@@ -159,45 +163,43 @@ namespace SafetySharp.CaseStudies.Visualizations
         }
 
         private void PlaceWorkpiece() {
-            Rectangle rect = new Rectangle();
-            rect.Width = 25; rect.Height = 25;
-            visualizationArea.Children.Add(rect);
-            rect.Visibility = Visibility.Hidden;
-            SolidColorBrush brush = new SolidColorBrush(Colors.Orange);
-            rect.Stroke = brush;
-            rect.StrokeThickness = 2;
+            //workpiece.Width = 25; workpiece.Height = 25;
+            //workpiece.Margin = new Thickness(45, 30, 0, 0);
 
-            //WorkpieceControl resource = new WorkpieceControl();
-            //visualizationArea.Children.Add(resource);
-            //resource.Visibility = Visibility.Visible;
+            //if (workpiece.Parent == null) {
+            //    visualizationArea.Children.Add(workpiece);
+            //    workpiece.Visibility = Visibility.Hidden;
+            //}
+            //workpiece.Stroke = brush_Orange;
+            //workpiece.StrokeThickness = 2;
 
             foreach (var robot in _robots)
             {
                 var agent = robot.Value.GetRobotAgent();
-                if (agent.HasResource) {
-                    Console.WriteLine("<Robot with ID '"+ agent.Id +"' has the resource>");
 
-                    //var rowRob = Grid.GetRow(robot.Value);
-                    //var colRob = Grid.GetColumn(robot.Value) + 1;
-                    //var rowRect = Grid.GetRow(rect); 
-                    //var colRect = Grid.GetColumn(rect);
+                if (agent.HasResource)
+                    robot.Value.workpiece.Visibility = Visibility.Visible;
+                else
+                    robot.Value.workpiece.Visibility = Visibility.Hidden;
 
-                    //if (colRob != colRect || rowRob != rowRect) {
-                    //    rect.Visibility = Visibility.Collapsed;
-                    //    //visualizationArea.Children.Remove(rect);
-                        
-                    //    Console.WriteLine("\n\ncolRob != colRect is "+ (colRob != colRect));
-                    //    Console.WriteLine("rowRob != rowRect is " + (rowRob != rowRect) +"\n\n");
+                //Version with extra rectangle as workpiece, outside the RobotControl-class, here in this class
+                //if (agent.HasResource)
+                //{
+                //    Console.WriteLine("<Robot with ID '" + agent.Id + "' has the resource>");
 
-                    //    Grid.SetRow(rect, Grid.GetRow(robot.Value));
-                    //    Grid.SetColumn(rect, Grid.GetColumn(robot.Value) + 1);
-                    //    rect.Visibility = Visibility.Visible;
-                    //}
-                    Grid.SetRow(rect, Grid.GetRow(robot.Value));
-                    Grid.SetColumn(rect, Grid.GetColumn(robot.Value) + 1);
-                    rect.Visibility = Visibility.Visible;
-                    
-                }
+                //    Grid.SetRow(workpiece, Grid.GetRow(robot.Value));
+                //    Grid.SetColumn(workpiece, Grid.GetColumn(robot.Value));
+                //    workpiece.Visibility = Visibility.Visible;
+                //}
+            }
+
+            foreach (var cart in _carts) {
+                var agent = cart.Value.GetCartAgent();
+
+                if (agent.HasResource)
+                    cart.Value.workpiece.Visibility = Visibility.Visible;
+                else
+                    cart.Value.workpiece.Visibility = Visibility.Hidden;
             }
         }
 
@@ -219,6 +221,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         private void OnModelStateReset()
         {
+            
             _model = (Model)SimulationControls.Model;
 
             if (SimulationControls.Simulator.IsReplay)
@@ -313,10 +316,8 @@ namespace SafetySharp.CaseStudies.Visualizations
         private void DisplayTask() {
             ListBox lbox = new ListBox();
             lbox.Visibility = Visibility.Visible;
-            //lbox.FontSize = 14;
             lbox.Items.Add("Current Task:");  //Maybe: Drawing the item myself and changing the background color
-
-            //if (_task != null)
+            
             foreach (var cap in _task)
             {
                 lbox.Items.Add(cap);
@@ -331,5 +332,22 @@ namespace SafetySharp.CaseStudies.Visualizations
                 Grid.SetRow(lbox, row);
             }
         }
+
+        //Attempt for manipulating
+        //private void InitializeCanvas() {
+        //    for (int i = 0; i < visualizationArea.RowDefinitions.Count; i++) {
+        //        for (int j = 0; j < visualizationArea.ColumnDefinitions.Count; j++) {
+        //            var canvas = new Canvas();
+        //            var rect = new Rectangle();
+        //            Canvas.SetTop(rect, 20);
+        //            Canvas.SetLeft(rect, 20);
+        //            rect.Width = 40; rect.Height = 40;
+        //            rect.Stroke = brush_Orange;
+        //            visualizationArea.Children.Add(canvas);
+        //            Grid.SetRow(canvas, i);
+        //            Grid.SetColumn(canvas, j);
+        //        }
+        //    }
+        //}
     }
 }

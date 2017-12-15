@@ -1,5 +1,7 @@
 ﻿- Aktuelle Rolle des ausführenden Roboters anzeigen
-- Anzeigen welcher RoboterAgent gerade an der Reihe ist (Wer ist in ExecuteRole?)
-- Anzeigen wo das Workpiece ist		(Statt Rectangle WorkpieceControl benutzen, nach Vorbild des Carts ^^)
+  => Anzeigen welcher RoboterAgent gerade an der Reihe ist (Wer ist in ExecuteRole?)
 - Routen der Carts anzeigen: Wo kann ein Cart hinfahren?
-- Faults anzeigen (Welcher Fault? Durch Anzeigen der Roles sollte das gut zu sehen sein)
+- Faults anzeigen (Welcher Fault?)
+
+Am Ende evtl. noch:
+- Animiere das fahrende Cart

@@ -13,6 +13,7 @@
     <Viewbox StretchDirection="Both" Stretch="Uniform" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
         <Grid Height="428.571" Width="302.857">
             <TextBlock x:Name="state" Foreground="White" Margin="18.163,0,19.059,19.184" FontSize="48" Height="57.143" VerticalAlignment="Bottom" d:LayoutOverrides="HorizontalAlignment"/>
+            <TextBlock x:Name="currentRole" Foreground="White" VerticalAlignment="Top" Height="40" Margin="218.775,31.883,10,0"/>
 
             <ListBox x:Name="availableCapabilityList" Margin="-16.327,0,89.082,0" d:LayoutOverrides="HorizontalAlignment" FontSize="48" Height="141.429" VerticalAlignment="Top">
                 <ListBox.Resources>
@@ -34,6 +35,11 @@
                     <TranslateTransform X="0" Y="0"/>
                 </Canvas.RenderTransform>
                 <Canvas.Resources/>
+                
+                <Rectangle x:Name="workpiece" Stroke="Orange" Width="50" Height="50" Canvas.Left="163" Canvas.Top="151" StrokeThickness="5" Visibility="Hidden">
+                    
+                </Rectangle>
+                
                 <Canvas Name="layer1">
                     <Rectangle xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="35.721436" Canvas.Top="237.65218" Width="124.81857" Height="29.109715" Name="rect3892" Fill="#FFFFFF" StrokeThickness="0.44349048"/>
                     <Ellipse xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Canvas.Left="1.5" Width="74.9" Canvas.Top="94" Height="77" Name="path3896" Fill="#FFFFFF" StrokeThickness="0.32612109"/>

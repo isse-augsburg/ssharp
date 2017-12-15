@@ -56,5 +56,9 @@ namespace SafetySharp.CaseStudies.Visualizations
             //to-do, currently just for the first cart of the Carts-list
             _container.Model.Carts.First().Broken.ToggleActivationMode();
         }
+
+        public CartAgent GetCartAgent() {
+            return _cartAgent;
+        }
     }
 }
