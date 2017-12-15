@@ -21,7 +21,7 @@ namespace SafetySharp.CaseStudies.Visualizations
     /// </summary>
     public partial class WorkpieceControl
     {
-        public WorkpieceControl(Resource resource)
+        public WorkpieceControl()
         {
             InitializeComponent();
         }

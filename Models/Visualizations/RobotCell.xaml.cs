@@ -101,7 +101,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
             //Create and place robots
             for (int i = 0; i < robotCount; i++) {
-                var robot = new RobotControl(_model.RobotAgents[i]);
+                var robot = new RobotControl(_model.RobotAgents[i], this);
                 _robots.Add(_model.RobotAgents[i].Id, robot);
                 visualizationArea.Children.Add(robot);
 
@@ -136,14 +136,13 @@ namespace SafetySharp.CaseStudies.Visualizations
             //Create resources
             for (int i = 0; i < _model.Resources.Count; i++) {
                 var agent = _model.Resources[i];
-                var resource = new WorkpieceControl(agent);
+                var resource = new WorkpieceControl();
                 _workpieces.Add(resource);
             }
 
             //Display task 
             _task = UpdateTask();
             DisplayTask();
-
 
             //Place Workpiece/Resource
             PlaceWorkpiece();
@@ -167,6 +166,10 @@ namespace SafetySharp.CaseStudies.Visualizations
             SolidColorBrush brush = new SolidColorBrush(Colors.Orange);
             rect.Stroke = brush;
             rect.StrokeThickness = 2;
+
+            //WorkpieceControl resource = new WorkpieceControl();
+            //visualizationArea.Children.Add(resource);
+            //resource.Visibility = Visibility.Visible;
 
             foreach (var robot in _robots)
             {
@@ -220,6 +223,10 @@ namespace SafetySharp.CaseStudies.Visualizations
 
             if (SimulationControls.Simulator.IsReplay)
                 return;
+
+            foreach (var robot in _robots) {
+                robot.Value.Update(robot.Value.GetRobotAgent());
+            }
         }
 
         private void UpdateModelState()

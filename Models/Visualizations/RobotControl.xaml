@@ -23,9 +23,11 @@
                 <Canvas.ContextMenu>
                     <ContextMenu StaysOpen="True">
                         <MenuItem x:Name="BrokenFault" Header="'BrokenFault'" IsCheckable="True" Click="OnBrokenFault"/>
-                        <MenuItem x:Name="SwitchFault" Header="'SwitchFault'" IsCheckable="True" Click="OnSwitchFault"/>
-                        <MenuItem x:Name="SwitchToWrongToolFault" Header="'SwitchToWrongToolFault'" IsCheckable="True" Click="OnSwitchToWrongToolFault"/>
                         <MenuItem x:Name="ResourceTransportFault" Header="'ResourceTransportFault'" IsCheckable="True" Click="OnResourceTransportFault"/>
+                        <MenuItem x:Name="DrillBrokenFault" Header="'DrillBrokenFault'" IsCheckable="True" Click="OnDrillBrokenFault"/>
+                        <MenuItem x:Name="InsertBrokenFault" Header="'InsertBrokenFault'" IsCheckable="True" Click="OnInsertBrokenFault"/>
+                        <MenuItem x:Name="TightenBrokenFault" Header="'TightenBrokenFault'" IsCheckable="True" Click="OnTightenBrokenFault"/>
+                        <MenuItem x:Name="PolishBrokenFault" Header="'PolishBrokenFault'" IsCheckable="True" Click="OnPolishBrokenFault"/>
                     </ContextMenu>
                 </Canvas.ContextMenu>
                 <Canvas.RenderTransform>
