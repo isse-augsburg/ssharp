@@ -42,11 +42,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	    public void TempTestSystemGeneratorTest()
 	    {
 	        var tsg = new TestSystemGenerator();
-            var result = tsg.Generate(100, 10, 40);
+            var result = tsg.Generate(100, 10, 40, new Random(42));
+			Console.WriteLine("end")
 	        ;
 	    }
 
-	    [Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
+		[TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
+		public void ComputeStateVectorLayout(Model model)
+		{
+			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 12 } };
+			var result = modelChecker.CheckInvariant(model, false);
+
+			Console.WriteLine(result.StateVectorLayout);
+		}
+
+		[Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
         public void Simulate(Model model)
         {
             model.Faults.SuppressActivations();
@@ -54,13 +64,21 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
             PrintTrace(simulator, model, steps: 100);
 		}
 
-        [Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
-        public void SimulateProfileBased(Model model)
+		private static readonly int[] timeoutSeeds = { 0, 270310109, 270364453, 270442343, 270468015, 270544828, 270570265, 270673000, 272980687, 276191703, 276241156, 623786875, 624231578, 624556093, 624581281, 624706750, 624756593, 624807265, 624958734, 625362093, 625414296, 625466328, 625543906, 625983203, 626181156, 626521921, 626805109, 626918062, 627491484, 628411312, 629232765, 629526812, 630165046, 630505953, 630749781, 631411156, 631474984, 633358718, 635164156, 636060859, 636141031, 636552203, 637437437, 640059937, 640469234, 642011468, 643386421, 645328187, 647254250, 647507078, 648405250, 649056750, 650996734, 652048234, 655944359, 656312015, 657046593, 658462218, 660240546, 660777687, 662170750, 664218078, 665282468, 667382515, 669330796, 671611812, 672139562, 672319406, 673419296, 673627734, 673825968, 676020000, 676610375, 682097796, 682594968, 683098828, 689535390, 690608375, 693462953, 695463343, 697192656, 700195953, 706713031, 709886093, 710165234, 710719875, 711327828, 719939640, 721695937, 722428328, 729626875, 735689031, 736080500, 758092703, 758906531, 759617812, 762761984, 766407593, 768445796, 770160234, 774324000 };
+
+        [Test, TestCaseSource(nameof(PerformanceMeasurementConfigurationsWithSeeds)), Timeout(2000000)]
+        public void SimulateProfileBased(Model model, int seed)
         {
             model.Faults.SuppressActivations();
+			var stInit = Stopwatch.StartNew();
             var profileBasedSimulator = new ProfileBasedSimulator(model);
-            profileBasedSimulator.Simulate(numberOfSteps: 1000);
-        }
+			stInit.Stop();
+			var stSim = Stopwatch.StartNew();
+            profileBasedSimulator.Simulate(numberOfSteps: 1000, seed: seed);
+			stSim.Stop();
+			Console.WriteLine("Initialization time: " + stInit.Elapsed.TotalSeconds + "s");
+			Console.WriteLine("Simulation time: " + stSim.Elapsed.TotalSeconds + "s");
+		}
 
 		[Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
 		public void PerformanceEvaluation(Model model)
@@ -70,7 +88,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Debug.Listeners.Clear();
 
 			const int simulationsPerModel = 100;
-			const int numberOfSteps = 10000;
+			const int numberOfSteps = 1000;
 			const int timeLimitMs = 600000;
 
 			var reportsDirectory = Path.Combine("performance-reports", TestContext.CurrentContext.Test.Name);
@@ -162,9 +180,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 							   .Select(model => new TestCaseData(model).SetName(model.Name + " (Centralized)"))
 							   .Concat(SampleModels.CreatePerformanceEvaluationConfigurationsCoalition()
 												   .Select(model => new TestCaseData(model).SetName(model.Name + " (Coalition)")));
-	    }
+		}
 
-        private static void PrintTrace(Simulator simulator, Model model, int steps)
+		private static IEnumerable PerformanceMeasurementConfigurationsWithSeeds()
+		{
+			return (from model in SampleModels.CreatePerformanceEvaluationConfigurationsCoalition()
+					from seed in timeoutSeeds
+					let testCase = new TestCaseData(model, seed)
+					select testCase.SetName(model.Name + " (Coalition) -- " + seed));
+		}
+
+		private static void PrintTrace(Simulator simulator, Model model, int steps)
 		{
 			
 			for (var i = 0; i < steps; ++i)
