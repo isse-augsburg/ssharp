@@ -102,6 +102,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			foreach (var member in CurrentCoalition.Members)
 				member.ConcludeReconfiguration();
+
+			// Make sure no other coalition is still waiting for us -- we're done here.
+			CurrentCoalition.CancelMergeRequests();
 		}
 
 		/// <summary>

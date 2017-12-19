@@ -39,7 +39,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			private readonly LinkedList<MergeRequest> _mergeRequests = new LinkedList<MergeRequest>();
 
-			private TaskCompletionSource<object> _pendingCoalitionMerge;
+			private TaskCompletionSource<bool> _pendingCoalitionMerge;
 
 			private CoalitionReconfigurationAgent _awaitingRendezvousFrom;
 
@@ -82,7 +82,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// </summary>
 			/// <exception cref="OperationCanceledException">Thrown if a merge results in dissolution of the coalition.</exception>
 			/// <remarks>Must be executed in this instance's <see cref="_coalition"/>'s execution context.</remarks>
-			public async Task WaitForMergeCompletion()
+			public async Task<bool> WaitForMergeCompletion()
 			{
 				// The coalition might already have been merged & disbanded
 				_cancel.ThrowIfCancellationRequested();
@@ -96,7 +96,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					// The coalition might have been disbanded
 					_cancel.ThrowIfCancellationRequested();
 
-					// detect deadlock
+					// if no deadlock detected: continue waiting
 					if (_mergeRequests.All(request => request.OpposingLeader != _awaitingRendezvousFrom))
 						continue;
 
@@ -121,6 +121,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					_cancel.ThrowIfCancellationRequested(); // The coalition might have been disbanded
 				}
 				Debug.WriteLine("Coalition with leader {0}: merges have completed", _coalition.Leader.BaseAgent.Id);
+
+				Debug.Assert(_pendingCoalitionMerge?.Task.IsCompleted ?? true);
+				return _pendingCoalitionMerge?.Task.Result ?? false;
 			}
 
 			/// <summary>
@@ -146,10 +149,35 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					_coalition.Leader.BaseAgent.Id,
 					leader.BaseAgent.Id);
 				_awaitingRendezvousFrom = leader;
-				_pendingCoalitionMerge = new TaskCompletionSource<object>();
+				_pendingCoalitionMerge = new TaskCompletionSource<bool>();
 
 				_coalition.ReceiveInvitationResponse(invitedAgent);
 				_coalition.CancelInvitations();
+			}
+
+			/// <summary>
+			///   Notifies all coalitions awaiting a <see cref="RendezvousRequest"/> from <see cref="_coalition"/> that no such request will be received,
+			///   since <see cref="_coalition"/> has completed its reconfiguration.
+			/// </summary>
+			/// <remarks>May be called from any execution context.</remarks>
+			public void CancelRequests()
+			{
+				foreach (var request in _mergeRequests)
+					request.OpposingMerger.CancelRequest(request.OriginalLeader);
+			}
+
+			/// <summary>
+			///   Notifies the coalition it shall no longer expect a <see cref="RendezvousRequest"/> from <paramref name="requestedLeader"/>, since the
+			///   opposite coalition has completed its reconfiguration.
+			/// </summary>
+			/// <remarks>May be called from any execution context.</remarks>
+			private void CancelRequest([NotNull] CoalitionReconfigurationAgent requestedLeader)
+			{
+				if (_awaitingRendezvousFrom != requestedLeader)
+					return;
+
+				_awaitingRendezvousFrom = null;
+				_pendingCoalitionMerge.SetResult(false);
 			}
 
 			/// <summary>
@@ -170,7 +198,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 				if (chosenCoalition == _coalition)
 				{
-					_pendingCoalitionMerge.SetResult(null);
+					_pendingCoalitionMerge.SetResult(true);
 					_pendingCoalitionMerge = null;
 					return;
 				}
@@ -181,7 +209,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					chosenCoalition.Join(member);
 
 				// stop controller from continuing
-				_pendingCoalitionMerge.SetResult(null);
+				_pendingCoalitionMerge.SetResult(true);
 				_pendingCoalitionMerge = null;
 				_cancellation.Cancel();
 
