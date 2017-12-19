@@ -197,7 +197,13 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			// If the invited agent already belongs to a coalition, a merge was initiated.
 			// Wait for such a merge to complete, but avoid deadlocks when two leaders invite each other.
-			await Merger.WaitForMergeCompletion();
+			var mergeCanceled = await Merger.WaitForMergeCompletion();
+			if (mergeCanceled)
+			{
+				// The invited agent was already member of a coalition. However, that coalition has
+				// since disbanded without merging this coalition. Hence we can re-invite the agent now.
+				newMember = await Invite(agent);
+			}
 
 			Debug.Assert(newMember != null);
 			return newMember;
@@ -288,6 +294,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		public void AwaitRendezvous(CoalitionReconfigurationAgent invitedAgent, CoalitionReconfigurationAgent leader)
 		{
 			Merger.AwaitRendezvous(invitedAgent, leader);
+		}
+
+		public void CancelMergeRequests()
+		{
+			Merger.CancelRequests();
 		}
 	}
 }
