@@ -28,6 +28,7 @@
             _robotAgent = robotAgent;
             state.Text = RobotCell.GetState(robotAgent);
             
+            //Set the capabilities, the robot is able to execute
             List<ICapability> capList = _robotAgent.AvailableCapabilities.ToList();
             List<string> stringCapList = new List<string>();
 
@@ -44,31 +45,37 @@
             }
             
             availableCapabilityList.ItemsSource = stringCapList;
-
-
-            if (_robotAgent.RoleExecutor.Role == null)
-                Console.WriteLine("<ROLE IS NULL!!!>");
-            else {
-                Console.WriteLine("<Current Role>: " + _robotAgent.RoleExecutor.Role);
-            }
-
-
+            
+            //Display the capability, the robot is currently executing 
             RoleExecutor executor = _robotAgent.RoleExecutor;
 
-            if (executor.IsExecuting && !executor.IsCompleted)
+            availableCapabilityList.SelectedItem = null;
+            if (executor.IsExecuting && _robotAgent.HasResource)
+            {
                 if (executor.ExecutionState.Count() > 0)
-                    Console.WriteLine("<Current Role>: " + _robotAgent.RoleExecutor.ExecutionState.Last());
+                {
+                    var cap = executor.ExecutionState.Last();
 
-
-            
-            //int i = 0;
-            //foreach (var role in _robotAgent.AllocatedRoles) {
-            //    foreach (var cap in role.CapabilitiesToApply) {
-            //        Console.WriteLine("Rolle "+i+": " + cap.CapabilityType.ToString());
-            //    }
-            //    i++;
-            //}
-
+                    if (capList.Contains(cap))
+                    {
+                        if (cap.GetType() == typeof(ProduceCapability) || cap.GetType() == typeof(ConsumeCapability))
+                        {
+                            //currentRole.Text = cap.CapabilityType.ToString();
+                            availableCapabilityList.SelectedItem = cap.CapabilityType.ToString();
+                        }
+                        else if (cap.GetType() == typeof(ProcessCapability))
+                        {
+                            ProcessCapability procCap = (ProcessCapability)cap;
+                            //currentRole.Text = procCap.ProductionAction.ToString();
+                            availableCapabilityList.SelectedItem = procCap.ProductionAction.ToString();
+                        }
+                        else
+                            availableCapabilityList.SelectedItem = null;
+                            //currentRole.Text = "";
+                    }
+                }
+            }            
+               
             _robotAgent.Broken.Activation = BrokenFault.IsChecked.ToOccurrenceKind();
             _robotAgent.ResourceTransportFault.Activation = ResourceTransportFault.IsChecked.ToOccurrenceKind();
             _robotAgent.DrillBroken.Activation = DrillBrokenFault.IsChecked.ToOccurrenceKind();
@@ -87,7 +94,8 @@
             //maybe without RobotCell in Constructor
             Console.WriteLine("<BROKEN FAULT OCCURED!>");
 
-            _robotAgent.Broken.ToggleActivationMode();
+            //_robotAgent.Broken.ToggleActivationMode();
+            _robotAgent.Broken.ForceActivation();
         }
         
         private void OnResourceTransportFault(object sender, RoutedEventArgs e) {
@@ -99,13 +107,13 @@
         private void OnDrillBrokenFault(object sender, RoutedEventArgs e) {
             Console.WriteLine("<DRILL BROKEN FAULT OCCURRED>");
 
-            _robotAgent.DrillBroken.ToggleActivationMode();
+            _robotAgent.DrillBroken.ForceActivation();
         }
 
         private void OnInsertBrokenFault(object sender, RoutedEventArgs e) {
             Console.WriteLine("<INSERT BROKEN FAULT OCCURRED>");
 
-            _robotAgent.DrillBroken.ToggleActivationMode();
+            _robotAgent.InsertBroken.Activation = Activation.Forced;
         }
 
         private void OnTightenBrokenFault(object sender, RoutedEventArgs e) {

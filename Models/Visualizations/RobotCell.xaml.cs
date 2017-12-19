@@ -246,6 +246,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
             _task = UpdateTask();
             PrintTask();
+            DisplayTask();
 
             InvalidateArrange();
             InvalidateVisual();
@@ -316,7 +317,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         private void DisplayTask() {
             ListBox lbox = new ListBox();
             lbox.Visibility = Visibility.Visible;
-            lbox.Items.Add("Current Task:");  //Maybe: Drawing the item myself and changing the background color
+            lbox.Items.Add("Current Task:");
             
             foreach (var cap in _task)
             {
@@ -331,23 +332,18 @@ namespace SafetySharp.CaseStudies.Visualizations
                 Grid.SetColumn(lbox, col);
                 Grid.SetRow(lbox, row);
             }
-        }
 
-        //Attempt for manipulating
-        //private void InitializeCanvas() {
-        //    for (int i = 0; i < visualizationArea.RowDefinitions.Count; i++) {
-        //        for (int j = 0; j < visualizationArea.ColumnDefinitions.Count; j++) {
-        //            var canvas = new Canvas();
-        //            var rect = new Rectangle();
-        //            Canvas.SetTop(rect, 20);
-        //            Canvas.SetLeft(rect, 20);
-        //            rect.Width = 40; rect.Height = 40;
-        //            rect.Stroke = brush_Orange;
-        //            visualizationArea.Children.Add(canvas);
-        //            Grid.SetRow(canvas, i);
-        //            Grid.SetColumn(canvas, j);
-        //        }
-        //    }
-        //}
+            //To fix: doesn't select the capabilities or even print the output
+            foreach (var done in _model.Resources.First().State) {
+                if (done.GetType() == typeof(ProcessCapability)) {
+                    ProcessCapability proc = (ProcessCapability)done;
+                    lbox.SelectedItems.Add(proc.ProductionAction.ToString());
+                    Console.WriteLine("\n<State of the task>: " + proc);
+                } else {
+                    lbox.SelectedItems.Add(done.CapabilityType.ToString());
+                    Console.WriteLine("\n<State of the task>: " + done);
+                }
+            }
+        }
     }
 }

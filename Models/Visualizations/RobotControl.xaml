@@ -13,8 +13,9 @@
     <Viewbox StretchDirection="Both" Stretch="Uniform" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
         <Grid Height="428.571" Width="302.857">
             <TextBlock x:Name="state" Foreground="White" Margin="18.163,0,19.059,19.184" FontSize="48" Height="57.143" VerticalAlignment="Bottom" d:LayoutOverrides="HorizontalAlignment"/>
-            <TextBlock x:Name="currentRole" Foreground="White" VerticalAlignment="Top" Height="40" Margin="218.775,31.883,10,0"/>
-
+            <!--
+            <TextBlock x:Name="currentRole" Foreground="White" VerticalAlignment="Top" Height="40" Margin="218.775,31.883,10,0" FontSize="12"/>
+            -->
             <ListBox x:Name="availableCapabilityList" Margin="-16.327,0,89.082,0" d:LayoutOverrides="HorizontalAlignment" FontSize="48" Height="141.429" VerticalAlignment="Top">
                 <ListBox.Resources>
                 </ListBox.Resources>
@@ -36,7 +37,7 @@
                 </Canvas.RenderTransform>
                 <Canvas.Resources/>
                 
-                <Rectangle x:Name="workpiece" Stroke="Orange" Width="50" Height="50" Canvas.Left="163" Canvas.Top="151" StrokeThickness="5" Visibility="Hidden">
+                <Rectangle x:Name="workpiece" Stroke="Orange" Width="50" Height="50" Canvas.Left="157" Canvas.Top="151" StrokeThickness="5" Visibility="Visible">
                     
                 </Rectangle>
                 
