@@ -172,13 +172,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int ioCount = 15;
             const int numberOfCarts = 5;
             const int numWorkpieces = 5;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
+            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
         }
 
-        private static ModelBuilder GenerateSystem(this ModelBuilder builder, int capCount, int sysSize, int ioCount, int numberOfCarts, int numWorkpieces)
+        private static ModelBuilder GenerateSystem(this ModelBuilder builder, int capCount, int sysSize, int ioCount, int numberOfCarts, int numWorkpieces, Random rnd)
         {
             var tsg = new TestSystemGenerator();
-            var generatedSystem = tsg.Generate(sysSize, capCount, ioCount);
+            var generatedSystem = tsg.Generate(sysSize, capCount, ioCount, rnd);
             Debug.Assert(capCount <= Enum.GetNames(typeof(ProductionAction)).Length && Enum.GetNames(typeof(ProductionAction)).Length >= sysSize);
 
             var currentCapa = generatedSystem.Item2;
@@ -303,7 +303,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int ioCount = 15;
             const int numberOfCarts = 15;
             const int numWorkpieces = 5;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
+            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
         }
 
         public static ModelBuilder MediumSizePerformanceMeasurementModel(this ModelBuilder builder)
@@ -313,7 +313,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int ioCount = 10;
             const int numberOfCarts = 3;
             const int numWorkpieces = 5;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces);
+            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
         }
 
         public static ModelBuilder Ictss1(this ModelBuilder builder)

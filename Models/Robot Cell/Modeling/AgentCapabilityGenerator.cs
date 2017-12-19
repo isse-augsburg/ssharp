@@ -15,15 +15,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         private readonly int _capsPerAgent;
         private readonly List<DummyCapability> _task;
         private readonly HashSet<DummyAgent> _agents;
+		private readonly Random _rnd;
 
-        public AgentCapabilityGenerator(int capsPerAgent, HashSet<DummyAgent> agents, List<DummyCapability> task)
+        public AgentCapabilityGenerator(int capsPerAgent, HashSet<DummyAgent> agents, List<DummyCapability> task, Random rnd)
         {
             Debug.Assert(agents.Count() == (task.Count()));
 
             _capsPerAgent = capsPerAgent;
             _task = task;
             _agents = agents;
-        }
+			_rnd = rnd;
+		}
 
         public HashSet<DummyAgent> Generate()
         {
@@ -67,8 +69,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                         var remainingCapsLocal = new List<DummyCapability>(remainingCaps);
                         remainingCapsLocal.RemoveAll(capability => anAgent.GetCapabilities().Contains(capability));
 
-                        var rnd = new Random();
-                        var rdm = rnd.Next(0, remainingCapsLocal.Count() - 1);
+                        var rdm = _rnd.Next(0, remainingCapsLocal.Count() - 1);
                         var cap = remainingCapsLocal[rdm];
 
                         anAgent.AddCapability(cap);

@@ -10,12 +10,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         private int _inOutDegree;
         private readonly HashSet<DummyAgent> _agents;
         private int _ioProbability = 25;
+		private readonly Random _rnd;
 
-        public IOGraphGenerator(int inOutDegree, HashSet<DummyAgent> agents)
+        public IOGraphGenerator(int inOutDegree, HashSet<DummyAgent> agents, Random rnd)
         {
             this._inOutDegree = inOutDegree;
             this._agents = this.GetFreshAgentSetWithoutIOs(agents);
-        }
+			_rnd = rnd;
+		}
 
         private HashSet<DummyAgent> GetFreshAgentSetWithoutIOs(HashSet<DummyAgent> setToClone)
         {
@@ -128,8 +130,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                             // anAgent must not have a link to itself
                             if (anAgent.Equals(tempAgent) == false)
                             {
-                                var rnd = new Random();
-                                var rdm = rnd.Next(1, 100);
+                                var rdm = _rnd.Next(1, 100);
                                 if (rdm <= _ioProbability && tempAgent.GetIndegree() < _inOutDegree)
                                 {
                                     anAgent.AddOutput(tempAgent);
@@ -152,8 +153,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                             // anAgent must not have a link to itself
                             if (anAgent.Equals(tempAgent) == false)
                             {
-                                var rnd = new Random();
-                                var rdm = rnd.Next(1, 100);
+                                var rdm = _rnd.Next(1, 100);
                                 if (rdm <= _ioProbability && tempAgent.GetOutdegree() < _inOutDegree)
                                 {
                                     anAgent.AddInput(tempAgent);
@@ -205,13 +205,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return _agents;
         }
 
-        private static void Shuffle<T>(List<T> list)
+        private void Shuffle<T>(List<T> list)
         {
             int n = list.Count;
-            Random rnd = new Random();
             while (n > 1)
             {
-                int k = (rnd.Next(0, n) % n);
+                int k = (_rnd.Next(0, n) % n);
                 n--;
                 T value = list[k];
                 list[k] = list[n];
