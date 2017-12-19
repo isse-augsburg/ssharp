@@ -192,7 +192,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				agentCount = coalition.BaseAgents.Count;
 
 				using (var enumerator = calculator.CalculateDistributions().GetEnumerator())
-					while (enumerator.MoveNext() && calculator.Fragment.Equals(coalition.CTF) && coalition.BaseAgents.Count == agentCount)
+					while (calculator.Fragment.Equals(coalition.CTF) && coalition.BaseAgents.Count == agentCount && enumerator.MoveNext())
 					{
 						var distribution = enumerator.Current;
 						if (previousDistributions.Add(distribution)) // only yield new distributions
