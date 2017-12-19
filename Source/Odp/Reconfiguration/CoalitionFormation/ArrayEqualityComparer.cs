@@ -22,6 +22,7 @@
 
 namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 {
+	using System.Collections;
 	using System.Collections.Generic;
 	using System.Linq;
 
@@ -45,14 +46,27 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			if (ReferenceEquals(x, y))
 				return true;
-			if (x == null || y == null)
+			if (x == null || y == null || x.Length != y.Length)
 				return false;
-			return x.SequenceEqual(y, _elementComparer);
+
+			for (var i = 0; i < x.Length; ++i)
+				if (!_elementComparer.Equals(x[i], y[i]))
+					return false;
+
+			return true;
 		}
 
 		int IEqualityComparer<T[]>.GetHashCode(T[] obj)
 		{
-			return obj.Aggregate(0, (hash, elem) => hash << 1 | elem.GetHashCode());
+			var hash = 0xcbf29ce484222325;
+			for (var i = 0; i < obj.Length; ++i)
+			{
+				var elementHash = obj[i] == null ? 0 : _elementComparer.GetHashCode(obj[i]);
+				hash = (hash ^ (ulong)elementHash) * 1099511628211;
+			}
+			var u = (int)(hash >> (sizeof(ulong) / 2));
+			var l = (int)hash;
+			return u ^ l;
 		}
 	}
 }
