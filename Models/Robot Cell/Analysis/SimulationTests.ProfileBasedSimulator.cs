@@ -126,6 +126,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 				for (_step = 0; _step < numberOfSteps; _step++)
 				{
+					Console.WriteLine("Step " + _step);
 					foreach (var fault in _faults)
 					{
 						if (fault.Item2?.MTTF > 0 && !fault.Item1.IsActivated && rd.NextDouble() <= fault.Item2.DistributionValueToFail())
