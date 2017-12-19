@@ -239,7 +239,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				public static void Clear()
 				{
 					lock (_listeners)
-						_listeners.Clear();
+					{
+						for (var i = 0; i < _listeners.Count; ++i)
+							_listeners[i] = null;
+					}
 				}
 
 				public static Action Create(Action listener)
