@@ -29,9 +29,15 @@ namespace SafetySharp.CaseStudies.Visualizations
         //SolidColorBrush brush_Orange = new SolidColorBrush(Colors.Orange);
 
         private List<string> _task;
+        private List<string> doneCapabilities = new List<string>();
+        private ListBox lboxTask = new ListBox();
 
         public RobotCell()
         {
+            //Initialize task-box
+            lboxTask.Visibility = Visibility.Visible;
+            lboxTask.SelectionMode = SelectionMode.Multiple;
+
             /// <summary>
             /// Ictss6 manually, because of problems with the SampleModels-file
             /// </summary>
@@ -51,9 +57,7 @@ namespace SafetySharp.CaseStudies.Visualizations
             
             _builder.AddCart(ModelBuilderHelper.Route(0, 1), ModelBuilderHelper.Route(0, 2));
             _builder.AddCart(ModelBuilderHelper.Route(1, 3), ModelBuilderHelper.Route(1, 4), ModelBuilderHelper.Route(1, 2));
-
-            //_builder.CreateWorkpiece( ModelBuilderHelper.Insert, ModelBuilderHelper.Drill, ModelBuilderHelper.Tighten);
-
+            
             _builder.ChooseController<FastController>();
             _builder.CentralReconfiguration();
 
@@ -137,12 +141,16 @@ namespace SafetySharp.CaseStudies.Visualizations
                 Grid.SetColumn(cart, column);
             }
 
-            //Create resources
-            for (int i = 0; i < _model.Resources.Count; i++) {
-                var agent = _model.Resources[i];
-                var resource = new WorkpieceControl();
-                _workpieces.Add(resource);
-            }
+            //Create resources for numbers larger than one
+            //for (int i = 0; i < _model.Resources.Count; i++) {
+            //    var agent = _model.Resources[i];
+            //    var resource = new WorkpieceControl();
+            //    _workpieces.Add(resource);
+            //}
+
+            //Create resource (only one)
+            var resource = new WorkpieceControl();
+            _workpieces.Add(resource);
 
             //Display task 
             _task = UpdateTask();
@@ -247,6 +255,7 @@ namespace SafetySharp.CaseStudies.Visualizations
             _task = UpdateTask();
             PrintTask();
             DisplayTask();
+            UpdateTaskSelection();
 
             InvalidateArrange();
             InvalidateVisual();
@@ -277,9 +286,9 @@ namespace SafetySharp.CaseStudies.Visualizations
             return stateField.GetValue(machine).ToString();
         }
 
+        //Currently it could be called "InitializeTask", but it's built for eventually more workpieces, thus more tasks
         private List<string> UpdateTask()
         {
-            //Task task = _model.Tasks.First();
             Task task = (Task)_model.Resources.First().Task;
             ICapability[] capabilities = task.RequiredCapabilities;
             List<string> stringCapabilities = new List<string>();
@@ -288,13 +297,15 @@ namespace SafetySharp.CaseStudies.Visualizations
             {
                 if (cap.GetType() == typeof(ProduceCapability) || cap.GetType() == typeof(ConsumeCapability))
                 {
-                    stringCapabilities.Add(cap.CapabilityType.ToString());
+                    if (!stringCapabilities.Contains(cap.CapabilityType.ToString()))
+                        stringCapabilities.Add(cap.CapabilityType.ToString());
                 }
 
                 if (cap.GetType() == typeof(ProcessCapability))
                 {
                     var proc = (ProcessCapability)cap;
-                    stringCapabilities.Add(proc.ProductionAction.ToString());
+                    if (!stringCapabilities.Contains(proc.ProductionAction.ToString()))
+                        stringCapabilities.Add(proc.ProductionAction.ToString());
                 }
             }
 
@@ -315,35 +326,56 @@ namespace SafetySharp.CaseStudies.Visualizations
         }
 
         private void DisplayTask() {
-            ListBox lbox = new ListBox();
-            lbox.Visibility = Visibility.Visible;
-            lbox.Items.Add("Current Task:");
             
+            if (!lboxTask.Items.Contains("Current Task:"))
+                lboxTask.Items.Add("Current Task:");
+
             foreach (var cap in _task)
             {
-                lbox.Items.Add(cap);
+                if (!lboxTask.Items.Contains(cap))
+                    lboxTask.Items.Add(cap);
             }
 
             var row = visualizationArea.RowDefinitions.Count - 2;
             var col = visualizationArea.ColumnDefinitions.Count - 2;
 
             if (IsFreePosition(row, col)) {
-                visualizationArea.Children.Add(lbox);
-                Grid.SetColumn(lbox, col);
-                Grid.SetRow(lbox, row);
-            }
+                visualizationArea.Children.Add(lboxTask);
+                Grid.SetColumn(lboxTask, col);
+                Grid.SetRow(lboxTask, row);
+            }         
+        }
 
-            //To fix: doesn't select the capabilities or even print the output
-            foreach (var done in _model.Resources.First().State) {
-                if (done.GetType() == typeof(ProcessCapability)) {
-                    ProcessCapability proc = (ProcessCapability)done;
-                    lbox.SelectedItems.Add(proc.ProductionAction.ToString());
-                    Console.WriteLine("\n<State of the task>: " + proc);
-                } else {
-                    lbox.SelectedItems.Add(done.CapabilityType.ToString());
-                    Console.WriteLine("\n<State of the task>: " + done);
+        public void UpdateTaskSelection() {
+            foreach (var cap in doneCapabilities)
+            {
+
+                if (!lboxTask.SelectedItems.Contains(cap))
+                    lboxTask.SelectedItems.Add(cap);
+
+                Console.WriteLine("\nSelected Items: ");
+
+                foreach (var sel in lboxTask.SelectedItems)
+                {
+                    Console.WriteLine("Selected Item = " + sel);
+                }
+                Console.WriteLine();
+
+                if (cap == _task.ElementAt(_task.Count - 2))
+                {
+                    Console.WriteLine("COMPLETED!!!");
+                    break;
                 }
             }
+        }
+
+        public List<string> GetDoneCapabilities() {
+            return doneCapabilities;
+        }
+
+        public void AddDoneCapability(string cap) {
+            if (!doneCapabilities.Contains(cap))
+                doneCapabilities.Add(cap);
         }
     }
 }

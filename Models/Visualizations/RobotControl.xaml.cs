@@ -62,12 +62,14 @@
                         {
                             //currentRole.Text = cap.CapabilityType.ToString();
                             availableCapabilityList.SelectedItem = cap.CapabilityType.ToString();
+                            _container.AddDoneCapability(cap.CapabilityType.ToString());
                         }
                         else if (cap.GetType() == typeof(ProcessCapability))
                         {
                             ProcessCapability procCap = (ProcessCapability)cap;
                             //currentRole.Text = procCap.ProductionAction.ToString();
                             availableCapabilityList.SelectedItem = procCap.ProductionAction.ToString();
+                            _container.AddDoneCapability(procCap.ProductionAction.ToString());
                         }
                         else
                             availableCapabilityList.SelectedItem = null;

@@ -1,8 +1,9 @@
-﻿- Aktuelle Rolle des ausführenden Roboters anzeigen
-  => Anzeigen welcher RoboterAgent gerade an der Reihe ist (Wer ist in ExecuteRole?)
+﻿- Faults anzeigen (Welcher Fault?)
+Hierzu: Eigene Simulatorklasse (wie in Pressure-Tank) schreiben und mit Modell aus der Visualisierung füttern. 
+Visualisierung vs. Visualisierungslos quasi gegeneinander ablaufen lassen.
 
 - Routen der Carts anzeigen: Wo kann ein Cart hinfahren?
-- Faults anzeigen (Welcher Fault?)
+
 
 Am Ende evtl. noch:
 - Animiere das fahrende Cart
