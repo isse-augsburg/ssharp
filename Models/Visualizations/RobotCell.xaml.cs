@@ -25,9 +25,6 @@ namespace SafetySharp.CaseStudies.Visualizations
         private readonly Dictionary<uint, CartControl> _carts = new Dictionary<uint, CartControl>();
         private readonly List<WorkpieceControl> _workpieces = new List<WorkpieceControl>();
 
-        //private Rectangle workpiece = new Rectangle();
-        //SolidColorBrush brush_Orange = new SolidColorBrush(Colors.Orange);
-
         private List<string> _task;
         private List<string> doneCapabilities = new List<string>();
         private ListBox lboxTask = new ListBox();
@@ -38,9 +35,8 @@ namespace SafetySharp.CaseStudies.Visualizations
             lboxTask.Visibility = Visibility.Visible;
             lboxTask.SelectionMode = SelectionMode.Multiple;
 
-            /// <summary>
-            /// Ictss6 manually, because of problems with the SampleModels-file
-            /// </summary>
+            
+            //Ictss6 manually, because of problems with the SampleModels-file
             _builder = new ModelBuilder("model builder");
             _builder.DefineTask(5, ModelBuilderHelper.Produce, ModelBuilderHelper.Drill, ModelBuilderHelper.Insert, ModelBuilderHelper.Tighten, ModelBuilderHelper.Consume);
 
@@ -60,7 +56,7 @@ namespace SafetySharp.CaseStudies.Visualizations
             
             _builder.ChooseController<FastController>();
             _builder.CentralReconfiguration();
-
+            
             Model = _builder.Build();
             
             //Initialize/Update task
@@ -121,7 +117,7 @@ namespace SafetySharp.CaseStudies.Visualizations
                 Grid.SetRow(robot, row);
                 Grid.SetColumn(robot, col);
             }
-
+            
             //Create and place carts
             for (int i = 0; i < _model.CartAgents.Count; i++)
             {
@@ -142,13 +138,14 @@ namespace SafetySharp.CaseStudies.Visualizations
             }
 
             //Create resources for numbers larger than one
+
             //for (int i = 0; i < _model.Resources.Count; i++) {
             //    var agent = _model.Resources[i];
             //    var resource = new WorkpieceControl();
             //    _workpieces.Add(resource);
             //}
 
-            //Create resource (only one)
+            //Create resource (currently only one)
             var resource = new WorkpieceControl();
             _workpieces.Add(resource);
 
@@ -171,15 +168,6 @@ namespace SafetySharp.CaseStudies.Visualizations
         }
 
         private void PlaceWorkpiece() {
-            //workpiece.Width = 25; workpiece.Height = 25;
-            //workpiece.Margin = new Thickness(45, 30, 0, 0);
-
-            //if (workpiece.Parent == null) {
-            //    visualizationArea.Children.Add(workpiece);
-            //    workpiece.Visibility = Visibility.Hidden;
-            //}
-            //workpiece.Stroke = brush_Orange;
-            //workpiece.StrokeThickness = 2;
 
             foreach (var robot in _robots)
             {
@@ -189,16 +177,6 @@ namespace SafetySharp.CaseStudies.Visualizations
                     robot.Value.workpiece.Visibility = Visibility.Visible;
                 else
                     robot.Value.workpiece.Visibility = Visibility.Hidden;
-
-                //Version with extra rectangle as workpiece, outside the RobotControl-class, here in this class
-                //if (agent.HasResource)
-                //{
-                //    Console.WriteLine("<Robot with ID '" + agent.Id + "' has the resource>");
-
-                //    Grid.SetRow(workpiece, Grid.GetRow(robot.Value));
-                //    Grid.SetColumn(workpiece, Grid.GetColumn(robot.Value));
-                //    workpiece.Visibility = Visibility.Visible;
-                //}
             }
 
             foreach (var cart in _carts) {
