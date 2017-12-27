@@ -5,10 +5,10 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:SafetySharp.CaseStudies.Visualizations"
       mc:Ignorable="d" 
-      d:DesignHeight="278" d:DesignWidth="241.333">
+      d:DesignHeight="462" d:DesignWidth="324.333">
     <Viewbox StretchDirection="Both" Stretch="Uniform">
         <Grid Height="398" Width="362">
-            <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Right" Margin="0,121.429,10,10" Stroke="Black" Width="280">
+            <Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Right" Margin="0,140.643,10,10" Stroke="Black" Width="243.8">
                 <Rectangle.ContextMenu>
                     <ContextMenu StaysOpen="True">
                         <MenuItem x:Name="Broken" Header="'Broken'" IsCheckable="True" Click="OnBroken"/>
@@ -19,8 +19,9 @@
                 </Rectangle.OpacityMask>
             </Rectangle>
             <!---->
-            <Rectangle x:Name="workpiece" Width="100" Height="100" Margin="41,243,221,55" Stroke="Orange" StrokeThickness="5" Visibility="Visible"/>
+            <Rectangle x:Name="workpiece" Margin="69.019,246.349,192.98,51.651" Stroke="Orange" StrokeThickness="5" Visibility="Visible" Width="100" Height="100"/>
             <TextBlock x:Name="state" Height="75.953" Margin="10,0" TextWrapping="Wrap" Text="StateText" VerticalAlignment="Top" Foreground="White" FontSize="50" FontWeight="Bold"/>
+            <TextBlock x:Name="routesTxt" Height="59.69" Margin="10,75.953,67.34,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Foreground="White" FontSize="50" FontWeight="Bold"/>
         </Grid>
     </Viewbox>
 </UserControl>

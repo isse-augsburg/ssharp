@@ -3,9 +3,15 @@ using System.Windows.Controls;
 using SafetySharp.CaseStudies.RobotCell.Modeling.Controllers;
 using System.Windows;
 using SafetySharp.Modeling;
+using System.Windows.Shapes;
 
 namespace SafetySharp.CaseStudies.Visualizations
-{ 
+{
+    using CaseStudies.RobotCell.Modeling.Plants;
+    using System;
+    using System.Collections.Generic;
+    using System.Windows.Media;
+
     /// <summary>
     /// Interaktionslogik für CartControl.xaml
     /// </summary>
@@ -31,6 +37,9 @@ namespace SafetySharp.CaseStudies.Visualizations
                 MoveTo(newPosition);
                 _positioned = newPosition.Id;
             }
+
+            DisplayCartRoutes();
+            //PrintCartRoutes();
 
             InvalidateArrange();
             InvalidateVisual();
@@ -59,6 +68,52 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         public CartAgent GetCartAgent() {
             return _cartAgent;
+        }
+
+        public void DisplayCartRoutes()
+        {
+            List<string> routes = new List<string>();
+            var routesString = "";
+
+            foreach (var input in _cartAgent.Inputs)
+            {
+                if (!routes.Contains((input.Id + 1).ToString()))
+                    routes.Add((input.Id + 1).ToString());
+            }
+
+            foreach (var route in routes)
+            {
+                routesString += route + ", ";
+            }
+
+            if (routesString.Length > 2)
+                routesTxt.Text = routesString.Remove(routesString.Length - 2, 2);
+            else
+                routesTxt.Text = routesString;
+        }
+
+        public void PrintCartRoutes()
+        {
+            var routes = _cartAgent.Cart.Routes;
+            int i = 0;
+
+            routesTxt.Text = "";
+            Console.WriteLine();
+
+            foreach (var route in routes)
+            {
+                var nameR1 = route.Robot1.Name;
+                var nameR2 = route.Robot2.Name;
+                Console.WriteLine("Route {0} for the cart with the id " + _cartAgent.Id + " is: " + nameR1 + " to " + nameR2, i + 1);
+                routesTxt.Text += CreateRouteString(nameR1, nameR2);
+                i++;
+            }
+            Console.WriteLine("Final routesTxt string: " + routesTxt.Text);
+        }
+
+        public string CreateRouteString(string r1, string r2)
+        {
+            return "(" + r1+ "," + r2 + ") ";
         }
     }
 }

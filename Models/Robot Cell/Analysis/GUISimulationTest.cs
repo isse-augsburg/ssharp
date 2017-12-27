@@ -204,6 +204,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
                 PrintResource(model.Resources.First());
                 //For some reason there are no capabilities in the execution state
                 Console.WriteLine("\nRobot.RoleExecutor has the following state: " + GetExecutionState(model.Resources.First().State.ToList()));
+                Console.WriteLine("model.Resources.First().State.ToString()" + model.Resources.First().State);
+                foreach (var resource in model.Resources)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Name of resource: " + resource.Workpiece.Name);
+                    Console.WriteLine("Count of resource state: " + resource.State.Count());
+                    if (resource.State.Count() > 0)
+                        Console.WriteLine("\n<Last cap per resource>: "+ resource.State.Last());
+                }
+                Console.WriteLine();
+                Console.WriteLine();
             }
 
             Assert.True(model.RobotAgents.ElementAt(2).DrillBroken.IsActivated);

@@ -28,6 +28,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         private List<string> _task;
         private List<string> doneCapabilities = new List<string>();
         private ListBox lboxTask = new ListBox();
+        private List<TextBox> routes = new List<TextBox>();
 
         public RobotCell()
         {
@@ -111,9 +112,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
                 var row = 2 * (i / gridWidth);
                 var col = 2 * (i % gridWidth);
-
-                //Console.Out.WriteLine("<WIDTH> " + gridWidth + "<ROW> " + row + "<COLUMN>" + col);
-
+                
                 Grid.SetRow(robot, row);
                 Grid.SetColumn(robot, col);
             }
@@ -155,6 +154,10 @@ namespace SafetySharp.CaseStudies.Visualizations
 
             //Place Workpiece/Resource
             PlaceWorkpiece();
+
+            //Draw routes for the carts
+            //DrawRoutes();
+            PrintCartRoutes();
 
             //Display the current role of a robot
             DisplayRole();
@@ -234,6 +237,8 @@ namespace SafetySharp.CaseStudies.Visualizations
             PrintTask();
             DisplayTask();
             UpdateTaskSelection();
+
+            PrintCartRoutes();
 
             InvalidateArrange();
             InvalidateVisual();
@@ -355,5 +360,66 @@ namespace SafetySharp.CaseStudies.Visualizations
             if (!doneCapabilities.Contains(cap))
                 doneCapabilities.Add(cap);
         }
+
+        //public void DrawRoutes()
+        //{
+        //    //Test
+        //    Line line = new Line();
+        //    line.Stroke = Brushes.LightGreen;
+        //    line.X1 = Grid.GetColumn(_carts.First().Value);
+        //    line.X2 = Grid.GetColumn(_robots.First().Value);
+        //    line.Y1 = Grid.GetRow(_carts.First().Value);
+        //    line.Y2 = Grid.GetRow(_robots.First().Value);
+
+        //    line.StrokeThickness = 3;
+        //    line.Visibility = Visibility.Visible;
+        //    visualizationArea.Children.Add(line);
+        //    //MyCanvas.Children.Add(line);
+        //}
+
+        public void PrintCartRoutes()
+        {
+            foreach (var child in visualizationArea.Children)
+            {
+                if (child.GetType() == typeof(ListBox))
+                    Console.WriteLine("\nType is ListBox\n");
+            }
+
+            foreach (var cart in _carts.Values)
+            {
+                TextBox routeBox = new TextBox();
+                Grid.SetColumn(routeBox, Grid.GetColumn(cart) - 1);
+                Grid.SetRow(routeBox, Grid.GetRow(cart));
+                visualizationArea.Children.Add(routeBox);
+                routeBox.Visibility = Visibility.Visible;
+
+                var agent = cart.GetCartAgent();
+                var cartPlant = agent.Cart;
+
+                var routesPlant = cartPlant.Routes;
+                int i = 0;
+
+                routeBox.Text = "";
+                Console.WriteLine();
+
+                foreach (var route in routesPlant)
+                {
+                    var nameR1 = route.Robot1.Name;
+                    var nameR2 = route.Robot2.Name;
+                    Console.WriteLine("Route {0} for the cart with the id " + agent.Id + " is: " + nameR1 + " to " + nameR2, i + 1);
+                    routeBox.Text += cart.CreateRouteString(nameR1, nameR2);
+                    i++;
+                }
+                Console.WriteLine("Final routesTxt string: " + routeBox.Text);
+            }
+        }
+
+        //public void CreateRouteDisplays()
+        //{
+        //    for (int i = 0; i < _carts.Count; i++)
+        //    {
+        //        TextBox route = new TextBox();
+        //    }
+        //}
     }
 }

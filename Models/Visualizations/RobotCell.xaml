@@ -9,16 +9,15 @@
              d:DesignHeight="500" d:DesignWidth="700">
     <DockPanel LastChildFill="True">
         <infrastructure:SimulationControls x:Name="SimulationControls" DockPanel.Dock="Top" />
-
-        <Grid x:Name="visualizationArea" ShowGridLines="True">
-            <Grid.RowDefinitions>
-                
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                
-            </Grid.ColumnDefinitions>
-        </Grid>
         
+            <Grid x:Name="visualizationArea" ShowGridLines="True">
+                <Grid.RowDefinitions>
+                
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                
+                </Grid.ColumnDefinitions>
+            </Grid>
     </DockPanel>
 
 </UserControl>
