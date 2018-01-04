@@ -136,6 +136,12 @@ namespace SafetySharp.CaseStudies.Visualizations
                 Grid.SetColumn(cart, column);
             }
 
+            //Create textboxes for displaying the carts' routes
+            for (int i = 0; i < _carts.Count; i++)
+            {
+                routes.Add(new TextBox());
+            }
+
             //Create resources for numbers larger than one
 
             //for (int i = 0; i < _model.Resources.Count; i++) {
@@ -387,10 +393,12 @@ namespace SafetySharp.CaseStudies.Visualizations
 
             foreach (var cart in _carts.Values)
             {
-                TextBox routeBox = new TextBox();
+                TextBox routeBox = routes.ElementAt((int)cart.GetCartAgent().Id % _carts.Count);
+
                 Grid.SetColumn(routeBox, Grid.GetColumn(cart) - 1);
                 Grid.SetRow(routeBox, Grid.GetRow(cart));
-                visualizationArea.Children.Add(routeBox);
+                if (!visualizationArea.Children.Contains(routeBox))
+                    visualizationArea.Children.Add(routeBox);
                 routeBox.Visibility = Visibility.Visible;
 
                 var agent = cart.GetCartAgent();
@@ -399,7 +407,7 @@ namespace SafetySharp.CaseStudies.Visualizations
                 var routesPlant = cartPlant.Routes;
                 int i = 0;
 
-                routeBox.Text = "";
+                routeBox.Text = "Routes:\n";
                 Console.WriteLine();
 
                 foreach (var route in routesPlant)
@@ -410,16 +418,10 @@ namespace SafetySharp.CaseStudies.Visualizations
                     routeBox.Text += cart.CreateRouteString(nameR1, nameR2);
                     i++;
                 }
+
+                routeBox.IsReadOnly = true;
                 Console.WriteLine("Final routesTxt string: " + routeBox.Text);
             }
         }
-
-        //public void CreateRouteDisplays()
-        //{
-        //    for (int i = 0; i < _carts.Count; i++)
-        //    {
-        //        TextBox route = new TextBox();
-        //    }
-        //}
     }
 }

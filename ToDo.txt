@@ -1,15 +1,11 @@
-﻿- Faults anzeigen (Welcher Fault?)
-Hierzu: Eigene Simulatorklasse (wie in Pressure-Tank) schreiben und mit Modell aus der Visualisierung füttern. 
-Visualisierung vs. Visualisierungslos quasi gegeneinander ablaufen lassen.
-
-Fürs Testen benutze ich ReSharper
+﻿Fürs Testen benutze ich ReSharper
 
 - Teste den einzelnen Fault
 - Routen der Carts anzeigen: Wo kann ein Cart hinfahren?
 
-Ich kann auch nach dem fehler suchen:
+Ich kann auch nach dem Fehler suchen:
 - Wird die Methode ApplyCapability(ConsumeCapability) in RobotAgent aufgerufen?
-
 
 Am Ende evtl. noch:
 - Animiere das fahrende Cart
+- Faults anzeigen (Welcher Fault?)

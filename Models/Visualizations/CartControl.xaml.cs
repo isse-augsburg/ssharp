@@ -92,24 +92,24 @@ namespace SafetySharp.CaseStudies.Visualizations
                 routesTxt.Text = routesString;
         }
 
-        public void PrintCartRoutes()
-        {
-            var routes = _cartAgent.Cart.Routes;
-            int i = 0;
+        //public void PrintCartRoutes()
+        //{
+        //    var routes = _cartAgent.Cart.Routes;
+        //    int i = 0;
 
-            routesTxt.Text = "";
-            Console.WriteLine();
+        //    routesTxt.Text = "Routes:\n";
+        //    Console.WriteLine();
 
-            foreach (var route in routes)
-            {
-                var nameR1 = route.Robot1.Name;
-                var nameR2 = route.Robot2.Name;
-                Console.WriteLine("Route {0} for the cart with the id " + _cartAgent.Id + " is: " + nameR1 + " to " + nameR2, i + 1);
-                routesTxt.Text += CreateRouteString(nameR1, nameR2);
-                i++;
-            }
-            Console.WriteLine("Final routesTxt string: " + routesTxt.Text);
-        }
+        //    foreach (var route in routes)
+        //    {
+        //        var nameR1 = route.Robot1.Name;
+        //        var nameR2 = route.Robot2.Name;
+        //        Console.WriteLine("Route {0} for the cart with the id " + _cartAgent.Id + " is: " + nameR1 + " to " + nameR2, i + 1);
+        //        routesTxt.Text += CreateRouteString(nameR1, nameR2);
+        //        i++;
+        //    }
+        //    Console.WriteLine("Final routesTxt string: " + routesTxt.Text);
+        //}
 
         public string CreateRouteString(string r1, string r2)
         {
