@@ -444,10 +444,8 @@ namespace BachelorarbeitLustre {
                 }
             }
             catch (Exception e) {
-                Console.WriteLine("Error reading the file:");
-                Console.WriteLine(e.Message);
-                Console.WriteLine("\nPress any key to end...");
-                Console.ReadKey();
+				Program.outputTextWriter.WriteLine("Error reading the file:");
+				Program.outputTextWriter.WriteLine(e.Message);
             }
         }
 

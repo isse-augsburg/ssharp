@@ -103,7 +103,7 @@ namespace BachelorarbeitLustre {
                     if (this.getAction().getIndex() < program.signals.Count) {
                         if (!Program.modelChecking)
                         {
-                            Console.WriteLine("Signal " + program.signals[this.getAction().getIndex()].getName() + " returns: " + program.signals[this.getAction().getIndex()].getVariable().getValue().ToString());
+							Program.outputTextWriter.WriteLine("Signal " + program.signals[this.getAction().getIndex()].getName() + " returns: " + program.signals[this.getAction().getIndex()].getVariable().getValue().ToString());
                         }
                         program.output.Add(program.signals[this.getAction().getIndex()].getVariable().getValue());
                     }

@@ -61,6 +61,7 @@ namespace BachelorarbeitLustre {
         const string cygwinPath = "c:\\cygwin64\\bin\\lustre\\bin";
         public static string ocExaplesPath = "";
 		public static string ocExaplesPathSuffix = "\\Examples\\";
+	    public static TextWriter outputTextWriter = Console.Out;
 
 		public Program(string fileName, string mainNode) {
             //Compiling Lustre-Program
@@ -81,9 +82,8 @@ namespace BachelorarbeitLustre {
                         sw.WriteLine("sh lus2oc " + ocExaplesPath + fileName + ".lus " + mainNode + " -o " + ocExaplesPath + fileName + ".oc");
                     }
                 }
-                Console.WriteLine("Compiling your .lus file to .oc file.\nPress any key to continue...");
+				outputTextWriter.WriteLine("Compiling your .lus file to .oc file.\nPress any key to continue...");
                 Console.ReadKey();
-                Console.Clear();
             }
 
             output = new List<object>();
@@ -109,7 +109,7 @@ namespace BachelorarbeitLustre {
             while (state != -1 && (input.Length > 0) ? (input[0].Count > 0) : true) {
                 executeProcedure();
             }
-            Console.WriteLine("\nPress any key to end...");
+			outputTextWriter.WriteLine("\nPress any key to end...");
             Console.ReadKey();
         }
 
@@ -157,8 +157,8 @@ namespace BachelorarbeitLustre {
                 }
             }
             catch (Exception e) {
-                Console.WriteLine("Error executing the program:");
-                Console.WriteLine(e.Message);
+				outputTextWriter.WriteLine("Error executing the program:");
+				outputTextWriter.WriteLine(e.Message);
             }
         }
 
@@ -282,11 +282,9 @@ namespace BachelorarbeitLustre {
         }
 
         static void Main(string[] args)
-        {
-	        var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
-			var path = new FileInfo(assemblyLocation).DirectoryName;
-			ocExaplesPath = path + ocExaplesPathSuffix;
-            Console.WriteLine("Select Mode:\n(1)Model Checking\n(2)Run Pressure Tank\n(3)Create OC-file");
+		{
+			ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
+			Console.WriteLine("Select Mode:\n(1)Model Checking\n(2)Run Pressure Tank\n(3)Create OC-file");
             var key = Console.ReadKey();
             Console.WriteLine("");
             if (key.Key.Equals(ConsoleKey.D1) || key.Key.Equals(ConsoleKey.NumPad1)) {

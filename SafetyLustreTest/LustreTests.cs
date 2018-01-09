@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,31 +9,45 @@ using ISSE.SafetyChecking.Utilities;
 using Tests.SimpleExecutableModel;
 using Xunit;
 using BachelorarbeitLustre;
+using Tests.Utilities;
+using Xunit.Abstractions;
 
 namespace Test {
 
 
     public class LustreModelCheckingTests {
-        [Fact]
-        public void CheckPressureTankGenerateCounterExample() {
-            Program.ocExaplesPath = System.Reflection.Assembly.GetExecutingAssembly()
-                                .Location.Substring(0,
-                                    System.Reflection.Assembly.GetExecutingAssembly().Location.IndexOf("BachelorarbeitLustre") + 20) + "\\Test\\Examples\\";
-            Formula invariant = new LustrePressureBelowThreshold();
+
+		protected TestTraceOutput Output { get; }
+
+		public LustreModelCheckingTests(ITestOutputHelper output)
+		{
+			Output = new TestTraceOutput(output);
+			Program.outputTextWriter = Output.TextWriterAdapter();
+		}
+
+		[Fact]
+        public void CheckPressureTankGenerateCounterExample(){
+			Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
+
+			Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 30;
             var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
-            modelChecker.CheckInvariant(invariant, 100);
+			modelChecker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+
+			modelChecker.CheckInvariant(invariant, 100);
         }
 
         [Fact]
-        public void CheckPressureTankInfiniteModelChecking() {
-            Program.ocExaplesPath = System.Reflection.Assembly.GetExecutingAssembly()
-                                .Location.Substring(0,
-                                    System.Reflection.Assembly.GetExecutingAssembly().Location.IndexOf("BachelorarbeitLustre") + 20) + "\\Test\\Examples\\";
-            Formula invariant = new LustrePressureBelowThreshold();
+        public void CheckPressureTankInfiniteModelChecking()
+		{
+			Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
+
+			Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 50;
             var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
-            modelChecker.CheckInvariant(invariant, 100);
+			modelChecker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+
+			modelChecker.CheckInvariant(invariant, 100);
         }
 
         [Fact]
@@ -102,11 +117,10 @@ namespace Test {
         [Fact]
         public void CheckSerializationDelegate() {
             unsafe
-            {
-                Program.ocExaplesPath = System.Reflection.Assembly.GetExecutingAssembly()
-                                            .Location.Substring(0,
-                                                System.Reflection.Assembly.GetExecutingAssembly().Location.IndexOf("BachelorarbeitLustre") + 20) + "\\Test\\Examples\\";
-                LustreModelBase model = new LustreModelBase("pressureTank");
+			{
+				Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
+
+				LustreModelBase model = new LustreModelBase("pressureTank");
 
                 for (int i = 0; i < model.program.variables.Count; i++) {
                     if (model.program.variables[i].getType() == 0) {
