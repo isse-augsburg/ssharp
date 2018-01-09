@@ -90,10 +90,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				coalition.MergeCtf(minTfr);
 				await coalition.InviteCtfAgents();
 
+				var connectionManager = new AgentConnectionManager();
+
 				do
 				{
 					Debug.WriteLine("Calculating distributions");
-					foreach (var distribution in CalculateCapabilityDistributions(coalition))
+					foreach (var distribution in CalculateCapabilityDistributions(coalition, connectionManager))
 					{
 						Debug.WriteLine("Distribution found");
 						var reconfSuggestion = new ConfigurationSuggestion(coalition, distribution);
@@ -108,7 +110,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 						// use dijkstra to find resource flow
 						Debug.WriteLine("Computing resource flow");
-						var resourceFlow = await ComputeResourceFlow(reconfSuggestion);
+						var resourceFlow = await ComputeResourceFlow(reconfSuggestion, connectionManager);
 						Debug.WriteLine("ResourceFlow {0} found", (object)(resourceFlow == null ? "not" : "indeed"));
 						if (resourceFlow != null)
 						{
@@ -177,8 +179,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		///   Agents recruited or changes to the CTF between two yielded distributions are tacken into account.
 		/// </summary>
 		/// <param name="coalition">The coalition used to find distributions.</param>
+		/// <param name="connectionOracle">Information about possible connections between agents.</param>
 		/// <returns>A lazily computed sequence of distributions, so that each distribution's length equals the CTF length at that moment.</returns>
-		private static IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition)
+		private static IEnumerable<BaseAgent[]> CalculateCapabilityDistributions(Coalition coalition, IConnectionOracle connectionOracle)
 		{
 			DistributionCalculator calculator;
 			int agentCount;
@@ -188,7 +191,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			do
 			{
-				calculator = new DistributionCalculator(coalition.CTF, coalition.RecoveredDistribution, coalition.BaseAgents, DefaultConnectionOracle.Instance);
+				calculator = new DistributionCalculator(coalition.CTF, coalition.RecoveredDistribution, coalition.BaseAgents, connectionOracle);
 				agentCount = coalition.BaseAgents.Count;
 
 				using (var enumerator = calculator.CalculateDistributions().GetEnumerator())
@@ -208,31 +211,45 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			} while (!calculator.Fragment.Equals(coalition.CTF) || coalition.BaseAgents.Count != agentCount);
 		}
 
-		protected async Task<IEnumerable<BaseAgent>> ComputeResourceFlow(ConfigurationSuggestion configurationSuggestion)
+		protected async Task<IEnumerable<BaseAgent>> ComputeResourceFlow(ConfigurationSuggestion configurationSuggestion, AgentConnectionManager connectionManager)
 		{
 			var agents = configurationSuggestion.ComputeAgentsToConnect();
 			Debug.Assert(agents.Length > 0);
+
+			// don't waste time if no connection is possible
+			if (connectionManager.ConnectionImpossible(agents))
+				return null;
 
 			var resourceFlow = new List<BaseAgent> { agents[0] };
 
 			for (var i = 1; i < agents.Length; ++i)
 			{
-				var shortestPaths = ComputeShortestPaths(configurationSuggestion, agents[i - 1]);
-				IEnumerable<BaseAgent> connection = shortestPaths.GetPathFromSource(destination: agents[i]);
-
-				if (connection == null)
+				var connection = connectionManager.GetConnection(agents[i], agents[i-1]);
+				if (connection == null) // connection unknown, but might still exist
 				{
-					var canFindConnection = await RecruitResourceFlowAgentsForPath(configurationSuggestion.Coalition, shortestPaths, agents[i]);
-					if (!canFindConnection)
-						return null;
+					var shortestPaths = ComputeShortestPaths(configurationSuggestion, agents[i - 1]);
+					connection = shortestPaths.GetPathFromSource(destination: agents[i]);
 
-					connection = ComputeShortestPaths(configurationSuggestion, source: agents[i - 1]).GetPathFromSource(destination: agents[i]);
+					if (connection == null) // connection impossible with current agents, but perhaps possible with additional agents
+					{
+						var canFindConnection = await RecruitResourceFlowAgentsForPath(configurationSuggestion.Coalition, shortestPaths, agents[i]);
+						if (!canFindConnection) // no connection possible at all
+						{
+							connectionManager.RecordConnectionFailure(agents[i-1], agents[i]);
+							return null;
+						}
+
+						// a connection is possible with the newly recruited agents - find it
+						connection = ComputeShortestPaths(configurationSuggestion, source: agents[i - 1]).GetPathFromSource(destination: agents[i]);
+					}
+
 					Debug.Assert(connection != null);
+					connectionManager.RecordConnection(agents[i-1], agents[i], connection);
 				}
 
-				connection = connection.Skip(1); // connection.first == resourceFlow.last => don't duplicate it
-				resourceFlow.AddRange(connection);
-				configurationSuggestion.AddResourceFlowAgents(connection);
+				var connectionSuffix = connection.Skip(1); // connection.first == resourceFlow.last => don't duplicate it
+				resourceFlow.AddRange(connectionSuffix);
+				configurationSuggestion.AddResourceFlowAgents(connectionSuffix);
 			}
 
 			Debug.Assert(resourceFlow.Count >= agents.Length);
