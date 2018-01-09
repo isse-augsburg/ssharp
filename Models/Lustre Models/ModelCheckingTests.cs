@@ -20,7 +20,9 @@ namespace Lustre_Models
 
 			Formula invariant = new LustrePressureBelowThreshold();
 			LustrePressureBelowThreshold.threshold = 50;
-			var faults = new Dictionary<string, Fault>();
+			var faults = new List<Fault>();
+			faults.Add(new TransientFault() { Name = "fault_k1", Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) });
+			faults.Add(new TransientFault() { Name = "fault_sensor", Identifier = 1, ProbabilityOfOccurrence = new Probability(0.2) });
 			var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
 
 			modelChecker.CheckInvariant(invariant, 100);

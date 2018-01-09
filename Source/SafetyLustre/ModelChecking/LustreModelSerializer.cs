@@ -35,8 +35,9 @@ namespace Tests.SimpleExecutableModel {
 
     public static unsafe class LustreModelSerializer {
 	    public static void WriteFault(BinaryWriter writer, Fault fault)
-	    {
-		    if (fault is TransientFault)
+		{
+			writer.Write(fault.Name);
+			if (fault is TransientFault)
 		    {
 			    writer.Write(1);
 		    }
@@ -47,7 +48,8 @@ namespace Tests.SimpleExecutableModel {
 			else
 		    {
 			    throw new Exception("Not implemented yet");
-		    }
+			}
+			writer.Write(fault.Identifier);
 			if (fault.ProbabilityOfOccurrence.HasValue)
 				writer.Write(fault.ProbabilityOfOccurrence.Value.Value);
 			else
@@ -56,8 +58,10 @@ namespace Tests.SimpleExecutableModel {
 
 	    public static Fault ReadFault(BinaryReader reader)
 	    {
-		    var type = reader.ReadInt32();
-		    var probabilityValue = reader.ReadDouble();
+			var name = reader.ReadString();
+			var type = reader.ReadInt32();
+			var identifier = reader.ReadInt32();
+			var probabilityValue = reader.ReadDouble();
 		    Fault fault;
 			if (type == 1)
 		    {
@@ -71,6 +75,8 @@ namespace Tests.SimpleExecutableModel {
 			{
 				throw new Exception("Not implemented yet");
 			}
+		    fault.Name = name;
+			fault.Identifier = identifier;
 			// ReSharper disable once CompareOfFloatsByEqualityOperator
 			fault.ProbabilityOfOccurrence =
 				probabilityValue == -1.0 ? null : (Probability?)new Probability(probabilityValue);
@@ -147,7 +153,7 @@ namespace Tests.SimpleExecutableModel {
 	        }
         }
 
-        public static byte[] CreateByteArray(string ocFileName, IDictionary<string, Fault> faults, Formula[] formulas) {
+        public static byte[] CreateByteArray(string ocFileName, Fault[] faults, Formula[] formulas) {
             Requires.NotNull(ocFileName, nameof(ocFileName));
 
             using (var buffer = new MemoryStream())
@@ -156,14 +162,13 @@ namespace Tests.SimpleExecutableModel {
                 writer.Write(ocFileName);
 
 				// write faults
-				writer.Write((uint)faults.Count);
+				writer.Write((uint)faults.Length);
 				var faultToIndex = new Dictionary<Fault, int>();
 				var faultIndex = 0;
 				foreach (var fault in faults)
 				{
-					writer.Write(fault.Key);
-					WriteFault(writer, fault.Value);
-					faultToIndex.Add(fault.Value, faultIndex);
+					WriteFault(writer, fault);
+					faultToIndex.Add(fault, faultIndex);
 					faultIndex++;
 				}
 
@@ -189,13 +194,12 @@ namespace Tests.SimpleExecutableModel {
 
 				// read faults
 				var faultNumber = reader.ReadUInt32();
-				var faults = new Dictionary<string, Fault>();
+				var faults = new List<Fault>();
 				var indexToFault = new Dictionary<int, Fault>();
 				for (var i = 0; i < faultNumber; ++i)
 				{
-					var faultName = reader.ReadString();
 					var fault = ReadFault(reader);
-					faults.Add(faultName,fault);
+					faults.Add(fault);
 					indexToFault.Add(i, fault);
 				}
 

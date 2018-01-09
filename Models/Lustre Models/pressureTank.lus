@@ -1,8 +1,8 @@
-node TANK(fault_k1: bool; press: bool) returns (level: int);
+node TANK(fault_k1, fault_sensor: bool; press: bool) returns (level: int);
 var k1: bool; k2: bool; sensor: bool; timer: int;
 let
 	sensor = false -> 
-		if (level > 39) then true
+		if (level > 39 and not fault_sensor) then true
 		else false;
 
 	k1 = false -> 

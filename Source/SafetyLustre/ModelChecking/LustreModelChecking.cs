@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System.Collections.Generic;
+using System.Linq;
 using ISSE.SafetyChecking.Modeling;
 
 namespace Tests.SimpleExecutableModel
@@ -38,18 +39,18 @@ namespace Tests.SimpleExecutableModel
 	
 	public sealed class LustreSafetyAnalysis : SafetyAnalysis<LustreExecutableModel>
 	{
-		public SafetyAnalysisResults<LustreExecutableModel> ComputeMinimalCriticalSets(string ocFileName, IDictionary<string,Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue)
+		public SafetyAnalysisResults<LustreExecutableModel> ComputeMinimalCriticalSets(string ocFileName, IEnumerable<Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
 			Program.modelChecking = true;
-			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults, hazard);
+			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults.ToArray(), hazard);
 			return ComputeMinimalCriticalSets(modelCreator, hazard, maxCardinality);
 		}
 
-		public static SafetyAnalysisResults<LustreExecutableModel> AnalyzeHazard(string ocFileName, IDictionary<string, Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue,
+		public static SafetyAnalysisResults<LustreExecutableModel> AnalyzeHazard(string ocFileName, IEnumerable<Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue,
 														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
 		{
 			Program.modelChecking = true;
-			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults, hazard);
+			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults.ToArray(), hazard);
 			return AnalyzeHazard(modelCreator, hazard, maxCardinality, backend);
 		}
 	}
@@ -58,8 +59,8 @@ namespace Tests.SimpleExecutableModel
 	{
 		public static int maxValue = 1000;
 
-		public LustreQualitativeChecker(string ocFileName, IDictionary<string, Fault> faults, Formula invariant)
-			: base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults, invariant))
+		public LustreQualitativeChecker(string ocFileName, IEnumerable<Fault> faults, Formula invariant)
+			: base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults.ToArray(), invariant))
 		{
 			Program.modelChecking = true;
 		}
@@ -73,7 +74,7 @@ namespace Tests.SimpleExecutableModel
 
 	public sealed class LustreMarkovChainFromExecutableModelGenerator : MarkovChainFromExecutableModelGenerator<LustreExecutableModel>
 	{
-		public LustreMarkovChainFromExecutableModelGenerator(string ocFileName, IDictionary<string, Fault> faults) : base(LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults))
+		public LustreMarkovChainFromExecutableModelGenerator(string ocFileName, IEnumerable<Fault> faults) : base(LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults.ToArray()))
 		{
 			Program.modelChecking = true;
 		}

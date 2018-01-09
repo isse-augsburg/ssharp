@@ -55,7 +55,7 @@ namespace Tests.SimpleExecutableModel
 		{
 			var modelWithFormula = LustreModelSerializer.DeserializeFromByteArray(SerializedModel);
 			Model = modelWithFormula.Item1;
-			Faults = Model.faults.Values.ToArray();
+			Faults = Model.faults.Values.OrderBy(fault => fault.Identifier).ToArray();
 			Formulas = modelWithFormula.Item2;
 
 			var atomarPropositionVisitor = new CollectAtomarPropositionFormulasVisitor();
@@ -102,7 +102,7 @@ namespace Tests.SimpleExecutableModel
 			}
 		}
 		
-		public static CoupledExecutableModelCreator<LustreExecutableModel> CreateExecutedModelCreator(string ocFileName, IDictionary<string, Fault> faults, params Formula[] formulasToCheckInBaseModel)
+		public static CoupledExecutableModelCreator<LustreExecutableModel> CreateExecutedModelCreator(string ocFileName, Fault[] faults, params Formula[] formulasToCheckInBaseModel)
 		{
 			Requires.NotNull(ocFileName, nameof(ocFileName));
 			Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
@@ -123,11 +123,11 @@ namespace Tests.SimpleExecutableModel
 				textWriter.WriteLine("bytes[0-4] state: int");
 				textWriter.WriteLine("bytes[5-12] permanent faults: long");
 			};
-			var flatFaults = faults.Values.ToArray();
+			var flatFaults = faults.OrderBy(fault => fault.Identifier).ToArray();
 			return new CoupledExecutableModelCreator<LustreExecutableModel>(creatorFunc, writeOptimizedStateVectorLayout, ocFileName, formulasToCheckInBaseModel, flatFaults);
 		}
 
-		public static ExecutableModelCreator<LustreExecutableModel> CreateExecutedModelFromFormulasCreator(string ocFileName, IDictionary<string, Fault> faults)
+		public static ExecutableModelCreator<LustreExecutableModel> CreateExecutedModelFromFormulasCreator(string ocFileName, Fault[] faults)
 		{
 			Requires.NotNull(ocFileName, nameof(ocFileName));
 

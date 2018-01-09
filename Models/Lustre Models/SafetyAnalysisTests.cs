@@ -20,10 +20,15 @@ namespace Lustre_Models
 			BachelorarbeitLustre.Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\";
 
 			Formula invariant = new LustrePressureBelowThreshold();
+			Formula hazard = new UnaryFormula(invariant, UnaryOperator.Not);
+
 			LustrePressureBelowThreshold.threshold = 50;
 
-			var faults = new Dictionary<string, Fault>();
-			var result = LustreSafetyAnalysis.AnalyzeHazard("pressureTank", faults, invariant);
+			var faults = new List<Fault>();
+			faults.Add(new TransientFault() { Name= "fault_k1", Identifier= 0, ProbabilityOfOccurrence = new Probability(0.1) });
+			faults.Add(new TransientFault() { Name= "fault_sensor", Identifier = 1, ProbabilityOfOccurrence = new Probability(0.2) });
+			var result = LustreSafetyAnalysis.AnalyzeHazard("pressureTank", faults, hazard);
+			Console.WriteLine($"Minimal Critical Sets: {result.MinimalCriticalSets.Count}");
 		}
 	}
 }

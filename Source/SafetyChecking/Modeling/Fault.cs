@@ -86,7 +86,7 @@ namespace ISSE.SafetyChecking.Modeling
 		/// <summary>
 		///   Gets or sets an identifier for the fault.
 		/// </summary>
-		internal int Identifier { get; set; } = -1;
+		public int Identifier { get; set; } = -1;
 
 		/// <summary>
 		///   Gets a value indicating whether the fault is used.

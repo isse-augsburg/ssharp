@@ -30,7 +30,7 @@ namespace Tests.SimpleExecutableModel
 {
 	public class LustreModelBase
 	{
-		public LustreModelBase(string ocFileName, Dictionary<string, Fault> faults)
+		public LustreModelBase(string ocFileName, IEnumerable<Fault> faults)
 		{
             program = new Program(ocFileName, null);
 			var numberOfInputQueuesNeeded =
@@ -50,7 +50,7 @@ namespace Tests.SimpleExecutableModel
 
 		    output = 0;
 
-			this.faults = faults;
+			this.faults = faults.ToDictionary( fault => fault.Name, fault => fault);
 		}
 
         public Program program;

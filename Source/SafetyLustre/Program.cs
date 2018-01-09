@@ -294,7 +294,7 @@ namespace BachelorarbeitLustre {
             Console.WriteLine("");
             if (key.Key.Equals(ConsoleKey.D1) || key.Key.Equals(ConsoleKey.NumPad1)) {
                 Formula invariant = new LustrePressureBelowThreshold();
-				var faults = new Dictionary<string, Fault>();
+				var faults = new Fault[0];
                 var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
                 var result = modelChecker.CheckInvariant(invariant, 100);
                 Console.WriteLine("Checked formula: pressure < " + LustrePressureBelowThreshold.threshold);

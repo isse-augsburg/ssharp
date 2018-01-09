@@ -24,8 +24,9 @@ namespace Lustre_Models
 			Formula invariant = new LustrePressureBelowThreshold();
 			Formula hazard = new UnaryFormula(invariant,UnaryOperator.Not);
 			LustrePressureBelowThreshold.threshold = 50;
-			var faults = new Dictionary<string, Fault>();
-			faults.Add("fault_k1",new TransientFault() {ProbabilityOfOccurrence = new Probability(0.2)});
+			var faults = new List<Fault>();
+			faults.Add(new TransientFault() { Name = "fault_k1", Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) });
+			faults.Add(new TransientFault() { Name = "fault_sensor", Identifier = 1, ProbabilityOfOccurrence = new Probability(0.2) });
 			var modelChecker = new LustreMarkovChainFromExecutableModelGenerator("pressureTank", faults);
 			modelChecker.AddFormulaToCheck(hazard);
 			modelChecker.Configuration.UseCompactStateStorage = true;

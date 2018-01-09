@@ -32,7 +32,7 @@ namespace Test {
 
 			Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 30;
-			var faults = new Dictionary<string, Fault>();
+			var faults = new Fault[0];
 			var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
 			modelChecker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
@@ -46,7 +46,7 @@ namespace Test {
 
 			Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 50;
-			var faults = new Dictionary<string, Fault>();
+			var faults = new Fault[0];
 			var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
 			modelChecker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
@@ -123,7 +123,7 @@ namespace Test {
 			{
 				Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
 
-				var faults = new Dictionary<string, Fault>();
+				var faults = new Fault[0];
 				LustreModelBase model = new LustreModelBase("pressureTank", faults);
 
                 for (int i = 0; i < model.program.variables.Count; i++) {
