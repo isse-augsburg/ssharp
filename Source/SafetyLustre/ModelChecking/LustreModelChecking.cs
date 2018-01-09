@@ -20,6 +20,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Collections.Generic;
+using ISSE.SafetyChecking.Modeling;
+
 namespace Tests.SimpleExecutableModel
 {
 	using System;
@@ -32,13 +35,31 @@ namespace Tests.SimpleExecutableModel
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
 	using BachelorarbeitLustre;
 	using ISSE.SafetyChecking.ExecutableModel;
+	
+	public sealed class LustreSafetyAnalysis : SafetyAnalysis<LustreExecutableModel>
+	{
+		public SafetyAnalysisResults<LustreExecutableModel> ComputeMinimalCriticalSets(string ocFileName, IDictionary<string,Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue)
+		{
+			Program.modelChecking = true;
+			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults, hazard);
+			return ComputeMinimalCriticalSets(modelCreator, hazard, maxCardinality);
+		}
+
+		public static SafetyAnalysisResults<LustreExecutableModel> AnalyzeHazard(string ocFileName, IDictionary<string, Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue,
+														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
+		{
+			Program.modelChecking = true;
+			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults, hazard);
+			return AnalyzeHazard(modelCreator, hazard, maxCardinality, backend);
+		}
+	}
 
 	public sealed class LustreQualitativeChecker : QualitativeChecker<LustreExecutableModel>
 	{
-	    public static int maxValue = 1000;
-		
-		public LustreQualitativeChecker(string ocFileName, Formula invariant)
-			: base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, invariant))
+		public static int maxValue = 1000;
+
+		public LustreQualitativeChecker(string ocFileName, IDictionary<string, Fault> faults, Formula invariant)
+			: base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults, invariant))
 		{
 			Program.modelChecking = true;
 		}
@@ -47,6 +68,14 @@ namespace Tests.SimpleExecutableModel
 		{
 			maxValue = max;
 			return CheckInvariant(invariant);
+		}
+	}
+
+	public sealed class LustreMarkovChainFromExecutableModelGenerator : MarkovChainFromExecutableModelGenerator<LustreExecutableModel>
+	{
+		public LustreMarkovChainFromExecutableModelGenerator(string ocFileName, IDictionary<string, Fault> faults) : base(LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults))
+		{
+			Program.modelChecking = true;
 		}
 	}
 }

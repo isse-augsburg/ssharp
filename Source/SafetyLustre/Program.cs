@@ -35,6 +35,7 @@ using ISSE.SafetyChecking;
 using ISSE.SafetyChecking.Formula;
 using Tests.SimpleExecutableModel;
 using System.Globalization;
+using ISSE.SafetyChecking.Modeling;
 
 namespace BachelorarbeitLustre {
     public class Program {
@@ -125,12 +126,16 @@ namespace BachelorarbeitLustre {
                 }
                 var activeNode = activeState.getRoot();
                 for (int i = 0; ; i++) {
-                    if (actions[i].getAction() != 0) {
+                    if (actions[i].getAction() != PredefinedObjects.present) {
                         break;
                     }
-                    if (signals.Count > actions[i].getIndex() && signals[actions[i].getIndex()].getNature() == 0) {
-                        signals[actions[i].getIndex()].getVariable().setValue(input[i].Dequeue());
-                    }
+                    if (signals.Count > actions[i].getIndex() && signals[actions[i].getIndex()].getNature() == 0)
+					{
+						var signal = signals[actions[i].getIndex()];
+						var variable = signal.getVariable();
+						var newValueOfVariable = input[i].Dequeue();
+						variable.setValue(newValueOfVariable);
+					}
                 }
                 while (true) {
                     if (activeNode.getState() == -1) {
@@ -289,8 +294,8 @@ namespace BachelorarbeitLustre {
             Console.WriteLine("");
             if (key.Key.Equals(ConsoleKey.D1) || key.Key.Equals(ConsoleKey.NumPad1)) {
                 Formula invariant = new LustrePressureBelowThreshold();
-                var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
-
+				var faults = new Dictionary<string, Fault>();
+                var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
                 var result = modelChecker.CheckInvariant(invariant, 100);
                 Console.WriteLine("Checked formula: pressure < " + LustrePressureBelowThreshold.threshold);
                 Console.WriteLine("Formula holds: " + result.FormulaHolds);

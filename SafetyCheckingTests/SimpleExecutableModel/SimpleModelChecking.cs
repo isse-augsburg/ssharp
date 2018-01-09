@@ -37,10 +37,10 @@ namespace Tests.SimpleExecutableModel
 	
 	public sealed class SimpleSafetyAnalysis : SafetyAnalysis<SimpleExecutableModel>
 	{
-		public SafetyAnalysisResults<SimpleExecutableModel> ComputeMinimalCriticalSets(SimpleModelBase model, Formula collision, int maxCardinality = Int32.MaxValue)
+		public SafetyAnalysisResults<SimpleExecutableModel> ComputeMinimalCriticalSets(SimpleModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue)
 		{
-			var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, collision);
-			return ComputeMinimalCriticalSets(modelCreator, collision, maxCardinality);
+			var modelCreator = SimpleExecutableModel.CreateExecutedModelCreator(model, hazard);
+			return ComputeMinimalCriticalSets(modelCreator, hazard, maxCardinality);
 		}
 
 		public static SafetyAnalysisResults<SimpleExecutableModel> AnalyzeHazard(SimpleModelBase model, Formula hazard, int maxCardinality = Int32.MaxValue,

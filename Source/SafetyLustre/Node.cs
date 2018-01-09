@@ -99,6 +99,7 @@ namespace BachelorarbeitLustre {
                     else {
                         throw new SyntaxException("The variable to be decremented can not be referenced");
                     }
+					// Note: no break!
                 case 3:
                     if (this.getAction().getIndex() < program.signals.Count) {
                         if (!Program.modelChecking)

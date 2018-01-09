@@ -36,7 +36,7 @@ namespace BachelorarbeitLustre {
 
         static Regex id = new Regex("^[1-9]*[0-9]:$");
         static Regex type = new Regex("^\\$[0-4]$");
-        static Regex signal_nature_name = new Regex("^(input|output):[a-zA-Z_-]+$");
+        static Regex signal_nature_name = new Regex("^(input|output):[a-zA-Z_][a-zA-Z0-9_-]*$");
         static Regex signal_actionindex = new Regex("^-|([1-9]*[0-9])$");
         static Regex signal_channel = new Regex("^(pure|single|multiple):[1-9]*[0-9]$");
         static Regex signal_bool = new Regex("^bool:[1-9]*[0-9]$");

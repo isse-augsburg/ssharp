@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System.Collections.Generic;
+
 namespace Tests.SimpleExecutableModel {
     using System.IO;
     using System.Text;
@@ -32,29 +34,80 @@ namespace Tests.SimpleExecutableModel {
     using ISSE.SafetyChecking.Formula;
 
     public static unsafe class LustreModelSerializer {
-        public static void WriteFormula(BinaryWriter writer, Formula formula) {
+	    public static void WriteFault(BinaryWriter writer, Fault fault)
+	    {
+		    if (fault is TransientFault)
+		    {
+			    writer.Write(1);
+		    }
+		    else if (fault is PermanentFault)
+			{
+				writer.Write(2);
+			}
+			else
+		    {
+			    throw new Exception("Not implemented yet");
+		    }
+			if (fault.ProbabilityOfOccurrence.HasValue)
+				writer.Write(fault.ProbabilityOfOccurrence.Value.Value);
+			else
+				writer.Write(-1.0);
+		}
+
+	    public static Fault ReadFault(BinaryReader reader)
+	    {
+		    var type = reader.ReadInt32();
+		    var probabilityValue = reader.ReadDouble();
+		    Fault fault;
+			if (type == 1)
+		    {
+			    fault = new TransientFault();
+			}
+			else if (type == 2)
+			{
+				fault = new PermanentFault();
+			}
+			else
+			{
+				throw new Exception("Not implemented yet");
+			}
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
+			fault.ProbabilityOfOccurrence =
+				probabilityValue == -1.0 ? null : (Probability?)new Probability(probabilityValue);
+		    return fault;
+	    }
+
+
+	    public static void WriteFormula(BinaryWriter writer, Formula formula, Dictionary<Fault, int> faultToIndex) {
 			if (formula is LustrePressureBelowThreshold)
 			{
 				var innerFormula = (LustrePressureBelowThreshold)formula;
 				writer.Write(1);
 				writer.Write(innerFormula.Label);
 			}
+			else if (formula is FaultFormula)
+			{
+				var innerFormula = (FaultFormula)formula;
+				writer.Write(4);
+				writer.Write(innerFormula.Label);
+				writer.Write(faultToIndex[innerFormula.Fault]);
+			}
 			else if (formula is UnaryFormula)
 			{
 				var innerFormula = (UnaryFormula)formula;
-				writer.Write(4);
+				writer.Write(5);
 				writer.Write(innerFormula.Label);
 				writer.Write((int)innerFormula.Operator);
-				WriteFormula(writer, innerFormula.Operand);
+				WriteFormula(writer, innerFormula.Operand, faultToIndex);
 			}
 			else if (formula is BinaryFormula)
 			{
 				var innerFormula = (BinaryFormula)formula;
-				writer.Write(5);
+				writer.Write(6);
 				writer.Write(innerFormula.Label);
 				writer.Write((int)innerFormula.Operator);
-				WriteFormula(writer, innerFormula.LeftOperand);
-				WriteFormula(writer, innerFormula.RightOperand);
+				WriteFormula(writer, innerFormula.LeftOperand, faultToIndex);
+				WriteFormula(writer, innerFormula.RightOperand, faultToIndex);
 			}
 			else
 			{
@@ -62,7 +115,7 @@ namespace Tests.SimpleExecutableModel {
 			}
         }
 
-        public static Formula ReadFormula(BinaryReader reader) {
+        public static Formula ReadFormula(BinaryReader reader, Dictionary<int, Fault> indexToFault) {
 			var type = reader.ReadInt32();
 			var label = reader.ReadString();
 			if (type==1)
@@ -72,24 +125,29 @@ namespace Tests.SimpleExecutableModel {
 			}
 			else if (type == 4)
 			{
-				var @operator = (UnaryOperator)reader.ReadInt32();
-				var operand = ReadFormula(reader);
-				return new UnaryFormula(operand, @operator, label);
+				var index = reader.ReadInt32();
+				return new FaultFormula(indexToFault[index], label);
 			}
 			else if (type == 5)
 			{
+				var @operator = (UnaryOperator)reader.ReadInt32();
+				var operand = ReadFormula(reader, indexToFault);
+				return new UnaryFormula(operand, @operator, label);
+			}
+			else if (type == 6)
+			{
 				var @operator = (BinaryOperator)reader.ReadInt32();
-				var leftOperand = ReadFormula(reader);
-				var rightOperand = ReadFormula(reader);
+				var leftOperand = ReadFormula(reader, indexToFault);
+				var rightOperand = ReadFormula(reader, indexToFault);
 				return new BinaryFormula(leftOperand, @operator, rightOperand, label);
 			}
-			else
-			{
-				throw new NotImplementedException();
-			}
+	        else
+	        {
+		        throw new NotImplementedException();
+	        }
         }
 
-        public static byte[] CreateByteArray(string ocFileName, Formula[] formulas) {
+        public static byte[] CreateByteArray(string ocFileName, IDictionary<string, Fault> faults, Formula[] formulas) {
             Requires.NotNull(ocFileName, nameof(ocFileName));
 
             using (var buffer = new MemoryStream())
@@ -97,10 +155,23 @@ namespace Tests.SimpleExecutableModel {
                 // write ocFileName
                 writer.Write(ocFileName);
 
-                // write formulas
-                writer.Write((uint)formulas.Length);
-                foreach (var formula in formulas) {
-                    WriteFormula(writer, formula);
+				// write faults
+				writer.Write((uint)faults.Count);
+				var faultToIndex = new Dictionary<Fault, int>();
+				var faultIndex = 0;
+				foreach (var fault in faults)
+				{
+					writer.Write(fault.Key);
+					WriteFault(writer, fault.Value);
+					faultToIndex.Add(fault.Value, faultIndex);
+					faultIndex++;
+				}
+
+				// write formulas
+				writer.Write((uint)formulas.Length);
+				
+				foreach (var formula in formulas) {
+                    WriteFormula(writer, formula, faultToIndex);
                 }
 
                 // return result as array
@@ -116,14 +187,26 @@ namespace Tests.SimpleExecutableModel {
                 // read ocFileName
                 var ocFileName = reader.ReadString();
 
-                // read state and instantiate model
-                var deserializedModel = new LustreModelBase(ocFileName);
+				// read faults
+				var faultNumber = reader.ReadUInt32();
+				var faults = new Dictionary<string, Fault>();
+				var indexToFault = new Dictionary<int, Fault>();
+				for (var i = 0; i < faultNumber; ++i)
+				{
+					var faultName = reader.ReadString();
+					var fault = ReadFault(reader);
+					faults.Add(faultName,fault);
+					indexToFault.Add(i, fault);
+				}
 
-                // read formulas
-                var formulaNumber = reader.ReadUInt32();
+				// read state and instantiate model
+				var deserializedModel = new LustreModelBase(ocFileName, faults);
+
+				// read formulas
+				var formulaNumber = reader.ReadUInt32();
                 var formulas = new Formula[formulaNumber];
-                for (var i = 0; i < formulaNumber; ++i) {
-                    formulas[i] = ReadFormula(reader);
+				for (var i = 0; i < formulaNumber; ++i) {
+                    formulas[i] = ReadFormula(reader, indexToFault);
                 }
 
                 //return tuple of model and formulas

@@ -21,6 +21,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using ISSE.SafetyChecking.ExecutableModel;
 using System.Linq.Expressions;
 using ISSE.SafetyChecking.Formula;
@@ -54,6 +55,7 @@ namespace Tests.SimpleExecutableModel
 		{
 			var modelWithFormula = LustreModelSerializer.DeserializeFromByteArray(SerializedModel);
 			Model = modelWithFormula.Item1;
+			Faults = Model.faults.Values.ToArray();
 			Formulas = modelWithFormula.Item2;
 
 			var atomarPropositionVisitor = new CollectAtomarPropositionFormulasVisitor();
@@ -65,7 +67,6 @@ namespace Tests.SimpleExecutableModel
 
 			StateConstraints = new Func<bool>[0];
 			
-			Faults = new Fault[0];
 			UpdateFaultSets();
 
 			_deserialize = LustreModelSerializer.CreateFastInPlaceDeserializer(Model);
@@ -95,9 +96,13 @@ namespace Tests.SimpleExecutableModel
 		public override void SetChoiceResolver(ChoiceResolver choiceResolver)
 		{
 			Model.Choice.Resolver = choiceResolver;
+			foreach (var faultsValue in Model.faults.Values)
+			{
+				faultsValue.Choice.Resolver = choiceResolver;
+			}
 		}
 		
-		public static CoupledExecutableModelCreator<LustreExecutableModel> CreateExecutedModelCreator(string ocFileName, params Formula[] formulasToCheckInBaseModel)
+		public static CoupledExecutableModelCreator<LustreExecutableModel> CreateExecutedModelCreator(string ocFileName, IDictionary<string, Fault> faults, params Formula[] formulasToCheckInBaseModel)
 		{
 			Requires.NotNull(ocFileName, nameof(ocFileName));
 			Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
@@ -108,7 +113,7 @@ namespace Tests.SimpleExecutableModel
 				// Each model checking thread gets its own SimpleExecutableModel.
 				// Thus, we serialize the C# model and load this file again.
 				// The serialization can also be used for saving counter examples
-				var serializedModelWithFormulas = LustreModelSerializer.CreateByteArray(ocFileName, formulasToCheckInBaseModel);
+				var serializedModelWithFormulas = LustreModelSerializer.CreateByteArray(ocFileName, faults, formulasToCheckInBaseModel);
 				var simpleExecutableModel=new LustreExecutableModel(serializedModelWithFormulas);
 				return simpleExecutableModel;
 			};
@@ -118,19 +123,18 @@ namespace Tests.SimpleExecutableModel
 				textWriter.WriteLine("bytes[0-4] state: int");
 				textWriter.WriteLine("bytes[5-12] permanent faults: long");
 			};
-
-			var faults = new Fault[0];
-			return new CoupledExecutableModelCreator<LustreExecutableModel>(creatorFunc, writeOptimizedStateVectorLayout, ocFileName, formulasToCheckInBaseModel, faults);
+			var flatFaults = faults.Values.ToArray();
+			return new CoupledExecutableModelCreator<LustreExecutableModel>(creatorFunc, writeOptimizedStateVectorLayout, ocFileName, formulasToCheckInBaseModel, flatFaults);
 		}
 
-		public static ExecutableModelCreator<LustreExecutableModel> CreateExecutedModelFromFormulasCreator(string ocFileName)
+		public static ExecutableModelCreator<LustreExecutableModel> CreateExecutedModelFromFormulasCreator(string ocFileName, IDictionary<string, Fault> faults)
 		{
 			Requires.NotNull(ocFileName, nameof(ocFileName));
 
 			Func<Formula[], CoupledExecutableModelCreator<LustreExecutableModel>> creator = formulasToCheckInBaseModel =>
 			{
 				Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
-				return CreateExecutedModelCreator(ocFileName, formulasToCheckInBaseModel);
+				return CreateExecutedModelCreator(ocFileName, faults, formulasToCheckInBaseModel);
 			};
 			return new ExecutableModelCreator<LustreExecutableModel>(creator, ocFileName);
 		}

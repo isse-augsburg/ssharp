@@ -30,10 +30,16 @@ namespace Tests.SimpleExecutableModel
 {
 	public class LustreModelBase
 	{
-		public LustreModelBase(string ocFileName)
+		public LustreModelBase(string ocFileName, Dictionary<string, Fault> faults)
 		{
             program = new Program(ocFileName, null);
-		    program.input = new Queue<Object>[] {new Queue<Object>()};
+			var numberOfInputQueuesNeeded =
+				program.signals.Count(signal => signal.IsFaultInput || signal.IsRealInput);
+		    program.input = new Queue<Object>[numberOfInputQueuesNeeded];
+			for (var i = 0; i < numberOfInputQueuesNeeded; i++)
+			{
+				program.input[i] = new Queue<Object>();
+			}
 
             StateVectorSize =
 		        program.countVariables(0) * sizeof(bool) +
@@ -43,9 +49,13 @@ namespace Tests.SimpleExecutableModel
 		        program.countVariables(4) * sizeof(double);
 
 		    output = 0;
+
+			this.faults = faults;
 		}
 
         public Program program;
+
+		public Dictionary<string, Fault> faults;
 
 		public int StateVectorSize { get; }
 
@@ -60,7 +70,22 @@ namespace Tests.SimpleExecutableModel
 
 		public void Update()
 		{
-            program.input[0].Enqueue(Choice.Choose(true, false));
+			for (var i = 0; i < program.signals.Count; i++)
+			{
+				var signal = program.signals[i];
+				if (signal.IsRealInput)
+				{
+					// TODO: Different types
+					var value=Choice.Choose(true, false);
+					program.input[i].Enqueue(value);
+				}
+				if (signal.IsFaultInput)
+				{
+					var activated = ISSE.SafetyChecking.ExecutedModel.FaultHelper.Activate(faults[signal.getName()]);
+					program.input[i].Enqueue(activated);
+				}
+			}
+			
             program.executeProcedure();
 		    output = program.output[0];
         }

@@ -39,7 +39,10 @@ namespace BachelorarbeitLustre {
         private Variable variable;
         private int boolean;
 
-        public Signal(int id, int nature, string name, int actionindex, int channel, int variableId, int boolean) {
+	    public bool IsRealInput { get; private set; }
+		public bool IsFaultInput { get; private set; }
+
+		public Signal(int id, int nature, string name, int actionindex, int channel, int variableId, int boolean) {
             this.id = id;
             this.nature = nature;
             this.name = name;
@@ -47,7 +50,16 @@ namespace BachelorarbeitLustre {
             this.actionindex = actionindex;
             this.variableId = variableId;
             this.boolean = boolean;
-        }
+
+			if (this.nature == PredefinedObjects.input && name.StartsWith("fault"))
+			{
+				IsFaultInput = true;
+			}
+			if (this.nature == PredefinedObjects.input && !name.StartsWith("fault"))
+			{
+				IsRealInput = true;
+			}
+		}
 
         public void setVariable(Variable variable) {
             this.variable = variable;

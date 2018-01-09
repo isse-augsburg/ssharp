@@ -20,10 +20,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CompilerServices
+namespace ISSE.SafetyChecking.ExecutedModel
 {
 	using System.Runtime.CompilerServices;
-	using ISSE.SafetyChecking.Modeling;
+	using Modeling;
 
 	/// <summary>
 	///   Allows the compiler to check whether a fault is activated while avoiding activation of faults that are known to have no
@@ -39,7 +39,11 @@ namespace SafetySharp.CompilerServices
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool Activate(Fault fault)
 		{
-			return ISSE.SafetyChecking.ExecutedModel.FaultHelper.Activate(fault);
+			if (fault == null)
+				return false;
+
+			fault.TryActivate();
+			return fault.IsActivated;
 		}
 
 		/// <summary>
@@ -50,7 +54,7 @@ namespace SafetySharp.CompilerServices
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void UndoActivation(Fault fault)
 		{
-			ISSE.SafetyChecking.ExecutedModel.FaultHelper.UndoActivation(fault);
+			fault?.UndoActivation();
 		}
 	}
 }

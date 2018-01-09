@@ -78,7 +78,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			return _dtmcModelChecker.CalculateBoolean(formulaToCheck);
 		}
 
-		internal override Probability CalculateProbability(Formula formulaToCheck)
+		public override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			if (_ltmcModelChecker != null)
 				return _ltmcModelChecker.CalculateProbability(formulaToCheck);

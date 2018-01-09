@@ -36,7 +36,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 	using Formula;
 	using GenericDataStructures;
 
-	internal class BuiltinLtmcModelChecker : LtmcModelChecker
+	public class BuiltinLtmcModelChecker : LtmcModelChecker
 	{
 		[Flags]
 		internal enum PrecalculatedTransitionTarget : byte
@@ -369,7 +369,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		}
 		
 
-		internal override Probability CalculateProbability(Formula formulaToCheck)
+		public override Probability CalculateProbability(Formula formulaToCheck)
 		{
 			_output.WriteLine($"Checking formula: {formulaToCheck}");
 			var stopwatch = new Stopwatch();

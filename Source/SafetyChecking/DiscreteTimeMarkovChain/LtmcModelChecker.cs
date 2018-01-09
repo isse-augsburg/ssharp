@@ -45,7 +45,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		public abstract void Dispose();
 
-		internal abstract Probability CalculateProbability(Formula formulaToCheck);
+		public abstract Probability CalculateProbability(Formula formulaToCheck);
 
 		internal abstract bool CalculateBoolean(Formula formulaToCheck);
 

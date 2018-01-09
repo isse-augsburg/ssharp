@@ -9,6 +9,7 @@ using ISSE.SafetyChecking.Utilities;
 using Tests.SimpleExecutableModel;
 using Xunit;
 using BachelorarbeitLustre;
+using ISSE.SafetyChecking.Modeling;
 using Tests.Utilities;
 using Xunit.Abstractions;
 
@@ -31,7 +32,8 @@ namespace Test {
 
 			Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 30;
-            var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
+			var faults = new Dictionary<string, Fault>();
+			var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
 			modelChecker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
 			modelChecker.CheckInvariant(invariant, 100);
@@ -44,7 +46,8 @@ namespace Test {
 
 			Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 50;
-            var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
+			var faults = new Dictionary<string, Fault>();
+			var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
 			modelChecker.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 
 			modelChecker.CheckInvariant(invariant, 100);
@@ -120,7 +123,8 @@ namespace Test {
 			{
 				Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
 
-				LustreModelBase model = new LustreModelBase("pressureTank");
+				var faults = new Dictionary<string, Fault>();
+				LustreModelBase model = new LustreModelBase("pressureTank", faults);
 
                 for (int i = 0; i < model.program.variables.Count; i++) {
                     if (model.program.variables[i].getType() == 0) {

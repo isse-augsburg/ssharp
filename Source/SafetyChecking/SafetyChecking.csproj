@@ -68,6 +68,7 @@
     <Compile Include="ExecutableModel\ModelAware.cs" />
     <Compile Include="ExecutableModel\ExecutableModelCreator.cs" />
     <Compile Include="AnalysisModel\AnalysisModelCreator.cs" />
+    <Compile Include="ExecutedModel\FaultHelper.cs" />
     <Compile Include="FaultMinimalKripkeStructure\InvariantAnalysisResult.cs" />
     <Compile Include="Formula\FaultFormula.cs" />
     <Compile Include="Formula\BoundedBinaryFormula.cs" />

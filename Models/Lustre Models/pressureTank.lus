@@ -1,0 +1,26 @@
+node TANK(fault_k1: bool; press: bool) returns (level: int);
+var k1: bool; k2: bool; sensor: bool; timer: int;
+let
+	sensor = false -> 
+		if (level > 39) then true
+		else false;
+
+	k1 = false -> 
+		if ((pre(k1) or press) and (timer < 10)) then true
+		else false;
+	
+	timer = 0 ->
+		if pre(sensor) then 0
+		else if (press or pre(k1)) then (pre(timer) + 1)
+		else 0;
+		
+	k2 = false -> 
+		if (press or pre(k1)) and not sensor then true
+		else false;
+		
+	level = 0 ->
+		if pre(sensor) or ((pre(timer) > 9) and not press) then 0 
+		else if pre(k2) then pre(level) + 5
+		else pre(level);
+		
+tel
