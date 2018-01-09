@@ -51,6 +51,7 @@
     <Compile Include="Reconfiguration\AbstractMiniZincController.cs" />
     <Compile Include="BaseAgent.cs" />
     <Compile Include="Reconfiguration\CentralReconfiguration.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\AgentConnectionManager.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\ArrayEqualityComparer.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\BrokenIoStrategy.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\Coalition.cs" />
@@ -62,6 +63,7 @@
     <Compile Include="Reconfiguration\CoalitionFormation\CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\DistributionCalculator.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\IConnectionOracle.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\IRecruitingStrategy.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\MissingCapabilitiesStrategy.cs" />
     <Compile Include="Reconfiguration\ReconfigurationReason.cs" />

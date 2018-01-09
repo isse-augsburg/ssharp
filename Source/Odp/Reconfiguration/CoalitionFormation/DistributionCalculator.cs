@@ -39,13 +39,16 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		private readonly ISet<BaseAgent> _agents;
 
+		private readonly IConnectionOracle _oracle;
+
 		/// <summary>
 		///   Creates a new instance.
 		/// </summary>
 		/// <param name="fragment">The fragment for which distributions shall be calculated.</param>
 		/// <param name="recoveredDistribution">The previous distribution, as far as recovered.</param>
 		/// <param name="agents">The set of available agents.</param>
-		public DistributionCalculator(TaskFragment fragment, [NotNull, ItemCanBeNull] BaseAgent[] recoveredDistribution, [NotNull, ItemNotNull] ISet<BaseAgent> agents)
+		/// <param name="oracle">Information about possible connections between agents.</param>
+		public DistributionCalculator(TaskFragment fragment, [NotNull, ItemCanBeNull] BaseAgent[] recoveredDistribution, [NotNull, ItemNotNull] ISet<BaseAgent> agents, [NotNull] IConnectionOracle oracle)
 		{
 			if (recoveredDistribution == null)
 				throw new ArgumentNullException(nameof(recoveredDistribution));
@@ -55,6 +58,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			Fragment = fragment;
 			_recoveredDistribution = recoveredDistribution;
 			_agents = agents;
+			_oracle = oracle;
 		}
 
 		/// <summary>
@@ -128,10 +132,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			while (prefixLength < Fragment.Length && !inevitableChanges[prefixLength])
 				prefixLength++;
 
-			// termination case: entire distribution found, hence return a copy
+			// termination case: entire distribution found, hence return a copy (unless resource flow impossible)
 			if (prefixLength == Fragment.Length)
 			{
-				yield return Copy(distribution);
+				if (!_oracle.ConnectionImpossible(distribution))
+					yield return Copy(distribution);
 				yield break;
 			}
 
@@ -166,11 +171,26 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				if (modifiedIndex >= Fragment.Length)
 					continue;
 
+				// if there's a broken connection to the left of modifiedIndex, it won't be fixed by future modifications.
+				var isPrefixConnectionBroken = Enumerable.Range(0, modifiedIndex)
+														 .Any(i => i > 0 && _oracle.CanConnect(previousDistribution[i - 1], previousDistribution[i]) == false);
+				if (isPrefixConnectionBroken)
+					continue;
+
 				// Find all possibilities to modify the chosen index, and return the respective resulting distributions.
 				foreach (var distribution in FindModifications(previousDistribution, modifiedIndex))
 				{
 					var result = Copy(distribution);
-					yield return result;
+
+					// Checks above & in FindModifications ensure connection isn't broken to the left of modifiedIndex.
+					// Now check to the right of modifiedIndex.
+					var isSuffixConnectionBroken = Enumerable.Range(modifiedIndex, (distribution.Length - 1) - modifiedIndex)
+															 .Any(i => _oracle.CanConnect(distribution[i], distribution[i + 1]) == false);
+					if (!isSuffixConnectionBroken)
+						yield return result;
+
+					// Don't return distributions with impossible connections, but enqueue them:
+					// Since the problem is to the right of modifiedIndex, later modifications might fix it.
 					queue.Enqueue(Tuple.Create(result, modifiedIndex));
 				}
 			}
@@ -185,6 +205,10 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			var eligibleAgents = _agents.Where(agent => CanSatisfyNext(agent, distribution, modifiedIndex));
 			foreach (var agent in eligibleAgents)
 			{
+				// don't consider modifications where a resource flow from the previous agent is impossible
+				if (modifiedIndex > 0 && _oracle.CanConnect(distribution[modifiedIndex - 1], agent) == false)
+					continue;
+
 				distribution[modifiedIndex] = agent;
 				yield return distribution;
 			}
