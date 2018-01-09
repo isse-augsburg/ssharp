@@ -38,6 +38,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		[Pure]
 		public bool? CanConnect([NotNull] BaseAgent source, [NotNull] BaseAgent destination)
 		{
+			if (source == destination)
+				return true;
+
 			var tuple = new AgentTuple(source, destination);
 			if (!_connections.ContainsKey(tuple))
 				return null;
@@ -99,6 +102,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		[CanBeNull, Pure]
 		public BaseAgent[] GetConnection([NotNull] BaseAgent source, [NotNull] BaseAgent destination)
 		{
+			if (source == destination)
+				return new[] { source };
+
 			var tuple = new AgentTuple(source, destination);
 			if (_connections.ContainsKey(tuple))
 				return _connections[tuple].Item2;

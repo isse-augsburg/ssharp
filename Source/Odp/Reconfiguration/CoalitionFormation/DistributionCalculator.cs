@@ -171,11 +171,26 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				if (modifiedIndex >= Fragment.Length)
 					continue;
 
+				// if there's a broken connection to the left of modifiedIndex, it won't be fixed by future modifications.
+				var isPrefixConnectionBroken = Enumerable.Range(0, modifiedIndex)
+														 .Any(i => i > 0 && _oracle.CanConnect(previousDistribution[i - 1], previousDistribution[i]) == false);
+				if (isPrefixConnectionBroken)
+					continue;
+
 				// Find all possibilities to modify the chosen index, and return the respective resulting distributions.
 				foreach (var distribution in FindModifications(previousDistribution, modifiedIndex))
 				{
 					var result = Copy(distribution);
-					yield return result;
+
+					// Checks above & in FindModifications ensure connection isn't broken to the left of modifiedIndex.
+					// Now check to the right of modifiedIndex.
+					var isSuffixConnectionBroken = Enumerable.Range(modifiedIndex, (distribution.Length - 1) - modifiedIndex)
+															 .Any(i => _oracle.CanConnect(distribution[i], distribution[i + 1]) == false);
+					if (!isSuffixConnectionBroken)
+						yield return result;
+
+					// Don't return distributions with impossible connections, but enqueue them:
+					// Since the problem is to the right of modifiedIndex, later modifications might fix it.
 					queue.Enqueue(Tuple.Create(result, modifiedIndex));
 				}
 			}
@@ -190,9 +205,12 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			var eligibleAgents = _agents.Where(agent => CanSatisfyNext(agent, distribution, modifiedIndex));
 			foreach (var agent in eligibleAgents)
 			{
+				// don't consider modifications where a resource flow from the previous agent is impossible
+				if (modifiedIndex > 0 && _oracle.CanConnect(distribution[modifiedIndex - 1], agent) == false)
+					continue;
+
 				distribution[modifiedIndex] = agent;
-				if (!_oracle.ConnectionImpossible(distribution))
-					yield return distribution;
+				yield return distribution;
 			}
 		}
 
