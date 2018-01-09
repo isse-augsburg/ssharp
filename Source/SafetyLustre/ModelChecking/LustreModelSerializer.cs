@@ -33,35 +33,17 @@ namespace Tests.SimpleExecutableModel {
 
     public static unsafe class LustreModelSerializer {
         public static void WriteFormula(BinaryWriter writer, Formula formula) {
-            /*
-			if (formula is LustreStateInRangeFormula)
+			if (formula is LustrePressureBelowThreshold)
 			{
-				var innerFormula = (LustreStateInRangeFormula)formula;
+				var innerFormula = (LustrePressureBelowThreshold)formula;
 				writer.Write(1);
 				writer.Write(innerFormula.Label);
-				writer.Write(innerFormula.From);
-				writer.Write(innerFormula.To);
-			}
-			else if (formula is LustreLocalVarInRangeFormula)
-			{
-				var innerFormula = (LustreLocalVarInRangeFormula)formula;
-				writer.Write(2);
-				writer.Write(innerFormula.Label);
-				writer.Write(innerFormula.Index);
-				writer.Write(innerFormula.From);
-				writer.Write(innerFormula.To);
-			}
-			else if (formula is LustreLocalVarIsTrue)
-			{
-				var innerFormula = (LustreLocalVarIsTrue)formula;
-				writer.Write(3);
-				writer.Write(innerFormula.Label);
-				writer.Write(innerFormula.Index);
 			}
 			else if (formula is UnaryFormula)
 			{
 				var innerFormula = (UnaryFormula)formula;
 				writer.Write(4);
+				writer.Write(innerFormula.Label);
 				writer.Write((int)innerFormula.Operator);
 				WriteFormula(writer, innerFormula.Operand);
 			}
@@ -69,6 +51,7 @@ namespace Tests.SimpleExecutableModel {
 			{
 				var innerFormula = (BinaryFormula)formula;
 				writer.Write(5);
+				writer.Write(innerFormula.Label);
 				writer.Write((int)innerFormula.Operator);
 				WriteFormula(writer, innerFormula.LeftOperand);
 				WriteFormula(writer, innerFormula.RightOperand);
@@ -76,52 +59,34 @@ namespace Tests.SimpleExecutableModel {
 			else
 			{
 				throw new NotImplementedException();
-			}*/
+			}
         }
 
         public static Formula ReadFormula(BinaryReader reader) {
-            /*
 			var type = reader.ReadInt32();
+			var label = reader.ReadString();
 			if (type==1)
 			{
-				var label = reader.ReadString();
-				var from = reader.ReadInt32();
-				var to = reader.ReadInt32();
-				return new LustreStateInRangeFormula(from,to,label);
+				return new LustrePressureBelowThreshold(label);
 
-			}
-			else if (type == 2)
-			{
-				var label = reader.ReadString();
-				var index = reader.ReadInt32();
-				var from = reader.ReadInt32();
-				var to = reader.ReadInt32();
-				return new LustreLocalVarInRangeFormula(index,from, to, label);
-			}
-			else if (type == 3)
-			{
-				var label = reader.ReadString();
-				var index = reader.ReadInt32();
-				return new LustreLocalVarIsTrue(index, label);
 			}
 			else if (type == 4)
 			{
 				var @operator = (UnaryOperator)reader.ReadInt32();
 				var operand = ReadFormula(reader);
-				return new UnaryFormula(operand, @operator);
+				return new UnaryFormula(operand, @operator, label);
 			}
 			else if (type == 5)
 			{
 				var @operator = (BinaryOperator)reader.ReadInt32();
 				var leftOperand = ReadFormula(reader);
 				var rightOperand = ReadFormula(reader);
-				return new BinaryFormula(leftOperand, @operator, rightOperand);
+				return new BinaryFormula(leftOperand, @operator, rightOperand, label);
 			}
 			else
 			{
 				throw new NotImplementedException();
-			}*/
-            return new LustrePressureBelowThreshold();
+			}
         }
 
         public static byte[] CreateByteArray(string ocFileName, Formula[] formulas) {

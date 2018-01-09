@@ -59,9 +59,10 @@ namespace BachelorarbeitLustre {
         static Regex function = new Regex("^\\$[1-9]*[0-9]");
 
         const string cygwinPath = "c:\\cygwin64\\bin\\lustre\\bin";
-        public static string ocExaplesPath = "\\Test\\Examples\\";
+        public static string ocExaplesPath = "";
+		public static string ocExaplesPathSuffix = "\\Examples\\";
 
-        public Program(string fileName, string mainNode) {
+		public Program(string fileName, string mainNode) {
             //Compiling Lustre-Program
             if (mainNode != null) {
                 Process p = new Process();
@@ -280,14 +281,15 @@ namespace BachelorarbeitLustre {
             return count;
         }
 
-        static void Main(string[] args) {
-            ocExaplesPath = System.Reflection.Assembly.GetExecutingAssembly()
-                                .Location.Substring(0,
-                                    System.Reflection.Assembly.GetExecutingAssembly().Location.IndexOf("BachelorarbeitLustre") + 20) + ocExaplesPath;
+        static void Main(string[] args)
+        {
+	        var assemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+			var path = new FileInfo(assemblyLocation).DirectoryName;
+			ocExaplesPath = path + ocExaplesPathSuffix;
             Console.WriteLine("Select Mode:\n(1)Model Checking\n(2)Run Pressure Tank\n(3)Create OC-file");
             var key = Console.ReadKey();
             Console.WriteLine("");
-            if (key.Key.Equals(ConsoleKey.D1)) {
+            if (key.Key.Equals(ConsoleKey.D1) || key.Key.Equals(ConsoleKey.NumPad1)) {
                 Formula invariant = new LustrePressureBelowThreshold();
                 var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
 
@@ -318,7 +320,7 @@ namespace BachelorarbeitLustre {
                 Console.WriteLine("\nPress any key to end...");
                 Console.ReadKey();
             }
-            else if (key.Key.Equals(ConsoleKey.D2)) {
+            else if (key.Key.Equals(ConsoleKey.D2) || key.Key.Equals(ConsoleKey.NumPad2)) {
                 const string fileName = "pressureTank";
                 const string mainNode = "TANK";
 
@@ -328,7 +330,7 @@ namespace BachelorarbeitLustre {
 
                 p.executeProgram();
             }
-            else if (key.Key.Equals(ConsoleKey.D3)) {
+            else if (key.Key.Equals(ConsoleKey.D3) || key.Key.Equals(ConsoleKey.NumPad3)) {
                 const string fileName = "ex2";
                 const string mainNode = "EDGE";
 
