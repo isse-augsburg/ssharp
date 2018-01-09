@@ -1,0 +1,26 @@
+node TANK(press: bool) returns (level: int);
+var s11: bool; s12: bool; s2: bool; timer: int;
+let
+
+	timer = 0 ->
+		if (press or pre(s12)) and not (pre(press) or pre(pre(s12))) then 0
+		else if (press or pre(s12)) then (pre(timer) + 1)
+		else 0;
+
+	level = 0 ->
+		if not pre(s12)then 0 
+		else pre(level) + 5;
+
+	s11 = false -> 
+		if(press or pre(s11)) and not (timer > 9) then true
+		else false;
+		
+	s12 = false -> 
+		if(press or pre(s11)) and not (false) then true
+		else false;
+		
+	s2 = false ->
+		if s12 then true
+		else false;
+		
+tel

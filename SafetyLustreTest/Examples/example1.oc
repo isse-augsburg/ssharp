@@ -1,0 +1,31 @@
+oc5:
+module: count
+
+signals: 3
+   0: input:x - single:1 bool:0
+   1: input:y - single:2 bool:0
+   2: output:s - single:3
+end: 
+
+variables: 4
+   0: $0
+   1: $1
+   2: $1
+   3: $1
+end: 
+
+actions: 4
+   0: present: 0
+   1: present: 1
+   2: output: 2
+   3: call:$1 (3) ($15(#2,$13(1,2)))
+end:
+
+states: 1
+startpoint: 0
+calls: 3
+0:  3 2 <0> 
+
+end:
+
+endmodule:
