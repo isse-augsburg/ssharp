@@ -224,7 +224,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			for (var i = 1; i < agents.Length; ++i)
 			{
-				var connection = connectionManager.GetConnection(agents[i], agents[i-1]);
+				var connection = connectionManager.GetConnection(agents[i-1], agents[i]);
 				if (connection == null) // connection unknown, but might still exist
 				{
 					var shortestPaths = ComputeShortestPaths(configurationSuggestion, agents[i - 1]);
