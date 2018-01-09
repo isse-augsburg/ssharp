@@ -30,8 +30,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml.Schema;
-using Xunit.Sdk;
 
 namespace BachelorarbeitLustre {
     public class Parser {

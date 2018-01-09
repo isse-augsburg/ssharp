@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BachelorarbeitLustre;
 using ISSE.SafetyChecking.Formula;
 using ISSE.SafetyChecking.Utilities;
 using Tests.SimpleExecutableModel;
 using Xunit;
+using BachelorarbeitLustre;
 
 namespace Test {
 
@@ -20,8 +20,8 @@ namespace Test {
                                     System.Reflection.Assembly.GetExecutingAssembly().Location.IndexOf("BachelorarbeitLustre") + 20) + "\\Test\\Examples\\";
             Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 30;
-            var modelChecker = new LustreQualitativeChecker();
-            modelChecker.CheckInvariant("pressureTank", invariant, 100);
+            var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
+            modelChecker.CheckInvariant(invariant, 100);
         }
 
         [Fact]
@@ -31,8 +31,8 @@ namespace Test {
                                     System.Reflection.Assembly.GetExecutingAssembly().Location.IndexOf("BachelorarbeitLustre") + 20) + "\\Test\\Examples\\";
             Formula invariant = new LustrePressureBelowThreshold();
             LustrePressureBelowThreshold.threshold = 50;
-            var modelChecker = new LustreQualitativeChecker();
-            modelChecker.CheckInvariant("pressureTank", invariant, 100);
+            var modelChecker = new LustreQualitativeChecker("pressureTank", invariant);
+            modelChecker.CheckInvariant(invariant, 100);
         }
 
         [Fact]

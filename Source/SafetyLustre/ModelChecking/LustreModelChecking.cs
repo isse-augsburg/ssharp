@@ -22,26 +22,31 @@
 
 namespace Tests.SimpleExecutableModel
 {
-    using System;
-    using ISSE.SafetyChecking.AnalysisModel;
-    using ISSE.SafetyChecking.AnalysisModelTraverser;
-    using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
-    using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
-    using ISSE.SafetyChecking.Formula;
-    using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
-    using ISSE.SafetyChecking.MarkovDecisionProcess;
-    using BachelorarbeitLustre;
+	using System;
+	using ISSE.SafetyChecking.AnalysisModel;
+	using ISSE.SafetyChecking.AnalysisModelTraverser;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+	using ISSE.SafetyChecking.MarkovDecisionProcess;
+	using BachelorarbeitLustre;
+	using ISSE.SafetyChecking.ExecutableModel;
 
-    public sealed class LustreQualitativeChecker : QualitativeChecker<LustreExecutableModel>
+	public sealed class LustreQualitativeChecker : QualitativeChecker<LustreExecutableModel>
 	{
 	    public static int maxValue = 1000;
+		
+		public LustreQualitativeChecker(string ocFileName, Formula invariant)
+			: base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, invariant))
+		{
+			Program.modelChecking = true;
+		}
 
-        public AnalysisResult<LustreExecutableModel> CheckInvariant(string ocFileName, Formula invariant, int max)
-        {
-            maxValue = max;
-		    Program.modelChecking = true;
-            var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, invariant);
-			return CheckInvariant(modelCreator, 0);
+		public InvariantAnalysisResult CheckInvariant(Formula invariant, int max)
+		{
+			maxValue = max;
+			return CheckInvariant(invariant);
 		}
 	}
 }

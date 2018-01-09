@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.props" Condition="Exists('..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.props')" />
+  <Import Project="..\Dependencies\more.xunit.runner.visualstudio.2.3.1\build\net20\more.xunit.runner.visualstudio.props" Condition="Exists('..\Dependencies\more.xunit.runner.visualstudio.2.3.1\build\net20\more.xunit.runner.visualstudio.props')" />
+  <Import Project="..\Dependencies\xunit.core.2.3.1\build\xunit.core.props" Condition="Exists('..\Dependencies\xunit.core.2.3.1\build\xunit.core.props')" />
   <Import Project="..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -70,16 +73,46 @@
       <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
       <Name>SafetyChecking</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Source\SafetyLustre\SafetyLustre.csproj">
+      <Project>{CC928659-8CCF-4357-BD4F-224F80C5C79A}</Project>
+      <Name>SafetyLustre</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.abstractions.2.0.1\lib\net35\xunit.abstractions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.assert, Version=2.3.1.3858, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.assert.2.3.1\lib\netstandard1.1\xunit.assert.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.core, Version=2.3.1.3858, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.extensibility.core.2.3.1\lib\netstandard1.1\xunit.core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.execution.desktop, Version=2.3.1.3858, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\Dependencies\xunit.extensibility.execution.2.3.1\lib\net452\xunit.execution.desktop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\Dependencies\xunit.analyzers.0.7.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
     </PropertyGroup>
+    <Error Condition="!Exists('..\Dependencies\xunit.core.2.3.1\build\xunit.core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\Dependencies\xunit.core.2.3.1\build\xunit.core.props'))" />
+    <Error Condition="!Exists('..\Dependencies\xunit.core.2.3.1\build\xunit.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\Dependencies\xunit.core.2.3.1\build\xunit.core.targets'))" />
+    <Error Condition="!Exists('..\Dependencies\more.xunit.runner.visualstudio.2.3.1\build\net20\more.xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\Dependencies\more.xunit.runner.visualstudio.2.3.1\build\net20\more.xunit.runner.visualstudio.props'))" />
+    <Error Condition="!Exists('..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.props'))" />
+    <Error Condition="!Exists('..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.targets'))" />
   </Target>
+  <Import Project="..\Dependencies\xunit.core.2.3.1\build\xunit.core.targets" Condition="Exists('..\Dependencies\xunit.core.2.3.1\build\xunit.core.targets')" />
+  <Import Project="..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.targets" Condition="Exists('..\Dependencies\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

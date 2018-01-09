@@ -36,7 +36,7 @@ namespace Tests.SimpleExecutableModel
 
 	public class LustreExecutableModelCounterExampleSerialization : CounterExampleSerialization<LustreExecutableModel>
 	{
-		public override void WriteInternalStateStructure(CounterExample<LustreExecutableModel> counterExample, BinaryWriter writer)
+		public override void WriteInternalStateStructure(ExecutableCounterExample<LustreExecutableModel> counterExample, BinaryWriter writer)
 		{
 		}
 
@@ -44,7 +44,7 @@ namespace Tests.SimpleExecutableModel
 		///   Loads a counter example from the <paramref name="file" />.
 		/// </summary>
 		/// <param name="file">The path to the file the counter example should be loaded from.</param>
-		public override CounterExample<LustreExecutableModel> Load(string file)
+		public override ExecutableCounterExample<LustreExecutableModel> Load(string file)
 		{
 			Requires.NotNullOrWhitespace(file, nameof(file));
 
@@ -88,7 +88,9 @@ namespace Tests.SimpleExecutableModel
 						replayInfo[i][j] = reader.ReadInt32();
 				}
 
-				return new CounterExample<LustreExecutableModel>(runtimeModel, counterExample, replayInfo, endsWithException);
+				var faultActivations = runtimeModel.Faults.Select(fault => fault.Activation).ToArray();
+
+				return new ExecutableCounterExample<LustreExecutableModel>(runtimeModel, counterExample, replayInfo, endsWithException, faultActivations);
 			}
 		}
 	}

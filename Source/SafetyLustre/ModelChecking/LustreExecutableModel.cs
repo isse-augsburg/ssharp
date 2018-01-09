@@ -29,6 +29,7 @@ using ISSE.SafetyChecking.Utilities;
 
 namespace Tests.SimpleExecutableModel
 {
+	using System.IO;
 	using System.Linq;
 
 	public unsafe class LustreExecutableModel :  ExecutableModel<LustreExecutableModel>
@@ -111,9 +112,15 @@ namespace Tests.SimpleExecutableModel
 				var simpleExecutableModel=new LustreExecutableModel(serializedModelWithFormulas);
 				return simpleExecutableModel;
 			};
-			
+			Action<TextWriter> writeOptimizedStateVectorLayout = (textWriter) =>
+			{
+				throw new NotImplementedException();
+				textWriter.WriteLine("bytes[0-4] state: int");
+				textWriter.WriteLine("bytes[5-12] permanent faults: long");
+			};
+
 			var faults = new Fault[0];
-			return new CoupledExecutableModelCreator<LustreExecutableModel>(creatorFunc, ocFileName, formulasToCheckInBaseModel, faults);
+			return new CoupledExecutableModelCreator<LustreExecutableModel>(creatorFunc, writeOptimizedStateVectorLayout, ocFileName, formulasToCheckInBaseModel, faults);
 		}
 
 		public static ExecutableModelCreator<LustreExecutableModel> CreateExecutedModelFromFormulasCreator(string ocFileName)
@@ -138,6 +145,13 @@ namespace Tests.SimpleExecutableModel
 			}
 
 			throw new InvalidOperationException("AtomarPropositionFormula cannot be evaluated. Use SimpleAtomarProposition instead.");
+		}
+
+		public override void WriteOptimizedStateVectorLayout(TextWriter textWriter)
+		{
+			throw new NotImplementedException();
+			textWriter.WriteLine("bytes[0-4] state: int");
+			textWriter.WriteLine("bytes[5-12] permanent faults: long");
 		}
 	}
 }
