@@ -39,13 +39,16 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 		private readonly ISet<BaseAgent> _agents;
 
+		private readonly IConnectionOracle _oracle;
+
 		/// <summary>
 		///   Creates a new instance.
 		/// </summary>
 		/// <param name="fragment">The fragment for which distributions shall be calculated.</param>
 		/// <param name="recoveredDistribution">The previous distribution, as far as recovered.</param>
 		/// <param name="agents">The set of available agents.</param>
-		public DistributionCalculator(TaskFragment fragment, [NotNull, ItemCanBeNull] BaseAgent[] recoveredDistribution, [NotNull, ItemNotNull] ISet<BaseAgent> agents)
+		/// <param name="oracle">Information about possible connections between agents.</param>
+		public DistributionCalculator(TaskFragment fragment, [NotNull, ItemCanBeNull] BaseAgent[] recoveredDistribution, [NotNull, ItemNotNull] ISet<BaseAgent> agents, [NotNull] IConnectionOracle oracle)
 		{
 			if (recoveredDistribution == null)
 				throw new ArgumentNullException(nameof(recoveredDistribution));
@@ -55,6 +58,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			Fragment = fragment;
 			_recoveredDistribution = recoveredDistribution;
 			_agents = agents;
+			_oracle = oracle;
 		}
 
 		/// <summary>
@@ -128,10 +132,11 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			while (prefixLength < Fragment.Length && !inevitableChanges[prefixLength])
 				prefixLength++;
 
-			// termination case: entire distribution found, hence return a copy
+			// termination case: entire distribution found, hence return a copy (unless resource flow impossible)
 			if (prefixLength == Fragment.Length)
 			{
-				yield return Copy(distribution);
+				if (!_oracle.ConnectionImpossible(distribution))
+					yield return Copy(distribution);
 				yield break;
 			}
 
@@ -186,7 +191,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			foreach (var agent in eligibleAgents)
 			{
 				distribution[modifiedIndex] = agent;
-				yield return distribution;
+				if (!_oracle.ConnectionImpossible(distribution))
+					yield return distribution;
 			}
 		}
 

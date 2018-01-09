@@ -188,7 +188,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 
 			do
 			{
-				calculator = new DistributionCalculator(coalition.CTF, coalition.RecoveredDistribution, coalition.BaseAgents);
+				calculator = new DistributionCalculator(coalition.CTF, coalition.RecoveredDistribution, coalition.BaseAgents, DefaultConnectionOracle.Instance);
 				agentCount = coalition.BaseAgents.Count;
 
 				using (var enumerator = calculator.CalculateDistributions().GetEnumerator())

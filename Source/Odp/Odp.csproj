@@ -62,6 +62,7 @@
     <Compile Include="Reconfiguration\CoalitionFormation\CoalitionReconfigurationAgent.cs" />
     <Compile Include="Condition.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\DistributionCalculator.cs" />
+    <Compile Include="Reconfiguration\CoalitionFormation\IConnectionOracle.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\IRecruitingStrategy.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\MissingCapabilitiesStrategy.cs" />
     <Compile Include="Reconfiguration\ReconfigurationReason.cs" />
