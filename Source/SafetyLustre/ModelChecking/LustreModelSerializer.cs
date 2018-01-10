@@ -218,8 +218,13 @@ namespace Tests.SimpleExecutableModel {
             }
         }
 
-        public static SerializationDelegate CreateFastInPlaceDeserializer(LustreModelBase model) {
-            SerializationDelegate deserialize = state => {
+        public static SerializationDelegate CreateFastInPlaceDeserializer(LustreModelBase model)
+		{
+			var permanentFaults = model.faults.Values.OrderBy(fault => fault.Identifier).OfType<PermanentFault>().ToArray();
+
+			var isActiveField = typeof(PermanentFault).GetField("_isActive", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			SerializationDelegate deserialize = state => {
 
                 var positionInRamOfFirstInt = (int*)state;
                 model.program.state = positionInRamOfFirstInt[0];
@@ -266,16 +271,38 @@ namespace Tests.SimpleExecutableModel {
                         index++;
                     }
                 }
-                var lastPosition = (byte*)(positionInRamOfFirstBool + model.program.countVariables(0));
-                var length = (lastPosition - state);
-                Requires.That(model.StateVectorSize == length, "model.StateVectorSize does not match");
+
+				// Faults
+				var positionInRamOfFaults = (long*)(positionInRamOfFirstBool + model.program.countVariables(0));
+				var faultsSerialized = *positionInRamOfFaults;
+				for (var i = 0; i < permanentFaults.Length; ++i)
+				{
+					var fault = permanentFaults[i];
+					if ((faultsSerialized & (1L << i)) != 0)
+					{
+						isActiveField.SetValue(fault, true);
+					}
+					else
+					{
+						isActiveField.SetValue(fault, false);
+					}
+				}
+
+				var lastPosition = (byte*) (positionInRamOfFaults+1);
+				var length = (lastPosition - state);
+				Requires.That(model.StateVectorSize == length, "model.StateVectorSize does not match");
             };
             return deserialize;
         }
 
 
-        public static SerializationDelegate CreateFastInPlaceSerializer(LustreModelBase model) {
-            SerializationDelegate serialize = state => {
+        public static SerializationDelegate CreateFastInPlaceSerializer(LustreModelBase model)
+		{
+			var permanentFaults = model.faults.Values.OrderBy(fault => fault.Identifier).OfType<PermanentFault>().ToArray();
+
+			var isActiveField = typeof(PermanentFault).GetField("_isActive", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			SerializationDelegate serialize = state => {
 
                 var positionInRamOfFirstInt = (int*)state;
                 positionInRamOfFirstInt[0] = model.program.state;
@@ -322,7 +349,21 @@ namespace Tests.SimpleExecutableModel {
                         index++;
                     }
                 }
-            };
+
+				// Faults
+				var positionInRamOfFaults = (long*)(positionInRamOfFirstBool + model.program.countVariables(0));
+				var faultsSerialized = 0L;
+				for (var i = 0; i < permanentFaults.Length; ++i)
+				{
+					var fault = permanentFaults[i];
+					var isActive = (bool)isActiveField.GetValue(fault);
+					if (isActive)
+					{
+						faultsSerialized |= 1L << i;
+					}
+				}
+				*(positionInRamOfFaults) = faultsSerialized;
+			};
             return serialize;
         }
     }

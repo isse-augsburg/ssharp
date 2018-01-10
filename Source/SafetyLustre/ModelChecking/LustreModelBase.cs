@@ -43,10 +43,12 @@ namespace Tests.SimpleExecutableModel
 
             StateVectorSize =
 		        program.countVariables(0) * sizeof(bool) +
-		        (program.countVariables(1) + 1) * sizeof(int) +
+		        program.countVariables(1) * sizeof(int) +
 		        program.countVariables(2) * sizeof(char) +
 		        program.countVariables(3) * sizeof(float) +
-		        program.countVariables(4) * sizeof(double);
+		        program.countVariables(4) * sizeof(double) +
+				sizeof(int) + // variable containing the current state
+				sizeof(long); // variable containing the permanent faults
 
 		    output = 0;
 
