@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="HazardProbabilityTests.cs" />
     <Compile Include="ModelCheckingTests.cs" />
+    <Compile Include="SimulationTests.cs" />
     <Compile Include="SafetyAnalysisTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

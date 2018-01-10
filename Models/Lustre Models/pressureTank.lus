@@ -1,26 +1,41 @@
-node TANK(fault_k1, fault_sensor: bool; press: bool) returns (level: int);
-var k1: bool; k2: bool; sensor: bool; timer: int;
-let
-	sensor = false -> 
-		if (level > 39 and not fault_sensor) then true
-		else false;
+const
+	max_time=9;
+	max_level=60;
+	min_sensed_pressure=40;
 
-	k1 = false -> 
-		if ((pre(k1) or press) and (timer < 10)) then true
-		else false;
-	
-	timer = 0 ->
-		if pre(sensor) then 0
-		else if (press or pre(k1)) then (pre(timer) + 1)
-		else 0;
+node TANK(fault_k1, fault_k2, fault_sensor: bool) returns (level: int);
+var
+	sensor, switch, k1, k2, timer: bool; -- these are the contacts
+	c1_c2 : bool;
+	time: int;
+let	
+	sensor = true -> 
+		if (level >= min_sensed_pressure and not fault_sensor) then false
+		else true;
 		
-	k2 = false -> 
-		if (press or pre(k1)) and not sensor then true
-		else false;
+	switch = true -> false;
+	
+	c1_c2 = pre(switch) or (false -> pre(k1));
+				
+	k1 = false -> (pre(timer) and c1_c2) or (pre(k1) and fault_k1);
+	
+	k2 = false -> (pre(sensor) and c1_c2) or (pre(k2) and fault_k2); 
+	
+	time = 0 ->
+		-- timer is powered
+		if pre(sensor) and c1_c2 then
+			if pre(time) >= max_time then max_time else pre(time) + 1
+		-- timer is not powered
+		else
+			0;
+	
+	timer = time < max_time;
 		
 	level = 0 ->
-		if pre(sensor) or ((pre(timer) > 9) and not press) then 0 
-		else if pre(k2) then pre(level) + 5
-		else pre(level);
-		
+		-- pump is powered
+		if k2 then
+		   if pre(level) >= max_level then max_level else pre(level) + 5
+		-- pump is not powered
+		else
+			0;	
 tel

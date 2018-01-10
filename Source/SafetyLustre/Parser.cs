@@ -440,8 +440,9 @@ namespace BachelorarbeitLustre {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"endmodule:\" expected");
                     }
                     referenceObjects();
-                    program.state = startpoint;
-                }
+					program.startState = startpoint;
+					program.state = startpoint;
+				}
             }
             catch (Exception e) {
 				Program.outputTextWriter.WriteLine("Error reading the file:");

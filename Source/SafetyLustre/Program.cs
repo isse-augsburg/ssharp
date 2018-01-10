@@ -43,7 +43,8 @@ namespace BachelorarbeitLustre {
         public static bool modelChecking = false;
 
         public List<Object> output;
-        public int state;
+		public int startState;
+		public int state;
         public Queue<Object>[] input;
 
         public List<Constant> constants;

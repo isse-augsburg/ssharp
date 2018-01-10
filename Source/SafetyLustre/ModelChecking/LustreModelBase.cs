@@ -65,7 +65,7 @@ namespace Tests.SimpleExecutableModel
 		
 		public virtual void SetInitialState()
 		{
-
+			output = 0;
 		}
 
 		public void Update()

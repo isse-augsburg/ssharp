@@ -62,6 +62,7 @@
     <Compile Include="ModelChecking\LustreModelBase.cs" />
     <Compile Include="ModelChecking\LustreModelChecking.cs" />
     <Compile Include="ModelChecking\LustreModelSerializer.cs" />
+    <Compile Include="ModelChecking\LustreSimulator.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="PredefinedObjects.cs" />

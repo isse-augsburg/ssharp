@@ -22,11 +22,12 @@ namespace Lustre_Models
 			Formula invariant = new LustrePressureBelowThreshold();
 			Formula hazard = new UnaryFormula(invariant, UnaryOperator.Not);
 
-			LustrePressureBelowThreshold.threshold = 50;
+			LustrePressureBelowThreshold.threshold = 60;
 
 			var faults = new List<Fault>();
-			faults.Add(new TransientFault() { Name= "fault_k1", Identifier= 0, ProbabilityOfOccurrence = new Probability(0.1) });
-			faults.Add(new TransientFault() { Name= "fault_sensor", Identifier = 1, ProbabilityOfOccurrence = new Probability(0.2) });
+			faults.Add(new TransientFault() { Name = "fault_k1", Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) });
+			faults.Add(new TransientFault() { Name = "fault_k2", Identifier = 1, ProbabilityOfOccurrence = new Probability(0.1) });
+			faults.Add(new TransientFault() { Name = "fault_sensor", Identifier = 2, ProbabilityOfOccurrence = new Probability(0.2) });
 			var result = LustreSafetyAnalysis.AnalyzeHazard("pressureTank", faults, hazard);
 			Console.WriteLine($"Minimal Critical Sets: {result.MinimalCriticalSets.Count}");
 		}
