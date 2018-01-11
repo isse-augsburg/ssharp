@@ -62,7 +62,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         }
 
         private void OnBroken(object sender, RoutedEventArgs e) {
-            //to-do, currently just for the first cart of the Carts-list
+            //Currently just for the first cart of the Carts-list
             _container.Model.Carts.First().Broken.ToggleActivationMode();
         }
 
@@ -91,26 +91,7 @@ namespace SafetySharp.CaseStudies.Visualizations
             else
                 routesTxt.Text = routesString;
         }
-
-        //public void PrintCartRoutes()
-        //{
-        //    var routes = _cartAgent.Cart.Routes;
-        //    int i = 0;
-
-        //    routesTxt.Text = "Routes:\n";
-        //    Console.WriteLine();
-
-        //    foreach (var route in routes)
-        //    {
-        //        var nameR1 = route.Robot1.Name;
-        //        var nameR2 = route.Robot2.Name;
-        //        Console.WriteLine("Route {0} for the cart with the id " + _cartAgent.Id + " is: " + nameR1 + " to " + nameR2, i + 1);
-        //        routesTxt.Text += CreateRouteString(nameR1, nameR2);
-        //        i++;
-        //    }
-        //    Console.WriteLine("Final routesTxt string: " + routesTxt.Text);
-        //}
-
+        
         public string CreateRouteString(string r1, string r2)
         {
             return "(" + r1+ "," + r2 + ") ";

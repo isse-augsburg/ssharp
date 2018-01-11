@@ -225,6 +225,8 @@ namespace SafetySharp.CaseStudies.Visualizations
             foreach (var robot in _robots) {
                 robot.Value.Update(robot.Value.GetRobotAgent());
             }
+            
+            lboxTask.SelectedItems.Clear();
         }
 
         private void UpdateModelState()
@@ -366,22 +368,6 @@ namespace SafetySharp.CaseStudies.Visualizations
             if (!doneCapabilities.Contains(cap))
                 doneCapabilities.Add(cap);
         }
-
-        //public void DrawRoutes()
-        //{
-        //    //Test
-        //    Line line = new Line();
-        //    line.Stroke = Brushes.LightGreen;
-        //    line.X1 = Grid.GetColumn(_carts.First().Value);
-        //    line.X2 = Grid.GetColumn(_robots.First().Value);
-        //    line.Y1 = Grid.GetRow(_carts.First().Value);
-        //    line.Y2 = Grid.GetRow(_robots.First().Value);
-
-        //    line.StrokeThickness = 3;
-        //    line.Visibility = Visibility.Visible;
-        //    visualizationArea.Children.Add(line);
-        //    //MyCanvas.Children.Add(line);
-        //}
 
         public void PrintCartRoutes()
         {
