@@ -225,7 +225,11 @@ namespace SafetySharp.CaseStudies.Visualizations
             foreach (var robot in _robots) {
                 robot.Value.Update(robot.Value.GetRobotAgent());
             }
-            
+                        
+            //Reset the selected task capabilities
+            for (int i = doneCapabilities.Count - 1; i >= 0; i--) {
+                doneCapabilities.RemoveAt(i);
+            }
             lboxTask.SelectedItems.Clear();
         }
 
@@ -407,25 +411,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
                 routeBox.IsReadOnly = true;
                 Console.WriteLine("Final routesTxt string: " + routeBox.Text);
-            }
-
-
-            /// <summary>
-            /// For creating a line in the grid, but doesn't reach over the edges of one gridcell 
-            /// </summary>
-            //Path path = new Path();
-            //path.Stroke = Brushes.Red;
-            //path.StrokeThickness = 3;
-            //path.Stretch = Stretch.Fill;
-            //LineGeometry geometry = new LineGeometry();
-            //geometry.StartPoint = new Point(Grid.GetColumn(_carts.First().Value), Grid.GetRow(_carts.First().Value));
-            //geometry.EndPoint = new Point(Grid.GetColumn(_carts.Last().Value), Grid.GetRow(_carts.Last().Value));
-            //path.Data = geometry;
-            ////path.Data = Geometry.Parse("M 100,200 C 100,25 0,0 0,0 H 280");
-            ////Grid.SetColumn(path, 4);
-            ////Grid.SetRow(path, 2);
-            //visualizationArea.Children.Add(path);
-
+            }            
         }
     }
 }
