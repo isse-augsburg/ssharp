@@ -74,6 +74,8 @@ namespace SafetyLustre
 		/// <param name="formula">The state formula to be checked.</param>
 		public static Probability CalculateProbabilityOfFormula(string ocFileName, IEnumerable<Fault> faults, Formula formula)
 		{
+			Program.modelChecking = true;
+
 			Probability probability;
 
 			var createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults.ToArray());
