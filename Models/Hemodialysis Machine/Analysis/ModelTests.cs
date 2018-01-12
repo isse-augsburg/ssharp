@@ -23,6 +23,7 @@
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 {
 	using System;
+	using System.Collections;
 	using System.Linq;
 	using Modeling;
 	using NUnit.Framework;
@@ -157,10 +158,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 		}
 
-		[Test]
-		public void Test()
+		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("Test")]
+		public void Test(Model specification)
 		{
-			var specification = new Model();
 			var model = specification;
 			var faults = model.Faults;
 
@@ -184,6 +185,22 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			result[0].FormulaHolds.Should().BeFalse();
 			result[1].FormulaHolds.Should().BeFalse();
+		}
+
+		private static IEnumerable CreateModelVariants()
+		{
+			Func<bool, Model> createVariant = (waterHeaterFaultIsPermanent) =>
+			{
+				var previousValue = Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent;
+				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = waterHeaterFaultIsPermanent;
+				var model = new Model();
+				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = previousValue;
+				return model;
+			};
+
+			return from waterHeaterFaultIsPermanent in new[] { true, false }
+				   let name = "WaterHeater" + (waterHeaterFaultIsPermanent ? "Permanent" : "Transient")
+				   select new TestCaseData(createVariant(waterHeaterFaultIsPermanent)).SetName(name);
 		}
 	}
 }

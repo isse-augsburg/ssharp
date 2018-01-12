@@ -100,3 +100,4 @@ function AddParameterizedJsonTestValuations($namePrefix,$sourceFile,$targetFile,
 # Height Control
 ###############################################
 . $PSScriptRoot\testCases-heightcontrol.ps1
+. $PSScriptRoot\testCases-hemodialysis.ps1

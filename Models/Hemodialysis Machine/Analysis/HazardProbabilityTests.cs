@@ -75,6 +75,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		}
 
 		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("IncomingBloodIsContaminated")]
 		public void IncomingBloodIsContaminated(Model model)
 		{
 			SetProbabilities(model);
@@ -84,6 +85,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		}
 
 		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("IncomingBloodIsContaminated_FaultTree")]
 		public void IncomingBloodIsContaminated_FaultTree(Model model)
 		{
 			SetProbabilities(model);
@@ -108,6 +110,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		}
 
 		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("DialysisFinishedAndBloodNotCleaned")]
 		public void DialysisFinishedAndBloodNotCleaned(Model model)
 		{
 			SetProbabilities(model);
@@ -118,6 +121,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 
 		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("DialysisFinishedAndBloodNotCleaned_FaultTree")]
 		public void DialysisFinishedAndBloodNotCleaned_FaultTree(Model model)
 		{
 			SetProbabilities(model);
@@ -142,6 +146,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		}
 
 		[TestCaseSource(nameof(CreateModelVariants))]
+		[Category("Parametric")]
 		public void Parametric(Model model)
 		{
 			SetProbabilities(model);
@@ -170,8 +175,11 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			Func<bool, Model> createVariant = (waterHeaterFaultIsPermanent) =>
 			{
+				var previousValue = Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent;
 				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = waterHeaterFaultIsPermanent;
-				return new Model();
+				var model = new Model();
+				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = previousValue;
+				return model;
 			};
 
 			return from waterHeaterFaultIsPermanent in new []{true,false}

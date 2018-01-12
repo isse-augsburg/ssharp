@@ -46,7 +46,7 @@ $global_testValuations = @()
 #$global_selected_tests = $global_tests
 
 # only fast
-$global_selected_tests = $global_tests | Where { (-not $_.TestCategories.Contains("Exceeds-Memory-Limit")) -and ($_.TestCategories.Contains("Probability") -or $_.TestCategories.Contains("DCCA"))}
+$global_selected_tests = $global_tests | Where { (-not $_.TestCategories.Contains("Exceeds-Memory-Limit")) -and ($_.TestCategories.Contains("HeightControl")) -and ($_.TestCategories.Contains("Probability") -or $_.TestCategories.Contains("DCCA"))}
 
 
 AddTestValuation -Name "HeightControlLowerLightBarriers" -Script "copy -Force $PSScriptRoot\HeightControlLowerLightBarriers.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json" -ResultDir "$PSScriptRoot\HeightControlLowerLightBarriers" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")

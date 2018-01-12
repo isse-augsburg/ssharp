@@ -38,6 +38,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	using Modeling.Controllers;
 	using Modeling.Sensors;
 	using Newtonsoft.Json;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using System.IO;
 
 	class HazardProbabilityTests
 	{
@@ -140,6 +142,49 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			SetProbabilities(model);
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PreventedCollision, 50);
 			Console.Write($"Probability of prevention: {result}");
+		}
+
+
+		[Test]
+		public void ParametricLbInOriginalDesign()
+		{
+			var model = Model.CreateOriginal();
+			SetProbabilities(model);
+
+			Action<double> updateParameterInModel = value =>
+			{
+				foreach (var detector in model.Components.OfType<LightBarrier>())
+				{
+					detector.FalseDetection.ProbabilityOfOccurrence = new Probability(value);
+				}
+			};
+
+			var parameter = new QuantitativeParametricAnalysisParameter
+			{
+				StateFormula = model.Collision,
+				Bound = null,
+				From = 000001,
+				To = 0.01,
+				Steps = 25,
+				UpdateParameterInModel = updateParameterInModel
+			};
+
+			var result = SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
+			var fileWriter = new StreamWriter("ParametricLbCollision.csv", append: false);
+			result.ToCsv(fileWriter);
+			fileWriter.Close();
+
+			parameter.StateFormula = model.FalseAlarm;
+			result = SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
+			fileWriter = new StreamWriter("ParametricLbFalseAlarm.csv", append: false);
+			result.ToCsv(fileWriter);
+			fileWriter.Close();
+			
+			parameter.StateFormula = model.PreventedCollision;
+			result = SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
+			fileWriter = new StreamWriter("ParametricLbPreventedCollision.csv", append: false);
+			result.ToCsv(fileWriter);
+			fileWriter.Close();
 		}
 
 
