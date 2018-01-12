@@ -8,8 +8,8 @@ using ISSE.SafetyChecking.Formula;
 using ISSE.SafetyChecking.Utilities;
 using Tests.SimpleExecutableModel;
 using Xunit;
-using BachelorarbeitLustre;
 using ISSE.SafetyChecking.Modeling;
+using SafetyLustre;
 using Tests.Utilities;
 using Xunit.Abstractions;
 

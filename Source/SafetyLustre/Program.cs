@@ -33,11 +33,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using ISSE.SafetyChecking;
 using ISSE.SafetyChecking.Formula;
-using Tests.SimpleExecutableModel;
 using System.Globalization;
 using ISSE.SafetyChecking.Modeling;
 
-namespace BachelorarbeitLustre {
+namespace SafetyLustre
+{
     public class Program {
 
         public static bool modelChecking = false;

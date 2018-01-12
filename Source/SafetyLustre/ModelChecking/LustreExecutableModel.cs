@@ -28,7 +28,7 @@ using ISSE.SafetyChecking.Formula;
 using ISSE.SafetyChecking.Modeling;
 using ISSE.SafetyChecking.Utilities;
 
-namespace Tests.SimpleExecutableModel
+namespace SafetyLustre
 {
 	using System.IO;
 	using System.Linq;

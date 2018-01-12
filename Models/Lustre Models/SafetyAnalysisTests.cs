@@ -6,8 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ISSE.SafetyChecking.Formula;
 using NUnit.Framework;
-using Tests.SimpleExecutableModel;
 using ISSE.SafetyChecking.Modeling;
+using SafetyLustre;
 
 namespace Lustre_Models
 {
@@ -17,7 +17,7 @@ namespace Lustre_Models
 		[Test]
 		public void TankRupture()
 		{
-			BachelorarbeitLustre.Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\";
+			Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\";
 
 			Formula invariant = new LustrePressureBelowThreshold();
 			Formula hazard = new UnaryFormula(invariant, UnaryOperator.Not);

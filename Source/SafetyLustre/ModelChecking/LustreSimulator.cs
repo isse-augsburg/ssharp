@@ -23,7 +23,7 @@
 
 using ISSE.SafetyChecking.Modeling;
 
-namespace Tests.SimpleExecutableModel
+namespace SafetyLustre
 {
 	using System;
 	using System.Collections.Generic;

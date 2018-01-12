@@ -27,7 +27,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BachelorarbeitLustre {
+namespace SafetyLustre
+{
     public class Dag {
 
         private Node root;

@@ -8,8 +8,8 @@
     <ProjectGuid>{CC928659-8CCF-4357-BD4F-224F80C5C79A}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BachelorarbeitLustre</RootNamespace>
-    <AssemblyName>BachelorarbeitLustre</AssemblyName>
+    <RootNamespace>SafetyLustre</RootNamespace>
+    <AssemblyName>SafetyLustre</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -60,6 +60,7 @@
     <Compile Include="ModelChecking\LustreCounterExampleSerialization.cs" />
     <Compile Include="ModelChecking\LustreExecutableModel.cs" />
     <Compile Include="ModelChecking\LustreModelBase.cs" />
+    <Compile Include="ModelChecking\LustreModelChecker.cs" />
     <Compile Include="ModelChecking\LustreModelChecking.cs" />
     <Compile Include="ModelChecking\LustreModelSerializer.cs" />
     <Compile Include="ModelChecking\LustreSimulator.cs" />

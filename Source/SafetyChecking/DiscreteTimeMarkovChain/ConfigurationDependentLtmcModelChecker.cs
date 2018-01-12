@@ -37,7 +37,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private readonly DtmcModelChecker _dtmcModelChecker;
 
 		// Note: Should be used with using(var modelchecker = new ...)
-		internal ConfigurationDependentLtmcModelChecker(AnalysisConfiguration configuration, LabeledTransitionMarkovChain markovChain, TextWriter output = null)
+		public ConfigurationDependentLtmcModelChecker(AnalysisConfiguration configuration, LabeledTransitionMarkovChain markovChain, TextWriter output = null)
 			: base(markovChain, output)
 		{
 			switch (configuration.LtmcModelChecker)

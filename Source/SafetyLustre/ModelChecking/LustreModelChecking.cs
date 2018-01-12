@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ISSE.SafetyChecking.Modeling;
 
-namespace Tests.SimpleExecutableModel
+namespace SafetyLustre
 {
 	using System;
 	using ISSE.SafetyChecking.AnalysisModel;
@@ -34,7 +34,6 @@ namespace Tests.SimpleExecutableModel
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
 	using ISSE.SafetyChecking.MarkovDecisionProcess;
-	using BachelorarbeitLustre;
 	using ISSE.SafetyChecking.ExecutableModel;
 	
 	public sealed class LustreSafetyAnalysis : SafetyAnalysis<LustreExecutableModel>

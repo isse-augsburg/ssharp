@@ -30,7 +30,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace BachelorarbeitLustre {
+namespace SafetyLustre
+{
     static class PredefinedObjects {
 
         //actions

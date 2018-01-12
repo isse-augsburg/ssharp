@@ -39,7 +39,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private readonly MdpModelChecker _mdpModelChecker;
 		
 		// Note: Should be used with using(var modelchecker = new ...)
-		internal ConfigurationDependentLtmdpModelChecker(AnalysisConfiguration configuration, LabeledTransitionMarkovDecisionProcess markovChain, TextWriter output = null)
+		public ConfigurationDependentLtmdpModelChecker(AnalysisConfiguration configuration, LabeledTransitionMarkovDecisionProcess markovChain, TextWriter output = null)
 			: base(markovChain, output)
 		{
 			switch (configuration.LtmdpModelChecker)
@@ -126,7 +126,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return _mdpModelChecker.CalculateMinimalProbability(formulaToCheck);
 		}
 
-		internal override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
+		public override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
 		{
 			if (_ltmdpModelChecker != null)
 				return _ltmdpModelChecker.CalculateProbabilityRange(formulaToCheck);

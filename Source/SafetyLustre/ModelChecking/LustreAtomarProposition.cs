@@ -23,7 +23,7 @@
 
 using System;
 
-namespace Tests.SimpleExecutableModel
+namespace SafetyLustre
 {
 	using ISSE.SafetyChecking.Formula;
 

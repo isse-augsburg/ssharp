@@ -49,7 +49,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		internal abstract Probability CalculateMaximalProbability(Formula formulaToCheck);
 
-		internal abstract ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck);
+		public abstract ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck);
 
 		internal abstract bool CalculateFormula(Formula formulaToCheck);
 

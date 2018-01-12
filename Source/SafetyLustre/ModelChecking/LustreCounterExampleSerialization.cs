@@ -27,7 +27,7 @@ using System.IO;
 using ISSE.SafetyChecking.ExecutableModel;
 using ISSE.SafetyChecking.Utilities;
 
-namespace Tests.SimpleExecutableModel
+namespace SafetyLustre
 {
 	using System.Linq;
 	using System.Runtime.Serialization.Formatters.Binary;

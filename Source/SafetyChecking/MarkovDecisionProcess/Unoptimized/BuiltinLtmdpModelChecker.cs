@@ -432,7 +432,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		}
 
 
-		internal override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
+		public override ProbabilityRange CalculateProbabilityRange(Formula formulaToCheck)
 		{
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();

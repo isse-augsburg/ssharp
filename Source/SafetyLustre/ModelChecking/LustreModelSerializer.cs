@@ -22,7 +22,8 @@
 
 using System.Collections.Generic;
 
-namespace Tests.SimpleExecutableModel {
+namespace SafetyLustre
+{
     using System.IO;
     using System.Text;
     using ISSE.SafetyChecking.Utilities;

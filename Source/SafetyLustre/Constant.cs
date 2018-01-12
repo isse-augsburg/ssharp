@@ -28,7 +28,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BachelorarbeitLustre {
+namespace SafetyLustre
+{
     public class Constant {
 
         private int id;

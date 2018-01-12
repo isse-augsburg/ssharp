@@ -31,7 +31,8 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace BachelorarbeitLustre {
+namespace SafetyLustre
+{
     public class Parser {
 
         static Regex id = new Regex("^[1-9]*[0-9]:$");

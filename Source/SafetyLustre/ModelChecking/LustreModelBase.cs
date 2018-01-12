@@ -24,9 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ISSE.SafetyChecking.Modeling;
-using BachelorarbeitLustre;
 
-namespace Tests.SimpleExecutableModel
+namespace SafetyLustre
 {
 	public class LustreModelBase
 	{
