@@ -22,20 +22,20 @@ let
 	k2 = false -> (pre(sensor) and c1_c2) or (pre(k2) and fault_k2); 
 	
 	time = 0 ->
-		-- timer is powered
+		-- timer is energized
 		if pre(sensor) and c1_c2 then
 			if pre(time) >= max_time then max_time else pre(time) + 1
-		-- timer is not powered
+		-- timer is not energized
 		else
 			0;
 	
 	timer = time < max_time;
 		
 	level = 0 ->
-		-- pump is powered
+		-- pump is energized
 		if k2 then
 		   if pre(level) >= max_level then max_level else pre(level) + 5
-		-- pump is not powered
+		-- pump is not energized
 		else
 			0;	
 tel

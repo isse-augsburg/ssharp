@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 {
+	using System.Collections;
 	using System.Globalization;
 	using System.IO;
 	using FluentAssertions;
@@ -73,20 +74,18 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 		}
 
-		[Test]
-		public void IncomingBloodIsContaminated()
+		[TestCaseSource(nameof(CreateModelVariants))]
+		public void IncomingBloodIsContaminated(Model model)
 		{
-			var model = new Model();
 			SetProbabilities(model);
 			
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.IncomingBloodWasNotOk);
 			Console.Write($"Probability of hazard: {result}");
 		}
 
-		[Test]
-		public void IncomingBloodIsContaminated_FaultTree()
+		[TestCaseSource(nameof(CreateModelVariants))]
+		public void IncomingBloodIsContaminated_FaultTree(Model model)
 		{
-			var model = new Model();
 			SetProbabilities(model);
 			var analysis = new SafetySharpSafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };
 
@@ -108,10 +107,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			Console.WriteLine($"Result with fault tree rare event approximation: {reaProbability.ToString(CultureInfo.InvariantCulture)}");
 		}
 
-		[Test]
-		public void DialysisFinishedAndBloodNotCleaned()
+		[TestCaseSource(nameof(CreateModelVariants))]
+		public void DialysisFinishedAndBloodNotCleaned(Model model)
 		{
-			var model = new Model();
 			SetProbabilities(model);
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachState(model, model.BloodNotCleanedAndDialyzingFinished);
@@ -119,10 +117,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		}
 
 
-		[Test]
-		public void DialysisFinishedAndBloodNotCleaned_FaultTree()
+		[TestCaseSource(nameof(CreateModelVariants))]
+		public void DialysisFinishedAndBloodNotCleaned_FaultTree(Model model)
 		{
-			var model = new Model();
 			SetProbabilities(model);
 			var analysis = new SafetySharpSafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };
 
@@ -144,10 +141,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			Console.WriteLine($"Result with fault tree rare event approximation: {reaProbability.ToString(CultureInfo.InvariantCulture)}");
 		}
 
-		[Test]
-		public void Parametric()
+		[TestCaseSource(nameof(CreateModelVariants))]
+		public void Parametric(Model model)
 		{
-			var model = new Model();
 			SetProbabilities(model);
 			var parameter = new QuantitativeParametricAnalysisParameter
 			{
@@ -168,6 +164,19 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			var fileWriterUnsuccessful = new StreamWriter("unsuccessful.csv", append: false);
 			result.ToCsv(fileWriterUnsuccessful);
 			fileWriterUnsuccessful.Close();
+		}
+
+		private static IEnumerable CreateModelVariants()
+		{
+			Func<bool, Model> createVariant = (waterHeaterFaultIsPermanent) =>
+			{
+				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = waterHeaterFaultIsPermanent;
+				return new Model();
+			};
+
+			return from waterHeaterFaultIsPermanent in new []{true,false}
+		           let name = "WaterHeater"+ (waterHeaterFaultIsPermanent ? "Permanent":"Transient")
+				   select new TestCaseData(createVariant(waterHeaterFaultIsPermanent)).SetName(name);
 		}
 	}
 }

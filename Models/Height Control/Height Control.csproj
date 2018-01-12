@@ -70,6 +70,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Analysis\HazardProbabilityRangeTests.cs" />
+    <Compile Include="Analysis\EvaluationTests.cs" />
     <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Analysis\ModelCheckingTests.cs" />
     <Compile Include="Analysis\SimulationTests.cs" />
