@@ -117,6 +117,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 		private void TraverseModel()
 		{
 			Reset();
+			Context.Output?.WriteLine($"State vector of transition modifiers vector has {_workers.First().TraversalModifierStateVectorSize} bytes."); // valid only after Reset()
 
 			_workers[0].ComputeInitialStates();
 			if (_loadBalancer.IsTerminated)
@@ -143,7 +144,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			if (!Context.Configuration.ProgressReportsOnly)
 			{
 				Context.Output?.WriteLine($"Traverse model using {AnalyzedModels.Count()} CPU cores.");
-				Context.Output?.WriteLine($"State vector has {AnalyzedModels.First().ModelStateVectorSize} bytes.");
+				Context.Output?.WriteLine($"State vector of model has {AnalyzedModels.First().ModelStateVectorSize} bytes.");
 			}
 
 			try

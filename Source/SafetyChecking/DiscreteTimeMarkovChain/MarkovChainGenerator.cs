@@ -63,6 +63,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				modelTraverser.Context.TraversalParameters.TransitionModifiers.AddRange(FormulaManager.TransitionModifierGenerators);
 				modelTraverser.Context.TraversalParameters.TransitionModifiers.Add(() => new ConsolidateTransitionsModifier());
 				modelTraverser.Context.TraversalParameters.BatchedTransitionActions.Add(() => new LabeledTransitionMarkovChain.LtmcBuilder(_markovChain));
+				AddFormulasToPlainlyIntegrateIntoStateSpace(FormulaManager.FinalStateFormulaLabels,
+					modelTraverser.Context.TraversalParameters.TransitionModifiers);
 
 				modelTraverser.Context.Output.WriteLine($"Generating labeled transition markov chain.");
 				modelTraverser.TraverseModelAndReport();
@@ -106,6 +108,33 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				throw new Exception(nameof(AddFormulaToCheck) + " must be called before the traversal of the model started!");
 			}
 			FormulaManager.AddFormulaToCheck(formula);
+		}
+
+
+
+
+
+		// Only for evaluation purposes.
+		private readonly List<Formula> _formulasToPlainlyIntegrateIntoTheStateSpace = new List<Formula>();
+
+		// This is only for evaluation purposes and should never be used for real evaluations.
+		public void AddFormulaToPlainlyIntegrateIntoStateSpace(Formula formulaToCheck)
+		{
+			_formulasToPlainlyIntegrateIntoTheStateSpace.Add(formulaToCheck);
+		}
+
+
+		// Only for evaluation purposes.
+		private void AddFormulasToPlainlyIntegrateIntoStateSpace(IEnumerable<string> knownLabels, List<Func<ITransitionModifier>> transitionModifiers )
+		{
+			if (_formulasToPlainlyIntegrateIntoTheStateSpace.Count == 0)
+				return;
+
+			var alreadyKnownLabels = knownLabels.ToArray();
+			var formulasToIntegrate = _formulasToPlainlyIntegrateIntoTheStateSpace.ToArray();
+
+			Func<PlainlyIntegrateFormulaIntoStateModifier> integrateFormulasModifier = () => new PlainlyIntegrateFormulaIntoStateModifier(alreadyKnownLabels, formulasToIntegrate);
+			transitionModifiers.Add(integrateFormulasModifier);
 		}
 	}
 }

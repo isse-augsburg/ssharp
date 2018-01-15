@@ -50,6 +50,7 @@
     <Compile Include="AnalysisModelTraverser\CompactStateStorage.cs" />
     <Compile Include="AnalysisModelTraverser\SparseStateStorage.cs" />
     <Compile Include="AnalysisModelTraverser\TemporaryStateStorage.cs" />
+    <Compile Include="AnalysisModelTraverser\TraversalModifiers\PlainlyIntegrateFormulaIntoStateModifier.cs" />
     <Compile Include="AnalysisModelTraverser\TraversalModifiers\ObserveFormulasModifier.cs" />
     <Compile Include="AnalysisModel\AnalysisModel.cs" />
     <Compile Include="AnalysisModel\CounterExample.cs" />

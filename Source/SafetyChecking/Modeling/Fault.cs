@@ -284,7 +284,7 @@ namespace ISSE.SafetyChecking.Modeling
 		protected abstract Activation CheckActivation();
 
 
-		public enum DemandTypes
+		public enum DemandTypes : byte
 		{
 			OnCustom,
 			OnStepBegin,
