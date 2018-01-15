@@ -22,47 +22,50 @@
 
 using System;
 using System.Collections.Generic;
-using ISSE.SafetyChecking;
-using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
-using ISSE.SafetyChecking.Modeling;
-using NUnit.Framework;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
+namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
-	using Analysis;
-	using Bayesian;
+	using FluentAssertions;
+	using ISSE.SafetyChecking.Modeling;
+	using Modeling;
+	using NUnit.Framework;
+	using SafetySharp.Analysis;
+	using SafetySharp.Modeling;
+	using System.Collections;
+	using ISSE.SafetyChecking;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.Formula;
-	using ModelChecking;
+	using Modeling.Controllers;
 	using Runtime;
 
-	public class EvaluationTests
+	class EvaluationTests
 	{
-		[Test]
-		public void CalculateHazardProbability()
+
+		public static void SetProbabilities(Model model)
 		{
-			var tc = SafetySharpModelChecker.TraversalConfiguration;
-			tc.WriteGraphvizModels = true;
-			tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
-			SafetySharpModelChecker.TraversalConfiguration = tc;
-
-			var model = new PrecisenessTradeoffModel();
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
-
-			Console.WriteLine($"Probability of hazard in model: {result}");
+			model.Channel.MessageDropped.ProbabilityOfOccurrence = new Probability(0.0001);
+			model.CrossingController.Motor.BarrierMotorStuck.ProbabilityOfOccurrence = new Probability(0.001);
+			model.CrossingController.Sensor.BarrierSensorFailure.ProbabilityOfOccurrence = new Probability(0.00003);
+			model.CrossingController.TrainSensor.ErroneousTrainDetection.ProbabilityOfOccurrence = new Probability(0.0002);
+			model.TrainController.Brakes.BrakesFailure.ProbabilityOfOccurrence = new Probability(0.00002);
+			model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = new Probability(0.02);
+			model.TrainController.Odometer.OdometerSpeedOffset.ProbabilityOfOccurrence = new Probability(0.02);
 		}
-
+		
 		[Test]
 		public void CreateMarkovChainWithFalseFormula()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+			SetProbabilities(model);
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			markovChainGenerator.AddFormulaToCheck(new ExecutableStateFormula(() => false));
+			markovChainGenerator.AddFormulaToCheck(new ExecutableStateFormula(()=> false));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
@@ -70,13 +73,14 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazards()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+			SetProbabilities(model);
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
@@ -84,20 +88,21 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazardRetraversal1()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+			SetProbabilities(model);
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
-
+			
 			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
 			retraversalMarkovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
 			markovChainGenerator.GenerateLabeledMarkovChain();
@@ -106,20 +111,21 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazardsRetraversal2()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+			SetProbabilities(model);
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 
 			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
 			retraversalMarkovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
 			markovChainGenerator.GenerateLabeledMarkovChain();
@@ -129,13 +135,14 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazardFaultsInState()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+			SetProbabilities(model);
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			foreach (var fault in model.Faults)
 			{
 				var faultFormula = new FaultFormula(fault);
@@ -145,12 +152,13 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
-
-
+		
+		
 		[Test]
 		public void CreateFaultAwareMarkovChainAllFaults()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+			SetProbabilities(model);
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
@@ -162,7 +170,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 				var faultFormula = new FaultFormula(fault);
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
@@ -170,21 +178,25 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CalculateHazardSingleCore()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+
+			SetProbabilities(model);
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = 1;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = Int32.MaxValue;
 			Console.Write($"Probability of hazard: {result}");
 		}
-
+		
 
 
 		[Test]
 		public void CalculateHazardWithoutEarlyTermination()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new Model();
+
+			SetProbabilities(model);
 			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
 			Console.Write($"Probability of hazard: {result}");
 		}

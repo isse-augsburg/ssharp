@@ -79,6 +79,7 @@
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="Analysis\DialyzingFluidFlowTests.cs" />
+    <Compile Include="Analysis\EvaluationTests.cs" />
     <Compile Include="Analysis\HazardProbabilityRangeTests.cs" />
     <Compile Include="Analysis\HazardProbabilityTests.cs" />
     <Compile Include="Modeling\DialyzingFluidDeliverySystem\ConcentrateSupply.cs" />

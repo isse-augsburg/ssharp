@@ -194,7 +194,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 
 		[Test]
-		public void CreateFaultAwareMarkovChainForFalseAlarmLeftDetectorFalse()
+		public void CreateFaultAwareMarkovChainLeftDetectorFalse()
 		{
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
@@ -205,13 +205,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
 			markovChainGenerator.AddFormulaToCheck(new FaultFormula(model.HeightControl.EndControl.LeftDetector.FalseDetection));
+			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
 		[Test]
-		public void CreateFaultAwareMarkovChainForFalseAlarmLeftDetectorMis()
+		public void CreateFaultAwareMarkovChainLeftDetectorMis()
 		{
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
@@ -222,13 +223,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
 			markovChainGenerator.AddFormulaToCheck(new FaultFormula(model.HeightControl.EndControl.LeftDetector.Misdetection));
+			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
 		[Test]
-		public void CreateFaultAwareMarkovChainForFalseAlarmPositionDetectorFalse()
+		public void CreateFaultAwareMarkovChainPositionDetectorFalse()
 		{
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
@@ -239,13 +241,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
 			markovChainGenerator.AddFormulaToCheck(new FaultFormula(model.HeightControl.PreControl.PositionDetector.FalseDetection));
+			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
 		[Test]
-		public void CreateFaultAwareMarkovChainForFalseAlarmPositionDetectorMis()
+		public void CreateFaultAwareMarkovChainPositionDetectorMis()
 		{
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
@@ -256,13 +259,14 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
 			markovChainGenerator.AddFormulaToCheck(new FaultFormula(model.HeightControl.PreControl.PositionDetector.Misdetection));
+			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
 		[Test]
-		public void CreateFaultAwareMarkovChainForFalseAlarmTwoFaults()
+		public void CreateFaultAwareMarkovChainTwoFaults()
 		{
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);
@@ -274,6 +278,25 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
 			markovChainGenerator.AddFormulaToCheck(new FaultFormula(model.HeightControl.EndControl.LeftDetector.FalseDetection));
 			markovChainGenerator.AddFormulaToCheck(new FaultFormula(model.HeightControl.EndControl.LeftDetector.Misdetection));
+			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
+			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateMarkovChain();
+		}
+
+		[Test]
+		public void CalculateSingleCore()
+		{
+			var model = Model.CreateOriginal();
+			SetProbabilities(model);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();

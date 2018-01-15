@@ -32,6 +32,9 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 	using ModelChecking;
 	using NUnit.Framework;
 	using System.Linq;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.Formula;
+	using Runtime;
 
 	public class EvaluationTests
 	{
@@ -70,35 +73,143 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 
 			probCalculator.WriteProbsToConsole();
 		}
+		[Test]
+		public void CreateMarkovChainWithFalseFormula()
+		{
+			var model = new DeadReckoningModel();
 
-        [Test]
-        public void CalculateHazardProbability()
-        {
-            var tc = SafetySharpModelChecker.TraversalConfiguration;
-            tc.WriteGraphvizModels = true;
-            tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
-            SafetySharpModelChecker.TraversalConfiguration = tc;
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-            var model = new DeadReckoningModel();
-            var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 20);
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.AddFormulaToCheck(new ExecutableStateFormula(() => false));
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateMarkovChain();
+		}
 
-            Console.WriteLine($"Probability of hazard in model: {result}");
-        }
+		[Test]
+		public void CreateMarkovChainWithHazards()
+		{
+			var model = new DeadReckoningModel();
 
-        [Test]
-        public void CalculateDcca()
-        {
-            var model = new DeadReckoningModel();
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
-            var analysis = new SafetySharpSafetyAnalysis
-            {
-                Backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly,
-                Heuristics = { new MaximalSafeSetHeuristic(model.Faults) }
-            };
-            var result = analysis.ComputeMinimalCriticalSets(model, model.Component.Hazard);
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateMarkovChain();
+		}
 
-            var orderResult = SafetySharpOrderAnalysis.ComputeOrderRelationships(result);
-            Console.WriteLine(orderResult);
-        }
-    }
+		[Test]
+		public void CreateMarkovChainWithHazardRetraversal1()
+		{
+			var model = new DeadReckoningModel();
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
+			retraversalMarkovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			markovChainGenerator.GenerateLabeledMarkovChain();
+		}
+
+		[Test]
+		public void CreateMarkovChainWithHazardsRetraversal2()
+		{
+			var model = new DeadReckoningModel();
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
+			retraversalMarkovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			markovChainGenerator.GenerateLabeledMarkovChain();
+		}
+
+
+		[Test]
+		public void CreateMarkovChainWithHazardFaultsInState()
+		{
+			var model = new DeadReckoningModel();
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+				markovChainGenerator.AddFormulaToPlainlyIntegrateIntoStateSpace(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateMarkovChain();
+		}
+
+
+		[Test]
+		public void CreateFaultAwareMarkovChainAllFaults()
+		{
+			var model = new DeadReckoningModel();
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateMarkovChain();
+		}
+
+		[Test]
+		public void CalculateHazardSingleCore()
+		{
+			var model = new DeadReckoningModel();
+
+			SafetySharpModelChecker.TraversalConfiguration.CpuCount = 1;
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			SafetySharpModelChecker.TraversalConfiguration.CpuCount = Int32.MaxValue;
+			Console.Write($"Probability of hazard: {result}");
+		}
+
+
+
+		[Test]
+		public void CalculateHazardWithoutEarlyTermination()
+		{
+			var model = new DeadReckoningModel();
+
+			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 50);
+			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
+			Console.Write($"Probability of hazard: {result}");
+		}
+
+	}
 }

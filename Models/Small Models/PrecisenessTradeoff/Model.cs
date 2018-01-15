@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 			return ChooseWithUniformDistribution(1, 2, 3);
 		}
 
-		public Fault F1 = new TransientFault();
+		public Fault F1 = new TransientFault() {ProbabilityOfOccurrence = new Probability(0.003)};
 
 		[FaultEffect(Fault = nameof(F1)), Priority(0)]
 		public class F1Effect : UnreliablePreciseSignalDetectorWithSelfCheck
@@ -162,7 +162,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 				resultValues[i] = currentResult.Value;
 			}
 
-			var fileWriter = new StreamWriter("Model3/graph.csv",append:false);
+			var fileWriter = new StreamWriter("PrecisenessTradeoff/graph.csv",append:false);
 			var csvWriter = new CsvWriter(fileWriter);
 			csvWriter.AddEntry("Step");
 			for (var i = 0; i < steps; i++)

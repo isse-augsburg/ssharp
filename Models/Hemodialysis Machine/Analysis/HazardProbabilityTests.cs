@@ -156,7 +156,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 				Bound = null,
 				From = 0.001,
 				To = 0.1,
-				Steps = 25,
+				Steps = 6,
 				UpdateParameterInModel = value => { model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence=new Probability(value); }
 			};
 			var result=SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
