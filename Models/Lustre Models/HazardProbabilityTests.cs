@@ -65,19 +65,19 @@ namespace Lustre_Models
 				UpdateParameterInModel = value => { faultK1.ProbabilityOfOccurrence=new Probability(value); }
 			};
 			var result = LustreModelChecker.ConductQuantitativeParametricAnalysis("pressureTank", faults, parameter);
-			var fileWriter = new StreamWriter("pressureTank_varyK1", append: false);
+			var fileWriter = new StreamWriter("pressureTank_varyK1.csv", append: false);
 			result.ToCsv(fileWriter);
 			fileWriter.Close();
 
 			parameter.UpdateParameterInModel = value => { faultK2.ProbabilityOfOccurrence = new Probability(value); };
 			result = LustreModelChecker.ConductQuantitativeParametricAnalysis("pressureTank", faults, parameter);
-			fileWriter = new StreamWriter("pressureTank_varyK2", append: false);
+			fileWriter = new StreamWriter("pressureTank_varyK2.csv", append: false);
 			result.ToCsv(fileWriter);
 			fileWriter.Close();
 
 			parameter.UpdateParameterInModel = value => { faultSensor.ProbabilityOfOccurrence = new Probability(value); };
 			result = LustreModelChecker.ConductQuantitativeParametricAnalysis("pressureTank", faults, parameter);
-			fileWriter = new StreamWriter("pressureTank_varySensor", append: false);
+			fileWriter = new StreamWriter("pressureTank_varySensor.csv", append: false);
 			result.ToCsv(fileWriter);
 			fileWriter.Close();
 		}

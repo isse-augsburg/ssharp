@@ -340,6 +340,8 @@ namespace SafetySharp.Utilities
 							member.Name == "<Identifier>k__BackingField" ||
 							member.Name == "<IsActivated>k__BackingField" ||
 							member.Name == "<Name>k__BackingField" ||
+							member.Name == "<DemandType>k__BackingField" ||
+							member.Name == "<CustomDemandType>k__BackingField" ||
 							member.Name == "_choice" ||
 							member.Name == "<RequiresActivationNotification>k__BackingField"
 							))
@@ -358,7 +360,8 @@ namespace SafetySharp.Utilities
 							 member.Name == "_isSubsumedFaultSetCached" ||
 							 member.Name == "_subsumedFaultSet" ||
 							 member.Name == "<SubsumedFaults>k__BackingField" ||
-							 member.Name == "_subsumedFaultSet")
+							 member.Name == "_subsumedFaultSet" ||
+							 member.Name == "<StepDemand>k__BackingField")
 							return true;
 					}
 				}

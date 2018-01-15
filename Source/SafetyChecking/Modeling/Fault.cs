@@ -92,6 +92,22 @@ namespace ISSE.SafetyChecking.Modeling
 		///   Gets a value indicating whether the fault is used.
 		/// </summary>
 		internal bool IsUsed => Identifier != -1;
+		
+		/// <summary>
+		///   Gets or sets the demand type of the fault.
+		/// </summary>
+		public DemandTypes DemandType { get; set; } = DemandTypes.OnMethodCall;
+
+		/// <summary>
+		///   The delegate which is used to determine if there is a demand in the current step.
+		///   Only used when DemandType is DemandTypes.OnCustom.
+		/// </summary>
+		public Func<bool> CustomDemandType { get; set; } = null;
+
+		/// <summary>
+		///   Returns true if there was a demand in the step.
+		/// </summary>
+		public bool StepDemand { get; set; } = false;
 
 		/// <summary>
 		///   Gets a value indicating whether the fault is activated and has some effect on the state of the system, therefore inducing
@@ -236,6 +252,7 @@ namespace ISSE.SafetyChecking.Modeling
 				}
 
 				_activationIsUnknown = false;
+				StepDemand = true;
 			}
 		}
 
@@ -250,6 +267,7 @@ namespace ISSE.SafetyChecking.Modeling
 			_activationIsUnknown = true;
 			_canUndoActivation = false;
 			IsActivated = false;
+			StepDemand = false;
 		}
 
 		/// <summary>
@@ -264,5 +282,13 @@ namespace ISSE.SafetyChecking.Modeling
 		///   method is not allowed to have any side effects, as otherwise S#'s fault activation mechanism will be completely broken.
 		/// </summary>
 		protected abstract Activation CheckActivation();
+
+
+		public enum DemandTypes
+		{
+			OnCustom,
+			OnStepBegin,
+			OnMethodCall
+		}
 	}
 }
