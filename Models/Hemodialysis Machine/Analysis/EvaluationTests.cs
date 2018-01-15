@@ -116,8 +116,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			retraversalMarkovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6));
 			retraversalMarkovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6));
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
-			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
-			markovChainGenerator.GenerateLabeledMarkovChain();
+			retraversalMarkovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			retraversalMarkovChainGenerator.GenerateLabeledMarkovChain();
 		}
 
 		[Test]
@@ -141,8 +141,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			retraversalMarkovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6));
 			retraversalMarkovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6));
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
-			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
-			markovChainGenerator.GenerateLabeledMarkovChain();
+			retraversalMarkovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			retraversalMarkovChainGenerator.GenerateLabeledMarkovChain();
 		}
 
 

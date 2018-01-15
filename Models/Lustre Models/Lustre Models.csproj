@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EvaluationTests.cs" />
     <Compile Include="HazardProbabilityTests.cs" />
     <Compile Include="ModelCheckingTests.cs" />
     <Compile Include="SimulationTests.cs" />
