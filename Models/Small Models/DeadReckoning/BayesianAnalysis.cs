@@ -87,7 +87,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
             var network = bayesianNetworkCreator.FromJson(filePath, hazard);
 
             var calculator = new BayesianNetworkProbabilityDistributionCalculator(network, 0.0000000001);
-            var result = calculator.CalculateConditionalProbabilityDistribution(new[] { "FS" }, new[] { "FV", "FL" });
+            var result = calculator.CalculateConditionalProbabilityDistribution(new[] { "FS" }, new[] { "FC", "FF" });
             Console.Out.WriteLine(string.Join("\n", result));
         }
 
