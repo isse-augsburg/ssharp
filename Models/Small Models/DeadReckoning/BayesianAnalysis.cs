@@ -1,4 +1,26 @@
-﻿namespace SafetySharp.CaseStudies.SmallModels.SimpleBayesianExample
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 {
     using System;
     using System.Collections.Generic;
@@ -15,9 +37,9 @@
         [Test]
         public void TestScoreBasedLearning()
         {
-            var model = new SimpleBayesianExampleModel();
+            var model = new DeadReckoningModel();
             Func<bool> hazard = () => model.Component.Hazard;
-            Func<bool> state = () => model.Component.NoDataAvailable || model.Component.SubsystemError;
+            Func<bool> state = () => model.Component.NoDataAvailable || model.Component.CalculationError;
             var states = new Dictionary<string, Func<bool>> { /*["State"] = state*/ };
 
             var config = BayesianLearningConfiguration.Default;
@@ -28,7 +50,7 @@
         [Test]
         public void TestConstraintBasedLearning()
         {
-            var model = new SimpleBayesianExampleModel();
+            var model = new DeadReckoningModel();
             Func<bool> hazard = () => model.Component.Hazard;
             Func<bool> state = () => true;
             var states = new Dictionary<string, Func<bool>> { /*["State"] = state*/ };
@@ -36,20 +58,20 @@
 
             var config = BayesianLearningConfiguration.Default;
             var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10, config);
-            var result = bayesianNetworkCreator.LearnConstraintBasedBayesianNetwork(hazard, states, new[] { model.Component.FL, model.Component.FS, model.Component.FV });
+            var result = bayesianNetworkCreator.LearnConstraintBasedBayesianNetwork(hazard, states, new[] { model.Component.FF, model.Component.FS, model.Component.FC });
         }
 
         [Test]
         public void SerializeAndDeserializeBayesianNetwork()
         {
             const string filePath = "network.json";
-            var model = new SimpleBayesianExampleModel();
+            var model = new DeadReckoningModel();
             Func<bool> hazard = () => model.Component.Hazard;
 
             var config = BayesianLearningConfiguration.Default;
             config.BayesianNetworkSerializationPath = filePath;
             var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10, config);
-            var result = bayesianNetworkCreator.LearnConstraintBasedBayesianNetwork(hazard, null, new[] { model.Component.FL, model.Component.FS, model.Component.FV });
+            var result = bayesianNetworkCreator.LearnConstraintBasedBayesianNetwork(hazard, null, new[] { model.Component.FF, model.Component.FS, model.Component.FC });
 
             bayesianNetworkCreator = new BayesianNetworkCreator(model, 10);
             var network = bayesianNetworkCreator.FromJson(filePath, hazard);
@@ -59,7 +81,7 @@
         public void CalculateBayesianNetworkProbabilities()
         { 
             const string filePath = "network.json";
-            var model = new SimpleBayesianExampleModel();
+            var model = new DeadReckoningModel();
             Func<bool> hazard = () => model.Component.Hazard;
             var bayesianNetworkCreator = new BayesianNetworkCreator(model, 10);
             var network = bayesianNetworkCreator.FromJson(filePath, hazard);
@@ -77,7 +99,7 @@
             tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
             SafetySharpModelChecker.TraversalConfiguration = tc;
 
-            var model = new SimpleBayesianExampleModel();
+            var model = new DeadReckoningModel();
             var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 20);
 
             Console.WriteLine($"Probability of hazard in model: {result}");
@@ -91,10 +113,10 @@
             tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
             SafetySharpModelChecker.TraversalConfiguration = tc;
 
-            var model = new SimpleBayesianExampleModel();
+            var model = new DeadReckoningModel();
 
-            var isFlActivated = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.FL.IsActivated, 20);
-            var isFvActivated = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.FV.IsActivated, 20);
+            var isFlActivated = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.FF.IsActivated, 20);
+            var isFvActivated = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.FC.IsActivated, 20);
             var isFsActivated = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.FS.IsActivated, 20);
 
 
@@ -106,7 +128,7 @@
         [Test]
         public void CalculateDcca()
         {
-            var model = new SimpleBayesianExampleModel();
+            var model = new DeadReckoningModel();
 
             var analysis = new SafetySharpSafetyAnalysis
             {
