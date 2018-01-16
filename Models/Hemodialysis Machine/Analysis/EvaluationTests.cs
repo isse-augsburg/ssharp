@@ -179,7 +179,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
@@ -196,7 +196,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			foreach (var fault in model.Faults)
 			{
 				var faultFormula = new FaultFormula(fault);
@@ -219,7 +219,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.CpuCount = 1;
-			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;

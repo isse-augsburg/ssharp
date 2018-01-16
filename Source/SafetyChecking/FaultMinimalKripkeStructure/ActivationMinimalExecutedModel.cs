@@ -71,19 +71,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			_transitions = new ActivationMinimalTransitionSetBuilder<TExecutableModel>(TemporaryStateStorage, configuration.SuccessorCapacity, formulas);
 			_stateConstraints = RuntimeModel.StateConstraints;
 
-			bool useForwardOptimization;
-			switch (configuration.MomentOfIndependentFaultActivation)
-			{
-				case MomentOfIndependentFaultActivation.AtStepBeginning:
-				case MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo:
-					useForwardOptimization = false;
-					break;
-				case MomentOfIndependentFaultActivation.OnFirstMethodWithUndo:
-					useForwardOptimization = true;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			var useForwardOptimization = configuration.EnableStaticPruningOptimization;
 
 			ChoiceResolver = new NondeterministicChoiceResolver(useForwardOptimization);
 			FaultSet.CheckFaultCount(RuntimeModel.Faults.Length);

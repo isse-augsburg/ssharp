@@ -57,19 +57,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			var formulas = RuntimeModel.Formulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 			_transitions = new LtmcTransitionSetBuilder<TExecutableModel>(TemporaryStateStorage, configuration.SuccessorCapacity, formulas);
 
-			bool useForwardOptimization;
-			switch (configuration.MomentOfIndependentFaultActivation)
-			{
-				case MomentOfIndependentFaultActivation.AtStepBeginning:
-				case MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo:
-					useForwardOptimization = false;
-					break;
-				case MomentOfIndependentFaultActivation.OnFirstMethodWithUndo:
-					useForwardOptimization = true;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			var useForwardOptimization = configuration.EnableStaticPruningOptimization;
 
 			_ltmcChoiceResolver = new LtmcChoiceResolver(useForwardOptimization);
 			ChoiceResolver = _ltmcChoiceResolver;

@@ -44,7 +44,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 		{
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.WriteGraphvizModels = true;
-			tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			tc.EnableStaticPruningOptimization = false;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 
 			var model = new DegradedModeModel();
@@ -156,7 +156,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			foreach (var fault in model.Faults)
 			{
 				var faultFormula = new FaultFormula(fault);

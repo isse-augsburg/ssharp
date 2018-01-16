@@ -62,9 +62,13 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		public IEnumerable<SimulationTraceStep> SimulationTrace => _simulationTrace;
 
 		private readonly Func<bool>[] _compiledNormalizedFormulas;
-
-		private readonly bool _activateIndependentFaultsAtStepBeginning;
+		
 		private readonly bool _allowFaultsOnInitialTransitions;
+
+		/// <summary>
+		///   Gets the activations of each non deterministic fault in the current traversal
+		/// </summary>
+		protected Activation[] SavedActivations { get; private set; }
 
 		/// <summary>
 		///   Initializes a new instance.
@@ -82,13 +86,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			_compiledNormalizedFormulas = NormalizedFormulas.Select(formula => FormulaCompilationVisitor<TExecutableModel>.Compile(RuntimeModel, formula)).ToArray();
 			
 			_allowFaultsOnInitialTransitions = configuration.AllowFaultsOnInitialTransitions;
-
-			_activateIndependentFaultsAtStepBeginning =
-				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
 			
 			_choiceResolver = new ProbabilisticSimulatorChoiceResolver(configuration.UseOptionProbabilitiesInSimulation, (int) DateTime.Now.Ticks);
 
 			RuntimeModel.SetChoiceResolver(_choiceResolver);
+			SavedActivations = RuntimeModel.NondeterministicFaults.Select(fault => fault.Activation).ToArray();
 		}
 		
 		/// <summary>
@@ -118,6 +120,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				fault.Reset();
 
 			var savedActivations = RuntimeModel.NondeterministicFaults.ToDictionary(fault => fault, fault => fault.Activation);
+
 			if (!_allowFaultsOnInitialTransitions)
 			{
 				foreach (var fault in RuntimeModel.NondeterministicFaults)
@@ -126,32 +129,24 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 				}
 			}
 
-			if (_activateIndependentFaultsAtStepBeginning)
+			// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+			foreach (var fault in RuntimeModel.OnStartOfStepFaults)
 			{
-				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
+				fault.TryActivate();
+			}
+			foreach (var fault in RuntimeModel.OnCustomFaults)
+			{
+				if (fault.HasCustomDemand())
 					fault.TryActivate();
-				}
+				else
+					fault.Activation = Activation.Suppressed;
 			}
 
 			RuntimeModel.ExecuteInitialStep();
-
-			if (!_activateIndependentFaultsAtStepBeginning)
+			
+			for (var i = 0; i < RuntimeModel.NondeterministicFaults.Length; i++)
 			{
-				// force activation of non-transient faults
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
-					if (!(fault is Modeling.TransientFault))
-						fault.TryActivate();
-				}
-			}
-			if (!_allowFaultsOnInitialTransitions)
-			{
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
-					fault.Activation = savedActivations[fault];
-				}
+				RuntimeModel.NondeterministicFaults[i].RestoreActivation(SavedActivations[i]);
 			}
 		}
 
@@ -163,25 +158,24 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			foreach (var fault in RuntimeModel.NondeterministicFaults)
 				fault.Reset();
 
-			if (_activateIndependentFaultsAtStepBeginning)
+			// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+			foreach (var fault in RuntimeModel.OnStartOfStepFaults)
 			{
-				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
+				fault.TryActivate();
+			}
+			foreach (var fault in RuntimeModel.OnCustomFaults)
+			{
+				if (fault.HasCustomDemand())
 					fault.TryActivate();
-				}
+				else
+					fault.Activation = Activation.Suppressed;
 			}
 
 			RuntimeModel.ExecuteStep();
-
-			if (!_activateIndependentFaultsAtStepBeginning)
+			
+			for (var i = 0; i < RuntimeModel.NondeterministicFaults.Length; i++)
 			{
-				// force activation of non-transient faults
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
-					if (!(fault is Modeling.TransientFault))
-						fault.TryActivate();
-				}
+				RuntimeModel.NondeterministicFaults[i].RestoreActivation(SavedActivations[i]);
 			}
 		}
 

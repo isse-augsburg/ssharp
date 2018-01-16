@@ -96,7 +96,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
         {
             var tc = SafetySharpModelChecker.TraversalConfiguration;
             tc.WriteGraphvizModels = true;
-            tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+            tc.EnableStaticPruningOptimization = false;
             SafetySharpModelChecker.TraversalConfiguration = tc;
 
             var model = new DeadReckoningModel();
@@ -110,7 +110,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
         {
             var tc = SafetySharpModelChecker.TraversalConfiguration;
             tc.WriteGraphvizModels = true;
-            tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+            tc.EnableStaticPruningOptimization = false;
             SafetySharpModelChecker.TraversalConfiguration = tc;
 
             var model = new DeadReckoningModel();

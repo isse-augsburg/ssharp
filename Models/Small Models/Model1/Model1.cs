@@ -79,7 +79,6 @@ namespace SafetySharp.CaseStudies.SmallModels.Model1
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.WriteGraphvizModels = true;
 			tc.AllowFaultsOnInitialTransitions = false;
-			tc.RetraversalNormalizations = RetraversalNormalizations.EmbedObserversIntoModel;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, isHazardActive, 50);

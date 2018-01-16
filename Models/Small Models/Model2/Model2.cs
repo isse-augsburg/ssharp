@@ -114,7 +114,6 @@ namespace SafetySharp.CaseStudies.SmallModels.Model2
 			tc.AllowFaultsOnInitialTransitions = false;
 			tc.UseAtomarPropositionsAsStateLabels = true;
 			tc.UseCompactStateStorage = true;
-			tc.RetraversalNormalizations = RetraversalNormalizations.EmbedObserversIntoModel;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.ModelComponent.Value==3, 50);

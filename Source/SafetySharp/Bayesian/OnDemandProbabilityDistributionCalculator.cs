@@ -122,7 +122,7 @@ namespace SafetySharp.Bayesian
         {
             Console.Out.WriteLine($"Modelchecking joint probability of: {string.Join(",", variables)}.");
             var tc = SafetySharpModelChecker.TraversalConfiguration;
-            tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+            tc.EnableStaticPruningOptimization = false;
             tc.DefaultTraceOutput = TextWriter.Null;
             SafetySharpModelChecker.TraversalConfiguration = tc;
 

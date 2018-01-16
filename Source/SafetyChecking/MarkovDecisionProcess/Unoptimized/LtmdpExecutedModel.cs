@@ -61,19 +61,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			_cachedLabeledStates = new LtmdpCachedLabeledStates<TExecutableModel>(TemporaryStateStorage, configuration.SuccessorCapacity, _stepGraph, formulas);
 
-			bool useForwardOptimization;
-			switch (configuration.MomentOfIndependentFaultActivation)
-			{
-				case MomentOfIndependentFaultActivation.AtStepBeginning:
-				case MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo:
-					useForwardOptimization = false;
-					break;
-				case MomentOfIndependentFaultActivation.OnFirstMethodWithUndo:
-					useForwardOptimization = true;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+			var useForwardOptimization = configuration.EnableStaticPruningOptimization;
 
 			_ltmdpChoiceResolver = new LtmdpChoiceResolver(_stepGraph, useForwardOptimization);
 			ChoiceResolver = _ltmdpChoiceResolver;

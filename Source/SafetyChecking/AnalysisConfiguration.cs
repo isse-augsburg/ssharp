@@ -25,20 +25,7 @@ namespace ISSE.SafetyChecking
 	using System;
 	using ExecutedModel;
 	using Utilities;
-
-	public enum MomentOfIndependentFaultActivation
-	{
-		AtStepBeginning,
-		OnFirstMethodWithoutUndo,
-		OnFirstMethodWithUndo
-	}
-
-	// TODO: obsolete
-	public enum RetraversalNormalizations
-	{
-		None,
-		EmbedObserversIntoModel
-	}
+	
 
 	public enum LtmcModelChecker
 	{
@@ -141,9 +128,8 @@ namespace ISSE.SafetyChecking
 			CollectFaultSets = true,
 			StateDetected = null,
 			UseAtomarPropositionsAsStateLabels = true,
-			MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithUndo,
+			EnableStaticPruningOptimization = true,
 			LimitOfActiveFaults = null,
-			RetraversalNormalizations = RetraversalNormalizations.None,
 			LtmcModelChecker = LtmcModelChecker.BuiltInDtmc,
 			LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp
 		};
@@ -206,15 +192,11 @@ namespace ISSE.SafetyChecking
 
 		/// <summary>
 		/// </summary>
-		public MomentOfIndependentFaultActivation MomentOfIndependentFaultActivation { get; set; }
+		public bool EnableStaticPruningOptimization { get; set; }
 		
 		/// <summary>
 		/// </summary>
 		public int? LimitOfActiveFaults{ get; set; }
-
-		/// <summary>
-		/// </summary>
-		public RetraversalNormalizations RetraversalNormalizations { get; set; }
 
 		/// <summary>
 		/// </summary>

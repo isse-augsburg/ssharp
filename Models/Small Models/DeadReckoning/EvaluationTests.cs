@@ -176,7 +176,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			foreach (var fault in model.Faults)
 			{
 				var faultFormula = new FaultFormula(fault);

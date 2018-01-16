@@ -117,7 +117,7 @@ namespace Lustre_Models
 		{
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			foreach (var fault in _faults)
 			{
 				var faultFormula = new FaultFormula(fault);
