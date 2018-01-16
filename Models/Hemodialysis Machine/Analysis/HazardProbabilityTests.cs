@@ -76,7 +76,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		[TestCaseSource(nameof(CreateModelVariants))]
 		[Category("IncomingBloodIsContaminated")]
-		public void IncomingBloodIsContaminated(Model model)
+		public void IncomingBloodIsContaminated(Model model, string name)
 		{
 			SetProbabilities(model);
 			
@@ -86,7 +86,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		[TestCaseSource(nameof(CreateModelVariants))]
 		[Category("IncomingBloodIsContaminated_FaultTree")]
-		public void IncomingBloodIsContaminated_FaultTree(Model model)
+		public void IncomingBloodIsContaminated_FaultTree(Model model, string name)
 		{
 			SetProbabilities(model);
 			var analysis = new SafetySharpSafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };
@@ -111,7 +111,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		[TestCaseSource(nameof(CreateModelVariants))]
 		[Category("DialysisFinishedAndBloodNotCleaned")]
-		public void DialysisFinishedAndBloodNotCleaned(Model model)
+		public void DialysisFinishedAndBloodNotCleaned(Model model, string name)
 		{
 			SetProbabilities(model);
 
@@ -122,7 +122,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		[TestCaseSource(nameof(CreateModelVariants))]
 		[Category("DialysisFinishedAndBloodNotCleaned_FaultTree")]
-		public void DialysisFinishedAndBloodNotCleaned_FaultTree(Model model)
+		public void DialysisFinishedAndBloodNotCleaned_FaultTree(Model model, string name)
 		{
 			SetProbabilities(model);
 			var analysis = new SafetySharpSafetyAnalysis { Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };
@@ -147,7 +147,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		[TestCaseSource(nameof(CreateModelVariants))]
 		[Category("Parametric")]
-		public void Parametric(Model model)
+		public void Parametric(Model model, string name)
 		{
 			SetProbabilities(model);
 			var parameter = new QuantitativeParametricAnalysisParameter
@@ -160,13 +160,13 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 				UpdateParameterInModel = value => { model.HdMachine.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefect.ProbabilityOfOccurrence=new Probability(value); }
 			};
 			var result=SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
-			var fileWriterContamination = new StreamWriter("contamination.csv", append: false);
+			var fileWriterContamination = new StreamWriter($"{name}contamination.csv", append: false);
 			result.ToCsv(fileWriterContamination);
 			fileWriterContamination.Close();
 
 			parameter.StateFormula = model.BloodNotCleanedAndDialyzingFinished;
 			result=SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
-			var fileWriterUnsuccessful = new StreamWriter("unsuccessful.csv", append: false);
+			var fileWriterUnsuccessful = new StreamWriter($"{name}unsuccessful.csv", append: false);
 			result.ToCsv(fileWriterUnsuccessful);
 			fileWriterUnsuccessful.Close();
 		}
@@ -184,7 +184,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 			return from waterHeaterFaultIsPermanent in new []{true,false}
 		           let name = "WaterHeater"+ (waterHeaterFaultIsPermanent ? "Permanent":"Transient")
-				   select new TestCaseData(createVariant(waterHeaterFaultIsPermanent)).SetName(name);
+				   select new TestCaseData(createVariant(waterHeaterFaultIsPermanent), name).SetName(name);
 		}
 	}
 }
