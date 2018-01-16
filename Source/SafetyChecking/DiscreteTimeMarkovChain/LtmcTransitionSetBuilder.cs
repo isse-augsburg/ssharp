@@ -127,6 +127,9 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			}
 			else
 			{
+				if (_count >= _capacity)
+					throw new OutOfMemoryException("Unable to store an additional transition. Try increasing the successor state capacity.");
+
 				var successorState = _temporalStateStorage.GetFreeTemporalSpaceAddress();
 				MemoryBuffer.Copy(stateToAdd, successorState, _temporalStateStorage.StateVectorSize);
 				_transitions[_count] = new LtmcTransition
