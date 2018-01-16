@@ -79,7 +79,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		}
 
 
-		public readonly Fault SafetyBypassFault = new PermanentFault();
+		public readonly Fault SafetyBypassFault = new PermanentFault { DemandType = Fault.DemandTypes.OnStartOfStep };
 
 		[FaultEffect(Fault = nameof(SafetyBypassFault))]
 		public class SafetyBypassFaultEffect : SafetyBypass

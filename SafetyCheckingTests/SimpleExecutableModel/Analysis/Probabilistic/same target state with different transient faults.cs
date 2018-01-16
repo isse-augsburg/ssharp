@@ -94,7 +94,6 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 
 			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
 			markovChainGenerator.Configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
-			markovChainGenerator.Configuration.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.AtStepBeginning;
 			markovChainGenerator.Configuration.WriteGraphvizModels = true;
 			markovChainGenerator.Configuration.DefaultTraceOutput = Output.TextWriterAdapter();
 			markovChainGenerator.AddFormulaToCheck(finallyState1WithFault1);
@@ -113,8 +112,8 @@ namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
 		{
 			public override Fault[] Faults { get; } = new Fault[]
 			{
-				new TransientFault { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.5) },
-				new TransientFault { Identifier = 1, ProbabilityOfOccurrence = new Probability(0.5) }
+				new TransientFault { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.5), DemandType = Fault.DemandTypes.OnStartOfStep },
+				new TransientFault { Identifier = 1, ProbabilityOfOccurrence = new Probability(0.5), DemandType = Fault.DemandTypes.OnStartOfStep  }
 			};
 
 			public override bool[] LocalBools { get; } = new bool[0];

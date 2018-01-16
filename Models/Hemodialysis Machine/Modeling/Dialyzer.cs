@@ -144,7 +144,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		}
 
 
-		public readonly Fault DialyzerMembraneRupturesFault = new PermanentFault();
+		public readonly Fault DialyzerMembraneRupturesFault = new PermanentFault { DemandType = Fault.DemandTypes.OnStartOfStep };
 
 		[FaultEffect(Fault = nameof(DialyzerMembraneRupturesFault))]
 		public class DialyzerMembraneRupturesFaultEffect : Dialyzer

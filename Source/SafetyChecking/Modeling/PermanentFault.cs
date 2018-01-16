@@ -36,6 +36,7 @@ namespace ISSE.SafetyChecking.Modeling
 		public PermanentFault()
 			: base(requiresActivationNotification: true)
 		{
+			DemandType=DemandTypes.OnStartOfStep;
 		}
 
 		/// <summary>

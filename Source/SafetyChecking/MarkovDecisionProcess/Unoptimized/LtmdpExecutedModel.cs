@@ -43,8 +43,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 		private readonly LtmdpStepGraph _stepGraph;
 
-		private readonly bool _activateIndependentFaultsAtStepBeginning;
-
 		private readonly bool _allowFaultsOnInitialTransitions;
 
 		/// <summary>
@@ -82,9 +80,6 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			RuntimeModel.SetChoiceResolver(ChoiceResolver);
 
 			_allowFaultsOnInitialTransitions = configuration.AllowFaultsOnInitialTransitions;
-
-			_activateIndependentFaultsAtStepBeginning =
-				configuration.MomentOfIndependentFaultActivation == MomentOfIndependentFaultActivation.AtStepBeginning;
 		}
 		
 		/// <summary>
@@ -115,43 +110,33 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 
 			foreach (var fault in RuntimeModel.NondeterministicFaults)
 				fault.Reset();
-			
-			var savedActivations = RuntimeModel.NondeterministicFaults.ToDictionary(fault => fault, fault => fault.Activation);
+
 			if (!_allowFaultsOnInitialTransitions)
 			{
 				foreach (var fault in RuntimeModel.NondeterministicFaults)
 				{
-					fault.Activation = Activation.Suppressed;
+					fault.Activation=Activation.Suppressed;
 				}
 			}
-
-			if (_activateIndependentFaultsAtStepBeginning)
+			
+			// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+			foreach (var fault in RuntimeModel.OnStartOfStepFaults)
 			{
-				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
+				fault.TryActivate();
+			}
+			foreach (var fault in RuntimeModel.OnCustomFaults)
+			{
+				if (fault.HasCustomDemand())
 					fault.TryActivate();
-				}
+				else
+					fault.Activation = Activation.Suppressed;
 			}
 
 			RuntimeModel.ExecuteInitialStep();
 
-			if (!_activateIndependentFaultsAtStepBeginning)
+			for (var i = 0; i < RuntimeModel.NondeterministicFaults.Length; i++)
 			{
-				// force activation of non-transient faults
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
-					if (!(fault is Modeling.TransientFault))
-						fault.TryActivate();
-				}
-			}
-			
-			if (!_allowFaultsOnInitialTransitions)
-			{
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
-					fault.Activation = savedActivations[fault];
-				}
+				RuntimeModel.NondeterministicFaults[i].RestoreActivation(SavedActivations[i]);
 			}
 		}
 
@@ -162,28 +147,28 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			//TODO: _resetRewards();
 
+
 			foreach (var fault in RuntimeModel.NondeterministicFaults)
 				fault.Reset();
 
-			if (_activateIndependentFaultsAtStepBeginning)
+			// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
+			foreach (var fault in RuntimeModel.OnStartOfStepFaults)
 			{
-				// Note: Faults get activated and their effects occur, but they are not notified yet of their activation.
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
+				fault.TryActivate();
+			}
+			foreach (var fault in RuntimeModel.OnCustomFaults)
+			{
+				if (fault.HasCustomDemand())
 					fault.TryActivate();
-				}
+				else
+					fault.Activation = Activation.Suppressed;
 			}
 
 			RuntimeModel.ExecuteStep();
 
-			if (!_activateIndependentFaultsAtStepBeginning)
+			for (var i = 0; i < RuntimeModel.NondeterministicFaults.Length; i++)
 			{
-				// force activation of non-transient faults
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
-				{
-					if (!(fault is Modeling.TransientFault))
-						fault.TryActivate();
-				}
+				RuntimeModel.NondeterministicFaults[i].RestoreActivation(SavedActivations[i]);
 			}
 		}
 

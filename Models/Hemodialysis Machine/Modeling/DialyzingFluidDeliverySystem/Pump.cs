@@ -55,7 +55,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			return toPredecessor;
 		}
 		
-		public readonly Fault PumpDefect = new PermanentFault();
+		public readonly Fault PumpDefect = new PermanentFault { DemandType = Fault.DemandTypes.OnStartOfStep };
 
 		[FaultEffect(Fault = nameof(PumpDefect))]
 		public class PumpDefectEffect : Pump

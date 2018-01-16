@@ -33,6 +33,7 @@ namespace ISSE.SafetyChecking.Modeling
 		public TransientFault()
 			: base(requiresActivationNotification: false)
 		{
+			DemandType = DemandTypes.OnMethodCall;
 		}
 
 		/// <summary>

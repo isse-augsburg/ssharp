@@ -119,8 +119,7 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 		{
 			foreach (var fault in RuntimeModel.NondeterministicFaults)
 				fault.Reset();
-
-			var savedActivations = RuntimeModel.NondeterministicFaults.ToDictionary(fault => fault, fault => fault.Activation);
+			
 			if (!_allowFaultsOnInitialTransitions)
 			{
 				foreach (var fault in RuntimeModel.NondeterministicFaults)
@@ -133,9 +132,9 @@ namespace ISSE.SafetyChecking.FaultMinimalKripkeStructure
 			
 			if (!_allowFaultsOnInitialTransitions)
 			{
-				foreach (var fault in RuntimeModel.NondeterministicFaults)
+				for (var i = 0; i < RuntimeModel.NondeterministicFaults.Length; i++)
 				{
-					fault.Activation = savedActivations[fault];
+					RuntimeModel.NondeterministicFaults[i].RestoreActivation(SavedActivations[i]);
 				}
 			}
 		}

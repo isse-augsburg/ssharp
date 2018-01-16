@@ -341,7 +341,7 @@ namespace SafetySharp.Utilities
 							member.Name == "<IsActivated>k__BackingField" ||
 							member.Name == "<Name>k__BackingField" ||
 							member.Name == "<DemandType>k__BackingField" ||
-							member.Name == "<CustomDemandType>k__BackingField" ||
+							member.Name == "<HasCustomDemand>k__BackingField" ||
 							member.Name == "_choice" ||
 							member.Name == "<RequiresActivationNotification>k__BackingField"
 							))

@@ -57,7 +57,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 			MainFlow.UpdateForward=SetMainFlow;
 		}
 
-		public readonly Fault SafetyDetectorDefect = new PermanentFault();
+		public readonly Fault SafetyDetectorDefect = new PermanentFault { DemandType = Fault.DemandTypes.OnStartOfStep };
 
 		[FaultEffect(Fault = nameof(SafetyDetectorDefect))]
 		public class SafetyDetectorDefectEffect : VenousSafetyDetector

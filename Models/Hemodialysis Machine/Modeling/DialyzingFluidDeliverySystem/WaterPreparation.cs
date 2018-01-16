@@ -58,7 +58,9 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 		public static bool WaterHeaterDefectIsPermanent = true;
 
 		public readonly Fault WaterHeaterDefect =
-			WaterHeaterDefectIsPermanent?(Fault)new PermanentFault() : (Fault)new TransientFault();
+			WaterHeaterDefectIsPermanent ?
+				(Fault)new PermanentFault { DemandType = Fault.DemandTypes.OnStartOfStep } :
+				(Fault)new TransientFault { DemandType = Fault.DemandTypes.OnStartOfStep };
 
 		[FaultEffect(Fault = nameof(WaterHeaterDefect))]
 		public class WaterHeaterDefectEffect : WaterPreparation

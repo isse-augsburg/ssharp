@@ -29,6 +29,7 @@ namespace ISSE.SafetyChecking.ExecutedModel
 	using Modeling;
 	using Utilities;
 	using System.IO;
+	using System.Linq;
 
 	/// <summary>
 	///   Represents an <see cref="AnalysisModel" /> that computes its state by executing a <see cref="Runtime.RuntimeModel" />.
@@ -57,7 +58,13 @@ namespace ISSE.SafetyChecking.ExecutedModel
 		///   Gets the size of the model's state vector in bytes.
 		/// </summary>
 		public sealed override int ModelStateVectorSize => RuntimeModel.StateVectorSize;
-		
+
+
+		/// <summary>
+		///   Gets the activations of each non deterministic fault in the current traversal
+		/// </summary>
+		protected Activation[] SavedActivations { get; private set; }
+
 		/// <summary>
 		///   Initializes a new instance.
 		/// </summary>
@@ -201,6 +208,8 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			ChoiceResolver.Clear();
 			RuntimeModel.Reset();
 			TemporaryStateStorage.Reset(traversalModifierStateVectorSize);
+
+			SavedActivations = RuntimeModel.NondeterministicFaults.Select(fault => fault.Activation).ToArray();
 		}
 	}
 }

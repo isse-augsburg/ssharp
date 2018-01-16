@@ -70,7 +70,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		{
 			var tc = SafetySharpModelChecker.TraversalConfiguration;
 			tc.AllowFaultsOnInitialTransitions = false;
-			tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.AtStepBeginning;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 		}
 
