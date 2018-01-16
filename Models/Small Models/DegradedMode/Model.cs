@@ -122,6 +122,14 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 	public class ExampleAnalysis
 	{
 		[Test]
+		public void CalculateHazardProbability()
+		{
+			var model = new DegradedModeModel();
+			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			Console.Write($"Probability of hazard: {result}");
+		}
+
+		[Test]
 		public void CalculateHazardProbabilityWhenF1AlwaysOccurs()
 		{
 			var model = new DegradedModeModel();

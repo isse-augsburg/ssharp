@@ -285,7 +285,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		}
 
 		[Test]
-		public void CalculateSingleCore()
+		public void CalculateHazardSingleCore()
 		{
 			var model = Model.CreateOriginal();
 			SetProbabilities(model);

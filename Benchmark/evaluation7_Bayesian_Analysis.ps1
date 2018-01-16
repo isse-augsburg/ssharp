@@ -33,16 +33,24 @@
 # To Undo
 #  Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope CurrentUser
 
+# Example nunit-console.exe D:\Repositories\Universität\ssharp\Binaries\Release\SafetySharp.CaseStudies.PressureTank.dll /run=SafetySharp.CaseStudies.PressureTank.Analysis.HazardProbabilityTests.CalculateHazardIsDepleted"
+
 # include functionality per Dot-Sourcing
 . $PSScriptRoot\func_benchmarkTestCases.ps1
+# include test cases per Dot-Sourcing
+. $PSScriptRoot\func_testCases.ps1
+
+New-Variable -Force -Name global_selected_tests -Option AllScope -Value @()
+$global_testValuations = @()
+
+# Bayesian
+AddTest -Testname "DeadReckoning_Bayesian" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.BayesianAnalysis.TestConstraintBasedLearning" -TestNunitCategory "" -TestCategories @("Bayesian","DeadReckoning","ConstrainedBased")
+AddTest -Testname "RailroadCrossing_Bayesian" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.RailroadCrossing.Analysis.BayesianAnalysis.ConstraintBased" -TestNunitCategory "" -TestCategories @("Bayesian","RailroadCrossing","ConstrainedBased")
 
 
-# HeightControl
-AddTest -Testname "HeightControl_Parametric" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.HazardProbabilityTests.ParametricLbInOriginalDesign" -TestNunitCategory "" -TestCategories @("Parametric","HeightControl")
+$global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("Bayesian") }
 
-$global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("Parametric") -and  $_.TestCategories.Contains("HeightControl") }
-
-AddTestValuation -Name "HeightControlParametric"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json"  -ResultDir "$PSScriptRoot\HeightControlParametric" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+AddTestValuation -Name "Bayesian" -Script "" -ResultDir "$PSScriptRoot\Bayesian" -FilesOfTestValuation @()
 
 Foreach ($testvaluation in $global_testValuations) {
     ExecuteTestValuation -TestValuation $testvaluation -Tests $global_selected_tests

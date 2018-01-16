@@ -100,7 +100,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
             SafetySharpModelChecker.TraversalConfiguration = tc;
 
             var model = new DeadReckoningModel();
-            var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 20);
+            var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.Component.Hazard, 10);
 
             Console.WriteLine($"Probability of hazard in model: {result}");
         }

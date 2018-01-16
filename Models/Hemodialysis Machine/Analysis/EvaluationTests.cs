@@ -209,7 +209,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		}
 
 		[Test]
-		public void CalculateSingleCore()
+		public void CalculateHazardSingleCore()
 		{
 			var model = new Model();
 			SetProbabilities(model);
