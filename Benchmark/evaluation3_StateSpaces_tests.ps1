@@ -45,4 +45,4 @@ $global_testValuations = @()
 
 $global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("Variant-Original-Original-Original") -and $_.TestCategories.Contains("EnumerateStateSpace") }
 
-AddTestValuation -Name "NoChanges" -Script "" -ResultDir "$PSScriptRoot\NoChanges" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+AddTestValuation -Name "StateSpaces" -Script "" -ResultDir "$PSScriptRoot\StateSpaces" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")

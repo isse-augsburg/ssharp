@@ -35,43 +35,18 @@
 
 # Example nunit-console.exe D:\Repositories\Universität\ssharp\Binaries\Release\SafetySharp.CaseStudies.PressureTank.dll /run=SafetySharp.CaseStudies.PressureTank.Analysis.HazardProbabilityTests.CalculateHazardIsDepleted"
 
-# include paths per Dot-Sourcing
-. $PSScriptRoot\paths.ps1
+# include functionality per Dot-Sourcing
+. $PSScriptRoot\func_benchmarkTestCases.ps1
+# include test cases per Dot-Sourcing
+. $PSScriptRoot\func_testCases.ps1
 
-Set-Location -Path $global_compilate_directory
-$env:Path += ";$PSScriptRoot\NUnit2"
+New-Variable -Force -Name global_selected_tests -Option AllScope -Value @()
+$global_testValuations = @()
 
-New-Variable -Force -Name global_testValuations -Option AllScope -Value @()
+$global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("HemodialysisMachine") }
 
-function ExecuteTest($test,$resultDir)
-{
-    Write-Output("Testing " +  $test.TestMethod + "`n")
-    $arguments = @($test.TestAssembly,"/run",$test.TestMethod)
-    if($test.TestNunitCategory){
-        $arguments=$arguments+@("/include:"+$test.TestNunitCategory)
-    }
-    
-    $outputfilename = $resultdir + "\" +$test.TestName+".out"
-    $errorfilename = $resultdir + "\"+$test.TestName+".err"
-    echo $outputfilename
-    Start-Process -FilePath $global_nunit -ArgumentList $arguments -WorkingDirectory $global_compilate_directory -NoNewWindow -RedirectStandardError $errorfilename -RedirectStandardOutput $outputfilename -Wait
-}
+AddTestValuation -Name "Hemodialysis" -Script "" -ResultDir "$PSScriptRoot\Hemodialysis" -FilesOfTestValuation @()
 
-function ExecuteTestValuation($testValuation,$tests)
-{
-    $resultDir = $testValuation.ResultDir
-    New-Item -ItemType directory -Force -Path $resultDir    
-    Invoke-Expression $testValuation.Script
-
-    Foreach ($file in $testValuation.FilesOfTestValuation) {
-        copy $file -Destination $resultDir -Force
-    }
-
-    Foreach ($test in $tests) {
-        ExecuteTest -Test $test -ResultDir $resultDir
-    }
-
-    $testValuation.Annotation > $resultDir\annotation
-
-    git log -1 > $resultDir\version
+Foreach ($testvaluation in $global_testValuations) {
+    ExecuteTestValuation -TestValuation $testvaluation -Tests $global_selected_tests
 }
