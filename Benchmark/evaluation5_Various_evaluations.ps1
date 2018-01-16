@@ -43,12 +43,96 @@
 New-Variable -Force -Name global_selected_tests -Option AllScope -Value @()
 $global_testValuations = @()
 
+# SafetyLustre.CaseStudies.LustreModels.dll
+# SafetySharp.CaseStudies.HeightControl.dll
+# SafetySharp.CaseStudies.RailroadCrossing.dll
+# SafetySharp.CaseStudies.SmallModels.exe
+# SafetySharp.CaseStudies.HemodialysisMachine.exe
+
+
+# DeadReckoning
+AddTest -Testname "DeadReckoning_FalseFormula" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CreateMarkovChainWithFalseFormula" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_AllHazards" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CreateMarkovChainWithHazards" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_Retraversal1" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CreateMarkovChainWithHazardRetraversal1" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_Retraversal2" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CreateMarkovChainWithHazardsRetraversal2" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_FaultsInState" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CreateMarkovChainWithHazardFaultsInState" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_FaultsOnTrans" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CreateFaultAwareMarkovChainAllFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_SingleCore" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_NoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateHazardWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+
+# DegradedMode
+AddTest -Testname "DegradedMode_FalseFormula" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CreateMarkovChainWithFalseFormula" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_AllHazards" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CreateMarkovChainWithHazards" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_Retraversal1" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CreateMarkovChainWithHazardRetraversal1" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_Retraversal2" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CreateMarkovChainWithHazardsRetraversal2" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_FaultsInState" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CreateMarkovChainWithHazardFaultsInState" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_FaultsOnTrans" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CreateFaultAwareMarkovChainAllFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_SingleCore" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_NoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateHazardWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+
+# RailroadCrossing
+AddTest -Testname "RailroadCrossing_FalseFormula" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CreateMarkovChainWithFalseFormula" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_AllHazards" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CreateMarkovChainWithHazards" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_Retraversal1" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CreateMarkovChainWithHazardRetraversal1" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_Retraversal2" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CreateMarkovChainWithHazardsRetraversal2" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_FaultsInState" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CreateMarkovChainWithHazardFaultsInState" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_FaultsOnTrans" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CreateFaultAwareMarkovChainAllFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_SingleCore" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_NoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.RailroadCrossing.EvaluationTests.CalculateHazardWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+
+# LustrePressureTank
+AddTest -Testname "LustrePressureTank_FalseFormula" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CreateMarkovChainWithFalseFormula" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_AllHazards" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CreateMarkovChainWithHazards" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_Retraversal1" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CreateMarkovChainWithHazardRetraversal1" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_Retraversal2" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CreateMarkovChainWithHazardsRetraversal2" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_FaultsInState" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CreateMarkovChainWithHazardFaultsInState" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_FaultsOnTrans" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CreateFaultAwareMarkovChainAllFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_SingleCore" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_NoEarlyTermination" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateHazardWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+
+
+# HemodialysisMachine
+AddTest -Testname "HemodialysisMachine_FalseFormula" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CreateMarkovChainWithFalseFormula" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_AllHazards" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CreateMarkovChainWithBothHazards" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_Retraversal1" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CreateMarkovChainWithBothHazardsRetraversal1" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_Retraversal2" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CreateMarkovChainWithBothHazardsRetraversal2" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_FaultsInState" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CreateMarkovChainWithBothHazardsFaultsInState" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_FaultsOnTrans" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CreateFaultAwareMarkovChainAllFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_UnsuccessfulSingleCore" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CalculateBloodNotCleanedAndDialyzingFinishedSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_ContaminationSingleCore" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CalculateIncomingBloodWasNotOkSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_UnsuccessfulNoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CalculateBloodNotCleanedAndDialyzingFinishedWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_ContaminationNoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.HemodialysisMachine.EvaluationTests.CalculateIncomingBloodWasNotOkWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+
+
 # HeightControl
-AddTest -Testname "HeightControl_Parametric" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.HazardProbabilityTests.ParametricLbInOriginalDesign" -TestNunitCategory "" -TestCategories @("Parametric","HeightControl")
+AddTest -Testname "HeightControl_FalseFormula" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateMarkovChainWithFalseFormula" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_AllHazards" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateMarkovChainWithBothHazards" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_Retraversal1" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateMarkovChainWithBothHazardsRetraversal1" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_Retraversal2" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateMarkovChainWithBothHazardsRetraversal2" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FaultsInState" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateMarkovChainWithBothHazardsFaultsInState" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FaultsOnTransFEndFalse" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateFaultAwareMarkovChainLeftDetectorFalse" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FaultsOnTransFEndMis" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateFaultAwareMarkovChainLeftDetectorMis" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FaultsOnTransFPreFalse" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateFaultAwareMarkovChainPositionDetectorFalse" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FaultsOnTransFPreMis" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateFaultAwareMarkovChainPositionDetectorMis" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FaultsOnTransTwoFaults" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CreateFaultAwareMarkovChainTwoFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
 
-$global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("Parametric") -and  $_.TestCategories.Contains("HeightControl") }
+AddTest -Testname "HeightControl_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_ColissionSingleCore" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CalculateCollisionSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FalseAlarmSingleCore" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CalculateFalseAlarmSingleCore" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_ColissionNoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CalculateCollisionWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_FalseAlarmNoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.SmallModels.HeightControl.EvaluationTests.CalculateFalseAlarmWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
 
-AddTestValuation -Name "HeightControlParametric" -Script "" -ResultDir "$PSScriptRoot\HeightControlParametric" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+
+
+
+
+
+
+
+$global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("VariousEvaluations") }
+
+AddTestValuation -Name "VariousEvaluations" -Script "" -ResultDir "$PSScriptRoot\VariousEvaluations" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
 
 Foreach ($testvaluation in $global_testValuations) {
     ExecuteTestValuation -TestValuation $testvaluation -Tests $global_selected_tests
