@@ -78,8 +78,11 @@ namespace ISSE.SafetyChecking.ExecutedModel
 			Requires.NotNull(createModel, nameof(createModel));
 
 			RuntimeModelCreator = createModel;
-			RuntimeModel = createModel.Create(stateHeaderBytes);
+			var runtimeModel = createModel.Create(stateHeaderBytes);
+			RuntimeModel = runtimeModel;
+
 			TemporaryStateStorage = new TemporaryStateStorage(ModelStateVectorSize, configuration.SuccessorCapacity);
+			SavedActivations = runtimeModel.NondeterministicFaults.Select(fault => fault.Activation).ToArray();
 		}
 
 		internal override void WriteStateVectorLayout(TextWriter defaultTraceOutput)
