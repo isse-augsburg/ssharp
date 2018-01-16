@@ -95,7 +95,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		private long GetPlaceForNewTransitionChainElements(long number)
 		{
 			var locationOfFirstNewEntry = InterlockedExtensions.AddFetch(ref _transitionChainElementCount, number);
-			if (locationOfFirstNewEntry  >= _maxNumberOfTransitions)
+			if (locationOfFirstNewEntry + number >= _maxNumberOfTransitions)
 				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
 			return locationOfFirstNewEntry ;
 		}

@@ -195,7 +195,7 @@ namespace ISSE.SafetyChecking.AnalysisModelTraverser
 			if (Context.Exception == null)
 				return;
 
-			if (Context.Exception is ModelException)
+			if (Context.Exception is ModelException || Context.Exception is OutOfMemoryException)
 				throw new AnalysisException(Context.Exception.InnerException, Context.CounterExample);
 			ExceptionDispatchInfo.Capture(Context.Exception).Throw();
 		}

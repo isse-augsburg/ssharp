@@ -118,7 +118,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		private long GetPlaceForNewContinuationGraphElements(int number)
 		{
 			var locationOfFirstNewEntry = InterlockedExtensions.AddFetch(ref _continuationGraphElementCount,number);
-			if (locationOfFirstNewEntry >= _maxNumberOfContinuationGraphElements)
+			if (locationOfFirstNewEntry + number >= _maxNumberOfContinuationGraphElements)
 				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
 			return locationOfFirstNewEntry;
 		}

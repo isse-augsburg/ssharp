@@ -146,6 +146,8 @@ namespace SafetySharp.Runtime
 				}
 				catch (Exception e)
 				{
+					if (e is OutOfMemoryException)
+						throw;
 					throw new ModelException(e);
 				}
 			}
@@ -167,6 +169,8 @@ namespace SafetySharp.Runtime
 				}
 				catch (Exception e)
 				{
+					if (e is OutOfMemoryException)
+						throw;
 					throw new ModelException(e);
 				}
 			}
