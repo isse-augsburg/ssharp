@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
+namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 {
 	using global::System;
 	using Analysis;
@@ -112,7 +112,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 	}
 
 
-	public sealed class PrecisenessTradeoffModel : ModelBase
+	public sealed class DegradedModeModel : ModelBase
 	{
 		[Root(RootKind.Controller)]
 		public System System { get; } = new System();
@@ -124,7 +124,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CalculateHazardProbabilityWhenF1AlwaysOccurs()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 			model.System.SignalDetector1.F1.ProbabilityOfOccurrence = new Probability(1.0);
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
 			Console.Write($"Probability of hazard: {result}");
@@ -133,7 +133,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CalculateHazardProbabilityWhenF1NeverOccurs()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 			model.System.SignalDetector1.F1.ProbabilityOfOccurrence = new Probability(0.0);
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
 			Console.Write($"Probability of hazard: {result}");
@@ -142,7 +142,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CalculateHazardProbabilityGraph()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 
 			var minValue = 0.0;
 			var maxValue = 1.0;
@@ -191,7 +191,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CalculateDcca()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 			
 			var analysis = new SafetySharpSafetyAnalysis { Backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly, Heuristics = { new MaximalSafeSetHeuristic(model.Faults) } };
 			var result = analysis.ComputeMinimalCriticalSets(model, model.System.HazardActive);

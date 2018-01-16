@@ -28,7 +28,7 @@ using ISSE.SafetyChecking.Modeling;
 using NUnit.Framework;
 using System.Linq;
 
-namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
+namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 {
 	using Analysis;
 	using Bayesian;
@@ -47,7 +47,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 			tc.MomentOfIndependentFaultActivation = MomentOfIndependentFaultActivation.OnFirstMethodWithoutUndo;
 			SafetySharpModelChecker.TraversalConfiguration = tc;
 
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
 
 			Console.WriteLine($"Probability of hazard in model: {result}");
@@ -56,7 +56,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithFalseFormula()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
@@ -70,7 +70,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazards()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
@@ -84,7 +84,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazardRetraversal1()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
@@ -106,7 +106,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazardsRetraversal2()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
@@ -129,7 +129,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateMarkovChainWithHazardFaultsInState()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
@@ -150,7 +150,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CreateFaultAwareMarkovChainAllFaults()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
 
@@ -170,7 +170,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CalculateHazardSingleCore()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = 1;
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = Int32.MaxValue;
@@ -182,7 +182,7 @@ namespace SafetySharp.CaseStudies.SmallModels.PrecisenessTradeoff
 		[Test]
 		public void CalculateHazardWithoutEarlyTermination()
 		{
-			var model = new PrecisenessTradeoffModel();
+			var model = new DegradedModeModel();
 			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
 			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
