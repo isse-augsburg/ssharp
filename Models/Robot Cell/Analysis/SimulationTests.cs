@@ -28,10 +28,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using System.IO;
 	using System.Linq;
 	using System.Threading;
-	using System.Threading.Tasks;
 
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+
 	using Modeling;
 
 	using NUnit.Framework;

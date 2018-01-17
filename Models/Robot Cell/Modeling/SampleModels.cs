@@ -28,11 +28,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
     using System.Linq;
     using Analysis;
     using Controllers;
-    using Odp;
+	using Odp;
     using Odp.Reconfiguration;
-    using static ModelBuilderHelper;
 
-    internal static class SampleModels
+    using static ModelBuilderHelper;
+	using FastConfigurationFinder = Controllers.Reconfiguration.FastConfigurationFinder;
+
+
+	internal static class SampleModels
     {
         private static readonly Func<ModelBuilder, ModelBuilder>[] _defaultConfigurations =
             { Ictss1, Ictss2, Ictss3, Ictss4, Ictss5, Ictss6, Ictss7 };
@@ -40,22 +43,22 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         private static readonly Func<ModelBuilder, ModelBuilder>[] _performanceEvaluationConfigurations =
             { FewAgentsHighRedundancy , ManyAgentsLowRedundancy, ManyAgentsHighRedundancy, MediumSizePerformanceMeasurementModel };
 
-        public static Model DefaultInstance<T>(AnalysisMode mode = AnalysisMode.AllFaults)
+        public static Model DefaultInstance<T>(IConfigurationFinder finder, AnalysisMode mode = AnalysisMode.AllFaults)
             where T : IController
         {
-            return DefaultSetup<T>(mode, false).Invoke(new ModelBuilder(nameof(Ictss1)).Ictss1()).Build();
+            return DefaultSetup<T>(finder, mode, false).Invoke(new ModelBuilder(nameof(Ictss1)).Ictss1()).Build();
         }
 
-        public static IEnumerable<Model> CreateDefaultConfigurations<T>(AnalysisMode mode, bool verify = false)
+        public static IEnumerable<Model> CreateDefaultConfigurations<T>(IConfigurationFinder finder, AnalysisMode mode, bool verify = false)
             where T : IController
         {
-            return CreateConfigurations(b => b, DefaultSetup<T>(mode, verify));
+            return CreateConfigurations(b => b, DefaultSetup<T>(finder, mode, verify));
         }
 
-        public static IEnumerable<Model> CreateDefaultConfigurationsWithoutPlant<T>(AnalysisMode mode, bool verify = false)
+        public static IEnumerable<Model> CreateDefaultConfigurationsWithoutPlant<T>(IConfigurationFinder finder, AnalysisMode mode, bool verify = false)
             where T : IController
         {
-            return CreateConfigurations(b => b.DisablePlants(), DefaultSetup<T>(mode, verify));
+            return CreateConfigurations(b => b.DisablePlants(), DefaultSetup<T>(finder, mode, verify));
         }
 
         public static IEnumerable<Model> CreateCoalitionConfigurations(bool verify = false)
@@ -70,7 +73,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         {
             return CreateConfigurations(
                 b => b.DisablePlants(),
-                b => b.ChooseController<FastController>().CentralReconfiguration().EnableControllerVerification(verify).DisableIntolerableFaults());
+                b => b.ChooseController<CentralizedController>(new FastConfigurationFinder()).CentralReconfiguration().EnableControllerVerification(verify).DisableIntolerableFaults());
                 
         }
 
@@ -79,7 +82,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return CreateConfigurations(
                 _performanceEvaluationConfigurations,
                 b => b.DisablePlants(),
-                b => b.ChooseController<FastController>().UseControllerReconfigurationAgents().EnablePerformanceMeasurement().DisableIntolerableFaults()
+                b => b.ChooseController<CentralizedController>(new FastConfigurationFinder()).UseControllerReconfigurationAgents().EnablePerformanceMeasurement().DisableIntolerableFaults()
             );
         }
 
@@ -105,14 +108,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return configurations.Select(setup => postSetup(setup(preSetup(new ModelBuilder(setup.Method.Name)))).Build());
         }
 
-        private static Func<ModelBuilder, ModelBuilder> DefaultSetup<T>(AnalysisMode mode, bool verify) where T : IController
+        private static Func<ModelBuilder, ModelBuilder> DefaultSetup<T>(IConfigurationFinder finder, AnalysisMode mode, bool verify) where T : IController
         {
-            return builder => ChooseAnalysisMode(builder.ChooseController<T>()
+            return builder => ChooseAnalysisMode(builder.ChooseController<T>(finder)
                                                         .EnableControllerVerification(verify)
                                                         .CentralReconfiguration(), mode);
         }
 
-        public static Model PerformanceMeasurement1<T>(AnalysisMode mode = AnalysisMode.AllFaults, bool verify = false)
+        public static Model PerformanceMeasurement1<T>(IConfigurationFinder finder, AnalysisMode mode = AnalysisMode.AllFaults, bool verify = false)
             where T : IController
         {
             return ChooseAnalysisMode(
@@ -134,7 +137,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     .AddCart(Route(4, 5), Route(3, 4))
                     .AddCart(Route(5, 6))
 
-                    .ChooseController<T>()
+                    .ChooseController<T>(finder)
                     .EnablePerformanceMeasurement()
                     .EnableControllerVerification(verify)
                     .CentralReconfiguration()

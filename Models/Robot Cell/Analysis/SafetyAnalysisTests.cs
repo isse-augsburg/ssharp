@@ -28,7 +28,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling;
 	using Modeling.Controllers.Reconfiguration;
 	using NUnit.Framework;
+	using Odp.Reconfiguration;
 	using SafetySharp.Analysis;
+
+	using FastConfigurationFinder = Modeling.Controllers.Reconfiguration.FastConfigurationFinder;
 
 	internal class SafetyAnalysisTests
 	{
@@ -67,7 +70,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurations()
 		{
-			return SampleModels.CreateDefaultConfigurations<FastController>(AnalysisMode.IntolerableFaults)
+			return SampleModels.CreateDefaultConfigurations<CentralizedController>(new FastConfigurationFinder(), AnalysisMode.IntolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}

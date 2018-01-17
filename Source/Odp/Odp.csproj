@@ -48,7 +48,7 @@
     <Compile Include="ICapabilityHandler.cs" />
     <Compile Include="ProduceCapability.cs" />
     <Compile Include="Reconfiguration\AbstractController.cs" />
-    <Compile Include="Reconfiguration\AbstractMiniZincController.cs" />
+    <Compile Include="Reconfiguration\AbstractMiniZincConfigurationFinder.cs" />
     <Compile Include="BaseAgent.cs" />
     <Compile Include="Reconfiguration\CentralReconfiguration.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\AgentConnectionManager.cs" />
@@ -66,12 +66,15 @@
     <Compile Include="Reconfiguration\CoalitionFormation\IConnectionOracle.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\IRecruitingStrategy.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\MissingCapabilitiesStrategy.cs" />
+    <Compile Include="Reconfiguration\FastConfigurationFinder.cs" />
+    <Compile Include="Reconfiguration\IConfigurationFinder.cs" />
+    <Compile Include="Reconfiguration\OptimalConfigurationFinder.cs" />
     <Compile Include="Reconfiguration\ReconfigurationReason.cs" />
     <Compile Include="Reconfiguration\ConfigurationUpdate.cs" />
     <Compile Include="Reconfiguration\ControllerReconfigurationAgent.cs" />
     <Compile Include="FairRoleSelector.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\DeadNeighbourStrategy.cs" />
-    <Compile Include="Reconfiguration\FastController.cs" />
+    <Compile Include="Reconfiguration\CentralizedController.cs" />
     <Compile Include="IAgent.cs" />
     <Compile Include="ICapability.cs" />
     <Compile Include="Reconfiguration\IController.cs" />
@@ -80,7 +83,6 @@
     <Compile Include="IRoleSelector.cs" />
     <Compile Include="ITask.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\NewTaskStrategy.cs" />
-    <Compile Include="Reconfiguration\OptimalController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>

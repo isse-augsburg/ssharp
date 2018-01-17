@@ -24,17 +24,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System.Linq;
 	using Modeling;
-	using Modeling.Controllers.Reconfiguration;
 	using NUnit.Framework;
+	using Odp.Reconfiguration;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+
+	using FastConfigurationFinder = Modeling.Controllers.Reconfiguration.FastConfigurationFinder;
 
 	public class ModelCheckingTests
 	{
 		[Test]
 		public void EnumerateStateSpace()
 		{
-			var model = SampleModels.DefaultInstance<FastController>();
+			var model = SampleModels.DefaultInstance<CentralizedController>(new FastConfigurationFinder());
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };
@@ -46,7 +48,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void NoDamagedWorkpieces()
 		{
-			var model = SampleModels.DefaultInstance<FastController>();
+			var model = SampleModels.DefaultInstance<CentralizedController>(new FastConfigurationFinder());
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };
@@ -58,7 +60,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void AllWorkpiecesCompleteEventually()
 		{
-			var model = SampleModels.DefaultInstance<FastController>();
+			var model = SampleModels.DefaultInstance<CentralizedController>(new FastConfigurationFinder());
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };
@@ -70,7 +72,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void HasResourceAndHasWorkpieceMatch()
 		{
-			var model = SampleModels.DefaultInstance<FastController>();
+			var model = SampleModels.DefaultInstance<CentralizedController>(new FastConfigurationFinder());
 			model.Faults.SuppressActivations();
 
 			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 10 } };

@@ -152,11 +152,24 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			return _model;
 		}
 
-		public ModelBuilder ChooseController<T>() where T : IController
+		public ModelBuilder ChooseController<T>(IConfigurationFinder finder) where T : IController
 		{
-			_model.Controller = (IController)Activator.CreateInstance(typeof(T), new object[] { Agents.ToArray() });
-			if (_model.Controller is IComponent)
-				_model.AdditionalComponents.Add(_model.Controller as IComponent);
+			var component = finder as IComponent;
+			if (component != null)
+				_model.AdditionalComponents.Add(component);
+
+			var controller = (IController)Activator.CreateInstance(typeof(T), Agents.ToArray(), finder);
+			return ChooseController(controller);
+		}
+
+		public ModelBuilder ChooseController(IController controller)
+		{
+			_model.Controller = controller;
+
+			var component = controller as IComponent;
+			if (component != null)
+				_model.AdditionalComponents.Add(component);
+
 			return this;
 		}
 
@@ -229,7 +242,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 	    public ModelBuilder UseCoalitionFormation()
 	    {
-	        ChooseController<CoalitionFormationController>();
+	        ChooseController(new CoalitionFormationController(Agents.ToArray()));
 	        foreach (var agent in Agents)
                 agent.ReconfigurationStrategy = new ReconfigurationAgentHandler(agent, (b, h, t) => new CoalitionReconfigurationAgent(b, h, _model.Controller));
 	        return this;

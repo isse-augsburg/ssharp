@@ -27,6 +27,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 	using System.IO;
 	using System.Text.RegularExpressions;
 	using Modeling;
+	using Odp.Reconfiguration;
 
 	internal class ModelSetupParser
 	{
@@ -58,7 +59,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 					lastStation = station;
 				}
 			}
-			var model = new Model(_stations.ToArray(), new FastController(_stations.ToArray()));
+			var model = new Model(_stations.ToArray(), new CentralizedController(_stations.ToArray(), new Modeling.FastConfigurationFinder()));
 
 			// read recipes to be produced by the model
 			for (lineIndex++; lineIndex < lines.Length; ++lineIndex)
