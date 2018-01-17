@@ -65,6 +65,8 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 
 		public long Transitions { get; private set; } = 0; //without entries of initial distribution
 
+		public long InitialTransitions { get; private set; } = 0;
+
 		public int RowOfInitialStates = 0;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -93,6 +95,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 		{
 			// initial state probabilities are also saved in the ProbabilityMatrix
 			ProbabilityMatrix.AddColumnValueToCurrentRow(new SparseDoubleMatrix.ColumnValue(StateToColumn(markovChainState), probability));
+			InitialTransitions++;
 		}
 
 		internal void FinishInitialDistribution()

@@ -146,7 +146,7 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			ConvertTransitions(ltmc);
 			stopwatch.Stop();
 			Console.Out.WriteLine($"Completed transformation in {stopwatch.Elapsed}");
-			Console.Out.WriteLine($"Mc: States {MarkovChain.States}, Transitions {MarkovChain.Transitions}");
+			Console.Out.WriteLine($"Mc: States {MarkovChain.States}, Transitions {MarkovChain.Transitions}, Initial Transitions {MarkovChain.InitialTransitions}");
 		}
 	}
 }
