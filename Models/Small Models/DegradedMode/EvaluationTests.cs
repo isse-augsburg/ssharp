@@ -76,7 +76,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			markovChainGenerator.AddFormulaToCheck(model.System.HazardActive);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
@@ -135,7 +135,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
+			markovChainGenerator.AddFormulaToCheck(model.System.HazardActive);
 			foreach (var fault in model.Faults)
 			{
 				var faultFormula = new FaultFormula(fault);
@@ -157,12 +157,12 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.AddFormulaToCheck(model.System.HazardActive);
 			foreach (var fault in model.Faults)
 			{
 				var faultFormula = new FaultFormula(fault);
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
-			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
