@@ -1,17 +1,17 @@
 ﻿// The MIT License (MIT)
-// 
-// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
-// 
+//
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,31 +22,39 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
+	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Threading.Tasks;
-	using Modeling;
 
-	public class FastController : AbstractController
+	/// <summary>
+	///   A centralized controller that uses all currently functioning agents in the system.
+	/// </summary>
+	public class CentralizedController : AbstractController
 	{
-		[Hidden(HideElements = true)]
-		protected BaseAgent[] _availableAgents;
+		private readonly IConfigurationFinder _configurationFinder;
 
-		protected virtual bool PreferCapabilityAccumulation => true;
-
-		public FastController(BaseAgent[] agents) : base(agents) { }
+		/// <summary>
+		///   Creates a new instance.
+		/// </summary>
+		/// <param name="agents">All agents that exist in the system.</param>
+		/// <param name="configurationFinder">A strategy to find configurations for given parameters.</param>
+		public CentralizedController(BaseAgent[] agents, IConfigurationFinder configurationFinder)
+			: base(agents)
+		{
+			_configurationFinder = configurationFinder;
+		}
 
 		// synchronous implementation
 		public override Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
-			_availableAgents = GetAvailableAgents();
+			var availableAgents = GetAvailableAgents();
 
 			var configs = new ConfigurationUpdate();
-			configs.RecordInvolvement(_availableAgents); // central controller uses all agents!
+			configs.RecordInvolvement(availableAgents); // central controller uses all available agents!
 			configs.RemoveAllRoles(task, Agents);
 
-			var configFinder = new FastConfigurationFinder(PreferCapabilityAccumulation);
-			var resultComputation = configFinder.Find(new HashSet<BaseAgent>(_availableAgents), task.RequiredCapabilities);
+			var resultComputation = _configurationFinder.Find(new HashSet<BaseAgent>(availableAgents), task.RequiredCapabilities);
 			Debug.Assert(resultComputation.IsCompleted);
 
 			var result = resultComputation.Result;

@@ -28,8 +28,11 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 	using Modeling;
 	using Modeling.Controllers.Reconfiguration;
 	using NUnit.Framework;
+	using Odp.Reconfiguration;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.Heuristics;
+
+	using FastConfigurationFinder = Modeling.Controllers.Reconfiguration.FastConfigurationFinder;
 
 	internal class FunctionalTests
 	{
@@ -42,7 +45,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		[Test]
 		public void DepthFirstSearch()
 		{
-			var model = SampleModels.DefaultInstance<MiniZincController>(AnalysisMode.TolerableFaults);
+			var model = SampleModels.DefaultInstance<CentralizedController>(new MiniZincConfigurationFinder(), AnalysisMode.TolerableFaults);
 
 			var modelChecker = new SSharpChecker { Configuration = { CpuCount = 1, StateCapacity = 1 << 20 } };
 			var result = modelChecker.CheckInvariant(model, true);
@@ -87,13 +90,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 		private static IEnumerable CreateConfigurationsMiniZinc()
 		{
-			return SampleModels.CreateDefaultConfigurations<MiniZincController>(AnalysisMode.TolerableFaults, verify: true)
+			return SampleModels.CreateDefaultConfigurations<CentralizedController>(new MiniZincConfigurationFinder(), AnalysisMode.TolerableFaults, verify: true)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 
 		private static IEnumerable CreateConfigurationsFast()
 		{
-			return SampleModels.CreateDefaultConfigurations<FastController>(AnalysisMode.TolerableFaults)
+			return SampleModels.CreateDefaultConfigurations<CentralizedController>(new FastConfigurationFinder(), AnalysisMode.TolerableFaults)
 						.Select(model => new TestCaseData(model).SetName(model.Name));
 		}
 	}

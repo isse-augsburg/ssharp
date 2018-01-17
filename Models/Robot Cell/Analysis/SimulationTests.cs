@@ -31,6 +31,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using Odp.Reconfiguration;
 
 	using Modeling;
 	using Modeling.Controllers;
@@ -39,6 +40,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 	using NUnit.Framework;
 	using RDotNet;
+
+	using FastConfigurationFinder = Modeling.Controllers.Reconfiguration.FastConfigurationFinder;
 
     public class SimulationTests
 	{
@@ -169,7 +172,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
         [Test]
 		public void Simulate()
 		{
-			var model = SampleModels.PerformanceMeasurement1<FastController>();
+			var model = SampleModels.PerformanceMeasurement1<CentralizedController>(new FastConfigurationFinder());
 			model.Faults.SuppressActivations();
 
 			var simulator = new Simulator(model);

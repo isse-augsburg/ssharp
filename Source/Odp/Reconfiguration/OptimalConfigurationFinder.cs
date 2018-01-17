@@ -1,17 +1,17 @@
 ﻿// The MIT License (MIT)
-// 
-// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
-// 
+//
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,33 +24,43 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System.Linq;
 
-	public class OptimalController : FastController
+	/// <summary>
+	///   A <see cref="IConfigurationFinder"/> that follows the resource flow and returns the solution with the shortest path from source to sink.
+	/// </summary>
+	public class OptimalConfigurationFinder : FastConfigurationFinder
 	{
-		public OptimalController(BaseAgent[] agents) : base(agents) { }
-
-		protected override int[] FindAgentPath(ITask task)
+		/// <summary>
+		///   Creates a new instance.
+		/// </summary>
+		/// <param name="preferCapabilityAccumulation">Whether or not it is preferred that one agent applies multiple capabilities.</param>
+		public OptimalConfigurationFinder(bool preferCapabilityAccumulation)
+			: base(preferCapabilityAccumulation)
 		{
-			var identifiers = Enumerable.Range(0, _availableAgents.Length).ToArray();
+		}
 
-			var emptyPath = new int[task.RequiredCapabilities.Length];
+		protected override int[] FindDistribution(ICapability[] capabilities, BaseAgent[] availableAgents)
+		{
+			var identifiers = Enumerable.Range(0, availableAgents.Length).ToArray();
+
+			var emptyPath = new int[capabilities.Length];
 			var paths = (from agent in identifiers
-						 where CanSatisfyNext(task, emptyPath, 0, agent)
+						 where CanSatisfyNext(capabilities, availableAgents, emptyPath, 0, agent)
 						 select new[] { agent }).ToArray();
 
 			if (paths.Length == 0)
 				return null;
 
-			for (var i = 1; i < task.RequiredCapabilities.Length; ++i)
+			for (var i = 1; i < capabilities.Length; ++i)
 			{
 				paths = (from path in paths
 						 from agent in identifiers
 						 let last = path[i - 1]
 						 // if agent is reachable from the previous path
 						 where _pathMatrix[last, agent] != -1
-							// and agent can satisfy the next required capability
-							&& CanSatisfyNext(task, path, i, agent)
+							   // and agent can satisfy the next required capability
+							   && CanSatisfyNext(capabilities, availableAgents, path, i, agent)
 						 select path.Concat(new[] { agent }).ToArray()
-						).ToArray();
+				).ToArray();
 
 				if (paths.Length == 0)
 					return null;

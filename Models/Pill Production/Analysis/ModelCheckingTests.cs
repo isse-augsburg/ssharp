@@ -26,6 +26,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 	using System.Linq;
 	using Modeling;
 	using NUnit.Framework;
+	using Odp.Reconfiguration;
 	using SafetySharp.Analysis;
 	using SafetySharp.Analysis.Heuristics;
 	using SafetySharp.Modeling;
@@ -66,7 +67,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Analysis
 			dispenserTop.Connect(consumerTop);
 			dispenserBottom.Connect(consumerBottom);
 
-			var model = new Model(stations, new FastController(stations));
+			var model = new Model(stations, new CentralizedController(stations, new Modeling.FastConfigurationFinder()));
 			var recipe = new Recipe(new[] { new Ingredient(IngredientType.BlueParticulate, 30), new Ingredient(IngredientType.RedParticulate, 10) }, 1u);
 			model.ScheduleProduction(recipe);
 

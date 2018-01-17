@@ -83,9 +83,9 @@
     <Compile Include="Analysis\FunctionalTests.cs" />
     <Compile Include="Modeling\Controllers\Agent.cs" />
     <Compile Include="Analysis\AnalysisMode.cs" />
-    <Compile Include="Modeling\Controllers\Reconfiguration\FastController.cs" />
+    <Compile Include="Modeling\Controllers\Reconfiguration\FastConfigurationFinder.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\IntolerableAnalysisController.cs" />
-    <Compile Include="Modeling\Controllers\Reconfiguration\MiniZincController.cs" />
+    <Compile Include="Modeling\Controllers\Reconfiguration\MiniZincConfigurationFinder.cs" />
     <Compile Include="Modeling\Controllers\ProcessCapability.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\PerformanceMeasurementController.cs" />
     <Compile Include="Modeling\Controllers\Reconfiguration\VerifyingController.cs" />

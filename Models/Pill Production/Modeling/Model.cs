@@ -84,7 +84,7 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 				stations[i].Connect(next);
 			}
 
-			var model = new Model(stations, new FastController(stations));
+			var model = new Model(stations, new CentralizedController(stations, new FastConfigurationFinder()));
 
 			var recipe = new Recipe(ingredients: new[]
 			{

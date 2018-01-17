@@ -32,10 +32,11 @@ namespace SafetySharp.Odp.Reconfiguration
 	/// <summary>
 	///   A <see cref="IConfigurationFinder"/> that follows the resource flow and returns the first solution it can find.
 	/// </summary>
-	[NonSerializable]
 	public class FastConfigurationFinder : IConfigurationFinder
 	{
+		[NonSerializable]
 		protected int[,] _costMatrix;
+		[NonSerializable]
 		protected int[,] _pathMatrix;
 
 		protected readonly bool PreferCapabilityAccumulation;
@@ -55,7 +56,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			CalculateShortestPaths(agents);
 
 			var distribution = FindDistribution(capabilities, agents);
-			var resourceFlow = FindResourceFlow(distribution);
+			var resourceFlow = FindResourceFlow(distribution, agents);
 
 			// translate from index to agent
 			var agentDistribution = distribution.Select(i => agents[i]).ToArray();
@@ -115,7 +116,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			for (var firstAgent = 0; firstAgent < availableAgents.Length; ++firstAgent)
 			{
-				if (CanSatisfyNext(capabilities, path, 0, availableAgents[firstAgent]))
+				if (CanSatisfyNext(capabilities, availableAgents, path, 0, firstAgent))
 				{
 					path[0] = firstAgent;
 					if (FindDistribution(capabilities, path, 1, availableAgents))
@@ -135,7 +136,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			var last = path[prefixLength - 1];
 
 			// special handling: see if the last agent can't do the next capability as well
-			if (PreferCapabilityAccumulation && CanSatisfyNext(capabilities, path, prefixLength, availableAgents[last]))
+			if (PreferCapabilityAccumulation && CanSatisfyNext(capabilities, availableAgents, path, prefixLength, last))
 			{
 				path[prefixLength] = last;
 				if (FindDistribution(capabilities, path, prefixLength + 1, availableAgents))
@@ -146,7 +147,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				for (var next = 0; next < availableAgents.Length; ++next) // go through all agents
 				{
 					// if connected to last agent and can fulfill next capability
-					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(capabilities, path, prefixLength, availableAgents[next]))
+					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(capabilities, availableAgents, path, prefixLength, next))
 					{
 						path[prefixLength] = next; // try a path over next
 						if (FindDistribution(capabilities, path, prefixLength + 1, availableAgents)) // if there is such a path, return true
@@ -158,24 +159,24 @@ namespace SafetySharp.Odp.Reconfiguration
 			return false; // there is no valid path with the given prefix
 		}
 
-		protected virtual bool CanSatisfyNext(ICapability[] capabilities, int[] path, int prefixLength, BaseAgent agent)
+		protected virtual bool CanSatisfyNext(ICapability[] capabilities, BaseAgent[] availableAgents, int[] path, int prefixLength, int agent)
 		{
-			return agent.AvailableCapabilities.Contains(capabilities[prefixLength]);
+			return availableAgents[agent].AvailableCapabilities.Contains(capabilities[prefixLength]);
 		}
 
-		private IEnumerable<int> FindResourceFlow(int[] distribution)
+		protected virtual IEnumerable<int> FindResourceFlow(int[] distribution, BaseAgent[] availableAgents)
 		{
 			if (distribution.Length == 0)
 				return new int[0];
 
 			var resourceFlow = new List<int>() { distribution[0] };
 			for (var i = 1; i < distribution.Length; ++i)
-				resourceFlow.AddRange(GetShortestPath(distribution[i-1], distribution[i]).Skip(1));
+				resourceFlow.AddRange(GetShortestPath(distribution[i-1], distribution[i], availableAgents).Skip(1));
 
 			return resourceFlow;
 		}
 
-		protected virtual IEnumerable<int> GetShortestPath(int from, int to)
+		protected virtual IEnumerable<int> GetShortestPath(int from, int to, BaseAgent[] availableAgents)
 		{
 			for (var current = from; current != to; current = _pathMatrix[current, to])
 				yield return current;

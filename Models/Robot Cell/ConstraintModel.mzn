@@ -124,7 +124,8 @@ solve
 minimize lastRoleSegment;
 
 output [
-"agents = \([agent[i] | i in 1..lastRoleSegment] )\n"++
+"distribution = \([taskAssigned[s] | s in TASK_IND] )\n"++
+"resourceFlow = \([agent[i] | i in 1..lastRoleSegment] )\n"
 %"capApplied   = \([capApplied[i] | i in 1..lastRoleSegment] )\n"++
-"workedOn = \([if capApplied[i] = 1 then poststate[i] else 0 endif | i in 1..lastRoleSegment] )\n"
+%"workedOn = \([if capApplied[i] = 1 then poststate[i] else 0 endif | i in 1..lastRoleSegment] )\n"
 ];

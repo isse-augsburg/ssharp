@@ -1,17 +1,17 @@
 ﻿// The MIT License (MIT)
-// 
-// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
-// 
+//
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,57 +25,52 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 	using System;
 	using System.Collections.Generic;
 	using System.Linq;
-	using System.Threading.Tasks;
 	using SafetySharp.Modeling;
 	using Odp;
-	using Odp.Reconfiguration;
 
 	/// <summary>
-	///   An <see cref="IController" /> implementation that is much faster than
-	///   the MiniZinc implementation.
+	///   Modifies <see cref="Odp.Reconfiguration.FastConfigurationFinder"/> to avoid reusing carts where possible.
 	/// </summary>
-	internal class FastController : Odp.Reconfiguration.FastController
+	internal class FastConfigurationFinder : Odp.Reconfiguration.FastConfigurationFinder
 	{
-		protected override bool PreferCapabilityAccumulation => false;
-
 		[NonDiscoverable, Hidden(HideElements = true)]
 		private readonly HashSet<CartAgent> _usedCarts = new HashSet<CartAgent>();
 
-		public FastController(Agent[] agents) : base(agents) { }
+		public FastConfigurationFinder() : base(preferCapabilityAccumulation: false) { }
 
-		public override Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
+		protected override IEnumerable<int> FindResourceFlow(int[] distribution, BaseAgent[] availableAgents)
 		{
 			_usedCarts.Clear();
-			return base.CalculateConfigurationsAsync(context, task);
+			return base.FindResourceFlow(distribution, availableAgents);
 		}
 
-		protected override IEnumerable<int> GetShortestPath(int from, int to)
+		protected override IEnumerable<int> GetShortestPath(int from, int to, BaseAgent[] availableAgents)
 		{
 			var previous = -1;
 			for (var current = from; current != to; current = _pathMatrix[current, to])
 			{
-				var agent = (_availableAgents[current] is CartAgent) ? GetPreferredCart(current, previous, to) : current;
+				var agent = (availableAgents[current] is CartAgent) ? GetPreferredCart(current, previous, to, availableAgents) : current;
 				yield return agent;
 				previous = agent;
 			}
 			yield return to;
 		}
 
-		private int GetPreferredCart(int suggestion, int previous, int destination)
+		private int GetPreferredCart(int suggestion, int previous, int destination, BaseAgent[] availableAgents)
 		{
-			var nextRobot = (RobotAgent)_availableAgents[_pathMatrix[suggestion, destination]];
+			var nextRobot = (RobotAgent)availableAgents[_pathMatrix[suggestion, destination]];
 
-			var unusedCart = _availableAgents[previous].Outputs
+			var unusedCart = availableAgents[previous].Outputs
 				.OfType<CartAgent>()
-				.FirstOrDefault(candidate => !_usedCarts.Contains(candidate) && candidate.Outputs.Contains(nextRobot));
+				.FirstOrDefault(candidate => !_usedCarts.Contains(candidate)
+					&& candidate.Inputs.Contains(availableAgents[previous])
+					&& candidate.Outputs.Contains(nextRobot) && nextRobot.Inputs.Contains(candidate));
 
-			if (unusedCart != null)
-			{
-				_usedCarts.Add(unusedCart);
-				var cartID = Array.IndexOf(_availableAgents, unusedCart);
-				return cartID;
-			}
-			return suggestion;
+			if (unusedCart == null)
+				return suggestion;
+
+			_usedCarts.Add(unusedCart);
+			return Array.IndexOf(availableAgents, unusedCart);
 		}
 	}
 }
