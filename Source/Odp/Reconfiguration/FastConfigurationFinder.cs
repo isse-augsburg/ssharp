@@ -56,6 +56,9 @@ namespace SafetySharp.Odp.Reconfiguration
 			CalculateShortestPaths(agents);
 
 			var distribution = FindDistribution(capabilities, agents);
+			if (distribution == null)
+				return Task.FromResult<Tuple<BaseAgent[], BaseAgent[]>>(null);
+
 			var resourceFlow = FindResourceFlow(distribution, agents);
 
 			// translate from index to agent
