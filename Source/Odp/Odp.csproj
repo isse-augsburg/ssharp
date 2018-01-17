@@ -66,6 +66,8 @@
     <Compile Include="Reconfiguration\CoalitionFormation\IConnectionOracle.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\IRecruitingStrategy.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\MissingCapabilitiesStrategy.cs" />
+    <Compile Include="Reconfiguration\FastConfigurationFinder.cs" />
+    <Compile Include="Reconfiguration\IConfigurationFinder.cs" />
     <Compile Include="Reconfiguration\ReconfigurationReason.cs" />
     <Compile Include="Reconfiguration\ConfigurationUpdate.cs" />
     <Compile Include="Reconfiguration\ControllerReconfigurationAgent.cs" />
