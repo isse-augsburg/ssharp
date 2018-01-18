@@ -1,11 +1,11 @@
 ﻿Fürs Testen benutze ich ReSharper
 
 - Teste den einzelnen Fault
-- Routen der Carts anzeigen: Wo kann ein Cart hinfahren?
 
-Ich kann auch nach dem Fehler suchen:
-- Wird die Methode ApplyCapability(ConsumeCapability) in RobotAgent aufgerufen?
+- Ich kann auch nach dem Fehler suchen:
+
+Notiz:
+Vielleicht liegt es an CapabilitiesToApply (in der kein Consume drin ist), dass die resource vor "Consume" verworfen wird?
 
 Am Ende evtl. noch:
-- Animiere das fahrende Cart
 - Faults anzeigen (Welcher Fault?)
