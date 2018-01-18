@@ -232,7 +232,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 
 
 		[Test]
-		public void CalculateLtmdp()
+		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var model = new DeadReckoningModel();
 			model.Component.FF.ProbabilityOfOccurrence = null;
@@ -244,11 +244,6 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = true;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
-			foreach (var fault in model.Faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}

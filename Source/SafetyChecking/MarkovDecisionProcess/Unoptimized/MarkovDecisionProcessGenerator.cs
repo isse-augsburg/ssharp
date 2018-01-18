@@ -65,6 +65,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 				
 				modelTraverser.Context.Output.WriteLine("Generating labeled transition markov decision process.");
 				modelTraverser.TraverseModelAndReport();
+				Configuration.DefaultTraceOutput?.WriteLine($"Continuation Elements in Ltmdp: {_mdp.ContinuationGraphSize}");
 
 				// StateStorage must be freed manually. Reason is that invariant checker does not free up the
 				// space, because it might be necessary for other usages of the ModelTraversers (e.g. StateGraphGenerator

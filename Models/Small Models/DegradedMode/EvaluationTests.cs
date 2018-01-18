@@ -208,7 +208,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 
 
 		[Test]
-		public void CalculateLtmdp()
+		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var model = new DegradedModeModel();
 			model.System.SignalDetector1.F1.ProbabilityOfOccurrence = null;
@@ -220,11 +220,6 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = true;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(model.System.HazardActive);
-			foreach (var fault in model.Faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}

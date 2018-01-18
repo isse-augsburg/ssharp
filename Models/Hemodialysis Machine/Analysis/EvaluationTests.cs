@@ -326,7 +326,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 
 		[Test]
-		public void CalculateLtmdp()
+		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var model = new Model();
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;

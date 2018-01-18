@@ -163,7 +163,7 @@ namespace Lustre_Models
 
 
 		[Test]
-		public void CalculateLtmdp()
+		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var oldProbability = _faults[1].ProbabilityOfOccurrence;
 			_faults[1].ProbabilityOfOccurrence = null;
@@ -172,11 +172,6 @@ namespace Lustre_Models
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = true;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(_hazard);
-			foreach (var fault in _faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 			_faults[1].ProbabilityOfOccurrence = oldProbability;
@@ -257,12 +252,12 @@ namespace Lustre_Models
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithFlattening;
 			markovChainGenerator.AddFormulaToCheck(_hazard);
-			/*
+			
 			foreach (var fault in _faults)
 			{
 				var faultFormula = new FaultFormula(fault);
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}*/
+			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 

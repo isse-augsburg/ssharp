@@ -39,7 +39,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	public unsafe partial class LabeledTransitionMarkovDecisionProcess : DisposableObject
 	{
 		public static readonly int TransitionSize = sizeof(TransitionTargetElement);
-		private const int AvgGraphNodesPerSucceedingState = 7;
+		private const int AvgGraphNodesPerSucceedingState = 8;
 
 		// TODO: Optimization potential for custom model checker: Add every state only once. Save the transitions and evaluate reachability formulas more efficient by only expanding "states" to "states x stateformulaset" where the state labels of interests are in "stateformulaset"
 
@@ -75,7 +75,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			_maxNumberOfContinuationGraphElements = _maxNumberOfTransitionTargets * AvgGraphNodesPerSucceedingState;
 
 			Requires.InRange(_maxNumberOfTransitionTargets, nameof(_maxNumberOfTransitionTargets), 1024, Int32.MaxValue - 1);
-			Requires.InRange(_maxNumberOfContinuationGraphElements, nameof(_maxNumberOfContinuationGraphElements), 1024, Int32.MaxValue - 1);
+			Requires.InRange(_maxNumberOfContinuationGraphElements, nameof(_maxNumberOfContinuationGraphElements), 1024, Int64.MaxValue - 1);
 
 			_stateStorageStateToRootOfContinuationGraphBuffer.Resize((long)maxNumberOfStates * sizeof(long), zeroMemory: false);
 			_stateStorageStateToRootOfContinuationGraphMemory = (long*)_stateStorageStateToRootOfContinuationGraphBuffer.Pointer;
@@ -119,7 +119,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			var locationOfFirstNewEntry = InterlockedExtensions.AddFetch(ref _continuationGraphElementCount,number);
 			if (locationOfFirstNewEntry + number >= _maxNumberOfContinuationGraphElements)
-				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
+				throw new OutOfMemoryException($"Unable to store continuation graph element (limit is {_maxNumberOfContinuationGraphElements} entries)");
 			return locationOfFirstNewEntry;
 		}
 
@@ -127,7 +127,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			var locationOfNewEntry = InterlockedExtensions.IncrementReturnOld(ref _transitionTargetCount);
 			if (locationOfNewEntry >= _maxNumberOfTransitionTargets)
-				throw new OutOfMemoryException("Unable to store distribution.");
+				throw new OutOfMemoryException($"Unable to transition target (limit is {_maxNumberOfTransitionTargets} entries)");
 			return locationOfNewEntry;
 		}
 

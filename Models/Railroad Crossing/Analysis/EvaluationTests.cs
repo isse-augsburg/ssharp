@@ -36,6 +36,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 	using SafetySharp.Modeling;
 	using System.Collections;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using Modeling.Controllers;
@@ -221,7 +222,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 
 		[Test]
-		public void CalculateLtmdp()
+		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var model = new Model();
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
@@ -230,14 +231,10 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = true;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(model.PossibleCollision);
-			foreach (var fault in model.Faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}
@@ -252,6 +249,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(model.PossibleCollision);
@@ -274,6 +272,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(model.PossibleCollision);
@@ -298,6 +297,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(model.PossibleCollision);
@@ -323,6 +323,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(model.PossibleCollision);

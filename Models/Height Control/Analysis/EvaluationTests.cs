@@ -36,6 +36,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 	using SafetySharp.Modeling;
 	using System.Collections;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.ExecutedModel;
 	using ISSE.SafetyChecking.Formula;
 	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using Modeling.Controllers;
@@ -400,7 +401,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 
 		[Test]
-		public void CalculateLtmdp()
+		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var model = Model.CreateOriginal();
 			model.VehicleSet.LeftHV.ProbabilityOfOccurrence = null;
@@ -409,17 +410,11 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = true;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
-			/*
-			foreach (var fault in model.Faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
-			*/
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}
@@ -434,6 +429,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
@@ -459,6 +455,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
@@ -486,6 +483,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
@@ -514,6 +512,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
