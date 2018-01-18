@@ -39,6 +39,7 @@ namespace ISSE.SafetyChecking
 		BuiltInLtmdp,
 		BuiltInNmdp,
 		BuildInMdpWithNewStates,
+		BuildInMdpWithNewStatesConstantDistance,
 		BuildInMdpWithFlattening
 	}
 

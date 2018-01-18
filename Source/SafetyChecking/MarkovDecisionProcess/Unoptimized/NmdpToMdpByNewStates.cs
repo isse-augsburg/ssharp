@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using GenericDataStructures;
 	using Utilities;
 
-	internal sealed class NmdpToMdpByNewStates : NmdpToMdp
+	public sealed class NmdpToMdpByNewStates : NmdpToMdp
 	{
 		// Problem with "For phi until psi" formula. Assume we have a state which has two successor states.
 		// One in which phi is true and one in which phi is not true. Shall we set phi to true in the intermediate

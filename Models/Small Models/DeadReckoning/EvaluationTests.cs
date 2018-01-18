@@ -34,7 +34,9 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 	using System.Linq;
 	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 	using Runtime;
+	using LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker;
 
 	public class EvaluationTests
 	{
@@ -101,6 +103,22 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
+
+		[Test]
+		public void CreateMarkovChainWithHazardsWithoutStaticPruning()
+		{
+			var model = new DeadReckoningModel();
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateMarkovChain();
+		}
+
 		[Test]
 		public void CreateMarkovChainWithHazardRetraversal1()
 		{
@@ -155,6 +173,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
 			foreach (var fault in model.Faults)
 			{
@@ -211,5 +230,122 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			Console.Write($"Probability of hazard: {result}");
 		}
 
+
+		[Test]
+		public void CalculateLtmdp()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = true;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+		}
+
+		[Test]
+		public void CalculateLtmdpWithoutStaticPruning()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+		}
+
+		[Test]
+		public void CalculateMdpNewStates()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, false);
+		}
+
+		[Test]
+		public void CalculateMdpNewStatesConstant()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, true);
+		}
+
+
+		[Test]
+		public void CalculateMdpFlattened()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByFlattening(nmdp);
+		}
 	}
 }

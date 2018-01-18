@@ -54,7 +54,12 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 					break;
 				case SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStates:
 					nmdp = ConvertToNmdp(configuration, Ltmdp);
-					var mdp = ConvertToMdpWithNewStates(configuration, nmdp);
+					var mdp = ConvertToMdpWithNewStates(configuration, nmdp,false);
+					_mdpModelChecker = new BuiltinMdpModelChecker(mdp, output);
+					break;
+				case SafetyChecking.LtmdpModelChecker.BuildInMdpWithNewStatesConstantDistance:
+					nmdp = ConvertToNmdp(configuration, Ltmdp);
+					mdp = ConvertToMdpWithNewStates(configuration, nmdp, true);
 					_mdpModelChecker = new BuiltinMdpModelChecker(mdp, output);
 					break;
 				case SafetyChecking.LtmdpModelChecker.BuildInMdpWithFlattening:
@@ -79,9 +84,9 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			return nmdp;
 		}
 
-		private MarkovDecisionProcess ConvertToMdpWithNewStates(AnalysisConfiguration configuration, NestedMarkovDecisionProcess nmdp)
+		private MarkovDecisionProcess ConvertToMdpWithNewStates(AnalysisConfiguration configuration, NestedMarkovDecisionProcess nmdp, bool makeConstantDistanceBetweenStates)
 		{
-			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp);
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp,configuration.DefaultTraceOutput,makeConstantDistanceBetweenStates);
 			var mdp = nmdpToMpd.MarkovDecisionProcess;
 			if (configuration.WriteGraphvizModels)
 			{

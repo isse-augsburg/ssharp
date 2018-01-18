@@ -159,7 +159,7 @@ namespace ISSE.SafetyChecking.GenericDataStructures
 
 		internal void SetRow(int row)
 		{
-			Assert.InRange(row, 0, _spaceLimitNumberOfRows);
+			Requires.InRange(row,nameof(row), 0, _spaceLimitNumberOfRows);
 			AssertNotSealed();
 			if (_rowMemory[row] != -1 || _rowColumnCountMemory[row] != -1)
 			{

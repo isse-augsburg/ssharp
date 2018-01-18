@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using GenericDataStructures;
 	using Utilities;
 
-	internal sealed class NmdpToMdpByFlattening : NmdpToMdp
+	public sealed class NmdpToMdpByFlattening : NmdpToMdp
 	{
 		private AutoResizeBigVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf> _continuationGraphLeafOfCid = new AutoResizeBigVector<NestedMarkovDecisionProcess.ContinuationGraphLeaf>();
 		
@@ -203,7 +203,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			stopwatch.Start();
 			Console.Out.WriteLine("Starting to convert Nested Markov Decision Process to Markov Decision Process");
 			Console.Out.WriteLine($"Nmdp: States {nmdp.States}, ContinuationGraphSize {nmdp.ContinuationGraphSize}");
-			var modelCapacity = new ModelCapacityByModelSize(nmdp.States, nmdp.ContinuationGraphSize * 8L);
+			var modelCapacity = new ModelCapacityByModelSize(nmdp.States, nmdp.ContinuationGraphSize * 1000L);
 			MarkovDecisionProcess = new MarkovDecisionProcess(modelCapacity);
 			MarkovDecisionProcess.StateFormulaLabels = nmdp.StateFormulaLabels;
 			CopyStateLabeling();

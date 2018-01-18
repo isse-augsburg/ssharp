@@ -140,5 +140,30 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
             var orderResult = SafetySharpOrderAnalysis.ComputeOrderRelationships(result);
             Console.WriteLine(orderResult);
         }
-    }
+
+		[Test]
+		public void CalculateRangeHazardLtmdp()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = true;
+			SafetySharpModelChecker.TraversalConfiguration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.Component.Hazard, 10);
+			Console.Write($"Probability of hazard: {result}");
+		}
+
+		[Test]
+		public void CalculateRangeHazardLtmdpWithoutStaticPruning()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = false;
+			SafetySharpModelChecker.TraversalConfiguration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.Component.Hazard, 10);
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = true;
+			Console.Write($"Probability of hazard: {result}");
+		}
+	}
 }

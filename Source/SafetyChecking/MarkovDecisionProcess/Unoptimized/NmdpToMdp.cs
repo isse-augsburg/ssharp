@@ -34,7 +34,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 	using GenericDataStructures;
 	using Utilities;
 
-	internal abstract class NmdpToMdp
+	public abstract class NmdpToMdp
 	{
 		protected NestedMarkovDecisionProcess _nmdp;
 		public MarkovDecisionProcess MarkovDecisionProcess { get; protected set; }

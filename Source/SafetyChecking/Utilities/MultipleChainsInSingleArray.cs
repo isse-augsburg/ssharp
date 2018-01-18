@@ -35,6 +35,8 @@ namespace ISSE.SafetyChecking.Utilities
 	{
 		// This list is deterministic
 
+		private const int ElementLimit = 100000000;
+
 		private struct ListChainElement
 		{
 			public T Element;
@@ -81,11 +83,15 @@ namespace ISSE.SafetyChecking.Utilities
 			}
 
 			var indexOfNewChainEntries = _chain.Count;
+			if (_chain.Count>ElementLimit)
+				throw new Exception("Too many elements in chain");
 			return indexOfNewChainEntries;
 		}
 
 		public int GetUnusedChainNumber()
 		{
+			if (_firstChainElementOfChainNumber.Count > ElementLimit)
+				throw new Exception("Too many chains");
 			return _firstChainElementOfChainNumber.Count;
 		}
 
