@@ -52,7 +52,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		public static void SetProbabilities(Model model)
 		{
-
 			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingFluidPreparation.DialyzingFluidPreparationPumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
 			model.HdMachine.DialyzingFluidDeliverySystem.PumpToBalanceChamber.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg5;
 			model.HdMachine.DialyzingFluidDeliverySystem.DialyzingUltraFiltrationPump.PumpDefect.ProbabilityOfOccurrence = _prob1Eneg3;
@@ -172,18 +171,32 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		private static IEnumerable CreateModelVariants()
 		{
-			Func<bool, Model> createVariant = (waterHeaterFaultIsPermanent) =>
+			Func<bool, Fault.DemandTypes, Model> createVariant = (waterHeaterFaultIsPermanent, demandType) =>
 			{
 				var previousValue = Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent;
 				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = waterHeaterFaultIsPermanent;
 				var model = new Model();
 				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = previousValue;
+				foreach (var fault in model.Faults)
+				{
+					if (fault.HasCustomDemand!=null)
+						fault.DemandType = demandType;
+				}
 				return model;
 			};
 
-			return from waterHeaterFaultIsPermanent in new []{true,false}
-		           let name = "WaterHeater"+ (waterHeaterFaultIsPermanent ? "Permanent":"Transient")
-				   select new TestCaseData(createVariant(waterHeaterFaultIsPermanent), name).SetName(name);
+			return from config in new []
+						{
+							new Tuple<bool, Fault.DemandTypes>(true, Fault.DemandTypes.OnCustom),
+							new Tuple<bool, Fault.DemandTypes>(false, Fault.DemandTypes.OnCustom),
+							new Tuple<bool, Fault.DemandTypes>(true, Fault.DemandTypes.OnStartOfStep)
+						}
+				   let waterHeaterFaultIsPermanent = config.Item1
+				   let demandType = config.Item2
+				   let name =
+						"WaterHeater"+ (waterHeaterFaultIsPermanent ? "Permanent":"Transient") +
+						"Demand"+ (demandType== Fault.DemandTypes.OnCustom ? "OnCustom": "OnStartOfStep")
+				   select new TestCaseData(createVariant(waterHeaterFaultIsPermanent, demandType), name).SetName(name);
 		}
 	}
 }

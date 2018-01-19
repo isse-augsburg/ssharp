@@ -30,7 +30,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public readonly BloodFlowInToOut MainFlow = new BloodFlowInToOut();
 
 		[Range(0, 8, OverflowBehavior.Error)]
-		public int SpeedOfMotor = 0;
+		public int PumpSpeed = 0;
 
 		[Provided]
 		public Blood SetMainFlow(Blood fromPredecessor)
@@ -42,7 +42,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		public virtual Suction SetMainFlowSuction(Suction fromSuccessor)
 		{
 			Suction toPredecessor;
-			toPredecessor.CustomSuctionValue = SpeedOfMotor; //Force suction set by motor
+			toPredecessor.CustomSuctionValue = PumpSpeed; //Force suction set by pump
 			toPredecessor.SuctionType=SuctionType.CustomSuction;
 			return toPredecessor;
 		}
@@ -51,6 +51,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.ExtracorporealBlo
 		{
 			MainFlow.UpdateBackward=SetMainFlowSuction;
 			MainFlow.UpdateForward=SetMainFlow;
+			BloodPumpDefect.HasCustomDemand = () => PumpSpeed != 0;
 		}
 
 		public readonly Fault BloodPumpDefect = new PermanentFault { DemandType = Fault.DemandTypes.OnStartOfStep };

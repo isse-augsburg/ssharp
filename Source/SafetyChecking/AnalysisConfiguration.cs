@@ -131,7 +131,7 @@ namespace ISSE.SafetyChecking
 			UseAtomarPropositionsAsStateLabels = true,
 			EnableStaticPruningOptimization = true,
 			LimitOfActiveFaults = null,
-			LtmcModelChecker = LtmcModelChecker.BuiltInDtmc,
+			LtmcModelChecker = LtmcModelChecker.BuiltInLtmc,
 			LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp
 		};
 

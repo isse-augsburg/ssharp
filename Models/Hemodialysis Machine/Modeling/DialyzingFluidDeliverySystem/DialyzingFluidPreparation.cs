@@ -73,9 +73,10 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			DialyzingFluidFlow.UpdateBackward=SetMainFlowSuction;
 			DialyzingFluidFlow.UpdateForward=SetMainFlow;
 			Concentrate.ReceivedForward=ReceivedConcentrate;
+			DialyzingFluidPreparationPumpDefect.HasCustomDemand = () => PumpSpeed != 0;
 		}
 
-		public readonly Fault DialyzingFluidPreparationPumpDefect = new PermanentFault { DemandType = Fault.DemandTypes.OnStartOfStep };
+		public readonly Fault DialyzingFluidPreparationPumpDefect = new PermanentFault { DemandType = Fault.DemandTypes.OnCustom };
 
 		[FaultEffect(Fault = nameof(DialyzingFluidPreparationPumpDefect))]
 		public class DialyzingFluidPreparationPumpDefectEffect : DialyzingFluidPreparation

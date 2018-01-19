@@ -34,6 +34,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling.DialyzingFluidDel
 			MainFlow = new DialyzingFluidFlowInToOut();
 			MainFlow.UpdateBackward = SetMainFlowSuction;
 			MainFlow.UpdateForward = SetMainFlow;
+			PumpDefect.HasCustomDemand = () => PumpSpeed != 0;
 		}
 
 		[Range(0, 8, OverflowBehavior.Error)]

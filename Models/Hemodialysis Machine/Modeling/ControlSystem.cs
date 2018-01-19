@@ -127,7 +127,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		public void StepOfMainTherapy()
 		{
 			TimeStepsLeft = (TimeStepsLeft > 0) ? (TimeStepsLeft - 1) : 0;
-			ArterialBloodPump.SpeedOfMotor = 4;
+			ArterialBloodPump.PumpSpeed = 4;
 			UltraFiltrationPump.PumpSpeed = 1;
 			PumpToBalanceChamber.PumpSpeed = 4;
 			DialyzingFluidPreparation.PumpSpeed = 4;
@@ -137,7 +137,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 		{
 			VenousTubingValve.CloseValve();
 			TimeStepsLeft = 0;
-			ArterialBloodPump.SpeedOfMotor = 0;
+			ArterialBloodPump.PumpSpeed = 0;
 			UltraFiltrationPump.PumpSpeed = 0;
 			PumpToBalanceChamber.PumpSpeed = 0;
 			DialyzingFluidPreparation.PumpSpeed = 0;

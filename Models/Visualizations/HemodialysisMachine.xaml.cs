@@ -247,13 +247,13 @@ namespace SafetySharp.CaseStudies.Visualizations
 		private void UpdateModelState()
 		{
 			// ArterialBloodPump
-			if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.SpeedOfMotor > 0 && _visualStateBloodPump!=LastVisualState.Enabled)
+			if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.PumpSpeed > 0 && _visualStateBloodPump!=LastVisualState.Enabled)
 			{
 				_visualStateBloodPump = LastVisualState.Enabled;
 				_animationBloodPumpEnabled.RepeatBehavior = RepeatBehavior.Forever;
 				_animationBloodPumpEnabled.Begin();
 			}
-			else if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.SpeedOfMotor == 0 && _visualStateBloodPump != LastVisualState.Disabled)
+			else if (Machine.ExtracorporealBloodCircuit.ArterialBloodPump.PumpSpeed == 0 && _visualStateBloodPump != LastVisualState.Disabled)
 			{
 				_visualStateBloodPump = LastVisualState.Disabled;
 				_animationBloodPumpEnabled.Stop();
