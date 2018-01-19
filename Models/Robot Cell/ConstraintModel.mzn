@@ -12,7 +12,7 @@
 %  *) an applied capability
 %  *) a transportation action (of a cart)
 
-/* Example usage 
+/* Example usage (OUTDATED, INCORRECT)
 task
 
    D   D  I     T  T
@@ -46,15 +46,6 @@ agent id shall be collected into one role
 
 include "globals.mzn"; % minizinc globals libary
 
-
-% ----------------------------------------
-% types
-% ----------------------------------------
-
-% replaces enumeration type
-%int: D = 1; int: I = 2; int: T = 3;
-%set of int: CAP = {D, I, T};
-
 % ----------------------------------------
 % input data 
 % ----------------------------------------
@@ -69,10 +60,13 @@ set of int: TASK_IND_0 = TASK_IND union {0}; % includes the zero for the first p
 int: noAgents;
 set of int: AGENT = 1..noAgents;
 array[AGENT] of set of CAP: capabilities;
-array[AGENT] of bool: isCart;
 
-% connectivity (for now, any cart may connect any robots and that's the only option for mobility)
-array[AGENT,AGENT] of bool: isConnected;% = array2d(AGENT,AGENT, [ isCart[a1] xor isCart[a2] | a1 in AGENT, a2 in AGENT]);
+% connectivity
+array[AGENT,AGENT] of bool: isConnected;
+
+% producers and consumers (possible first / last agents)
+array[AGENT] of bool: isProducer;
+array[AGENT] of bool: isConsumer;
 
 % ----------------------------------------
 % decision variables  
@@ -113,6 +107,10 @@ constraint forall(s in TASK_IND) (task[s] in capabilities[taskAssigned[s]]);
 
 % connect adjacent role segments of different agents 
 constraint forall(r in 1..lastRoleSegment-1) (agent[r] != agent[r+1] -> isConnected[agent[r], agent[r+1]]);
+
+% first and last agent valid:
+constraint isProducer[agent[0]];
+constraint isConsumer[agent[lastRoleSegment]];
 
 % ----------------------------------------
 % objective function (make plans short)

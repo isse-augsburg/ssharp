@@ -41,29 +41,29 @@ namespace SafetySharp.Odp.Reconfiguration
 			_constraintsModel = constraintsModel;
 		}
 
-		public Task<Configuration?> Find(TaskFragment taskFragment, ISet<BaseAgent> availableAgents)
+		public Task<Configuration?> Find(TaskFragment taskFragment, ISet<BaseAgent> availableAgents, Predicate<BaseAgent> isProducer, Predicate<BaseAgent> isConsumer)
 		{
 			var agents = availableAgents.ToArray();
 
 			lock (MiniZinc)
 			{
-				var inputFile = CreateDataFile(taskFragment.Capabilities.ToArray(), agents);
+				var inputFile = CreateDataFile(taskFragment.Capabilities.ToArray(), agents, isProducer, isConsumer);
 				var outputFile = ExecuteMiniZinc(inputFile);
 				return Task.FromResult(ParseSolution(outputFile, agents));
 			}
 		}
 
-		private string CreateDataFile(ICapability[] capabilities, BaseAgent[] availableAgents)
+		private string CreateDataFile(ICapability[] capabilities, BaseAgent[] availableAgents, Predicate<BaseAgent> isProducer, Predicate<BaseAgent> isConsumer)
 		{
 			var inputFile = $"data{++_counter}.dzn";
 			using (var writer = new StreamWriter(inputFile))
 			{
-				WriteInputData(capabilities, availableAgents, writer);
+				WriteInputData(capabilities, availableAgents, isProducer, isConsumer, writer);
 			}
 			return inputFile;
 		}
 
-		protected abstract void WriteInputData(ICapability[] capabilities, BaseAgent[] availableAgents, StreamWriter writer);
+		protected abstract void WriteInputData(ICapability[] capabilities, BaseAgent[] availableAgents, Predicate<BaseAgent> isProducer, Predicate<BaseAgent> isConsumer, StreamWriter writer);
 
 		private string ExecuteMiniZinc(string inputFile)
 		{
@@ -112,5 +112,17 @@ namespace SafetySharp.Odp.Reconfiguration
 			return line.Substring(openBrace + 1, closeBrace - openBrace - 1).Split(',')
 					   .Select(n => int.Parse(n.Trim()) - 1);
 		}
+
+		#region input file helpers
+
+		protected static string Array<T>(IEnumerable<T> values) => "[" + string.Join(",", values) + "]";
+		protected static string Array(IEnumerable<bool> values) => Array(values.Select(x => x.ToString().ToLower()));
+
+		protected static string Set<T>(IEnumerable<T> values) => "{" + string.Join(",", values) + "}";
+
+		protected static string Matrix<T>(IEnumerable<IEnumerable<T>> values) => "[|" + string.Join("\n|", values.Select(row => string.Join(",", row))) + "|]";
+		protected static string Matrix(IEnumerable<IEnumerable<bool>> values) => Matrix(values.Select(row => row.Select(x => x.ToString().ToLower())));
+
+		#endregion
 	}
 }

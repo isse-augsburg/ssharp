@@ -40,11 +40,13 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		protected override int[] FindDistribution(TaskFragment taskFragment, BaseAgent[] availableAgents)
 		{
-			var identifiers = Enumerable.Range(0, availableAgents.Length).ToArray();
-
 			var emptyPath = new int[taskFragment.Length];
+			if (taskFragment.Length == 0)
+				return emptyPath;
+
+			var identifiers = Enumerable.Range(0, availableAgents.Length).ToArray();
 			var paths = (from agent in identifiers
-						 where CanSatisfyNext(taskFragment, availableAgents, emptyPath, 0, agent)
+						 where _precedingProducer[agent] != -1 && CanSatisfyNext(taskFragment, availableAgents, emptyPath, 0, agent)
 						 select new[] { agent }).ToArray();
 
 			if (paths.Length == 0)
@@ -66,12 +68,16 @@ namespace SafetySharp.Odp.Reconfiguration
 					return null;
 			}
 
-			return paths.MinBy(PathCosts);
+			return paths
+				.Where(path => _succedingConsumer[path[path.Length - 1]] != -1)
+				.MinBy(PathCosts);
 		}
 
 		protected virtual int PathCosts(int[] path)
 		{
-			return path.Zip(path.Skip(1), (from, to) => _costMatrix[from, to]).Sum();
+			return path.Zip(path.Skip(1), (from, to) => _costMatrix[from, to]).Sum()
+				+ _costMatrix[_precedingProducer[path[0]], path[0]]
+				+ _costMatrix[path[path.Length - 1], _succedingConsumer[path[path.Length - 1]]];
 		}
 	}
 }

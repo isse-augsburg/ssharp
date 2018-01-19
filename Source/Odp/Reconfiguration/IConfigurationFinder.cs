@@ -35,13 +35,15 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// </summary>
 		/// <param name="taskFragment">The task fragment for which a configuration shall be found.</param>
 		/// <param name="availableAgents">The agents that may partake in the configuration.</param>
+		/// <param name="isProducer">A predicate that identifies which <paramref name="availableAgents"/> may occur as first agent in the resource flow.</param>
+		/// <param name="isConsumer">A predicate that identifies which <paramref name="availableAgents"/> may occur as last agent in the resource flow.</param>
 		/// <returns>
 		///   A struct containing a capability distribution (a sequence of agents with the capabilities in the given <paramref name="taskFragment"/>)
 		///   and a matching resource flow (a sequence of connected agents).
 		///   Or null, if no configuration is found.
 		/// </returns>
 		[NotNull]
-		Task<Configuration?> Find(TaskFragment taskFragment, [NotNull, ItemNotNull] ISet<BaseAgent> availableAgents);
+		Task<Configuration?> Find(TaskFragment taskFragment, [NotNull, ItemNotNull] ISet<BaseAgent> availableAgents, [NotNull] Predicate<BaseAgent> isProducer, [NotNull] Predicate<BaseAgent> isConsumer);
 	}
 
 	/// <summary>
@@ -49,8 +51,10 @@ namespace SafetySharp.Odp.Reconfiguration
 	/// </summary>
 	public struct Configuration
 	{
+		[NotNull, ItemNotNull]
 		public BaseAgent[] Distribution { get; }
 
+		[NotNull, ItemNotNull]
 		public BaseAgent[] ResourceFlow { get; }
 
 		public Configuration([NotNull, ItemNotNull] BaseAgent[] distribution, [NotNull, ItemNotNull] BaseAgent[] resourceFlow)
