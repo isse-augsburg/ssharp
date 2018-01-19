@@ -45,43 +45,49 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 				var robotCount = routes.SelectMany(r => new[] { r.Item1, r.Item2 }).Max() + 1;
 			    var connected = new bool[robotCount, robotCount]; // initialized to false
 
-                // Routes are bidirectional, reflexive routes are ignored.
-                // To improve efficiency, we can thus only compute routes
-                // (r1, r2) where r1 < r2.
-
                 // direct routes
                 foreach (var route in routes)
-			    {
-                    var robot1 = Math.Min(route.Item1, route.Item2);
-			        var robot2 = Math.Max(route.Item1, route.Item2);
+				{
+					var robot1 = route.Item1;
+					var robot2 = route.Item2;
 
-			        connected[robot1, robot2] = true;
-			        yield return Tuple.Create(robot1, robot2);
-			    }
+					connected[robot1, robot2] = true;
+					yield return Tuple.Create(robot1, robot2);
+
+					// routes are bidirectional
+					connected[robot2, robot1] = true;
+					yield return Tuple.Create(robot2, robot1);
+				}
 
                 // Floyd-Warshall algorithm
                 for (var link = 0; link < robotCount; ++link)
                 {
                     for (var start = 0; start < robotCount; ++start)
                     {
-                        for (var end = start + 1; end < robotCount; ++end)
+                        for (var end = 0; end < robotCount; ++end)
                         {
-                            if (connected[start, end] || !connected[start, link] || !connected[link, end])
+                            if (start == end || connected[start, end]) // no route necessary
                                 continue;
-                            connected[start, end] = true;
-                            yield return Tuple.Create(start, end);
-                        }
+
+							if ((connected[start, link] || start == link) && (connected[link, end] || link == end))
+							{
+								connected[start, end] = true;
+								yield return Tuple.Create(start, end);
+							}
+						}
                     }
                 }
             }
 
-            public static Route[] ToRoutes(Tuple<int, int>[] routeSpecifications, Model model)
+            public static Route[] ToRoutes(IEnumerable<Tuple<int, int>> routeSpecifications, Model model)
 			{
-				return routeSpecifications.Select(spec => new Route(model.Robots[spec.Item1], model.Robots[spec.Item2]))
+				return routeSpecifications
+					.Distinct()
+					.Select(spec => new Route(model.Robots[spec.Item1], model.Robots[spec.Item2]))
 					.ToArray();
 			}
 
-			public static void Connect(Agent agent, Tuple<int, int>[] routes, Model model)
+			public static void Connect(Agent agent, IEnumerable<Tuple<int, int>> routes, Model model)
 			{
 				foreach (var route in routes)
 				{
