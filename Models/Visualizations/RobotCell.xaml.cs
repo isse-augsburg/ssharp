@@ -10,6 +10,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 {
     using CaseStudies.RobotCell.Modeling;
     using CaseStudies.RobotCell.Modeling.Controllers;
+    using Modeling;
     using Odp;
     using Odp.Reconfiguration;
 
@@ -29,6 +30,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         private List<string> doneCapabilities = new List<string>();
         private ListBox lboxTask = new ListBox();
         private List<TextBox> routes = new List<TextBox>();
+        private int resourceCounter;
 
         public RobotCell()
         {
@@ -53,16 +55,20 @@ namespace SafetySharp.CaseStudies.Visualizations
             _builder.AddRobot(ModelBuilderHelper.Drill, ModelBuilderHelper.Consume);
             
             _builder.AddCart(ModelBuilderHelper.Route(0, 1), ModelBuilderHelper.Route(0, 2));
-            _builder.AddCart(ModelBuilderHelper.Route(1, 3), ModelBuilderHelper.Route(1, 4), ModelBuilderHelper.Route(1, 2));
+            _builder.AddCart(ModelBuilderHelper.Route(1, 3), ModelBuilderHelper.Route(1, 4), ModelBuilderHelper.Route(1, 2), ModelBuilderHelper.Route(2, 4));
             
             _builder.ChooseController<FastController>();
             _builder.CentralReconfiguration();
             
             Model = _builder.Build();
+            Model.Faults.SuppressActivations();
             
             //Initialize/Update task
             _task = UpdateTask();
             PrintTask();
+
+            //Initialize resource counter
+            resourceCounter = _model.Resources.Count;
 
             SimulationControls.MaxSpeed = 64;
             SimulationControls.ChangeSpeed(1);
@@ -227,14 +233,18 @@ namespace SafetySharp.CaseStudies.Visualizations
             }
                         
             //Reset the selected task capabilities
-            for (int i = doneCapabilities.Count - 1; i >= 0; i--) {
-                doneCapabilities.RemoveAt(i);
-            }
-            lboxTask.SelectedItems.Clear();
+            ClearTaskDisplay();
         }
 
         private void UpdateModelState()
         {
+            //Check if a new resource is processed
+            if (resourceCounter != _model.Resources.Count)
+            {
+                ClearTaskDisplay();
+                resourceCounter--;
+            }
+
             foreach (var robot in _model.RobotAgents) {
                 _robots[robot.Id].Update(robot);
             }
@@ -284,7 +294,9 @@ namespace SafetySharp.CaseStudies.Visualizations
         //Currently it could be called "InitializeTask", but it's built for eventually more workpieces, thus more tasks
         private List<string> UpdateTask()
         {
-            Task task = (Task)_model.Resources.First().Task;
+            Task task = new Task();
+            if (_model.Resources.Count > 0)
+                task = (Task)_model.Resources.First().Task;
             ICapability[] capabilities = task.RequiredCapabilities;
             List<string> stringCapabilities = new List<string>();
 
@@ -313,9 +325,9 @@ namespace SafetySharp.CaseStudies.Visualizations
             for (int i = 0; i < _task.Count; i++)
             {
                 if (i < _task.Count - 1)
-                    str += _task.ElementAt(i).ToString() + ", ";
+                    str += _task.ElementAt(i) + ", ";
                 else
-                    str += _task.ElementAt(i).ToString();
+                    str += _task.ElementAt(i);
             }
             Console.WriteLine(str);
         }
@@ -356,11 +368,12 @@ namespace SafetySharp.CaseStudies.Visualizations
                 }
                 Console.WriteLine();
 
-                if (cap == _task.ElementAt(_task.Count - 2))
-                {
-                    Console.WriteLine("COMPLETED!!!");
-                    break;
-                }
+                if (_task.Count > 0)
+                    if (cap == _task.ElementAt(_task.Count - 2))
+                    {
+                        Console.WriteLine("COMPLETED!!!");
+                        break;
+                    }
             }
         }
 
@@ -375,12 +388,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         public void PrintCartRoutes()
         {
-            foreach (var child in visualizationArea.Children)
-            {
-                if (child.GetType() == typeof(ListBox))
-                    Console.WriteLine("\nType is ListBox\n");
-            }
-
+            int j = 0;
             foreach (var cart in _carts.Values)
             {
                 TextBox routeBox = routes.ElementAt((int)cart.GetCartAgent().Id % _carts.Count);
@@ -399,19 +407,32 @@ namespace SafetySharp.CaseStudies.Visualizations
 
                 routeBox.Text = "Routes:\n";
                 Console.WriteLine();
-
+                
                 foreach (var route in routesPlant)
                 {
                     var nameR1 = route.Robot1.Name;
                     var nameR2 = route.Robot2.Name;
-                    Console.WriteLine("Route {0} for the cart with the id " + agent.Id + " is: " + nameR1 + " to " + nameR2, i + 1);
-                    routeBox.Text += cart.CreateRouteString(nameR1, nameR2);
+
+                    if ((i + j) % 3 == 0)
+                        routeBox.Text += cart.CreateRouteString(nameR1, nameR2) + "\n";
+                    else
+                        routeBox.Text += cart.CreateRouteString(nameR1, nameR2);
+
                     i++;
+                    j++;
                 }
 
                 routeBox.IsReadOnly = true;
-                Console.WriteLine("Final routesTxt string: " + routeBox.Text);
             }            
+        }
+
+        public void ClearTaskDisplay()
+        {
+            for (int i = doneCapabilities.Count - 1; i >= 0; i--)
+            {
+                doneCapabilities.RemoveAt(i);
+            }
+            lboxTask.SelectedItems.Clear();
         }
     }
 }

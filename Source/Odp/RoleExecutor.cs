@@ -108,10 +108,10 @@ namespace SafetySharp.Odp
 		[NotNull]
 		public IEnumerable<ICapability> ExecutionState => Task.RequiredCapabilities.Take(_role.PreCondition.StateLength + _executionState);
 
-		/// <summary>
-		///  Checks if the execution of the role is complete and the resource can be handed over to the next agent.
-		/// </summary>
-		public bool CanHandover => IsExecuting && IsCompleted && Output != null && Output.CanReceive(Agent, Role.Value.PostCondition);
+        /// <summary>
+        ///  Checks if the execution of the role is complete and the resource can be handed over to the next agent.
+        /// </summary>
+        public bool CanHandover => IsExecuting && IsCompleted && Output != null && Output.CanReceive(Agent, Role.Value.PostCondition);
 
 		#endregion
 

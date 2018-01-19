@@ -90,7 +90,9 @@ namespace SafetySharp.Odp
 
 		protected virtual async Task UpdateAsync()
 		{
-			Debug.WriteLine("Agent {0}: Observe", Id);
+            Debug.WriteLine($"Agent {Id} Outputs=[ { string.Join(",", Outputs.Select(x => x.Id))} ] Inputs=[{ string.Join(",", Inputs.Select(x => x.Id))}]");
+            Debug.WriteLine($"Agent {Id} Outputs=[ { string.Join(",", _outputs.Select(x => x.Id))} ] Inputs=[{ string.Join(",", _inputs.Select(x => x.Id))}]");
+            Debug.WriteLine("Agent {0}: Observe", Id);
 			await Observe();
 			Debug.WriteLine("Agent {0}: Work", Id);
 			Work();

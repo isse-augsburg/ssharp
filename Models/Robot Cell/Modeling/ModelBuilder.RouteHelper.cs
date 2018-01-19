@@ -85,8 +85,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 			{
 				foreach (var route in routes)
 				{
-					model.RobotAgents[route.Item1].BidirectionallyConnect(agent);
-					model.RobotAgents[route.Item2].BidirectionallyConnect(agent);
+                    model.RobotAgents[route.Item1].BidirectionallyConnect(agent);
+                    //model.RobotAgents[route.Item1].Connect(agent);
+                    model.RobotAgents[route.Item2].BidirectionallyConnect(agent);
+                    //agent.Connect(model.RobotAgents[route.Item2]);
 				}
 			}
 		}

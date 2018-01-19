@@ -1,11 +1,8 @@
-﻿Fürs Testen benutze ich ReSharper
-
-- Teste den einzelnen Fault
-
-- Ich kann auch nach dem Fehler suchen:
-
-Notiz:
-Vielleicht liegt es an CapabilitiesToApply (in der kein Consume drin ist), dass die resource vor "Consume" verworfen wird?
+﻿Notiz:
+- Routenneukonfiguration klappt nur unidirektional (ungefähr)
 
 Am Ende evtl. noch:
 - Faults anzeigen (Welcher Fault?)
+
+TODO:
+- Consume Capability is not selected
