@@ -53,7 +53,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			configs.RecordInvolvement(availableAgents); // central controller uses all available agents!
 			configs.RemoveAllRoles(task, Agents);
 
-			var result = await _configurationFinder.Find(new HashSet<BaseAgent>(availableAgents), task.RequiredCapabilities);
+			var result = await _configurationFinder.Find(TaskFragment.FromTask(task), new HashSet<BaseAgent>(availableAgents));
 			if (result.HasValue)
 				ExtractConfigurations(configs, task, result.Value.Distribution, result.Value.ResourceFlow);
 			else

@@ -38,19 +38,19 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 		}
 
-		protected override int[] FindDistribution(ICapability[] capabilities, BaseAgent[] availableAgents)
+		protected override int[] FindDistribution(TaskFragment taskFragment, BaseAgent[] availableAgents)
 		{
 			var identifiers = Enumerable.Range(0, availableAgents.Length).ToArray();
 
-			var emptyPath = new int[capabilities.Length];
+			var emptyPath = new int[taskFragment.Length];
 			var paths = (from agent in identifiers
-						 where CanSatisfyNext(capabilities, availableAgents, emptyPath, 0, agent)
+						 where CanSatisfyNext(taskFragment, availableAgents, emptyPath, 0, agent)
 						 select new[] { agent }).ToArray();
 
 			if (paths.Length == 0)
 				return null;
 
-			for (var i = 1; i < capabilities.Length; ++i)
+			for (var i = 1; i < taskFragment.Length; ++i)
 			{
 				paths = (from path in paths
 						 from agent in identifiers
@@ -58,7 +58,7 @@ namespace SafetySharp.Odp.Reconfiguration
 						 // if agent is reachable from the previous path
 						 where _pathMatrix[last, agent] != -1
 							   // and agent can satisfy the next required capability
-							   && CanSatisfyNext(capabilities, availableAgents, path, i, agent)
+							   && CanSatisfyNext(taskFragment, availableAgents, path, i, agent)
 						 select path.Concat(new[] { agent }).ToArray()
 				).ToArray();
 

@@ -41,13 +41,13 @@ namespace SafetySharp.Odp.Reconfiguration
 			_constraintsModel = constraintsModel;
 		}
 
-		public Task<Configuration?> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities)
+		public Task<Configuration?> Find(TaskFragment taskFragment, ISet<BaseAgent> availableAgents)
 		{
 			var agents = availableAgents.ToArray();
 
 			lock (MiniZinc)
 			{
-				var inputFile = CreateDataFile(capabilities, agents);
+				var inputFile = CreateDataFile(taskFragment.Capabilities.ToArray(), agents);
 				var outputFile = ExecuteMiniZinc(inputFile);
 				return Task.FromResult(ParseSolution(outputFile, agents));
 			}

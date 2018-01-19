@@ -33,11 +33,11 @@ namespace SafetySharp.CaseStudies.PillProduction.Modeling
 		public FastConfigurationFinder() : base(preferCapabilityAccumulation: true) { }
 
 		// override necessary due to ingredient amounts
-		protected override bool CanSatisfyNext(ICapability[] requiredCapabilities, BaseAgent[] availableAgents, int[] path, int prefixLength, int station)
+		protected override bool CanSatisfyNext(TaskFragment taskFragment, BaseAgent[] availableAgents, int[] path, int prefixLength, int station)
 		{
 			var capabilities = from index in Enumerable.Range(0, prefixLength + 1)
 							   where index == prefixLength || path[index] == station
-							   select requiredCapabilities[index];
+							   select taskFragment[index];
 			return capabilities.ToArray().IsSatisfiable(availableAgents[station].AvailableCapabilities);
 		}
 	}

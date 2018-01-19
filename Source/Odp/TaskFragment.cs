@@ -165,6 +165,17 @@ namespace SafetySharp.Odp
 			return new TaskFragment(role.Task, role.PreCondition.StateLength, role.PostCondition.StateLength - 1);
 		}
 
+		/// <summary>
+		///   Returns the task fragment that encompasses the entire given <paramref name="task"/>.
+		/// </summary>
+		[Pure]
+		public static TaskFragment FromTask([NotNull] ITask task)
+		{
+			if (task == null)
+				throw new ArgumentNullException(nameof(task));
+			return new TaskFragment(task, 0, task.RequiredCapabilities.Length - 1);
+		}
+
 		#region monoid operations
 
 		/// <summary>

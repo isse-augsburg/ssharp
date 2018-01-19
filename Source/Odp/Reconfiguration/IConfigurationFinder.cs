@@ -31,16 +31,17 @@ namespace SafetySharp.Odp.Reconfiguration
 	public interface IConfigurationFinder
 	{
 		/// <summary>
-		///   Finds a configuration for the given <paramref name="capabilities"/> among the given <paramref name="availableAgents"/>.
+		///   Finds a configuration for the given <paramref name="taskFragment"/> using the given <paramref name="availableAgents"/>.
 		/// </summary>
+		/// <param name="taskFragment">The task fragment for which a configuration shall be found.</param>
 		/// <param name="availableAgents">The agents that may partake in the configuration.</param>
-		/// <param name="capabilities">The sequence of capabilities to be fulfilled by the configuration.</param>
 		/// <returns>
-		///   A struct containing a capability distribution (a sequence of agents with the given <paramref name="capabilities"/>) and a matching resource flow
-		///   (a sequence of connected agents). Or null, if no configuration is found.
+		///   A struct containing a capability distribution (a sequence of agents with the capabilities in the given <paramref name="taskFragment"/>)
+		///   and a matching resource flow (a sequence of connected agents).
+		///   Or null, if no configuration is found.
 		/// </returns>
 		[NotNull]
-		Task<Configuration?> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities);
+		Task<Configuration?> Find(TaskFragment taskFragment, [NotNull, ItemNotNull] ISet<BaseAgent> availableAgents);
 	}
 
 	/// <summary>

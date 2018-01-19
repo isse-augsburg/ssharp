@@ -50,12 +50,12 @@ namespace SafetySharp.Odp.Reconfiguration
 			PreferCapabilityAccumulation = preferCapabilityAccumulation;
 		}
 
-		public Task<Configuration?> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities)
+		public Task<Configuration?> Find(TaskFragment taskFragment, ISet<BaseAgent> availableAgents)
 		{
 			var agents = availableAgents.ToArray();
 			CalculateShortestPaths(agents);
 
-			var distribution = FindDistribution(capabilities, agents);
+			var distribution = FindDistribution(taskFragment, agents);
 			if (distribution == null)
 				return Task.FromResult<Configuration?>(null);
 
@@ -113,16 +113,16 @@ namespace SafetySharp.Odp.Reconfiguration
 			}
 		}
 
-		protected virtual int[] FindDistribution(ICapability[] capabilities, BaseAgent[] availableAgents)
+		protected virtual int[] FindDistribution(TaskFragment taskFragment, BaseAgent[] availableAgents)
 		{
-			var path = new int[capabilities.Length];
+			var path = new int[taskFragment.Length];
 
 			for (var firstAgent = 0; firstAgent < availableAgents.Length; ++firstAgent)
 			{
-				if (CanSatisfyNext(capabilities, availableAgents, path, 0, firstAgent))
+				if (CanSatisfyNext(taskFragment, availableAgents, path, 0, firstAgent))
 				{
 					path[0] = firstAgent;
-					if (FindDistribution(capabilities, path, 1, availableAgents))
+					if (FindDistribution(taskFragment, path, 1, availableAgents))
 						return path;
 				}
 			}
@@ -130,19 +130,19 @@ namespace SafetySharp.Odp.Reconfiguration
 			return null;
 		}
 
-		private bool FindDistribution(ICapability[] capabilities, int[] path, int prefixLength, BaseAgent[] availableAgents)
+		private bool FindDistribution(TaskFragment taskFragment, int[] path, int prefixLength, BaseAgent[] availableAgents)
 		{
 			// termination case: the path is already complete
-			if (prefixLength == capabilities.Length)
+			if (prefixLength == taskFragment.Length)
 				return true;
 
 			var last = path[prefixLength - 1];
 
 			// special handling: see if the last agent can't do the next capability as well
-			if (PreferCapabilityAccumulation && CanSatisfyNext(capabilities, availableAgents, path, prefixLength, last))
+			if (PreferCapabilityAccumulation && CanSatisfyNext(taskFragment, availableAgents, path, prefixLength, last))
 			{
 				path[prefixLength] = last;
-				if (FindDistribution(capabilities, path, prefixLength + 1, availableAgents))
+				if (FindDistribution(taskFragment, path, prefixLength + 1, availableAgents))
 					return true;
 			}
 			else // otherwise check connected agents
@@ -150,10 +150,10 @@ namespace SafetySharp.Odp.Reconfiguration
 				for (var next = 0; next < availableAgents.Length; ++next) // go through all agents
 				{
 					// if connected to last agent and can fulfill next capability
-					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(capabilities, availableAgents, path, prefixLength, next))
+					if (_pathMatrix[last, next] != -1 && CanSatisfyNext(taskFragment, availableAgents, path, prefixLength, next))
 					{
 						path[prefixLength] = next; // try a path over next
-						if (FindDistribution(capabilities, path, prefixLength + 1, availableAgents)) // if there is such a path, return true
+						if (FindDistribution(taskFragment, path, prefixLength + 1, availableAgents)) // if there is such a path, return true
 							return true;
 					}
 				}
@@ -162,9 +162,9 @@ namespace SafetySharp.Odp.Reconfiguration
 			return false; // there is no valid path with the given prefix
 		}
 
-		protected virtual bool CanSatisfyNext(ICapability[] capabilities, BaseAgent[] availableAgents, int[] path, int prefixLength, int agent)
+		protected virtual bool CanSatisfyNext(TaskFragment taskFragment, BaseAgent[] availableAgents, int[] path, int prefixLength, int agent)
 		{
-			return availableAgents[agent].AvailableCapabilities.Contains(capabilities[prefixLength]);
+			return availableAgents[agent].AvailableCapabilities.Contains(taskFragment[prefixLength]);
 		}
 
 		protected virtual IEnumerable<int> FindResourceFlow(int[] distribution, BaseAgent[] availableAgents)
