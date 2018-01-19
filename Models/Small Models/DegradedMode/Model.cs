@@ -129,6 +129,18 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 			Console.Write($"Probability of hazard: {result}");
 		}
 
+
+		[Test]
+		public void CalculateRangeHazardLtmdp()
+		{
+			var model = new DegradedModeModel();
+			model.System.SignalDetector1.F1.ProbabilityOfOccurrence = null;
+
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = true;
+			var result = SafetySharpModelChecker.CalculateProbabilityRangeToReachStateBounded(model, model.System.HazardActive, 50);
+			Console.Write($"Probability of hazard: {result}");
+		}
+
 		[Test]
 		public void CalculateHazardProbabilityWhenF1AlwaysOccurs()
 		{

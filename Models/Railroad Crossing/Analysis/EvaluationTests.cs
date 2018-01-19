@@ -206,11 +206,45 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			SetProbabilities(model);
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = 1;
+			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = false;
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision, 50);
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = Int32.MaxValue;
+			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = true;
 			Console.Write($"Probability of hazard: {result}");
 		}
-		
+
+
+		[Test]
+		public void CalculateHazardSingleCoreAllFaults()
+		{
+			var model = new Model();
+			SetProbabilities(model);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 10);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(formulaToCheck);
+				Console.Write($"Probability of formulaToCheck: {result}");
+			}
+		}
+
 
 
 		[Test]
@@ -267,6 +301,38 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+		}
+
+		[Test]
+		public void CalculateLtmdpWithoutStaticPruningSingleCore()
+		{
+			var model = new Model();
+			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 10);
+			markovChainGenerator.AddFormulaToCheck(model.PossibleCollision);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbabilityRange(formulaToCheck);
+				Console.Write($"Probability of formulaToCheck: {result}");
+			}
 		}
 
 		[Test]

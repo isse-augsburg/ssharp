@@ -194,9 +194,46 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 		{
 			var model = new DegradedModeModel();
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = 1;
+			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = false;
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.System.HazardActive, 50);
 			SafetySharpModelChecker.TraversalConfiguration.CpuCount = Int32.MaxValue;
+			SafetySharpModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
+			SafetySharpModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = true;
 			Console.Write($"Probability of hazard: {result}");
+		}
+
+
+		[Test]
+		public void CalculateHazardSingleCoreAllFaults()
+		{
+			var model = new DegradedModeModel();
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			var formula = new ExecutableStateFormula(() => model.System.HazardActive);
+			var formulaToCheck = new BoundedUnaryFormula(formula, UnaryOperator.Finally, 50);
+			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			markovChainGenerator.Configuration.CpuCount = Int32.MaxValue;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(formulaToCheck);
+				Console.Write($"Probability of hazard: {result}");
+			}
 		}
 
 
@@ -251,6 +288,39 @@ namespace SafetySharp.CaseStudies.SmallModels.DegradedMode
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+		}
+
+		[Test]
+		public void CalculateLtmdpWithoutStaticPruningSingleCore()
+		{
+			var model = new DegradedModeModel();
+			model.System.SignalDetector1.F1.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			var formula = new ExecutableStateFormula(() => model.System.HazardActive);
+			var formulaToCheck = new BoundedUnaryFormula(formula, UnaryOperator.Finally, 50);
+			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbabilityRange(formulaToCheck);
+				Console.Write($"Probability of hazard: {result}");
+			}
 		}
 
 		[Test]

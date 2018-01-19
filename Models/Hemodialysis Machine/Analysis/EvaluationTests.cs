@@ -250,11 +250,67 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			markovChainGenerator.Configuration.CpuCount = 1;
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
-			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6));
-			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6));
+			var unsuccessful = new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6);
+			var contamination = new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6);
+			markovChainGenerator.AddFormulaToCheck(unsuccessful);
+			markovChainGenerator.AddFormulaToCheck(contamination);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
-			var markovChain = markovChainGenerator.GenerateMarkovChain();
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(unsuccessful);
+				Console.Write($"Probability of collision: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(contamination);
+				Console.Write($"Probability of collision: {result}");
+			}
 		}
+		
+		[Test]
+		public void CalculateHazardSingleCoreAllFaults()
+		{
+			var model = new Model();
+			SetProbabilities(model);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			var unsuccessful = new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6);
+			var contamination = new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6);
+			markovChainGenerator.AddFormulaToCheck(unsuccessful);
+			markovChainGenerator.AddFormulaToCheck(contamination);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(unsuccessful);
+				Console.Write($"Probability of unsuccessful: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(contamination);
+				Console.Write($"Probability of contamination: {result}");
+			}
+		}
+
+
 
 		[Test]
 		public void CalculateBloodNotCleanedAndDialyzingFinishedSingleCore()
@@ -378,6 +434,47 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+		}
+
+
+		[Test]
+		public void CalculateLtmdpWithoutStaticPruningSingleCore()
+		{
+			var model = new Model();
+			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var unsuccessful = new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6);
+			var contamination = new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6);
+			markovChainGenerator.AddFormulaToCheck(unsuccessful);
+			markovChainGenerator.AddFormulaToCheck(contamination);
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbabilityRange(unsuccessful);
+				Console.Write($"Probability of unsuccessful: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbabilityRange(contamination);
+				Console.Write($"Probability of contamination: {result}");
+			}
 		}
 
 		[Test]

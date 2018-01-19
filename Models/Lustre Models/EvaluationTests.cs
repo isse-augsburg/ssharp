@@ -150,9 +150,37 @@ namespace Lustre_Models
 		public void CalculateHazardSingleCore()
 		{
 			LustreModelChecker.TraversalConfiguration.CpuCount = 1;
+			LustreModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
+			LustreModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = false;
 			var result = LustreModelChecker.CalculateProbabilityToReachStateBounded("pressureTank", _faults, _hazard, 25);
 			LustreModelChecker.TraversalConfiguration.CpuCount = Int32.MaxValue;
+			LustreModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
+			LustreModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = true;
 			Console.Write($"Probability of hazard: {result}");
+		}
+
+		[Test]
+		public void CalculateHazardSingleCoreAllFaults()
+		{
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			var formulaToCheck = new BoundedUnaryFormula(_hazard, UnaryOperator.Finally, 25);
+			markovChainGenerator.AddFormulaToCheck(_hazard);
+			foreach (var fault in _faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(formulaToCheck);
+				Console.Write($"Probability of formulaToCheck: {result}");
+			}
 		}
 
 
@@ -202,6 +230,35 @@ namespace Lustre_Models
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 			_faults[1].ProbabilityOfOccurrence = oldProbability;
+		}
+
+		[Test]
+		public void CalculateLtmdpWithoutStaticPruningSingleCore()
+		{
+			var oldProbability = _faults[1].ProbabilityOfOccurrence;
+			_faults[1].ProbabilityOfOccurrence = null;
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			markovChainGenerator.AddFormulaToCheck(_hazard);
+			var formulaToCheck = new BoundedUnaryFormula(_hazard, UnaryOperator.Finally, 25);
+			foreach (var fault in _faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+			_faults[1].ProbabilityOfOccurrence = oldProbability;
+
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbabilityRange(formulaToCheck);
+				Console.Write($"Probability of formulaToCheck: {result}");
+			}
 		}
 
 		[Test]

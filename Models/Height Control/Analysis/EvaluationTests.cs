@@ -329,11 +329,26 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.CpuCount = 1;
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
-			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
-			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
+			var collision = new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50);
+			var falseAlarm = new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50);
+			markovChainGenerator.AddFormulaToCheck(collision);
+			markovChainGenerator.AddFormulaToCheck(falseAlarm);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
-			var markovChain = markovChainGenerator.GenerateMarkovChain();
+			markovChainGenerator.Configuration.CpuCount = Int32.MaxValue;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+			
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(collision);
+				Console.Write($"Probability of collision: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(falseAlarm);
+				Console.Write($"Probability of falseAlarm: {result}");
+			}
 		}
 
 		[Test]
@@ -460,6 +475,50 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}
+
+		[Test]
+		public void CalculateLtmdpWithoutStaticPruningSingleCore()
+		{
+			var model = Model.CreateOriginal();
+			model.VehicleSet.LeftHV.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			var collision = new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50);
+			var falseAlarm = new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50);
+			markovChainGenerator.AddFormulaToCheck(collision);
+			markovChainGenerator.AddFormulaToCheck(falseAlarm);
+			/*
+			foreach (var fault in model.Faults)
+			{
+				var faultFormula = new FaultFormula(fault);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			*/
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
+
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbabilityRange(collision);
+				Console.Write($"Probability of collision: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmdpModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbabilityRange(falseAlarm);
+				Console.Write($"Probability of falseAlarm: {result}");
+			}
+		}
+
+
 
 		[Test]
 		public void CalculateMdpNewStatesWithoutFaults()
