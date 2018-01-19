@@ -1,0 +1,154 @@
+﻿// The MIT License (MIT)
+// 
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+namespace Tests.SimpleExecutableModel.Analysis.Probabilistic
+{
+	using System;
+	using ISSE.SafetyChecking;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+	using ISSE.SafetyChecking.ExecutedModel;
+	using ISSE.SafetyChecking.Formula;
+	using ISSE.SafetyChecking.Modeling;
+	using Shouldly;
+	using Xunit;
+	using Xunit.Abstractions;
+
+	public class PermanentOnDemandFaultLeadsToInvariantViolationOnlyInSpecificStep : AnalysisTest
+	{
+		public PermanentOnDemandFaultLeadsToInvariantViolationOnlyInSpecificStep(ITestOutputHelper output = null) : base(output)
+		{
+		}
+
+		private Probability Check(AnalysisConfiguration configuration)
+		{
+			var m = new Model();
+			Probability probabilityOfInvariantViolation;
+			
+			var finallyInvariantViolated = new UnaryFormula(Model.InvariantViolated, UnaryOperator.Finally);
+
+			var markovChainGenerator = new SimpleMarkovChainFromExecutableModelGenerator(m);
+			markovChainGenerator.Configuration = configuration;
+			markovChainGenerator.AddFormulaToCheck(finallyInvariantViolated);
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var modelChecker = new ConfigurationDependentLtmcModelChecker(configuration, ltmc, Output.TextWriterAdapter());
+			using (modelChecker)
+			{
+				probabilityOfInvariantViolation = modelChecker.CalculateProbability(finallyInvariantViolated);
+			}
+
+			return probabilityOfInvariantViolation;
+		}
+
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public void CheckBuiltinDtmc(bool faultsPossibleOnInitialTransition)
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInDtmc;
+			configuration.AllowFaultsOnInitialTransitions = faultsPossibleOnInitialTransition;
+			var probabilityOfInvariantViolation = Check(configuration);
+
+			if (faultsPossibleOnInitialTransition)
+			{
+				// 1.0-(1.0-0.1)^2 = 0.19
+				probabilityOfInvariantViolation.Is(0.19, 0.00001).ShouldBe(true);
+			}
+			else
+			{
+				// 1.0-(1.0-0.1)^2 = 0.19
+				probabilityOfInvariantViolation.Is(0.19, 0.00001).ShouldBe(true);
+			}
+		}
+
+		[Theory]
+		[InlineData(true)]
+		[InlineData(false)]
+		public void CheckBuiltinLtmc(bool faultsPossibleOnInitialTransition)
+		{
+			var configuration = AnalysisConfiguration.Default;
+			configuration.ModelCapacity = ModelCapacityByMemorySize.Small;
+			configuration.DefaultTraceOutput = Output.TextWriterAdapter();
+			configuration.WriteGraphvizModels = true;
+			configuration.LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker.BuiltInLtmc;
+			configuration.UseCompactStateStorage = true;
+			configuration.AllowFaultsOnInitialTransitions = faultsPossibleOnInitialTransition;
+			var probabilityOfInvariantViolation = Check(configuration);
+
+			if (faultsPossibleOnInitialTransition)
+			{
+				// 1.0-(1.0-0.1)^2 = 0.19
+				probabilityOfInvariantViolation.Is(0.19, 0.00001).ShouldBe(true);
+			}
+			else
+			{
+				// 1.0-(1.0-0.1)^2 = 0.19
+				probabilityOfInvariantViolation.Is(0.19, 0.00001).ShouldBe(true);
+			}
+		}
+
+		private class Model : SimpleModelBase
+		{
+			public override Fault[] Faults { get; } = { new PermanentFault { Identifier = 0, ProbabilityOfOccurrence = new Probability(0.1) } };
+			public override bool[] LocalBools { get; } = new bool[] { false };
+			public override int[] LocalInts { get; } = new int[0];
+
+			public Model()
+			{
+				F1.DemandType=Fault.DemandTypes.OnCustom;
+				F1.HasCustomDemand = () => State == 8 || State == 9;
+			}
+
+			private Fault F1 => Faults[0];
+
+			private bool ViolateInvariant
+			{
+				get { return LocalBools[0]; }
+				set { LocalBools[0]=value; }
+			}
+			
+			private void CriticalStep()
+			{
+				F1.TryActivate();
+
+				if (F1.IsActivated)
+					ViolateInvariant = true;
+			}
+
+			public override void Update()
+			{
+				ViolateInvariant = false;
+				if (State == 11)
+					return;
+				State++;
+				if (State == 10)
+					CriticalStep();
+			}
+			
+			public static readonly Formula InvariantViolated = new SimpleLocalVarIsTrue(0);
+		}
+	}
+
+}
