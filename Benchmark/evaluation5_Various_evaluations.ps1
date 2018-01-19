@@ -65,6 +65,9 @@ AddTest -Testname "DeadReckoning_LtmdpWithoutStaticPruning" -TestAssembly "Safet
 AddTest -Testname "DeadReckoning_MdpNewStates" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateMdpNewStates" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
 AddTest -Testname "DeadReckoning_MdpNewStatesConstant" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateMdpNewStatesConstant" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
 AddTest -Testname "DeadReckoning_MdpFlattened" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateMdpFlattened" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_MdpNewStatesWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateMdpNewStatesWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_MdpNewStatesConstantWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateMdpNewStatesConstantWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
+AddTest -Testname "DeadReckoning_MdpFlattenedWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DeadReckoning.EvaluationTests.CalculateMdpFlattenedWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DeadReckoning")
 
 
 
@@ -83,6 +86,9 @@ AddTest -Testname "DegradedMode_LtmdpWithoutStaticPruning" -TestAssembly "Safety
 AddTest -Testname "DegradedMode_MdpNewStates" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateMdpNewStates" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
 AddTest -Testname "DegradedMode_MdpNewStatesConstant" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateMdpNewStatesConstant" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
 AddTest -Testname "DegradedMode_MdpFlattened" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateMdpFlattened" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_MdpNewStatesWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateMdpNewStatesWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_MdpNewStatesConstantWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateMdpNewStatesConstantWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
+AddTest -Testname "DegradedMode_MdpFlattenedWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.SmallModels.exe" -TestMethod "SafetySharp.CaseStudies.SmallModels.DegradedMode.EvaluationTests.CalculateMdpFlattenedWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","DegradedMode")
 
 
 
@@ -101,6 +107,9 @@ AddTest -Testname "RailroadCrossing_LtmdpWithoutStaticPruning" -TestAssembly "Sa
 AddTest -Testname "RailroadCrossing_MdpNewStates" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.RailroadCrossing.Analysis.EvaluationTests.CalculateMdpNewStates" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
 AddTest -Testname "RailroadCrossing_MdpNewStatesConstant" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.RailroadCrossing.Analysis.EvaluationTests.CalculateMdpNewStatesConstant" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
 AddTest -Testname "RailroadCrossing_MdpFlattened" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.RailroadCrossing.Analysis.EvaluationTests.CalculateMdpFlattened" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_MdpNewStatesWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.RailroadCrossing.Analysis.EvaluationTests.CalculateMdpNewStatesWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_MdpNewStatesConstantWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.RailroadCrossing.Analysis.EvaluationTests.CalculateMdpNewStatesConstantWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
+AddTest -Testname "RailroadCrossing_MdpFlattenedWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.RailroadCrossing.dll" -TestMethod "SafetySharp.CaseStudies.RailroadCrossing.Analysis.EvaluationTests.CalculateMdpFlattenedWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","RailroadCrossing")
 
 
 # LustrePressureTank
@@ -118,6 +127,9 @@ AddTest -Testname "LustrePressureTank_LtmdpWithoutStaticPruning" -TestAssembly "
 AddTest -Testname "LustrePressureTank_MdpNewStates" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateMdpNewStates" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
 AddTest -Testname "LustrePressureTank_MdpNewStatesConstant" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateMdpNewStatesConstant" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
 AddTest -Testname "LustrePressureTank_MdpFlattened" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateMdpFlattened" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_MdpNewStatesWithoutFaults" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateMdpNewStatesWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_MdpNewStatesConstantWithoutFaults" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateMdpNewStatesConstantWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
+AddTest -Testname "LustrePressureTank_MdpFlattenedWithoutFaults" -TestAssembly "SafetyLustre.CaseStudies.LustreModels.dll" -TestMethod "Lustre_Models.EvaluationTests.CalculateMdpFlattenedWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","LustrePressureTank")
 
 
 # HemodialysisMachine
@@ -140,6 +152,9 @@ AddTest -Testname "HemodialysisMachine_LtmdpWithoutStaticPruning" -TestAssembly 
 AddTest -Testname "HemodialysisMachine_MdpNewStates" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateMdpNewStates" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
 AddTest -Testname "HemodialysisMachine_MdpNewStatesConstant" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateMdpNewStatesConstant" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
 AddTest -Testname "HemodialysisMachine_MdpFlattened" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateMdpFlattened" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_MdpNewStatesWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateMdpNewStatesWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_MdpNewStatesConstantWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateMdpNewStatesConstantWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
+AddTest -Testname "HemodialysisMachine_MdpFlattenedWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateMdpFlattenedWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
 
 
 
@@ -164,9 +179,9 @@ AddTest -Testname "HeightControl_ColissionSingleCoreNoEarlyTermination" -TestAss
 AddTest -Testname "HeightControl_FalseAlarmSingleCoreNoEarlyTermination" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateFalseAlarmSingleCoreWithoutEarlyTermination" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
 AddTest -Testname "HeightControl_LtmdpWithoutFaultsWithPruning" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateLtmdpWithoutFaultsWithPruning" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
 AddTest -Testname "HeightControl_LtmdpWithoutStaticPruning" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateLtmdpWithoutStaticPruning" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
-AddTest -Testname "HeightControl_MdpNewStates" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateMdpNewStates" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
-AddTest -Testname "HeightControl_MdpNewStatesConstant" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateMdpNewStatesConstant" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
-AddTest -Testname "HeightControl_MdpFlattened" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateMdpFlattened" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_MdpNewStatesWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateMdpNewStatesWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_MdpNewStatesConstantWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateMdpNewStatesConstantWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HeightControl_MdpFlattenedWithoutFaults" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateMdpFlattenedWithoutFaults" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
 
 
 

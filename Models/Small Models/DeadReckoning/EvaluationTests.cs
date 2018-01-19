@@ -86,6 +86,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.AddFormulaToCheck(new ExecutableStateFormula(() => false));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -116,6 +117,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -131,6 +133,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 
 			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
@@ -138,6 +141,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			retraversalMarkovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
 			retraversalMarkovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			retraversalMarkovChainGenerator.GenerateLabeledMarkovChain();
 		}
 
@@ -153,6 +157,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 
 			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
@@ -160,6 +165,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			retraversalMarkovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
 			retraversalMarkovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			retraversalMarkovChainGenerator.GenerateLabeledMarkovChain();
 		}
 
@@ -182,6 +188,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 				markovChainGenerator.AddFormulaToPlainlyIntegrateIntoStateSpace(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -203,6 +210,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -267,6 +275,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}
 
@@ -289,6 +298,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, false);
@@ -313,6 +323,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, true);
@@ -338,6 +349,68 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByFlattening(nmdp);
+		}
+
+		[Test]
+		public void CalculateMdpNewStatesWithoutFaults()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, false);
+		}
+
+		[Test]
+		public void CalculateMdpNewStatesConstantWithoutFaults()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, true);
+		}
+
+
+		[Test]
+		public void CalculateMdpFlattenedWithoutFaults()
+		{
+			var model = new DeadReckoningModel();
+			model.Component.FF.ProbabilityOfOccurrence = null;
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			markovChainGenerator.AddFormulaToCheck(model.Component.Hazard);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByFlattening(nmdp);

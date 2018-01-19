@@ -102,6 +102,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.AddFormulaToCheck(new ExecutableStateFormula(()=> false));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -118,6 +119,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -135,6 +137,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -152,6 +155,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 			
 			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
@@ -160,6 +164,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			retraversalMarkovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
 			retraversalMarkovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			retraversalMarkovChainGenerator.GenerateLabeledMarkovChain();
 		}
 
@@ -177,6 +182,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 
 			var retraversalMarkovChainGenerator = new MarkovChainFromMarkovChainGenerator(markovChain);
@@ -185,6 +191,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			retraversalMarkovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			retraversalMarkovChainGenerator.Configuration.UseCompactStateStorage = true;
 			retraversalMarkovChainGenerator.Configuration.UseAtomarPropositionsAsStateLabels = false;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			retraversalMarkovChainGenerator.GenerateLabeledMarkovChain();
 		}
 
@@ -209,6 +216,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 				markovChainGenerator.AddFormulaToPlainlyIntegrateIntoStateSpace(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -228,6 +236,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -246,6 +255,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -264,6 +274,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -282,6 +293,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -301,6 +313,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -319,6 +332,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -416,6 +430,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}
 
@@ -442,11 +457,12 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			}
 			*/
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 		}
 
 		[Test]
-		public void CalculateMdpNewStates()
+		public void CalculateMdpNewStatesWithoutFaults()
 		{
 			var model = Model.CreateOriginal();
 			model.VehicleSet.LeftHV.ProbabilityOfOccurrence = null;
@@ -460,21 +476,15 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
-			/*
-			foreach (var fault in model.Faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
-			*/
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, false);
 		}
 
 		[Test]
-		public void CalculateMdpNewStatesConstant()
+		public void CalculateMdpNewStatesConstantWithoutFaults()
 		{
 			var model = Model.CreateOriginal();
 			model.VehicleSet.LeftHV.ProbabilityOfOccurrence = null;
@@ -488,14 +498,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
-			/*
-			foreach (var fault in model.Faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
-			*/
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, true);
@@ -503,7 +507,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 
 
 		[Test]
-		public void CalculateMdpFlattened()
+		public void CalculateMdpFlattenedWithoutFaults()
 		{
 			var model = Model.CreateOriginal();
 			model.VehicleSet.LeftHV.ProbabilityOfOccurrence = null;
@@ -517,14 +521,8 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
 			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
-			/*
-			foreach (var fault in model.Faults)
-			{
-				var faultFormula = new FaultFormula(fault);
-				markovChainGenerator.AddFormulaToCheck(faultFormula);
-			}
-			*/
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByFlattening(nmdp);

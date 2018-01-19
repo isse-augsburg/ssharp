@@ -47,6 +47,7 @@ namespace Lustre_Models
 			markovChainGenerator.AddFormulaToCheck(new BinaryFormula(_invariant, BinaryOperator.And,
 				new UnaryFormula(_invariant, UnaryOperator.Not)));
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -57,6 +58,7 @@ namespace Lustre_Models
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.AddFormulaToCheck(_hazard);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -68,6 +70,7 @@ namespace Lustre_Models
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.AddFormulaToCheck(_hazard);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -121,6 +124,7 @@ namespace Lustre_Models
 				markovChainGenerator.AddFormulaToPlainlyIntegrateIntoStateSpace(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -138,6 +142,7 @@ namespace Lustre_Models
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
 		}
 
@@ -173,6 +178,7 @@ namespace Lustre_Models
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.AddFormulaToCheck(_hazard);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 			_faults[1].ProbabilityOfOccurrence = oldProbability;
 		}
@@ -193,6 +199,7 @@ namespace Lustre_Models
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var markovChain = markovChainGenerator.GenerateLabeledTransitionMarkovDecisionProcess();
 			_faults[1].ProbabilityOfOccurrence = oldProbability;
 		}
@@ -213,6 +220,7 @@ namespace Lustre_Models
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, false);
@@ -235,6 +243,7 @@ namespace Lustre_Models
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, true);
@@ -252,13 +261,70 @@ namespace Lustre_Models
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithFlattening;
 			markovChainGenerator.AddFormulaToCheck(_hazard);
-			
+
 			foreach (var fault in _faults)
 			{
 				var faultFormula = new FaultFormula(fault);
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByFlattening(nmdp);
+			_faults[1].ProbabilityOfOccurrence = oldProbability;
+		}
+
+		[Test]
+		public void CalculateMdpNewStatesWithoutFaults()
+		{
+			var oldProbability = _faults[1].ProbabilityOfOccurrence;
+			_faults[1].ProbabilityOfOccurrence = null;
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
+			markovChainGenerator.AddFormulaToCheck(_hazard);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, false);
+			_faults[1].ProbabilityOfOccurrence = oldProbability;
+		}
+
+		[Test]
+		public void CalculateMdpNewStatesConstantWithoutFaults()
+		{
+			var oldProbability = _faults[1].ProbabilityOfOccurrence;
+			_faults[1].ProbabilityOfOccurrence = null;
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStatesConstantDistance;
+			markovChainGenerator.AddFormulaToCheck(_hazard);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
+
+			var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, true);
+			_faults[1].ProbabilityOfOccurrence = oldProbability;
+		}
+
+
+		[Test]
+		public void CalculateMdpFlattenedWithoutFaults()
+		{
+			var oldProbability = _faults[1].ProbabilityOfOccurrence;
+			_faults[1].ProbabilityOfOccurrence = null;
+			var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithFlattening;
+			markovChainGenerator.AddFormulaToCheck(_hazard);
+			
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			var nmdp = markovChainGenerator.GenerateNestedMarkovDecisionProcess();
 
 			var nmdpToMpd = new NmdpToMdpByFlattening(nmdp);
