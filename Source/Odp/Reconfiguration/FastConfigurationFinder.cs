@@ -50,14 +50,14 @@ namespace SafetySharp.Odp.Reconfiguration
 			PreferCapabilityAccumulation = preferCapabilityAccumulation;
 		}
 
-		public Task<Tuple<BaseAgent[], BaseAgent[]>> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities)
+		public Task<Configuration?> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities)
 		{
 			var agents = availableAgents.ToArray();
 			CalculateShortestPaths(agents);
 
 			var distribution = FindDistribution(capabilities, agents);
 			if (distribution == null)
-				return Task.FromResult<Tuple<BaseAgent[], BaseAgent[]>>(null);
+				return Task.FromResult<Configuration?>(null);
 
 			var resourceFlow = FindResourceFlow(distribution, agents);
 
@@ -65,7 +65,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			var agentDistribution = distribution.Select(i => agents[i]).ToArray();
 			var agentResourceFlow = resourceFlow.Select(i => agents[i]).ToArray();
 
-			return Task.FromResult(Tuple.Create(agentDistribution, agentResourceFlow));
+			return Task.FromResult<Configuration?>(new Configuration(agentDistribution, agentResourceFlow));
 		}
 
 		private void CalculateShortestPaths(BaseAgent[] availableAgents)

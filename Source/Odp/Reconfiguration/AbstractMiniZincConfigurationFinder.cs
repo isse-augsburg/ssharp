@@ -41,7 +41,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			_constraintsModel = constraintsModel;
 		}
 
-		public Task<Tuple<BaseAgent[], BaseAgent[]>> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities)
+		public Task<Configuration?> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities)
 		{
 			var agents = availableAgents.ToArray();
 
@@ -93,7 +93,7 @@ namespace SafetySharp.Odp.Reconfiguration
 			return outputFile;
 		}
 
-		private static Tuple<BaseAgent[], BaseAgent[]> ParseSolution(string outputFile, BaseAgent[] availableAgents)
+		private static Configuration? ParseSolution(string outputFile, BaseAgent[] availableAgents)
 		{
 			var lines = File.ReadAllLines(outputFile);
 			if (lines[0].Contains("UNSATISFIABLE"))
@@ -101,7 +101,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			var distribution = ParseList(lines[0]).Select(i => availableAgents[i]).ToArray();
 			var resourceFlow = ParseList(lines[1]).Select(i => availableAgents[i]).ToArray();
-			return Tuple.Create(distribution, resourceFlow);
+			return new Configuration(distribution, resourceFlow);
 		}
 
 		private static IEnumerable<int> ParseList(string line)

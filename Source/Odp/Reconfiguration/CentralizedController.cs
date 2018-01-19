@@ -54,10 +54,10 @@ namespace SafetySharp.Odp.Reconfiguration
 			configs.RemoveAllRoles(task, Agents);
 
 			var result = await _configurationFinder.Find(new HashSet<BaseAgent>(availableAgents), task.RequiredCapabilities);
-			if (result == null)
-				configs.Fail();
+			if (result.HasValue)
+				ExtractConfigurations(configs, task, result.Value.Distribution, result.Value.ResourceFlow);
 			else
-				ExtractConfigurations(configs, task, result.Item1, result.Item2);
+				configs.Fail();
 
 			OnConfigurationsCalculated(task, configs);
 			return configs;

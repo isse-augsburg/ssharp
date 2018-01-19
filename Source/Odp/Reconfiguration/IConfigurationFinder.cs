@@ -24,6 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Collections.Generic;
+	using System.Linq;
 	using System.Threading.Tasks;
 	using JetBrains.Annotations;
 
@@ -35,10 +36,45 @@ namespace SafetySharp.Odp.Reconfiguration
 		/// <param name="availableAgents">The agents that may partake in the configuration.</param>
 		/// <param name="capabilities">The sequence of capabilities to be fulfilled by the configuration.</param>
 		/// <returns>
-		///   A tuple of a capability distribution (a sequence of agents with the given <paramref name="capabilities"/>) and a matching resource flow
+		///   A struct containing a capability distribution (a sequence of agents with the given <paramref name="capabilities"/>) and a matching resource flow
 		///   (a sequence of connected agents). Or null, if no configuration is found.
 		/// </returns>
-		[NotNull, ItemCanBeNull]
-		Task<Tuple<BaseAgent[], BaseAgent[]>> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities);
+		[NotNull]
+		Task<Configuration?> Find(ISet<BaseAgent> availableAgents, ICapability[] capabilities);
+	}
+
+	/// <summary>
+	///   Describes a configuration as returned by <see cref="IConfigurationFinder"/>.
+	/// </summary>
+	public struct Configuration
+	{
+		public BaseAgent[] Distribution { get; }
+
+		public BaseAgent[] ResourceFlow { get; }
+
+		public Configuration([NotNull, ItemNotNull] BaseAgent[] distribution, [NotNull, ItemNotNull] BaseAgent[] resourceFlow)
+		{
+			if (distribution == null)
+				throw new ArgumentNullException(nameof(distribution));
+			if (resourceFlow == null)
+				throw new ArgumentNullException(nameof(resourceFlow));
+
+#if DEBUG
+			if (distribution.Contains(null))
+				throw new ArgumentException("Partially defined distribution", nameof(distribution));
+			if (resourceFlow.Contains(null))
+				throw new ArgumentException("Partially defined resource flow", nameof(resourceFlow));
+			for (int i = 0, j = 0; i < distribution.Length; ++i)
+			{
+				while (j < resourceFlow.Length && resourceFlow[j] != distribution[i])
+					j++;
+				if (j >= resourceFlow.Length)
+					throw new ArgumentException("Resource flow does not match distribution");
+			}
+#endif
+
+			Distribution = distribution;
+			ResourceFlow = resourceFlow;
+		}
 	}
 }
