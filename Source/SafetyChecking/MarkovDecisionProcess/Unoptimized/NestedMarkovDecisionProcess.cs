@@ -65,10 +65,10 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 			StateLabeling = new LabelVector();
 			States = (int) modelSize.NumberOfStates;
 			
-			_maxNumberOfContinuationGraphElements = modelSize.NumberOfTransitions;
+			_maxNumberOfContinuationGraphElements = modelSize.NumberOfTransitions * 10L;
 			_maxNumberOfContinuationGraphElements = Math.Max(_maxNumberOfContinuationGraphElements, 1024);
 			
-			Requires.InRange(_maxNumberOfContinuationGraphElements, nameof(_maxNumberOfContinuationGraphElements), 1024, Int32.MaxValue - 1);
+			Requires.InRange(_maxNumberOfContinuationGraphElements, nameof(_maxNumberOfContinuationGraphElements), 1024, Int64.MaxValue - 1);
 
 			_stateToRootOfContinuationGraphBuffer.Resize(States * sizeof(long), zeroMemory: false);
 			_stateToRootOfContinuationGraphMemory = (long*)_stateToRootOfContinuationGraphBuffer.Pointer;
@@ -152,7 +152,7 @@ namespace ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized
 		{
 			var locationOfFirstNewEntry = InterlockedExtensions.AddFetch(ref _continuationGraphElementCount, number);
 			if (locationOfFirstNewEntry + number >= _maxNumberOfContinuationGraphElements)
-				throw new OutOfMemoryException("Unable to store transitions. Try increasing the transition capacity.");
+				throw new OutOfMemoryException($"Unable to store continuation graph element (limit is {_maxNumberOfContinuationGraphElements} entries)");
 			return locationOfFirstNewEntry;
 		}
 		
