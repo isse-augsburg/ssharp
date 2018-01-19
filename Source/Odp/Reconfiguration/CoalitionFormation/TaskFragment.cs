@@ -72,6 +72,20 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		public IEnumerable<int> CapabilityIndices => Enumerable.Range(Start, Length);
 
 		/// <summary>
+		///   Accesses the capability at the given <paramref name="index"/> in the fragment.
+		/// </summary>
+		[NotNull]
+		public ICapability this[int index]
+		{
+			get
+			{
+				if (index >= Length)
+					throw new ArgumentOutOfRangeException(nameof(index), index, $"Task fragment has length {Length}.");
+				return Task.RequiredCapabilities[Start + index];
+			}
+		}
+
+		/// <summary>
 		///  The number of capabilities that are part of this fragment.
 		/// </summary>
 		public int Length => Math.Max(0, End - Start + 1);

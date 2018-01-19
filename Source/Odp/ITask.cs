@@ -32,7 +32,7 @@ namespace SafetySharp.Odp
 		/// <summary>
 		///  The sequence of capabilities that must be applied to resources.
 		/// </summary>
-		[NotNull]
+		[NotNull, ItemNotNull]
 		ICapability[] RequiredCapabilities { get; }
 
 		/// <summary>
