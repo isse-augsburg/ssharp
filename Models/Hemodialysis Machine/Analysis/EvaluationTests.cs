@@ -396,6 +396,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -416,6 +417,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateLtmdpWithoutStaticPruning()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -441,6 +443,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateLtmdpWithoutStaticPruningSingleCore()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -481,6 +484,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateMdpNewStates()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -507,6 +511,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateMdpNewStatesConstant()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -534,6 +539,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateMdpFlattened()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -560,6 +566,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateMdpNewStatesWithoutFaults()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -582,6 +589,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateMdpNewStatesConstantWithoutFaults()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -605,6 +613,7 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 		public void CalculateMdpFlattenedWithoutFaults()
 		{
 			var model = new Model();
+			//SetProbabilities(model);
 			model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
