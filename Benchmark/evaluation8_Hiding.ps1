@@ -63,9 +63,9 @@ AddTest -Testname "HeightControl_Probability_Prevention-Collision" -TestAssembly
 
 
 
-$global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("VariousEvaluations") }
+$global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("Unhidden") }
 
-AddTestValuation -Name "VariousEvaluations"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json"  -ResultDir "$PSScriptRoot\VariousEvaluations" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
+AddTestValuation -Name "Unhidden"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json"  -ResultDir "$PSScriptRoot\Unhidden" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
 
 Foreach ($testvaluation in $global_testValuations) {
     ExecuteTestValuation -TestValuation $testvaluation -Tests $global_selected_tests

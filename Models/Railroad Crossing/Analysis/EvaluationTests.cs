@@ -228,6 +228,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 10);
+			markovChainGenerator.AddFormulaToCheck(model.PossibleCollision);
 			foreach (var fault in model.Faults)
 			{
 				var faultFormula = new FaultFormula(fault);

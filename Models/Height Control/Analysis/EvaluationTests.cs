@@ -417,11 +417,26 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.Configuration.CpuCount = 1;
 			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.AddFormulaToCheck(new FaultFormula(model.HeightControl.PreControl.PositionDetector.Misdetection));
-			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50));
-			markovChainGenerator.AddFormulaToCheck(new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50));
+			var collision = new BoundedUnaryFormula(model.Collision, UnaryOperator.Finally, 50);
+			var falseAlarm = new BoundedUnaryFormula(model.FalseAlarm, UnaryOperator.Finally, 50);
+			markovChainGenerator.AddFormulaToCheck(collision);
+			markovChainGenerator.AddFormulaToCheck(falseAlarm);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
 			var markovChain = markovChainGenerator.GenerateMarkovChain();
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, ltmc, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(collision);
+				Console.Write($"Probability of collision: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, ltmc, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(falseAlarm);
+				Console.Write($"Probability of falseAlarm: {result}");
+			}
 		}
 
 		[Test]
