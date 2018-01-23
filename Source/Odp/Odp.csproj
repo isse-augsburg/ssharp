@@ -58,6 +58,7 @@
     <Compile Include="Reconfiguration\CoalitionFormation\Coalition.MergeSupervisor.cs">
       <DependentUpon>Coalition.cs</DependentUpon>
     </Compile>
+    <Compile Include="Reconfiguration\CoalitionFormation\CoalitionController.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\CoalitionFormationController.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\AgentQueue.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\CoalitionReconfigurationAgent.cs" />

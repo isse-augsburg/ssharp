@@ -24,6 +24,7 @@ namespace SafetySharp.Odp.Reconfiguration
 {
 	using System;
 	using System.Threading.Tasks;
+	using JetBrains.Annotations;
 	using Modeling;
 
 	public abstract class AbstractController : IController
@@ -33,8 +34,11 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public event Action<ITask, ConfigurationUpdate> ConfigurationsCalculated;
 
-		protected AbstractController(BaseAgent[] agents)
+		protected AbstractController([NotNull, ItemNotNull] BaseAgent[] agents)
 		{
+			if (agents == null)
+				throw new ArgumentNullException(nameof(agents));
+
 			Agents = agents;
 		}
 
@@ -45,7 +49,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 		public abstract Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task);
 
-		protected Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
+		protected static Role GetRole(ITask recipe, BaseAgent input, Condition? previous)
 		{
 			var initialState = previous?.StateLength ?? 0;
 			return new Role(
