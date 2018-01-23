@@ -227,7 +227,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
-			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 10);
+			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 50);
 			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
 			foreach (var fault in model.Faults)
 			{
@@ -317,7 +317,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
-			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 10);
+			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 50);
 			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
 			foreach (var fault in model.Faults)
 			{
