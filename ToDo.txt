@@ -1,8 +1,16 @@
 ﻿Notiz:
 - Routenneukonfiguration klappt nur unidirektional (ungefähr)
 
-Am Ende evtl. noch:
-- Faults anzeigen (Welcher Fault?)
 
 TODO:
 - Consume Capability is not selected
+
+- Faults of plants and agents are different
+	
+	- Drill fault is activated, but the robot still can drill. Maybe because the robot-plant is used instead of the robot agent?
+
+Zum Fault:
+- Wird Fault-Methode auch wirklich aufgerufen?
+
+Zur Consume-Capability:
+Counter anzeigen: Einer für completed tasks, einer für reseted/discarded tasks

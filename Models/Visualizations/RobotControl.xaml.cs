@@ -54,6 +54,7 @@
             {
                 if (executor.ExecutionState.Count() > 0)
                 {
+                    
                     var cap = executor.ExecutionState.Last();
 
                     if (capList.Contains(cap))
@@ -71,9 +72,13 @@
                             availableCapabilityList.SelectedItem = procCap.ProductionAction.ToString();
                             _container.AddDoneCapability(procCap.ProductionAction.ToString());
                         }
+                        //else if (executor.IsCompleted)
+                        //{
+                        //    availableCapabilityList.SelectedItem = cap.CapabilityType.ToString();
+                        //    _container.AddDoneCapability(cap.CapabilityType.ToString());
+                        //}
                         else
                             availableCapabilityList.SelectedItem = null;
-                            //currentRole.Text = "";
                     }
                 }
             }            
@@ -110,6 +115,8 @@
             Console.WriteLine("<DRILL BROKEN FAULT OCCURRED>");
 
             _robotAgent.DrillBroken.ForceActivation();
+
+            Console.WriteLine("\n>>> Drill-fault is activated is: " + _robotAgent.DrillBroken.IsActivated);
         }
 
         private void OnInsertBrokenFault(object sender, RoutedEventArgs e) {

@@ -10,6 +10,7 @@ namespace SafetySharp.CaseStudies.Visualizations
 {
     using CaseStudies.RobotCell.Modeling;
     using CaseStudies.RobotCell.Modeling.Controllers;
+    using Infrastructure;
     using Modeling;
     using Odp;
     using Odp.Reconfiguration;
@@ -31,6 +32,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         private ListBox lboxTask = new ListBox();
         private List<TextBox> routes = new List<TextBox>();
         private int resourceCounter;
+        private TextBox workpieceCount = new TextBox();
 
         public RobotCell()
         {
@@ -66,6 +68,9 @@ namespace SafetySharp.CaseStudies.Visualizations
             //Initialize/Update task
             _task = UpdateTask();
             PrintTask();
+
+            //Register workpieceCount-textbox with visualization area
+            RegisterWorkpieceCount();
 
             //Initialize resource counter
             resourceCounter = _model.Resources.Count;
@@ -147,15 +152,7 @@ namespace SafetySharp.CaseStudies.Visualizations
             {
                 routes.Add(new TextBox());
             }
-
-            //Create resources for numbers larger than one
-
-            //for (int i = 0; i < _model.Resources.Count; i++) {
-            //    var agent = _model.Resources[i];
-            //    var resource = new WorkpieceControl();
-            //    _workpieces.Add(resource);
-            //}
-
+            
             //Create resource (currently only one)
             var resource = new WorkpieceControl();
             _workpieces.Add(resource);
@@ -164,10 +161,10 @@ namespace SafetySharp.CaseStudies.Visualizations
             _task = UpdateTask();
             DisplayTask();
 
-            //Place Workpiece/Resource
+            //Place workpiece/resource
             PlaceWorkpiece();
 
-            //Draw routes for the carts
+            //Display routes for the carts
             //DrawRoutes();
             PrintCartRoutes();
 
@@ -228,8 +225,24 @@ namespace SafetySharp.CaseStudies.Visualizations
             if (SimulationControls.Simulator.IsReplay)
                 return;
 
-            foreach (var robot in _robots) {
-                robot.Value.Update(robot.Value.GetRobotAgent());
+            foreach (var robot in _robots)
+            {
+                var robotCtrl = robot.Value;
+                //Update the robot
+                robotCtrl.Update(robot.Value.GetRobotAgent());
+
+                //Update the faults of the robot
+                robotCtrl.GetRobotAgent().DrillBroken.Activation = robotCtrl.DrillBrokenFault.IsChecked.ToOccurrenceKind();
+                robotCtrl.GetRobotAgent().InsertBroken.Activation = robotCtrl.InsertBrokenFault.IsChecked.ToOccurrenceKind();
+                robotCtrl.GetRobotAgent().TightenBroken.Activation = robotCtrl.TightenBrokenFault.IsChecked.ToOccurrenceKind();
+                robotCtrl.GetRobotAgent().PolishBroken.Activation = robotCtrl.PolishBrokenFault.IsChecked.ToOccurrenceKind();
+                robotCtrl.GetRobotAgent().ResourceTransportFault.Activation = robotCtrl.ResourceTransportFault.IsChecked.ToOccurrenceKind();
+                robotCtrl.GetRobotAgent().Broken.Activation = robotCtrl.BrokenFault.IsChecked.ToOccurrenceKind();
+            }
+
+            foreach (var cart in _carts)
+            {
+                cart.Value.GetCartAgent().Broken.Activation = cart.Value.Broken.IsChecked.ToOccurrenceKind();
             }
                         
             //Reset the selected task capabilities
@@ -259,6 +272,8 @@ namespace SafetySharp.CaseStudies.Visualizations
             PrintTask();
             DisplayTask();
             UpdateTaskSelection();
+            
+            DisplayWorkpieceCount();
 
             PrintCartRoutes();
 
@@ -433,6 +448,30 @@ namespace SafetySharp.CaseStudies.Visualizations
                 doneCapabilities.RemoveAt(i);
             }
             lboxTask.SelectedItems.Clear();
+        }
+
+        public void DisplayWorkpieceCount()
+        {
+            string countText = "TEST\nTEST\nTEST\n";
+
+            var currentCount = _workpieces.Count;
+
+            for (int i = 0; i < currentCount; i++)
+            {
+                //TODO
+            }
+
+            workpieceCount.Text = countText;
+        }
+
+        public void RegisterWorkpieceCount()
+        {
+            //if (!visualizationArea.Children.Contains(workpieceCount))
+            //    visualizationArea.Children.Add(workpieceCount);
+            visualizationArea.Children.Add(workpieceCount);
+
+            Grid.SetColumn(workpieceCount, Grid.GetColumn(lboxTask) + 1);
+            Grid.SetRow(workpieceCount, Grid.GetRow(lboxTask));
         }
     }
 }

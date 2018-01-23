@@ -46,7 +46,8 @@ namespace SafetySharp.CaseStudies.Visualizations
             UpdateLayout();
         }
 
-        private RobotAgent GetPosition() {
+        private RobotAgent GetPosition()
+        {
             return _container.Model.RobotAgents.First(r => _cartAgent.Cart.IsPositionedAt(r.Robot));
         }
 
