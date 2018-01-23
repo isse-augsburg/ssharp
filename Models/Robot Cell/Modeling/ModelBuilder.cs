@@ -237,9 +237,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	        return this;
 	    }
 
-	    public ModelBuilder UseCoalitionFormation()
+	    public ModelBuilder UseCoalitionFormation(IConfigurationFinder finder)
 	    {
-	        ChooseController(new CoalitionFormationController(Agents.ToArray()));
+	        ChooseController<CoalitionController>(finder);
 	        foreach (var agent in Agents)
                 agent.ReconfigurationStrategy = new ReconfigurationAgentHandler(agent, (b, h, t) => new CoalitionReconfigurationAgent(b, h, _model.Controller));
 	        return this;
