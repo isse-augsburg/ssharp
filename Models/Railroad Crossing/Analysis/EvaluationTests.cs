@@ -227,6 +227,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.CpuCount = 1;
 			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 50);
 			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
 			foreach (var fault in model.Faults)
@@ -265,6 +266,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateLtmdpWithoutFaultsWithPruning()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -284,6 +286,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateLtmdpWithoutStaticPruning()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -308,6 +311,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateLtmdpWithoutStaticPruningSingleCore()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -317,6 +321,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
+			markovChainGenerator.Configuration.CpuCount = 1;
 			var formulaToCheck = new BoundedUnaryFormula(model.PossibleCollision, UnaryOperator.Finally, 50);
 			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
 			foreach (var fault in model.Faults)
@@ -340,6 +345,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateMdpNewStates()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -366,6 +372,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateMdpNewStatesConstant()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -393,6 +400,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateMdpFlattened()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence=null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -420,6 +428,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateMdpNewStatesWithoutFaults()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -441,6 +450,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateMdpNewStatesConstantWithoutFaults()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
@@ -463,6 +473,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 		public void CalculateMdpFlattenedWithoutFaults()
 		{
 			var model = new Model();
+			SetProbabilities(model);
 			model.Channel.MessageDropped.ProbabilityOfOccurrence = null;
 
 			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
