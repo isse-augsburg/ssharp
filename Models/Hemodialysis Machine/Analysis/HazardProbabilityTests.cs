@@ -171,31 +171,44 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 
 		private static IEnumerable CreateModelVariants()
 		{
-			Func<bool, Fault.DemandTypes, Model> createVariant = (waterHeaterFaultIsPermanent, demandType) =>
+			var demandKeep = 1;
+			var demandToOnCustom = 2;
+			var demandToOnStartOfStep = 3;
+			Func<int,string> demandToName = demand => {
+				if (demand==demandKeep)
+						return "Keep";
+				if (demand==demandToOnCustom)
+						return "OnCustom";
+				return "OnStartOfStep";
+			};
+			Func<bool, int, Model> createVariant = (waterHeaterFaultIsPermanent, demandType) =>
 			{
 				var previousValue = Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent;
 				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = waterHeaterFaultIsPermanent;
 				var model = new Model();
 				Modeling.DialyzingFluidDeliverySystem.WaterPreparation.WaterHeaterDefectIsPermanent = previousValue;
+				if (demandType == demandKeep)
+					return model;
 				foreach (var fault in model.Faults)
 				{
 					if (fault.HasCustomDemand!=null)
-						fault.DemandType = demandType;
+						fault.DemandType = demandType== demandToOnCustom? Fault.DemandTypes.OnCustom : Fault.DemandTypes.OnStartOfStep;
 				}
 				return model;
 			};
 
 			return from config in new []
 						{
-							new Tuple<bool, Fault.DemandTypes>(true, Fault.DemandTypes.OnCustom),
-							new Tuple<bool, Fault.DemandTypes>(false, Fault.DemandTypes.OnCustom),
-							new Tuple<bool, Fault.DemandTypes>(true, Fault.DemandTypes.OnStartOfStep)
+							new Tuple<bool, int>(true, demandKeep),
+							new Tuple<bool, int>(false, demandKeep),
+							new Tuple<bool, int>(true, demandToOnCustom),
+							new Tuple<bool, int>(true, demandToOnStartOfStep)
 						}
 				   let waterHeaterFaultIsPermanent = config.Item1
 				   let demandType = config.Item2
 				   let name =
 						"WaterHeater"+ (waterHeaterFaultIsPermanent ? "Permanent":"Transient") +
-						"Demand"+ (demandType== Fault.DemandTypes.OnCustom ? "OnCustom": "OnStartOfStep")
+						"Demand"+ (demandToName(demandType))
 				   select new TestCaseData(createVariant(waterHeaterFaultIsPermanent, demandType), name).SetName(name);
 		}
 	}

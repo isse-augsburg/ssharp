@@ -361,9 +361,9 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			markovChainGenerator.AddFormulaToCheck(falseAlarm);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
-			markovChainGenerator.Configuration.CpuCount = Int32.MaxValue;
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
-			
+			markovChainGenerator.Configuration.CpuCount = Int32.MaxValue;
+
 			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
 			{
 				var result = modelChecker.CalculateProbability(collision);
