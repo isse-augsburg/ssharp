@@ -258,7 +258,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
 			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
-			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.CpuCount = 3;
 			var onceFormula = new UnaryFormula(model.PossibleCollision, UnaryOperator.Once);
 			var onceFault1 = new UnaryFormula(new FaultFormula(model.Channel.MessageDropped), UnaryOperator.Once);
 			markovChainGenerator.AddFormulaToCheck(onceFault1);
@@ -271,6 +271,7 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(63000000L, 1000000000L);
 			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
 			
 			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
