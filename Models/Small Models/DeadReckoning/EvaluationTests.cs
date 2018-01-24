@@ -247,7 +247,7 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 			Console.Write($"Probability of hazard: {result}");
 		}
 		[Test]
-		public void CreateFaultAwareMarkovChainSingleCoreAllFaults()
+		public void CalculateHazardSingleCoreAllFaults()
 		{
 			var model = new DeadReckoningModel();
 
@@ -266,6 +266,41 @@ namespace SafetySharp.CaseStudies.SmallModels.DeadReckoning
 				var faultFormula = new FaultFormula(fault);
 				markovChainGenerator.AddFormulaToCheck(faultFormula);
 			}
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			markovChainGenerator.Configuration.CpuCount = Int32.MaxValue;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(formulaToCheck);
+				Console.Write($"Probability of hazard: {result}");
+			}
+		}
+
+		[Test]
+		public void CalculateHazardSingleCoreAllFaultsWithOnce()
+		{
+			var model = new DeadReckoningModel();
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			var formula = new ExecutableStateFormula(() => model.Component.Hazard);
+			var onceFormula = new UnaryFormula(formula, UnaryOperator.Once);
+			var onceFault1 = new UnaryFormula(new FaultFormula(model.Component.FC),UnaryOperator.Once);
+			markovChainGenerator.AddFormulaToCheck(onceFault1);
+			foreach (var fault in model.Faults.Where(fault => fault!=model.Component.FC))
+			{
+				var faultFormula = new UnaryFormula(new FaultFormula(fault), UnaryOperator.Once);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			var formulaToCheck = new BoundedUnaryFormula(new BinaryFormula(onceFault1,BinaryOperator.And, onceFormula), UnaryOperator.Finally, 10);
+			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
 			markovChainGenerator.Configuration.UseCompactStateStorage = true;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
 			markovChainGenerator.Configuration.CpuCount = Int32.MaxValue;

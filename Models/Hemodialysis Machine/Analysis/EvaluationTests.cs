@@ -310,6 +310,50 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			}
 		}
 
+		[Test]
+		public void CalculateHazardSingleCoreAllFaultsWithOnce()
+		{
+			var model = new Model();
+			SetProbabilities(model);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var onceUnsuccessful = new UnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Once);
+			var onceContamination = new UnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Once);
+			var onceFault1 = new UnaryFormula(new FaultFormula(model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault), UnaryOperator.Once);
+			markovChainGenerator.AddFormulaToCheck(onceFault1);
+			foreach (var fault in model.Faults.Where(fault => fault != model.HdMachine.Dialyzer.DialyzerMembraneRupturesFault))
+			{
+				var faultFormula = new UnaryFormula(new FaultFormula(fault), UnaryOperator.Once);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+
+			var finallyUnsuccessful = new BoundedUnaryFormula(new BinaryFormula(onceFault1, BinaryOperator.And, onceUnsuccessful), UnaryOperator.Finally, 6);
+			var finallyContamination = new BoundedUnaryFormula(new BinaryFormula(onceFault1, BinaryOperator.And, onceContamination), UnaryOperator.Finally, 6);
+			markovChainGenerator.AddFormulaToCheck(finallyUnsuccessful);
+			markovChainGenerator.AddFormulaToCheck(finallyContamination);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(finallyUnsuccessful);
+				Console.Write($"Probability of unsuccessful: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(finallyContamination);
+				Console.Write($"Probability of contamination: {result}");
+			}
+		}
+
 
 
 		[Test]

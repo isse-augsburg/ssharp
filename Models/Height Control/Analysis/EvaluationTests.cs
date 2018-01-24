@@ -403,6 +403,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 		}
 
 
+
 		[Test]
 		public void CalculateHazardSingleCorePositionDetectorMis()
 		{
@@ -435,6 +436,46 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, ltmc, markovChainGenerator.Configuration.DefaultTraceOutput))
 			{
 				var result = modelChecker.CalculateProbability(falseAlarm);
+				Console.Write($"Probability of falseAlarm: {result}");
+			}
+		}
+
+
+		[Test]
+		public void CalculateHazardSingleCoreWithOncePositionDetectorMis()
+		{
+			var model = Model.CreateOriginal();
+			SetProbabilities(model);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(3300000L, 1000000000L);
+			var onceFault1 = new UnaryFormula(new FaultFormula(model.HeightControl.PreControl.PositionDetector.Misdetection), UnaryOperator.Once);
+			markovChainGenerator.AddFormulaToCheck(onceFault1);
+			var onceCollision = new UnaryFormula(model.Collision, UnaryOperator.Once);
+			var onceFalseAlarm = new UnaryFormula(model.FalseAlarm, UnaryOperator.Once);
+			var finallyCollision = new BoundedUnaryFormula(new BinaryFormula(onceFault1, BinaryOperator.And, onceCollision), UnaryOperator.Finally, 50);
+			var finallyFalseAlarm = new BoundedUnaryFormula(new BinaryFormula(onceFault1, BinaryOperator.And, onceFalseAlarm), UnaryOperator.Finally, 50);
+			markovChainGenerator.AddFormulaToCheck(finallyCollision);
+			markovChainGenerator.AddFormulaToCheck(finallyFalseAlarm);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var ltmc = markovChainGenerator.GenerateLabeledMarkovChain();
+			var markovChain = markovChainGenerator.GenerateMarkovChain();
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, ltmc, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(finallyCollision);
+				Console.Write($"Probability of collision: {result}");
+			}
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, ltmc, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(finallyFalseAlarm);
 				Console.Write($"Probability of falseAlarm: {result}");
 			}
 		}

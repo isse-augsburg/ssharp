@@ -247,6 +247,39 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 			}
 		}
 
+		[Test]
+		public void CalculateHazardSingleCoreAllFaultsWithOnce()
+		{
+			var model = new Model();
+			SetProbabilities(model);
+
+			var createModel = SafetySharpRuntimeModel.CreateExecutedModelFromFormulasCreator(model);
+
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<SafetySharpRuntimeModel>(createModel) { Configuration = SafetySharpModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			markovChainGenerator.Configuration.CpuCount = 1;
+			var onceFormula = new UnaryFormula(model.PossibleCollision, UnaryOperator.Once);
+			var onceFault1 = new UnaryFormula(new FaultFormula(model.Channel.MessageDropped), UnaryOperator.Once);
+			markovChainGenerator.AddFormulaToCheck(onceFault1);
+			foreach (var fault in model.Faults.Where(fault => fault != model.Channel.MessageDropped))
+			{
+				var faultFormula = new UnaryFormula(new FaultFormula(fault), UnaryOperator.Once);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			var formulaToCheck = new BoundedUnaryFormula(new BinaryFormula(onceFault1, BinaryOperator.And, onceFormula), UnaryOperator.Finally, 50);
+			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+			
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(formulaToCheck);
+				Console.Write($"Probability of formulaToCheck: {result}");
+			}
+		}
+
 
 
 		[Test]

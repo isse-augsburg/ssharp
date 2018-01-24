@@ -183,6 +183,33 @@ namespace Lustre_Models
 			}
 		}
 
+		[Test]
+		public void CalculateHazardSingleCoreAllFaultsWithOnce()
+		{
+			var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
+			markovChainGenerator.Configuration.SuccessorCapacity *= 2;
+			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
+			var onceFormula = new UnaryFormula(_hazard, UnaryOperator.Once);
+			var onceFault1 = new UnaryFormula(new FaultFormula(_faults[1]), UnaryOperator.Once);
+			markovChainGenerator.AddFormulaToCheck(onceFault1);
+			foreach (var fault in _faults.Where(fault => fault != _faults[1]))
+			{
+				var faultFormula = new UnaryFormula(new FaultFormula(fault), UnaryOperator.Once);
+				markovChainGenerator.AddFormulaToCheck(faultFormula);
+			}
+			var formulaToCheck = new BoundedUnaryFormula(new BinaryFormula(onceFault1, BinaryOperator.And, onceFormula), UnaryOperator.Finally, 25);
+			markovChainGenerator.AddFormulaToCheck(formulaToCheck);
+			markovChainGenerator.Configuration.UseCompactStateStorage = true;
+			markovChainGenerator.Configuration.EnableEarlyTermination = false;
+			var markovChain = markovChainGenerator.GenerateLabeledMarkovChain();
+
+			using (var modelChecker = new ConfigurationDependentLtmcModelChecker(markovChainGenerator.Configuration, markovChain, markovChainGenerator.Configuration.DefaultTraceOutput))
+			{
+				var result = modelChecker.CalculateProbability(formulaToCheck);
+				Console.Write($"Probability of formulaToCheck: {result}");
+			}
+		}
+
 
 
 		[Test]
