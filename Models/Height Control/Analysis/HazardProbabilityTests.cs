@@ -162,7 +162,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			var parameter = new QuantitativeParametricAnalysisParameter
 			{
 				StateFormula = model.Collision,
-				Bound = null,
+				Bound = 50,
 				From = 000001,
 				To = 0.01,
 				Steps = 25,

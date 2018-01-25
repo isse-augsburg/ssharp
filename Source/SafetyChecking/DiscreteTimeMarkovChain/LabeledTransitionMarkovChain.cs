@@ -398,9 +398,11 @@ namespace ISSE.SafetyChecking.DiscreteTimeMarkovChain
 			{
 				while (enumerator.MoveNext())
 				{
-					if (!(enumerator.CurrentProbability > 0.0))
-						continue;
-
+					// Cannot make the next validation check because such transitions might exist when many small probabilities are
+					// multiplied because of imprecise doubles arithmetic
+					//if (!(enumerator.CurrentProbability > 0.0))
+					//	continue;
+					
 					var transitionTargetNodeIndex = TransitionTargetToNodeIndex(enumerator.CurrentIndex);
 					var targetStateNodeIndex = StateToNodeIndex(enumerator.CurrentTargetState);
 					_baseGraph.AddVerticesAndEdge(new Edge(transitionTargetNodeIndex, targetStateNodeIndex));
