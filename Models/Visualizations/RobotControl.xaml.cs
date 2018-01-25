@@ -81,8 +81,16 @@
                             availableCapabilityList.SelectedItem = null;
                     }
                 }
-            }            
-               
+            }
+
+            //Checking out the drill-fault
+            if (_robotAgent.DrillBroken.IsActivated)
+                Console.WriteLine($">>> Drill-fault of robot {_robotAgent.Id} is activated <<<");
+            else
+            {
+                Console.WriteLine($">>> Drill-fault of robot {_robotAgent.Id} is NOT activated <<<");
+            }
+
             _robotAgent.Broken.Activation = BrokenFault.IsChecked.ToOccurrenceKind();
             _robotAgent.ResourceTransportFault.Activation = ResourceTransportFault.IsChecked.ToOccurrenceKind();
             _robotAgent.DrillBroken.Activation = DrillBrokenFault.IsChecked.ToOccurrenceKind();

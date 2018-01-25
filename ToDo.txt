@@ -1,16 +1,16 @@
-﻿Notiz:
-- Routenneukonfiguration klappt nur unidirektional (ungefähr)
-
+﻿Note:
+- Route reconfiguration works only unidirectional
 
 TODO:
-- Consume Capability is not selected
+- Consume Capability is not selected :: EDIT :: Not in "ExecutionState"-list
 
 - Faults of plants and agents are different
 	
-	- Drill fault is activated, but the robot still can drill. Maybe because the robot-plant is used instead of the robot agent?
+	- Drill fault is activated, but the robot still can drill. Maybe because the robot-plant is used instead of the robot agent? :: EDIT :: Yes!
+	- "RobotAgent" uses "CanApply" from "Robot" for checking its own "CanApply"-method 
 
-Zum Fault:
-- Wird Fault-Methode auch wirklich aufgerufen?
+Fault:
+- Is the fault-method actually invoked? :: EDIT :: Yes!
 
-Zur Consume-Capability:
-Counter anzeigen: Einer für completed tasks, einer für reseted/discarded tasks
+Consume-Capability:
+Show Counter: One for completed tasks, one for reseted/discarded tasks :: EDIT :: No task is completed, tasks are endless

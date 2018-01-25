@@ -38,6 +38,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
         
         public Fault SwitchFault = new TransientFault();
 
+        //public Fault DrillFault = new TransientFault();
+
 		// intolerable fault
 		public Fault SwitchToWrongToolFault = new TransientFault();
 
@@ -163,7 +165,13 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Plants
 			public override bool CanTransfer() => false;
 		}
 
-		[FaultEffect(Fault = nameof(SwitchFault)), Priority(1)]
+        //[FaultEffect(Fault = nameof(DrillFault)), Priority(2)]
+        //public class DrillEffect : Robot
+        //{
+        //    public override bool CanApply(ModelBuilderHelper.Drill) => false;
+        //}
+
+        [FaultEffect(Fault = nameof(SwitchFault)), Priority(1)]
 		public class SwitchEffect : Robot
 		{
 			public override bool SwitchCapability(ProcessCapability capability) => false;

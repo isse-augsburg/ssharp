@@ -33,6 +33,8 @@ namespace SafetySharp.CaseStudies.Visualizations
         private List<TextBox> routes = new List<TextBox>();
         private int resourceCounter;
         private TextBox workpieceCount = new TextBox();
+        private int workpieceCountNumber;
+        //private string countText = "";
 
         public RobotCell()
         {
@@ -175,7 +177,7 @@ namespace SafetySharp.CaseStudies.Visualizations
         private void DisplayRole() {
             foreach (var robot in _robots) {
                 var agent = robot.Value.GetRobotAgent();
-                Console.WriteLine("'ROLE HAS VALUE' IS: "+agent.RoleExecutor.Role.HasValue);
+                Console.WriteLine("'ROLE HAS VALUE' IS: "+ agent.RoleExecutor.Role.HasValue);
             }
         }
 
@@ -272,7 +274,7 @@ namespace SafetySharp.CaseStudies.Visualizations
             PrintTask();
             DisplayTask();
             UpdateTaskSelection();
-            
+
             DisplayWorkpieceCount();
 
             PrintCartRoutes();
@@ -452,13 +454,28 @@ namespace SafetySharp.CaseStudies.Visualizations
 
         public void DisplayWorkpieceCount()
         {
-            string countText = "TEST\nTEST\nTEST\n";
+            string countText = "";
 
-            var currentCount = _workpieces.Count;
-
-            for (int i = 0; i < currentCount; i++)
+            try
             {
-                //TODO
+                var currentCount = _model.Resources.Count;
+                var resource = _model.Resources.ElementAt(Math.Max(currentCount - 1, 0));
+
+                if (!resource.IsComplete)
+                    countText = $"Res. {currentCount}: not completed\n";
+                else
+                    countText = $"Res. {currentCount}: completed\n";
+
+                if (!resource.Task.IsCompleted)
+                    countText += $"Res. {currentCount}: Task not completed\n";
+                else
+                    countText += $"Res. {currentCount}: Task completed\n";
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                countText = $"NO MORE RESOURCES!!!\nIndex was out of range!";
+                //OnModelStateReset();
+                Environment.Exit(0);
             }
 
             workpieceCount.Text = countText;
@@ -470,8 +487,8 @@ namespace SafetySharp.CaseStudies.Visualizations
             //    visualizationArea.Children.Add(workpieceCount);
             visualizationArea.Children.Add(workpieceCount);
 
-            Grid.SetColumn(workpieceCount, Grid.GetColumn(lboxTask) + 1);
-            Grid.SetRow(workpieceCount, Grid.GetRow(lboxTask));
+            Grid.SetColumn(workpieceCount, Grid.GetColumn(lboxTask));
+            Grid.SetRow(workpieceCount, Grid.GetRow(lboxTask) + 1);
         }
     }
 }
