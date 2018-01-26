@@ -95,12 +95,15 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				do
 				{
 					Debug.WriteLine("Calculating solution");
-
 					var fragment = coalition.CTF;
-					var entry = coalition.RecoveredDistribution[fragment.Start];
-					var exit = coalition.RecoveredDistribution[fragment.End];
 
-					var solution = await _configurationFinder.Find(fragment, coalition.BaseAgents, x => x == entry, x => x == exit);
+					var entry = coalition.RecoveredDistribution[fragment.Start];
+					var isProducer = fragment.Start == 0 ? (Predicate<BaseAgent>)(x => true) : entry.Equals;
+
+					var exit = coalition.RecoveredDistribution[fragment.End];
+					var isConsumer = fragment.End == fragment.Task.RequiredCapabilities.Length-1 ? (Predicate<BaseAgent>)(x => true) : exit.Equals;
+
+					var solution = await _configurationFinder.Find(fragment, coalition.BaseAgents, isProducer, isConsumer);
 					if (solution.HasValue)
 					{
 						Debug.WriteLine("Computing role allocations");
