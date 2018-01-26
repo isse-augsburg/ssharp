@@ -1,17 +1,17 @@
 ﻿// The MIT License (MIT)
-// 
-// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
-// 
+//
+// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,7 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
+namespace SafetySharp.Odp
 {
 	using System;
 	using System.Collections.Generic;
@@ -70,6 +70,20 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		/// </summary>
 		[NotNull]
 		public IEnumerable<int> CapabilityIndices => Enumerable.Range(Start, Length);
+
+		/// <summary>
+		///   Accesses the capability at the given <paramref name="index"/> in the fragment.
+		/// </summary>
+		[NotNull]
+		public ICapability this[int index]
+		{
+			get
+			{
+				if (index >= Length)
+					throw new ArgumentOutOfRangeException(nameof(index), index, $"Task fragment has length {Length}.");
+				return Task.RequiredCapabilities[Start + index];
+			}
+		}
 
 		/// <summary>
 		///  The number of capabilities that are part of this fragment.
@@ -149,6 +163,17 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 		{
 			Debug.Assert(role.IsValid);
 			return new TaskFragment(role.Task, role.PreCondition.StateLength, role.PostCondition.StateLength - 1);
+		}
+
+		/// <summary>
+		///   Returns the task fragment that encompasses the entire given <paramref name="task"/>.
+		/// </summary>
+		[Pure]
+		public static TaskFragment FromTask([NotNull] ITask task)
+		{
+			if (task == null)
+				throw new ArgumentNullException(nameof(task));
+			return new TaskFragment(task, 0, task.RequiredCapabilities.Length - 1);
 		}
 
 		#region monoid operations

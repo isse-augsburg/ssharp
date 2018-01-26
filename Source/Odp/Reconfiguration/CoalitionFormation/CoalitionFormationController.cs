@@ -25,7 +25,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
-	using System.IO;
 	using System.Linq;
 	using System.Threading.Tasks;
 	using JetBrains.Annotations;
@@ -38,6 +37,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	/// 
 	/// (cf. Konstruktion selbst-organisierender Softwaresysteme, chapter 8)
 	/// </summary>
+	[Obsolete("use CoalitionController instead")]
 	public class CoalitionFormationController : AbstractController
 	{
 		private readonly Dictionary<InvariantPredicate, IRecruitingStrategy> _strategies = new Dictionary<InvariantPredicate, IRecruitingStrategy>();
@@ -408,9 +408,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			public BaseAgent EntryEdgeAgent { get; private set; }
 			[CanBeNull]
 			public BaseAgent ExitEdgeAgent { get; private set; }
-
-			public BaseAgent FirstCoreAgent => CtfDistribution[ReconfiguredTaskFragment.Start - CTF.Start];
-			public BaseAgent LastCoreAgent => CtfDistribution[ReconfiguredTaskFragment.End - CTF.Start];
 
 			public List<Tuple<BaseAgent, Role>> EdgeTransportRoles { get; } = new List<Tuple<BaseAgent, Role>>();
 

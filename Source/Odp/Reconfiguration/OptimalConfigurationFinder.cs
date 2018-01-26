@@ -38,19 +38,21 @@ namespace SafetySharp.Odp.Reconfiguration
 		{
 		}
 
-		protected override int[] FindDistribution(ICapability[] capabilities, BaseAgent[] availableAgents)
+		protected override int[] FindDistribution(TaskFragment taskFragment, BaseAgent[] availableAgents)
 		{
-			var identifiers = Enumerable.Range(0, availableAgents.Length).ToArray();
+			var emptyPath = new int[taskFragment.Length];
+			if (taskFragment.Length == 0)
+				return emptyPath;
 
-			var emptyPath = new int[capabilities.Length];
+			var identifiers = Enumerable.Range(0, availableAgents.Length).ToArray();
 			var paths = (from agent in identifiers
-						 where CanSatisfyNext(capabilities, availableAgents, emptyPath, 0, agent)
+						 where _precedingProducer[agent] != -1 && CanSatisfyNext(taskFragment, availableAgents, emptyPath, 0, agent)
 						 select new[] { agent }).ToArray();
 
 			if (paths.Length == 0)
 				return null;
 
-			for (var i = 1; i < capabilities.Length; ++i)
+			for (var i = 1; i < taskFragment.Length; ++i)
 			{
 				paths = (from path in paths
 						 from agent in identifiers
@@ -58,7 +60,7 @@ namespace SafetySharp.Odp.Reconfiguration
 						 // if agent is reachable from the previous path
 						 where _pathMatrix[last, agent] != -1
 							   // and agent can satisfy the next required capability
-							   && CanSatisfyNext(capabilities, availableAgents, path, i, agent)
+							   && CanSatisfyNext(taskFragment, availableAgents, path, i, agent)
 						 select path.Concat(new[] { agent }).ToArray()
 				).ToArray();
 
@@ -66,12 +68,16 @@ namespace SafetySharp.Odp.Reconfiguration
 					return null;
 			}
 
-			return paths.MinBy(PathCosts);
+			return paths
+				.Where(path => _succedingConsumer[path[path.Length - 1]] != -1)
+				.MinBy(PathCosts);
 		}
 
 		protected virtual int PathCosts(int[] path)
 		{
-			return path.Zip(path.Skip(1), (from, to) => _costMatrix[from, to]).Sum();
+			return path.Zip(path.Skip(1), (from, to) => _costMatrix[from, to]).Sum()
+				+ _costMatrix[_precedingProducer[path[0]], path[0]]
+				+ _costMatrix[path[path.Length - 1], _succedingConsumer[path[path.Length - 1]]];
 		}
 	}
 }

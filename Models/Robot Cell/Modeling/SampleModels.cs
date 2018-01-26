@@ -65,7 +65,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         {
             return CreateConfigurations(
                 b => b.DisablePlants(),
-                b => b.UseCoalitionFormation().EnableControllerVerification(verify).DisableIntolerableFaults()
+                b => b.UseCoalitionFormation(new FastConfigurationFinder()).EnableControllerVerification(verify).DisableIntolerableFaults()
             );
         }
 
@@ -91,7 +91,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             return CreateConfigurations(
                 _performanceEvaluationConfigurations,
                 b => b.DisablePlants(),
-                b => b.UseCoalitionFormation().EnablePerformanceMeasurement().DisableIntolerableFaults()
+                b => b.UseCoalitionFormation(new FastConfigurationFinder()).EnablePerformanceMeasurement().DisableIntolerableFaults()
             );
         }
 

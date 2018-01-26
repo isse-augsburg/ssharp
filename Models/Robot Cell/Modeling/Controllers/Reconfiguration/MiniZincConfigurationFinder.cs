@@ -33,20 +33,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 
 		public MiniZincConfigurationFinder() : base(MinizincModel) { }
 
-		protected override void WriteInputData(ICapability[] requiredCapabilities, BaseAgent[] availableAgents, StreamWriter writer)
+		protected override void WriteInputData(ICapability[] requiredCapabilities, BaseAgent[] availableAgents, Predicate<BaseAgent> isProducer, Predicate<BaseAgent> isConsumer, StreamWriter writer)
 		{
-			var taskSequence = string.Join(",", requiredCapabilities.Select(GetIdentifier));
-			var isCart = string.Join(",", availableAgents.Select(a => (a is CartAgent).ToString().ToLower()));
-			var capabilities = string.Join(",", availableAgents.Select(a =>
-				$"{{{string.Join(",", a.AvailableCapabilities.Select(GetIdentifier))}}}"));
-			var isConnected = string.Join("\n|", availableAgents.Select(from =>
-				string.Join(",", availableAgents.Select(to => ((from.Outputs.Contains(to) && to.Inputs.Contains(from)) || from == to).ToString().ToLower()))));
+			var taskSequence = Array(requiredCapabilities.Select(GetIdentifier));
+			var capabilities = Array(availableAgents.Select(a => Set(a.AvailableCapabilities.Select(GetIdentifier))));
+			var isConnected = Matrix(availableAgents.Select(from => availableAgents.Select(to => from == to || from.Outputs.Contains(to) && to.Inputs.Contains(from))));
+			var isProducerArray = Array(availableAgents.Select(x => isProducer(x)));
+			var isConsumerArray = Array(availableAgents.Select(x => isConsumer(x)));
 
-			writer.WriteLine($"task = [{taskSequence}];");
+			writer.WriteLine($"task = {taskSequence};");
 			writer.WriteLine($"noAgents = {availableAgents.Length};");
-			writer.WriteLine($"capabilities = [{capabilities}];");
-			writer.WriteLine($"isCart = [{isCart}];");
-			writer.WriteLine($"isConnected = [|{isConnected}|]");
+			writer.WriteLine($"capabilities = {capabilities};");
+			writer.WriteLine($"isConnected = {isConnected};");
+			writer.WriteLine($"isProducer = {isProducerArray};");
+			writer.WriteLine($"isConsumer = {isConsumerArray};");
 		}
 
 		private static int GetIdentifier(ICapability capability)

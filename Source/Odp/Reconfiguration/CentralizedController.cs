@@ -22,7 +22,6 @@
 
 namespace SafetySharp.Odp.Reconfiguration
 {
-	using System;
 	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.Threading.Tasks;
@@ -46,7 +45,7 @@ namespace SafetySharp.Odp.Reconfiguration
 		}
 
 		// synchronous implementation
-		public override Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
+		public override async Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
 		{
 			var availableAgents = GetAvailableAgents();
 
@@ -54,17 +53,14 @@ namespace SafetySharp.Odp.Reconfiguration
 			configs.RecordInvolvement(availableAgents); // central controller uses all available agents!
 			configs.RemoveAllRoles(task, Agents);
 
-			var resultComputation = _configurationFinder.Find(new HashSet<BaseAgent>(availableAgents), task.RequiredCapabilities);
-			Debug.Assert(resultComputation.IsCompleted);
-
-			var result = resultComputation.Result;
-			if (result == null)
-				configs.Fail();
+			var result = await _configurationFinder.Find(TaskFragment.FromTask(task), new HashSet<BaseAgent>(availableAgents), x => true, x => true);
+			if (result.HasValue)
+				ExtractConfigurations(configs, task, result.Value.Distribution, result.Value.ResourceFlow);
 			else
-				ExtractConfigurations(configs, task, result.Item1, result.Item2);
+				configs.Fail();
 
 			OnConfigurationsCalculated(task, configs);
-			return Task.FromResult(configs);
+			return configs;
 		}
 
 		private void ExtractConfigurations(ConfigurationUpdate config, ITask task, BaseAgent[] distribution, BaseAgent[] resourceFlow)
