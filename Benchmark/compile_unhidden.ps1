@@ -50,6 +50,7 @@ CompileProject($project_file_hc)
 cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControl.dll" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControlUnhidden.dll"
 git checkout "$PSScriptRoot\..\Models\Height Control\Modeling\Vehicles\Vehicle.cs"
 CompileProject($project_file_hc)
+cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControl.dll" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControlHidden.dll"
 
 
 cp "$PSScriptRoot\SourceChanges\FlowPortUnhidden.cs" "$PSScriptRoot\..\Models\Hemodialysis Machine\Utilities\BidirectionalFlow\FlowPort.cs"
@@ -59,3 +60,4 @@ cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachin
 git checkout "$PSScriptRoot\..\Models\Hemodialysis Machine\Utilities\BidirectionalFlow\FlowPort.cs"
 git checkout "$PSScriptRoot\..\Models\Hemodialysis Machine\Modeling\Flows\DialyzingFluidFlow.cs"
 CompileProject($project_file_hd)
+cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachine.exe" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachineHidden.exe"

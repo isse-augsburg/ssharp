@@ -34,7 +34,6 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Modeling
 	// Also called dialysate or dialyzate
 	public struct DialyzingFluid
 	{
-		[Range(0, 8, OverflowBehavior.Error)]
 		public int Quantity;
 		public KindOfDialysate KindOfDialysate;
 		public bool ContaminatedByBlood;

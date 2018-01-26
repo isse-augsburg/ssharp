@@ -3,11 +3,21 @@
 $month = (Get-Date).Month
 $year = (Get-Date).Year
 
-#..\cloc-1.72.exe --csv --out=cloc-total-${year}_${month}.csv ..\
-cloc-1.72.exe --csv --out=cloc-models-${year}_${month}.csv ..\Models
-cloc-1.72.exe --csv --out=cloc-safetychecking-${year}_${month}.csv ..\Source\SafetyChecking
-cloc-1.72.exe --csv --out=cloc-safetysharp-${year}_${month}.csv ..\Source\SafetySharp ..\Source\Compiler
-cloc-1.72.exe --csv --out=cloc-safetysharp-faultaware-${year}_${month}.csv ..\Source\SafetyChecking\FaultMinimalKripkeStructure ..\Source\SafetyChecking\MinimalCriticalSetAnalysis
-cloc-1.72.exe --csv --out=cloc-safetysharp-dtmc-${year}_${month}.csv ..\Source\SafetyChecking\DiscreteTimeMarkovChain
-cloc-1.72.exe --csv --out=cloc-safetysharp-mdp-${year}_${month}.csv ..\Source\SafetyChecking\MarkovDecisionProcess
-cloc-1.72.exe --csv --out=cloc-tests-${year}_${month}.csv ..\SafetySharpTests ..\SafetyCheckingTests
+#..\cloc-1.72.exe --csv --out=cloc-total-${year}_${month}.csv .
+..\cloc-1.72.exe --csv --out=cloc-models-${year}_${month}.csv Models
+..\cloc-1.72.exe --csv --out=cloc-safetychecking-${year}_${month}.csv Source\SafetyChecking
+..\cloc-1.72.exe --csv --out=cloc-safetysharp-compiler${year}_${month}.csv Source\Compiler .\Source\SafetySharp\CompilerServices
+..\cloc-1.72.exe --csv --out=cloc-safetysharp-common-runtime${year}_${month}.csv Source\SafetySharp\ModelChecking Source\SafetySharp\Runtime Source\SafetySharp\Utilities
+..\cloc-1.72.exe --csv --out=cloc-safetysharp-modeling${year}_${month}.csv Source\SafetySharp\Modeling
+..\cloc-1.72.exe --csv --out=cloc-safetysharp-faultaware-${year}_${month}.csv Source\SafetyChecking\FaultMinimalKripkeStructure Source\SafetyChecking\MinimalCriticalSetAnalysis
+..\cloc-1.72.exe --csv --out=cloc-safetysharp-dtmc-${year}_${month}.csv Source\SafetyChecking\DiscreteTimeMarkovChain
+..\cloc-1.72.exe --csv --out=cloc-safetysharp-mdp-${year}_${month}.csv Source\SafetyChecking\MarkovDecisionProcess
+..\cloc-1.72.exe --csv --out=cloc-safetysharp-bayesian-${year}_${month}.csv Source\SafetySharp\Bayesian
+..\cloc-1.72.exe --csv --out=cloc-tests-${year}_${month}.csv SafetySharpTests SafetyCheckingTests SafetyLustreTests
+..\cloc-1.72.exe --csv --out=cloc-safetylustre-common-runtime${year}_${month}.csv Source\SafetyLustre
+
+..\cloc-1.72.exe --csv --out=cloc-models-heightcontrol-${year}_${month}.csv '.\Models\Height Control\Modeling'
+..\cloc-1.72.exe --csv --out=cloc-models-hemodialysis-${year}_${month}.csv '.\Models\Hemodialysis Machine\Modeling' '.\Models\Hemodialysis Machine\Utilities'
+..\cloc-1.72.exe --csv --out=cloc-models-railroad-${year}_${month}.csv '.\Models\Railroad Crossing\Modeling'
+..\cloc-1.72.exe --csv --out=cloc-models-deadreckoning-${year}_${month}.csv '.\Models\Small Models\DeadReckoning\Model.cs'
+..\cloc-1.72.exe --csv --out=cloc-models-degraded-mode-${year}_${month}.csv '.\Models\Small Models\DegradedMode\Model.cs'
