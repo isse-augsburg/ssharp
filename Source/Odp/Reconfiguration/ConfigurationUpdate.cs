@@ -140,5 +140,18 @@ namespace SafetySharp.Odp.Reconfiguration
 					agent.AllocateRoles(_addedRoles[agent]);
 			}
 		}
+
+		/// <summary>
+		///   Retrieves the changes recorded for a specific given <paramref name="agent"/>.
+		/// </summary>
+		/// <returns>A tuple containing the removed and added roles.</returns>
+		[Pure]
+		public Tuple<Role[], Role[]> GetChanges([NotNull] BaseAgent agent)
+		{
+			return Tuple.Create(
+			  _removedRoles.ContainsKey(agent) ? _removedRoles[agent].ToArray() : new Role[0],
+			  _addedRoles.ContainsKey(agent) ? _addedRoles[agent].ToArray() : new Role[0]
+			);
+		}
 	}
 }

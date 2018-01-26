@@ -153,13 +153,28 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			// write reconf data
 			using (var reconfWriter = new StreamWriter(Path.Combine(subdirectory, "reconfigurations.csv")))
 			{
-				reconfWriter.WriteLine("Step;Duration;End;Failed;InvolvedAgents;AffectedAgents");
+				reconfWriter.WriteLine("Step;Duration (Ticks);End (Ticks);Failed;InvolvedAgents;AffectedAgents;RemovedRoles;AddedRoles");
+
 				foreach (var reconfiguration in report.Reconfigurations)
 				{
 					var involved = string.Join(" ", reconfiguration.ConfigUpdate.InvolvedAgents.Select(a => a.Id));
 					var affected = string.Join(" ", reconfiguration.ConfigUpdate.AffectedAgents.Select(a => a.Id));
+
+					// compute number of removed, added roles; exclude roles both removed and added to same agent (compare modulo locked)
+					var addedRolesCount = 0;
+					var removedRolesCount = 0;
+					foreach (var agent in reconfiguration.ConfigUpdate.AffectedAgents)
+					{
+						var changes = reconfiguration.ConfigUpdate.GetChanges(agent);
+						var recordedRemoved = changes.Item1;
+						var recordedAdded = changes.Item2;
+
+						removedRolesCount += recordedRemoved.Count(role1 => !recordedAdded.Any(role2 => role1.PreCondition == role2.PreCondition && role1.PostCondition == role2.PostCondition));
+						addedRolesCount += recordedAdded.Count(role1 => !recordedRemoved.Any(role2 => role1.PreCondition == role2.PreCondition && role1.PostCondition == role2.PostCondition));
+					}
+
 					reconfWriter.WriteLine(
-						$"{reconfiguration.Step};{reconfiguration.Duration.Ticks};{reconfiguration.End.Ticks};{reconfiguration.ConfigUpdate.Failed};{involved};{affected}");
+						$"{reconfiguration.Step};{reconfiguration.Duration.Ticks};{reconfiguration.End.Ticks};{reconfiguration.ConfigUpdate.Failed};{involved};{affected};{removedRolesCount};{addedRolesCount}");
 				}
 			}
 
