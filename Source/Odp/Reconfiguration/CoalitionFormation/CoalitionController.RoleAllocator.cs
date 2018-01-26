@@ -297,8 +297,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			private BaseAgent[] RestrictResourceFlow(BaseAgent entryEdgeAgent, BaseAgent exitEdgeAgent)
 			{
 				// find entryEdgeAgent, exitEdgeAgent in _resourceFlow, searching backwards/forwards from TFR.Start/.End
-				// they must be present because:
-				// 1) either TFR.Start == CTF.Start, hence NewDistribution[TFR.Start] == OldDistribution[TFR.Start] is edge agent (see isProducer in CoalitionController) -- same for exitedgeagent
+				// If they exist (i.e. are non-null), they must be present because:
+				// 1) either TFR.Start == CTF.Start > 0, hence NewDistribution[TFR.Start] == OldDistribution[TFR.Start] is edge agent (see isProducer in CoalitionController) -- same for exitedgeagent
 				// 2) TFR.Start > CTF.Start, hence capability TFR.Start - 1 >= CTF.Start remains unmodified and part of distribution -> agent that (still) applies it is in resourceFlow -- same for exitedgeagent
 				
 				var entryIndex = _reconfiguredFragment.Start - _fragment.Start;
