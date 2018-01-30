@@ -74,6 +74,9 @@ namespace SafetySharp.Odp
 				throw new InvalidOperationException("wrong capability applied to resource");
 
 			_statePrefixLength++;
+			CapabilityApplied?.Invoke();
 		}
+
+		public event Action CapabilityApplied;
 	}
 }

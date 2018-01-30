@@ -146,8 +146,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			// write global data
 			using (var globalWriter = new StreamWriter(Path.Combine(subdirectory, "simulation.csv")))
 			{
-				globalWriter.WriteLine("Seed;Model;Steps;Start;End;Throughput");
-				globalWriter.WriteLine($"{report.Seed};{report.Model};{report.Steps};{report.SimulationStart.Ticks};{report.SimulationEnd.Ticks};{report.Throughput}");
+				globalWriter.WriteLine("Seed;Model;Steps;Start;End;Resource Throughput;Capability Throughput");
+				globalWriter.WriteLine($"{report.Seed};{report.Model};{report.Steps};{report.SimulationStart.Ticks};{report.SimulationEnd.Ticks};{report.ResourceThroughput};{report.CapabilityThroughput}");
 			}
 
 			// write reconf data

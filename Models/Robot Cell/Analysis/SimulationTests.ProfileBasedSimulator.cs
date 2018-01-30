@@ -46,7 +46,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			private readonly Tuple<Fault, ReliabilityAttribute, IComponent>[] _faults;
 
 			private int _step;
-			private int _throughput;
+			private int _capabilityThroughput;
+			private int _resourceThroughput;
 			private SimulationReport _report;
 
 			public ProfileBasedSimulator(Model model)
@@ -63,53 +64,54 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			{
 				_simulator.Reset();
 				_step = 0;
-				_throughput = 0;
+				_capabilityThroughput = 0;
+				_resourceThroughput = 0;
 				_report = null;
 			}
 
 			private Tuple<Fault, ReliabilityAttribute, IComponent>[] CollectFaults()
 			{
-				var faultInfo = new HashSet<Tuple<Fault, ReliabilityAttribute, IComponent>>();
-				_model.VisitPostOrder(component =>
-				{
-					var faultFields =
+				return (from component in _model.Components
 						from faultField in component.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
-						where typeof(Fault).IsAssignableFrom(faultField.FieldType) && faultField.GetCustomAttribute<ReliabilityAttribute>() != null
-						select Tuple.Create((Fault)faultField.GetValue(component), faultField.GetCustomAttribute<ReliabilityAttribute>(), component);
-
-					foreach (var info in faultFields)
-						faultInfo.Add(info);
-				});
-				return faultInfo.ToArray();
+						let attribute = faultField.GetCustomAttribute<ReliabilityAttribute>()
+						where attribute != null && typeof(Fault).IsAssignableFrom(faultField.FieldType)
+						select Tuple.Create((Fault)faultField.GetValue(component), attribute, component)
+				).ToArray();
 			}
 
 			private void RegisterListeners(Model model)
 			{
-				model.VisitPostOrder(component =>
+				foreach (var resource in model.Resources)
+					resource.CapabilityApplied += StaticListener.Create(() => _capabilityThroughput++);
+
+				foreach (var component in model.Components)
 				{
 					var agent = component as Agent;
 					if (agent == null)
-						return;
+						continue;
 
 					var performanceStrategy = agent.ReconfigurationStrategy as PerformanceMeasurementReconfigurationStrategy;
 					if (performanceStrategy != null)
 						performanceStrategy.MeasuredReconfigurations += StaticListener.Create<IEnumerable<ReconfigurationRequest>, TimeSpan>((requests, duration) =>
 						{
-							if (_report != null)
-								foreach (var reconfigurationRequest in requests)
-									_report.AddAgentReconfiguration(_step, agent, duration, reconfigurationRequest.Task);
+							if (_report == null)
+								return;
+							foreach (var reconfigurationRequest in requests)
+								_report.AddAgentReconfiguration(_step, agent, duration, reconfigurationRequest.Task);
 						});
 
 					var robotAgent = agent as RobotAgent;
 					if (robotAgent != null)
-						robotAgent.ResourceConsumed += StaticListener.Create(() => _throughput++);
-				});
+						robotAgent.ResourceConsumed += StaticListener.Create(() => _resourceThroughput++);
+				}
 
 				var performanceController = model.Controller as PerformanceMeasurementController;
 				if (performanceController != null)
 					performanceController.MeasuredConfigurationCalculation += StaticListener.Create<ITask, ConfigurationUpdate, TimeSpan>(
-						(task, config, duration) => _report?.AddReconfiguration(_step, task, config, duration)
-					);
+						(task, config, duration) =>
+						{
+							_report?.AddReconfiguration(_step, task, config, duration);
+						});
 			}
 
 			public SimulationReport Simulate(int numberOfSteps)
@@ -147,7 +149,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					_simulator.SimulateStep();
 				}
 
-				_report.Throughput = _throughput;
+				_report.ResourceThroughput = _resourceThroughput;
+				_report.CapabilityThroughput = _capabilityThroughput;
 				_report.SimulationEnd = DateTime.Now;
 
 				var report = _report;
@@ -176,7 +179,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 				public int Seed { get; }
 
-				public int Throughput { get; set; }
+				public int ResourceThroughput { get; set; }
+
+				public int CapabilityThroughput { get; set; }
 
 				public DateTime SimulationStart { get; }
 
