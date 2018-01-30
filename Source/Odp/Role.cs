@@ -251,5 +251,31 @@ namespace SafetySharp.Odp
 				$"{PreCondition.Port?.Id.ToString() ?? "#"}@{PreCondition.StateLength} -> {interval} -> {PostCondition.Port?.Id.ToString() ?? "#"}@{PostCondition.StateLength}{(IsLocked ? " [locked]" : "")}";
 		}
 #endif
+
+		/// <summary>
+		///   Represents the allocation of a role to an agent.
+		/// </summary>
+		public struct Allocation
+		{
+			/// <summary>
+			///   The agent to which <see cref="Role"/> is allocated.
+			/// </summary>
+			[NotNull]
+			public BaseAgent Agent { get; }
+
+			/// <summary>
+			///   The role allocated to <see cref="Agent"/>.
+			/// </summary>
+			public Role Role { get; }
+
+			public Allocation([NotNull] BaseAgent agent, Role role)
+			{
+				if (agent == null)
+					throw new ArgumentNullException(nameof(agent));
+
+				Agent = agent;
+				Role = role;
+			}
+		}
 	}
 }
