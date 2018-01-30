@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 //
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -75,8 +75,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			Debug.WriteLine("Begin coalition-based reconfiguration");
 			try
 			{
-				ConfigurationUpdate config;
-
 				Debug.WriteLine("Recruiting necessary agents");
 				var fragmentComputations = new List<Task<TaskFragment>>();
 
@@ -107,7 +105,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					if (solution.HasValue)
 					{
 						Debug.WriteLine("Computing role allocations");
-						config = await ComputeRoleAllocations(fragment, solution.Value, coalition, minTfr);
+						var config = await ComputeRoleAllocations(fragment, solution.Value, coalition, minTfr);
 
 						config.RecordInvolvement(coalition.BaseAgents);
 						OnConfigurationsCalculated(coalition.Task, config);
@@ -125,9 +123,9 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 						break;
 				} while (true);
 
-				config = FailedReconfiguration(coalition);
-				OnConfigurationsCalculated(coalition.Task, config);
-				return config;
+				var failedConfig = FailedReconfiguration(coalition);
+				OnConfigurationsCalculated(coalition.Task, failedConfig);
+				return failedConfig;
 			}
 			catch (OperationCanceledException)
 			{

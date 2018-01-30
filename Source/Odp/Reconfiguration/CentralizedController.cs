@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 //
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ namespace SafetySharp.Odp.Reconfiguration
 
 			var configs = new ConfigurationUpdate();
 			configs.RecordInvolvement(availableAgents); // central controller uses all available agents!
-			configs.RemoveAllRoles(task, Agents);
+			configs.RemoveAllRoles(task, availableAgents);
 
 			var result = await _configurationFinder.Find(TaskFragment.FromTask(task), new HashSet<BaseAgent>(availableAgents), x => true, x => true);
 			if (result.HasValue)
