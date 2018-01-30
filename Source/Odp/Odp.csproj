@@ -93,6 +93,7 @@
     <Compile Include="Reconfiguration\ReconfigurationAgentHandler.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\RestartReconfigurationException.cs" />
     <Compile Include="Reconfiguration\CoalitionFormation\ShortestPaths.cs" />
+    <Compile Include="ResourceFlowWalker.cs" />
     <Compile Include="TaskFragment.cs" />
     <Compile Include="Reconfiguration\ReconfigurationMonitor.cs" />
     <Compile Include="Reconfiguration\ReconfigurationRequest.cs" />
