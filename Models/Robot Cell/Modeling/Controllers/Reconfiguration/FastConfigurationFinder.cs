@@ -61,6 +61,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			var nextRobot = (RobotAgent)availableAgents[_pathMatrix[suggestion, destination]];
 
 			var unusedCart = availableAgents[previous].Outputs
+				.Intersect(availableAgents) // needed for local reconfiguration
 				.OfType<CartAgent>()
 				.FirstOrDefault(candidate => !_usedCarts.Contains(candidate)
 					&& candidate.Inputs.Contains(availableAgents[previous])
