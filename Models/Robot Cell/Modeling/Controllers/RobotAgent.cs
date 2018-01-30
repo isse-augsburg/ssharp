@@ -1,17 +1,17 @@
 // The MIT License (MIT)
-// 
-// Copyright (c) 2014-2016, Institute for Software & Systems Engineering
-// 
+//
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,53 +31,56 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
 
 	public class RobotAgent : Agent, ICapabilityHandler<ProduceCapability>, ICapabilityHandler<ProcessCapability>, ICapabilityHandler<ConsumeCapability>
 	{
-
-        [Reliability(mttf: 10000, mttr: 100)]
+        [Reliability(mttf: 8000, mttr: 50)]
         public readonly Fault Broken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1500, mttr: 40)]
         public readonly Fault ResourceTransportFault = new TransientFault();
 
         // In analyses without hardware components, these replace the Tool.Broken faults.
         // When hardware components are included, these faults are ignored.
-        [Reliability(mttf: 1000, mttr: 100)]
+		//
+		// The ReliabilityAttribute defines mean time to failure (mttf) and mean time to repair
+		// for simulations that support this. MTTF ranges from 500 to 2000 steps here,
+		// whereas MTTR is between 5 and 20 steps.
+        [Reliability(mttf: 512, mttr: 20)]
         public readonly Fault DrillBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1024, mttr: 5)]
         public readonly Fault InsertBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 756, mttr: 15)]
         public readonly Fault TightenBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1803, mttr: 6)]
         public readonly Fault PolishBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1776, mttr: 11)]
         public readonly Fault GenericABroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1095, mttr: 19)]
         public readonly Fault GenericBBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1791, mttr: 13)]
         public readonly Fault GenericCBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1871, mttr: 8)]
         public readonly Fault GenericDBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 1914, mttr: 10)]
         public readonly Fault GenericEBroken = new TransientFault();
-        [Reliability(mttf: 1000, mttr: 100)]
+        [Reliability(mttf: 921, mttr: 7)]
         public readonly Fault GenericFBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 1918, mttr: 11)]
 		public readonly Fault GenericGBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 1933, mttr: 11)]
 		public readonly Fault GenericHBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 1945, mttr: 11)]
 		public readonly Fault GenericIBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 767, mttr: 15)]
 		public readonly Fault GenericJBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 1963, mttr: 16)]
 		public readonly Fault GenericKBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 800, mttr: 14)]
 		public readonly Fault GenericLBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 1066, mttr: 17)]
 		public readonly Fault GenericMBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 554, mttr: 12)]
 		public readonly Fault GenericNBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 671, mttr: 13)]
 		public readonly Fault GenericOBroken = new TransientFault();
-		[Reliability(mttf: 1000, mttr: 100)]
+		[Reliability(mttf: 834, mttr: 16)]
 		public readonly Fault GenericPBroken = new TransientFault();
 
 		private ICapability _currentCapability;
@@ -92,8 +95,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers
         private readonly bool[] _plantCapabilityDefects;
         // Actually available capabilities.
         public override IEnumerable<ICapability> AvailableCapabilities => _capabilities.Where((c, i) => !_plantCapabilityDefects[i] && CheckAllocatedCapability(c));
-
-
 
         public RobotAgent(ICapability[] capabilities, Robot robot, List<Task> tasks, List<Resource> resources)
         {
