@@ -174,7 +174,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int sysSize = 15;
             const int ioCount = 15;
             const int numberOfCarts = 5;
-            const int numWorkpieces = 5;
+            const int numWorkpieces = 1000;
             return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
         }
 
@@ -305,7 +305,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int sysSize = 20;
             const int ioCount = 15;
             const int numberOfCarts = 15;
-            const int numWorkpieces = 5;
+            const int numWorkpieces = 1000;
             return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
         }
 
@@ -315,7 +315,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             const int sysSize = 10;
             const int ioCount = 10;
             const int numberOfCarts = 3;
-            const int numWorkpieces = 5;
+            const int numWorkpieces = 1000;
             return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
         }
 
