@@ -1,6 +1,6 @@
 ﻿// The MIT License (MIT)
 //
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,6 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 	using System.Diagnostics;
 	using System.Linq;
 	using System.Threading.Tasks;
-	using Modeling;
 
 	partial class CoalitionController
 	{
@@ -75,7 +74,7 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				return ReconfigureTFR(restrictedResourceFlow, entryEdgeAgent, exitEdgeAgent, edgeTransportRoles);
 			}
 
-			private ConfigurationUpdate ReconfigureTFR(BaseAgent[] resourceFlow, BaseAgent entryEdgeAgent, BaseAgent exitEdgeAgent, Tuple<BaseAgent, Role>[] edgeTransportRoles)
+			private ConfigurationUpdate ReconfigureTFR(BaseAgent[] resourceFlow, BaseAgent entryEdgeAgent, BaseAgent exitEdgeAgent, Role.Allocation[] edgeTransportRoles)
 			{
 				// preconditions
 				Debug.Assert(resourceFlow.Length >= 1);
@@ -138,8 +137,8 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 					config.RemoveRoles(agent, obsoleteRoles.ToArray());
 				}
 				// clear old transport roles
-				foreach (var agentRoleGroup in edgeTransportRoles.GroupBy(t => t.Item1))
-					config.RemoveRoles(agentRoleGroup.Key, agentRoleGroup.Select(t => t.Item2).ToArray());
+				foreach (var agentRoleGroup in edgeTransportRoles.GroupBy(t => t.Agent))
+					config.RemoveRoles(agentRoleGroup.Key, agentRoleGroup.Select(t => t.Role).ToArray());
 
 				return config;
 			}
@@ -167,70 +166,144 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 				return TaskFragment.Identity(Task);
 			}
 
-			private async Task<Tuple<BaseAgent, Tuple<BaseAgent, Role>[]>> FindEntryEdgeAgent()
+			private async Task<Tuple<BaseAgent, Role.Allocation[]>> FindEntryEdgeAgent()
 			{
 				// TFR includes first capability - no edge agent needed
 				if (_reconfiguredFragment.Start == 0)
-					return Tuple.Create((BaseAgent)null, new Tuple<BaseAgent, Role>[0]);
+					return Tuple.Create((BaseAgent)null, new Role.Allocation[0]);
 
 				Debug.Assert(OldDistribution[_reconfiguredFragment.Start] != null, "Dead agents should be surrounded in TFR.");
 
 				// first agent to apply a capability is the same -> can serve as edge agent
 				if (NewDistribution[_reconfiguredFragment.Start - _fragment.Start] == OldDistribution[_reconfiguredFragment.Start])
-					return Tuple.Create(OldDistribution[_reconfiguredFragment.Start], new Tuple<BaseAgent, Role>[0]);
+					return Tuple.Create(OldDistribution[_reconfiguredFragment.Start], new Role.Allocation[0]);
 
-				// otherwise agent that applied (and still applies) capability ReconfiguredTaskFragment.Start-1 is chosen as edge agent
-				var currentAgent = OldDistribution[_reconfiguredFragment.Start];
-				var currentRole = FindRoleForCapability(_reconfiguredFragment.Start);
-
-				var edgeTransportRoles = new List<Tuple<BaseAgent, Role>>();
-
-				while (!currentRole.IncludesCapability(_reconfiguredFragment.Start - 1))
+				// Otherwise we need an agent we know is connected to whoever applies capability TFR.Start-1.
+				// If TFR.Start > CTF.Start, capability TFR.Start-1 was and is applied by an agent in ResourceFlow - choose it!
+				if (_reconfiguredFragment.Start > _fragment.Start)
 				{
-					edgeTransportRoles.Add(Tuple.Create(currentAgent, currentRole));
+					var edgeAgent = OldDistribution[_reconfiguredFragment.Start - 1];
 
-					var nextAgent = currentRole.Input;
-					Debug.Assert(nextAgent != null && nextAgent.IsAlive); // otherwise coalition merge would have occurred.
-					await _coalition.Invite(nextAgent);
+					// Find roles that transport resources between edge agent and TFR
+					var edgeTransportRoles = ResourceFlowWalker
+						.WalkBackward(OldDistribution[_reconfiguredFragment.Start], FindRoleForCapability(_reconfiguredFragment.Start))
+						.TakeWhile(allocation => !allocation.Role.IncludesCapability(_reconfiguredFragment.Start-1))
+						.ToArray();
 
-					currentRole = nextAgent.AllocatedRoles.Single(_reconfiguredFragment.Succeedes);
-					currentAgent = nextAgent;
+					return Tuple.Create(edgeAgent, edgeTransportRoles);
 				}
 
-				return Tuple.Create(currentAgent, edgeTransportRoles.ToArray());
+				Debug.Assert(_reconfiguredFragment.Start == _fragment.Start);
+				Debug.Assert(ResourceFlow[0] == OldDistribution[_reconfiguredFragment.Start]);
+
+				// Otherwise TFR.Start-1 is outside of the fragment.
+				// We know the agent that applies it is connected to ResourceFlow[0], and ResourceFlow connects ResourceFlow[0] to TFR.
+				// But we need the concatenated connection (from TFR.Start-1 over edge agent to TFR) to be cycle-free.
+
+				// Find TFR start in resource flow.
+				var resourceFlowIndex = Array.IndexOf(ResourceFlow, NewDistribution[_reconfiguredFragment.Start - _fragment.Start]);
+				Debug.Assert(resourceFlowIndex != -1);
+
+				// Find agent between ResourceFlow[0] and TFR that also connects TFR.Start-1 to ResourceFlow[0].
+				BaseAgent duplicateAgent = null;
+				var duplicateRole = default(Role);
+
+				for (var i = resourceFlowIndex - 1; i >= 0 && duplicateAgent == null; --i)
+					foreach (var role in ResourceFlow[i].AllocatedRoles)
+						if (_reconfiguredFragment.Succeedes(role))
+						{
+							duplicateAgent = ResourceFlow[i];
+							duplicateRole = role;
+							break;
+						}
+
+				// There's no agent between ResourceFlow[0] and TFR that also transports resources to ResourceFlow[0].
+				if (duplicateAgent == null)
+					return Tuple.Create(ResourceFlow[0], new Role.Allocation[0]); // Choose ResourceFlow[0] as edge agent.
+
+				// Choose duplicateAgent as edge agent. Collect transport roles between that agent and TFR.
+				var transportRoles = new List<Role.Allocation>();
+				foreach (var allocation in ResourceFlowWalker.WalkForward(duplicateAgent, duplicateRole))
+				{
+					if (allocation.Agent == OldDistribution[_reconfiguredFragment.Start])
+						break;
+
+					Debug.Assert(allocation.Agent.IsAlive);
+					await _coalition.Invite(allocation.Agent);
+
+					transportRoles.Add(allocation);
+				}
+				return Tuple.Create(duplicateAgent, transportRoles.ToArray());
 			}
 
-			private async Task<Tuple<BaseAgent, Tuple<BaseAgent, Role>[]>> FindExitEdgeAgent()
+			private async Task<Tuple<BaseAgent, Role.Allocation[]>> FindExitEdgeAgent()
 			{
-				// TFR includes last capability - no edge agent needed
+				// TFR includes last capability in task - no edge agent needed
 				if (_reconfiguredFragment.End == Task.RequiredCapabilities.Length - 1)
-					return Tuple.Create((BaseAgent)null, new Tuple<BaseAgent, Role>[0]);
+					return Tuple.Create((BaseAgent)null, new Role.Allocation[0]);
 
 				Debug.Assert(OldDistribution[_reconfiguredFragment.End] != null, "Dead agents should be surrounded in TFR.");
 
-				// last agent to apply a capability is the same -> can serve as edge agent
+				// last agent to apply a capability in TFR is the same -> can serve as edge agent
 				if (NewDistribution[_reconfiguredFragment.End - _fragment.Start] == OldDistribution[_reconfiguredFragment.End])
-					return Tuple.Create(OldDistribution[_reconfiguredFragment.End], new Tuple<BaseAgent, Role>[0]);
+					return Tuple.Create(OldDistribution[_reconfiguredFragment.End], new Role.Allocation[0]);
 
-				// otherwise agent that applied (and still applies) capability ReconfiguredTaskFragment.End+1 is chosen as edge agent
-				var currentAgent = OldDistribution[_reconfiguredFragment.End];
-				var currentRole = FindRoleForCapability(_reconfiguredFragment.End);
-
-				var edgeTransportRoles = new List<Tuple<BaseAgent, Role>>();
-
-				while (!currentRole.IncludesCapability(_reconfiguredFragment.End + 1))
+				// Otherwise we need an agent we know is connected to whoever applies capability TFR.End+1.
+				// If TFR.End < CTF,End, capability TFR.End+1 was and is applied by an agent in ResourceFlow - choose it!
+				if (_reconfiguredFragment.End < _fragment.End)
 				{
-					edgeTransportRoles.Add(Tuple.Create(currentAgent, currentRole));
+					var edgeAgent = OldDistribution[_reconfiguredFragment.End + 1];
 
-					var nextAgent = currentRole.Output;
-					Debug.Assert(nextAgent != null && nextAgent.IsAlive); // otherwise coalition merge would have occurred.
-					await _coalition.Invite(nextAgent);
+					// Find roles that transport resources between TFR and edge agent
+					var edgeTransportRoles = ResourceFlowWalker
+						.WalkForward(OldDistribution[_reconfiguredFragment.End], FindRoleForCapability(_reconfiguredFragment.End))
+						.TakeWhile(allocation => !allocation.Role.IncludesCapability(_reconfiguredFragment.End + 1))
+						.ToArray();
 
-					currentRole = nextAgent.AllocatedRoles.Single(_reconfiguredFragment.Precedes);
-					currentAgent = nextAgent;
+					return Tuple.Create(edgeAgent, edgeTransportRoles);
 				}
 
-				return Tuple.Create(currentAgent, edgeTransportRoles.ToArray());
+				Debug.Assert(_reconfiguredFragment.End == _fragment.End);
+				Debug.Assert(ResourceFlow[ResourceFlow.Length - 1] == OldDistribution[_reconfiguredFragment.End]);
+
+				// Otherwise TFR.End+1 is outside of the fragment.
+				// We know ResourceFlow.Last is connected to the agent that applies it is, and ResourceFlow connects TFR to ResourceFlow.Last.
+				// But we need the concatenated connection (from TFR over edge agent to TFR.End+1) to be cycle-free.
+
+				// Find TFR end in resource flow.
+				var resourceFlowIndex = Array.LastIndexOf(ResourceFlow, NewDistribution[_reconfiguredFragment.End - _fragment.Start]);
+				Debug.Assert(resourceFlowIndex != -1);
+
+				// Find agent between TFR and ResourceFlow.Last that also connects ResourceFlow.Last to TFR.End+1.
+				BaseAgent duplicateAgent = null;
+				var duplicateRole = default(Role);
+
+				for (var i = resourceFlowIndex + 1; i < ResourceFlow.Length && duplicateAgent == null; ++i)
+					foreach (var role in ResourceFlow[i].AllocatedRoles)
+						if (_reconfiguredFragment.Precedes(role))
+						{
+							duplicateAgent = ResourceFlow[i];
+							duplicateRole = role;
+							break;
+						}
+
+				// There's no agent between TFR and ResourceFlow.Last that also transports resources from ResourceFlow.Last.
+				if (duplicateAgent == null)
+					return Tuple.Create(ResourceFlow[ResourceFlow.Length - 1], new Role.Allocation[0]); // Choose ResourceFlow.Last as edge agent.
+
+				// Choose duplicateAgent as edge agent. Collect transport roles between TFR and that agent.
+				var transportRoles = new List<Role.Allocation>();
+				foreach (var allocation in ResourceFlowWalker.WalkBackward(duplicateAgent, duplicateRole))
+				{
+					if (allocation.Agent == OldDistribution[_reconfiguredFragment.End])
+						break;
+
+					Debug.Assert(allocation.Agent.IsAlive);
+					await _coalition.Invite(allocation.Agent);
+
+					transportRoles.Add(allocation);
+				}
+				return Tuple.Create(duplicateAgent, transportRoles.ToArray());
 			}
 
 			private Role FindRoleForCapability(int capabilityIndex)
@@ -296,23 +369,36 @@ namespace SafetySharp.Odp.Reconfiguration.CoalitionFormation
 			/// </summary>
 			private BaseAgent[] RestrictResourceFlow(BaseAgent entryEdgeAgent, BaseAgent exitEdgeAgent)
 			{
-				// find entryEdgeAgent, exitEdgeAgent in _resourceFlow, searching backwards/forwards from TFR.Start/.End
+				// find entryEdgeAgent, exitEdgeAgent in ResourceFlow, searching backwards/forwards from TFR.Start/.End
 				// If they exist (i.e. are non-null), they must be present because:
-				// 1) either TFR.Start == CTF.Start > 0, hence NewDistribution[TFR.Start] == OldDistribution[TFR.Start] is edge agent (see isProducer in CoalitionController) -- same for exitedgeagent
+				// 1) either TFR.Start == CTF.Start > 0, hence ??? -- same for exitedgeagent
 				// 2) TFR.Start > CTF.Start, hence capability TFR.Start - 1 >= CTF.Start remains unmodified and part of distribution -> agent that (still) applies it is in resourceFlow -- same for exitedgeagent
-				
-				var entryIndex = _reconfiguredFragment.Start - _fragment.Start;
-				while (entryIndex > 0 && ResourceFlow[entryIndex] != entryEdgeAgent)
-					entryIndex--;
-				Debug.Assert(entryEdgeAgent == null && entryIndex == 0 || ResourceFlow[entryIndex] == entryEdgeAgent);
 
-				var exitIndex = _reconfiguredFragment.End - _fragment.Start;
-				while (exitIndex < ResourceFlow.Length - 1 && ResourceFlow[entryIndex] != exitEdgeAgent)
-					exitIndex++;
-				Debug.Assert(exitEdgeAgent == null && exitIndex == ResourceFlow.Length-1 || ResourceFlow[exitIndex] == exitEdgeAgent);
+				// for all agents in NewDistribution, determine position in ResourceFlow
+				var distributionPositions = new int[_fragment.Length];
+				var j = 0;
+				for (var i = 0; i < distributionPositions.Length; ++i)
+				{
+					while (ResourceFlow[j] != NewDistribution[i])
+						++j;
+					distributionPositions[i] = j;
+				}
+
+				// determine start of restricted resource flow
+				var entryIndex = distributionPositions[_reconfiguredFragment.Start - _fragment.Start];
+				if (entryEdgeAgent != null)
+					while (ResourceFlow[entryIndex] != entryEdgeAgent)
+						entryIndex--;
+
+				// determine end of restricted resource flow
+				var exitIndex = distributionPositions[_reconfiguredFragment.End - _fragment.Start];
+				if (exitEdgeAgent != null)
+					while (ResourceFlow[exitIndex] != exitEdgeAgent)
+						exitIndex++;
 
 				// restrict resourceflow to the respective subrange
 				var restrictedResourceFlow = new BaseAgent[exitIndex - entryIndex + 1];
+				Console.WriteLine($"source.length={ResourceFlow.Length}, start={entryIndex}, end={exitIndex}, length={restrictedResourceFlow.Length}");
 				Array.Copy(ResourceFlow, entryIndex, restrictedResourceFlow, 0, restrictedResourceFlow.Length);
 				return restrictedResourceFlow;
 			}
