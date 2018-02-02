@@ -41,12 +41,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 			_strategy = strategy;
 		}
 
-		public event Action<IEnumerable<ReconfigurationRequest>, TimeSpan> MeasuredReconfigurations; 
+		public event Action<IEnumerable<ReconfigurationRequest>, ulong> MeasuredReconfigurations;
 
 		public async Task Reconfigure(IEnumerable<ReconfigurationRequest> reconfigurations)
 		{
 			var reconfTime = await AsyncPerformance.Measure(() => _strategy.Reconfigure(reconfigurations));
-			MeasuredReconfigurations?.Invoke(reconfigurations, reconfTime.Elapsed);
+			MeasuredReconfigurations?.Invoke(reconfigurations, PerformanceMeasurementController.ElapsedNanoseconds(reconfTime));
 		}
 	}
 }

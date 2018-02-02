@@ -92,12 +92,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 					var performanceStrategy = agent.ReconfigurationStrategy as PerformanceMeasurementReconfigurationStrategy;
 					if (performanceStrategy != null)
-						performanceStrategy.MeasuredReconfigurations += StaticListener.Create<IEnumerable<ReconfigurationRequest>, TimeSpan>((requests, duration) =>
+						performanceStrategy.MeasuredReconfigurations += StaticListener.Create<IEnumerable<ReconfigurationRequest>, ulong>((requests, nanosecondsDuration) =>
 						{
 							if (_report == null)
 								return;
 							foreach (var reconfigurationRequest in requests)
-								_report.AddAgentReconfiguration(_step, agent, duration, reconfigurationRequest.Task);
+								_report.AddAgentReconfiguration(_step, agent, nanosecondsDuration, reconfigurationRequest.Task);
 						});
 
 					var robotAgent = agent as RobotAgent;
@@ -107,10 +107,10 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 				var performanceController = model.Controller as PerformanceMeasurementController;
 				if (performanceController != null)
-					performanceController.MeasuredConfigurationCalculation += StaticListener.Create<ITask, ConfigurationUpdate, TimeSpan>(
-						(task, config, duration) =>
+					performanceController.MeasuredConfigurationCalculation += StaticListener.Create<ITask, ConfigurationUpdate, ulong>(
+						(task, config, nanosecondsDuration) =>
 						{
-							_report?.AddReconfiguration(_step, task, config, duration);
+							_report?.AddReconfiguration(_step, task, config, nanosecondsDuration);
 						});
 			}
 
@@ -193,29 +193,29 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 				public LinkedList<AgentReconfiguration> AgentReconfigurations { get; } = new LinkedList<AgentReconfiguration>();
 
-				public void AddReconfiguration(int step, ITask task, ConfigurationUpdate configUpdate, TimeSpan duration)
+				public void AddReconfiguration(int step, ITask task, ConfigurationUpdate configUpdate, ulong nanosecondsDuration)
 				{
-					Reconfigurations.AddLast(new ReconfigurationRecord(step, duration, DateTime.Now, task, configUpdate));
+					Reconfigurations.AddLast(new ReconfigurationRecord(step, nanosecondsDuration, DateTime.Now, task, configUpdate));
 				}
 
-				public void AddAgentReconfiguration(int step, Agent agent, TimeSpan duration, ITask task)
+				public void AddAgentReconfiguration(int step, Agent agent, ulong nanosecondsDuration, ITask task)
 				{
-					AgentReconfigurations.AddLast(new AgentReconfiguration(agent.Id, step, duration, task));
+					AgentReconfigurations.AddLast(new AgentReconfiguration(agent.Id, step, nanosecondsDuration, task));
 				}
 
 				public struct ReconfigurationRecord
 				{
-					public ReconfigurationRecord(int step, TimeSpan duration, DateTime end, ITask task, ConfigurationUpdate configUpdate)
+					public ReconfigurationRecord(int step, ulong nanosecondsDuration, DateTime end, ITask task, ConfigurationUpdate configUpdate)
 					{
 						Step = step;
-						Duration = duration;
+						NanosecondsDuration = nanosecondsDuration;
 						End = end;
 						Task = task;
 						ConfigUpdate = configUpdate;
 					}
 
 					public int Step { get; }
-					public TimeSpan Duration { get; }
+					public ulong NanosecondsDuration { get; }
 					public DateTime End { get; }
 					public ITask Task { get; }
 					public ConfigurationUpdate ConfigUpdate { get; }
@@ -223,17 +223,17 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 
 				public struct AgentReconfiguration
 				{
-					public AgentReconfiguration(uint agent, int step, TimeSpan duration, ITask task)
+					public AgentReconfiguration(uint agent, int step, ulong nanosecondsDuration, ITask task)
 					{
 						Agent = agent;
 						Step = step;
-						Duration = duration;
+						NanosecondsDuration = nanosecondsDuration;
 						Task = task;
 					}
 
 					public uint Agent { get; }
 					public int Step { get; }
-					public TimeSpan Duration { get; }
+					public ulong NanosecondsDuration { get; }
 					public ITask Task { get; }
 				}
 			}

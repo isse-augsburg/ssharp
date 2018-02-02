@@ -23,7 +23,8 @@
 namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration.PerformanceMeasurement
 {
     using System;
-    using System.Threading.Tasks;
+	using System.Diagnostics;
+	using System.Threading.Tasks;
 
     using Odp;
     using Odp.Reconfiguration;
@@ -38,7 +39,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             _actingController = actingController;
         }
 
-		public event Action<ITask, ConfigurationUpdate, TimeSpan> MeasuredConfigurationCalculation;
+		public event Action<ITask, ConfigurationUpdate, ulong> MeasuredConfigurationCalculation;
 
         public async Task<ConfigurationUpdate> CalculateConfigurationsAsync(object context, ITask task)
         {
@@ -46,7 +47,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
 	        var configUpdate = tuple.Item1;
 	        var reconfTime = tuple.Item2;
 
-			MeasuredConfigurationCalculation?.Invoke(task, configUpdate, reconfTime.Elapsed);
+			MeasuredConfigurationCalculation?.Invoke(task, configUpdate, ElapsedNanoseconds(reconfTime));
             return configUpdate;
         }
 
@@ -57,5 +58,16 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling.Controllers.Reconfiguration
             add { _actingController.ConfigurationsCalculated += value; }
             remove { _actingController.ConfigurationsCalculated -= value; }
         }
+
+		public static ulong ElapsedNanoseconds(Stopwatch watch)
+		{
+			const ulong nanosecondsPerSecond = 1000000000ul;
+
+			// lossless since non-negative
+			var ticks = (ulong)watch.ElapsedTicks;
+			var frequency = (ulong)Stopwatch.Frequency;
+
+			return (ticks * nanosecondsPerSecond) / frequency;
+		}
     }
 }

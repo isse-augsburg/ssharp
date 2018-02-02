@@ -153,7 +153,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			// write reconf data
 			using (var reconfWriter = new StreamWriter(Path.Combine(subdirectory, "reconfigurations.csv")))
 			{
-				reconfWriter.WriteLine("Step;Duration (Ticks);End (Ticks);Failed;InvolvedAgents;AffectedAgents;RemovedRoles;AddedRoles");
+				reconfWriter.WriteLine("Step;Duration;End (Ticks);Failed;InvolvedAgents;AffectedAgents;RemovedRoles;AddedRoles");
 
 				foreach (var reconfiguration in report.Reconfigurations)
 				{
@@ -174,7 +174,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					}
 
 					reconfWriter.WriteLine(
-						$"{reconfiguration.Step};{reconfiguration.Duration.Ticks};{reconfiguration.End.Ticks};{reconfiguration.ConfigUpdate.Failed};{involved};{affected};{removedRolesCount};{addedRolesCount}");
+						$"{reconfiguration.Step};{reconfiguration.NanosecondsDuration};{reconfiguration.End.Ticks};{reconfiguration.ConfigUpdate.Failed};{involved};{affected};{removedRolesCount};{addedRolesCount}");
 				}
 			}
 
@@ -184,7 +184,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 				agentWriter.WriteLine("Step;Agent;Duration");
 				foreach (var reconfiguration in report.AgentReconfigurations)
 				{
-					agentWriter.WriteLine($"{reconfiguration.Step};{reconfiguration.Agent};{reconfiguration.Duration.Ticks}");
+					agentWriter.WriteLine($"{reconfiguration.Step};{reconfiguration.Agent};{reconfiguration.NanosecondsDuration}");
 				}
 			}
 		}
