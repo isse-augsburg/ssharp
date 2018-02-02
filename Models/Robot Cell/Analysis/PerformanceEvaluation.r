@@ -24,14 +24,24 @@ library(data.table)
 TestRun.readData <- function(folder) {
   # Read all 3 files.
   simulation            <- fread(file.path(folder, "simulation.csv"))
-  reconfigurations      <- fread(file.path(folder, "reconfigurations.csv"))
-  agentReconfigurations <- fread(file.path(folder, "agent-reconfigurations.csv"))
+  reconfigurations      <- fread(file.path(folder, "reconfigurations.csv"), colClasses=list(integer64=c("Duration (Ticks)")))
+  agentReconfigurations <- fread(file.path(folder, "agent-reconfigurations.csv"), colClasses=list(integer64=c("Duration")))
 
   # Split lists of agents and convert agent IDs to integers.
   reconfigurations[, InvolvedAgents := map(strsplit(InvolvedAgents, " ", fixed=TRUE), strtoi)]
   reconfigurations[, AffectedAgents := map(strsplit(AffectedAgents, " ", fixed=TRUE), strtoi)]
 
-  list(simulation, reconfigurations, agentReconfigurations)
+  # Add seed to reconfigurations and agentReconfigurations tables.
+  seed <- simulation[,Seed]
+  reconfigurations[,Seed := seed]
+  agentReconfigurations[,Seed := seed]
+
+  list(simulation=simulation, reconfigurations=reconfigurations, agentReconfigurations=agentReconfigurations)
+}
+
+TestSet.exists <- function(model, config, rootFolder) {
+  testSetFolder <- file.path(rootFolder, paste(model, " (", config, ")", sep=""))
+  dir.exists(testSetFolder)
 }
 
 TestSet.readData <- function(model, config, rootFolder) {
@@ -40,11 +50,30 @@ TestSet.readData <- function(model, config, rootFolder) {
   testRuns      <- list.dirs(testSetFolder, recursive=FALSE)
   testSetData   <- map(testRuns, TestRun.readData)
 
-  list(model, config, testSetData)
+  # Combine respective tables.
+  simulations           <- rbindlist(map(testSetData, ~ .[["simulation"]]))
+  reconfigurations      <- rbindlist(map(testSetData, ~ .[["reconfigurations"]]))
+  agentReconfigurations <- rbindlist(map(testSetData, ~ .[["agentReconfigurations"]]))
+
+  # Add test set information as necessary.
+  simulations[,Config := config]
+  reconfigurations[,':='(Config = config, Model = model)]
+  agentReconfigurations[,':='(Config = config, Model = model)]
+
+  list(model, config, simulations=simulations, reconfigurations=reconfigurations, agentReconfigurations=agentReconfigurations)
 }
 
 Performance.readData <- function(models, configs, rootFolder) {
-  map(models, ~ map(configs, ~ TestSet.readData(.y, .x, rootFolder), .))
+  # Iterate through all existing test sets and read their data.
+  testSets        <- cross2(models, configs, .filter = ~ !TestSet.exists(.x, .y, rootFolder))
+  performanceData <- map(testSets, ~ TestSet.readData(.[1], .[2], rootFolder))
+
+  # Combine respective tables.
+  simulations           <- rbindlist(map(performanceData, ~ .[["simulations"]]))
+  reconfigurations      <- rbindlist(map(performanceData, ~ .[["reconfigurations"]]))
+  agentReconfigurations <- rbindlist(map(performanceData, ~ .[["agentReconfigurations"]]))
+
+  list(simulations=simulations, reconfigurations=reconfigurations, agentReconfigurations=agentReconfigurations)
 }
 
 ##################### Main Program ####################
