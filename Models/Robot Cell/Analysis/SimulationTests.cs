@@ -100,6 +100,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var initializationStopwatch = Stopwatch.StartNew();
 			console.WriteLine("Initializing...");
 
+			model.Faults.MakeNondeterministic();
 			using (var simulator = new ProfileBasedSimulator(model))
 			{
 				initializationStopwatch.Stop();

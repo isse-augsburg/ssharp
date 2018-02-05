@@ -73,9 +73,15 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			{
 				return (from component in _model.Components
 						from faultField in component.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
+						where typeof(Fault).IsAssignableFrom(faultField.FieldType)
+
 						let attribute = faultField.GetCustomAttribute<ReliabilityAttribute>()
-						where attribute != null && typeof(Fault).IsAssignableFrom(faultField.FieldType)
-						select Tuple.Create((Fault)faultField.GetValue(component), attribute, component)
+						where attribute != null
+
+						let fault = (Fault)faultField.GetValue(component)
+						where fault.Activation == Activation.Nondeterministic // Don't (de-) activate suppressed or forced faults.
+
+						select Tuple.Create(fault, attribute, component)
 				).ToArray();
 			}
 
