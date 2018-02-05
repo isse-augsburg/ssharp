@@ -26,7 +26,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using Analysis;
+	using Analysis;
     using Controllers;
 	using Odp;
     using Odp.Reconfiguration;
@@ -40,8 +40,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
         private static readonly Func<ModelBuilder, ModelBuilder>[] _defaultConfigurations =
             { Ictss1, Ictss2, Ictss3, Ictss4, Ictss5, Ictss6, Ictss7 };
 
-        private static readonly Func<ModelBuilder, ModelBuilder>[] _performanceEvaluationConfigurations =
-            { FewAgentsHighRedundancy , ManyAgentsLowRedundancy, ManyAgentsHighRedundancy, MediumSizePerformanceMeasurementModel };
+		private static readonly Func<ModelBuilder, ModelBuilder>[] _performanceEvaluationConfigurations =
+			//{ FewAgentsHighRedundancy , ManyAgentsLowRedundancy, ManyAgentsHighRedundancy, MediumSizePerformanceMeasurementModel };
+			{ FewAgentsHighRedundancy, ManyAgentsLowRedundancy2, ManyAgentsHighRedundancy2 };
 
         public static Model DefaultInstance<T>(IConfigurationFinder finder, AnalysisMode mode = AnalysisMode.AllFaults)
             where T : IController
@@ -144,12 +145,35 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 , mode).Build();
         }
 
-        public static Model MediumSizePerformanceMeasurementModel()
+		public static Model MediumSizePerformanceMeasurementModel()
         {
             return new ModelBuilder(nameof(MediumSizePerformanceMeasurementModel)).MediumSizePerformanceMeasurementModel().Build();
-        }
+		}
 
-        public static ModelBuilder FewAgentsHighRedundancy(this ModelBuilder builder)
+		// Existing Models:
+		// ================
+		// PerformanceMeasurement1:                 7 robots,  5 capabilities,  6 carts,  3 capabilities/robot, few/medium IO
+		//
+		// FewAgentsHighRedundancy:                 6 robots,  3 capabilities,  4 carts, ~2 capabilities/robot, ioCount~=4
+		// MediumSizePerformanceMeasurementModel:  10 robots, 10 capabilities,  3 carts,  5 capabilities/robot, ioCount=10
+		// --------------------------------------------------------------------------------------------------------------- (analyzability barrier)
+		// ManyAgentsLowRedundancy:                15 robots, 15 capabilities,  5 carts,  5 capabilities/robot, ioCount=15
+		// ManyAgentsHighRedundancy:               20 robots, 20 capabilities, 15 carts, 20 capabilities/robot, ioCount=15
+		//
+		//
+		//
+		// nach Paper-Notizen, aber noch analysierbar:
+		// ===========================================
+		// FewAgentsHighRedundancy:                 6 robots,  3 capabilities,  4 carts, ~2 capabilities/robot, ioCount~=4  || redundancy: capability 66.7%
+		// ManyAgentsLowRedundancy*:               10 robots, 10 capabilities,  7 carts,  4 capabilities/robot, ioCount=4   || redundancy: capability 40.0%
+		// ManyAgentsHighRedundancy*:              10 robots, 10 capabilities,  7 carts,  7 capabilities/robot, ioCount=7   || redundancy: capability 70.0%
+		//
+		// FaultKindComparison:                     8 robots,  8 capabilities,  4 carts,  4 capabilities/robot, ioCount=4   || redundancy: capability 50.0%
+		//
+		// [NOTE: currently GenerateSystem connects all robots to all other robots via all carts]
+		// [NOTE: capabilities only count process capabilities]
+
+		public static ModelBuilder FewAgentsHighRedundancy(this ModelBuilder builder)
         {
             return builder.DefineTask(1000, Produce, Drill, Insert, Tighten, Consume) // 5 capabilities in task
 
@@ -166,23 +190,46 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 .AddCart(Route(2, 3), Route(2, 4), Route(2, 5), Route(3, 4), Route(3, 5), Route(4, 5))
                 .AddCart(Route(0, 2), Route(0, 4), Route(2, 4), Route(1, 3), Route(1, 5), Route(3, 5))
                 .AddCart(Route(3, 4), Route(4, 5), Route(1, 5), Route(5, 3));
-        }
+		}
 
-        public static ModelBuilder ManyAgentsLowRedundancy(this ModelBuilder builder)
+		[Obsolete]
+		public static ModelBuilder MediumSizePerformanceMeasurementModel(this ModelBuilder builder)
+		{
+			return GenerateSystem(builder, capsPerAgent: 5, sysSize: 10, ioCount: 10, numberOfCarts: 3, numWorkpieces: 1000, rnd: new Random(42));
+		}
+
+		[Obsolete]
+		public static ModelBuilder ManyAgentsLowRedundancy(this ModelBuilder builder)
         {
-            const int capCount = 5;
-            const int sysSize = 15;
-            const int ioCount = 15;
-            const int numberOfCarts = 5;
-            const int numWorkpieces = 1000;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
-        }
+            return GenerateSystem(builder, capsPerAgent: 5, sysSize: 15, ioCount: 15, numberOfCarts: 5, numWorkpieces: 1000, rnd: new Random(42));
+		}
 
-        private static ModelBuilder GenerateSystem(this ModelBuilder builder, int capCount, int sysSize, int ioCount, int numberOfCarts, int numWorkpieces, Random rnd)
+		[Obsolete]
+		public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
+		{
+			return GenerateSystem(builder, capsPerAgent: 20, sysSize: 20, ioCount: 15, numberOfCarts: 15, numWorkpieces: 1000, rnd: new Random(42));
+		}
+
+		public static ModelBuilder ManyAgentsLowRedundancy2(this ModelBuilder builder)
+		{
+			return GenerateSystem(builder, capsPerAgent: 4, sysSize: 10, ioCount: 4, numberOfCarts: 7, numWorkpieces: 1000, rnd: new Random(42));
+		}
+
+		public static ModelBuilder ManyAgentsHighRedundancy2(this ModelBuilder builder)
+		{
+			return GenerateSystem(builder, capsPerAgent: 7, sysSize: 10, ioCount: 7, numberOfCarts: 7, numWorkpieces: 1000, rnd: new Random(42));
+		}
+
+		public static ModelBuilder FaultKindComparison(this ModelBuilder builder)
+		{
+			return GenerateSystem(builder, capsPerAgent: 4, sysSize: 8, ioCount: 4, numberOfCarts: 4, numWorkpieces: 1000, rnd: new Random(42));
+		}
+
+		private static ModelBuilder GenerateSystem(this ModelBuilder builder, int capsPerAgent, int sysSize, int ioCount, int numberOfCarts, int numWorkpieces, Random rnd)
         {
             var tsg = new TestSystemGenerator();
-            var generatedSystem = tsg.Generate(sysSize, capCount, ioCount, rnd);
-            Debug.Assert(capCount <= Enum.GetNames(typeof(ProductionAction)).Length && Enum.GetNames(typeof(ProductionAction)).Length >= sysSize);
+            var generatedSystem = tsg.Generate(sysSize, capsPerAgent, ioCount, rnd);
+            Debug.Assert(capsPerAgent <= Enum.GetNames(typeof(ProductionAction)).Length && Enum.GetNames(typeof(ProductionAction)).Length >= sysSize);
 
             var currentCapa = generatedSystem.Item2;
             var enumerator = Enum.GetValues(typeof(ProductionAction)).Cast<ProductionAction>().GetEnumerator();
@@ -231,14 +278,20 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 }
             }
             
-            for (var j = 0; j < numberOfCarts; j++)
-            {
-                builder.AddCart(neededConnections.ToArray());
-            }
+			// split neededConnections in numberOfCarts approx. equal-size pieces
+			foreach (var connections in neededConnections.Split(numberOfCarts))
+			{
+				builder.AddCart(connections.ToArray());
+			}
 
             //Debug.Assert(IsReconfigurationPossible(builder.Build().Tasks.First(), builder.Build().RobotAgents.ToArray()));
             return builder;
         }
+
+		private static IEnumerable<IEnumerable<T>> Split<T>(this IEnumerable<T> sequence, int numPieces)
+		{
+			return Enumerable.Range(0, numPieces).Select(n => sequence.Where((x, i) => i % numPieces == n));
+		}
 
         private static bool IsReconfigurationPossible(ITask task, RobotAgent[] robotsAgents)
         {
@@ -296,27 +349,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             }
 
             return false;
-        }
-        
-
-        public static ModelBuilder ManyAgentsHighRedundancy(this ModelBuilder builder)
-        {
-            const int capCount = 20;
-            const int sysSize = 20;
-            const int ioCount = 15;
-            const int numberOfCarts = 15;
-            const int numWorkpieces = 1000;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
-        }
-
-        public static ModelBuilder MediumSizePerformanceMeasurementModel(this ModelBuilder builder)
-        {
-            const int capCount = 5;
-            const int sysSize = 10;
-            const int ioCount = 10;
-            const int numberOfCarts = 3;
-            const int numWorkpieces = 1000;
-            return GenerateSystem(builder, capCount, sysSize, ioCount, numberOfCarts, numWorkpieces, new Random(42));
         }
 
         public static ModelBuilder Ictss1(this ModelBuilder builder)

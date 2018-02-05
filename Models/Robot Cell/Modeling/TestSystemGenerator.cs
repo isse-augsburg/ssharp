@@ -9,7 +9,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
     public class TestSystemGenerator
     {
 
-        public Tuple<HashSet<DummyAgent>, List<DummyCapability>> Generate(int sysSize, int capCount, int ioCount, Random rnd)
+        public Tuple<HashSet<DummyAgent>, List<DummyCapability>> Generate(int sysSize, int capsPerAgent, int ioCount, Random rnd)
         {
             // generate agents
             var agentSet = new HashSet<DummyAgent>();
@@ -35,7 +35,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
             HashSet<DummyAgent> agents = null;
 
             // generate capabilities
-            var agentCapGenerator = new AgentCapabilityGenerator(capCount, agentSet, task, rnd);
+            var agentCapGenerator = new AgentCapabilityGenerator(capsPerAgent, agentSet, task, rnd);
 
             agents = agentCapGenerator.Generate();
 
@@ -46,6 +46,5 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
             return new Tuple<HashSet<DummyAgent>,List<DummyCapability>>(agents, task);
         }
-
     }
 }

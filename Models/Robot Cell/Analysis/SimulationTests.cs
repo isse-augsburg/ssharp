@@ -80,60 +80,66 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine("Simulation time: " + stSim.Elapsed.TotalSeconds + "s");
 		}
 
-		[Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
-		public void PerformanceEvaluation(Model model)
+		[Test, TestCaseSource(nameof(PerformanceEvaluationConfigurations))]
+		public void PerformanceEvaluation(Model model, int seed)
 		{
-			var console = Console.Out;
-			Console.SetOut(TextWriter.Null);
-			Debug.Listeners.Clear();
-
-			const int simulationsPerModel = 100;
 			const int numberOfSteps = 1000;
-			var timeLimit = TimeSpan.FromMinutes(20);
-
+			var timeLimit = TimeSpan.FromMinutes(45);
 			var reportsDirectory = Path.Combine("performance-reports", TestContext.CurrentContext.Test.Name);
 
-			var successful = 0;
-			for (var seed = 0; successful <= simulationsPerModel; ++seed)
+			// disable output
+			var console = Console.Out;
+			Console.SetOut(TextWriter.Null);
+			var listeners = new TraceListener[Debug.Listeners.Count];
+			Debug.Listeners.CopyTo(listeners, 0);
+			Debug.Listeners.Clear();
+
+			console.WriteLine($"Test {seed}");
+			console.WriteLine("==================");
+
+			var initializationStopwatch = Stopwatch.StartNew();
+			console.WriteLine("Initializing...");
+
+			using (var simulator = new ProfileBasedSimulator(model))
 			{
-				console.WriteLine($"Test {seed}");
-				console.WriteLine("\tInitializing...");
-				using (var simulator = new ProfileBasedSimulator(model))
+				initializationStopwatch.Stop();
+				console.WriteLine($"Initialization complete after {initializationStopwatch.Elapsed.TotalSeconds}s.");
+
+				Exception exception = null;
+				ProfileBasedSimulator.SimulationReport report = null;
+				var thread = new Thread(() =>
 				{
-					Exception exception = null;
-					ProfileBasedSimulator.SimulationReport report = null;
-
-					var thread = new Thread(() =>
+					try
 					{
-						try
-						{
-							report = simulator.Simulate(numberOfSteps, seed);
-						}
-						catch (Exception e)
-						{
-							exception = e;
-						}
-					});
-
-					console.WriteLine("\tSimulating...");
-					thread.Start();
-					var completed = thread.Join(timeLimit);
-
-					if (!completed)
-					{
-						thread.Abort();
-						console.WriteLine("\tTest timed out.");
+						report = simulator.Simulate(numberOfSteps, seed);
 					}
-					else if (exception != null)
-						console.WriteLine($"\tTest failed with exception {exception.GetType().Name}: '{exception.Message}'.");
-					else
+					catch (Exception e)
 					{
-						successful++;
-						console.WriteLine($"\tTest succeeded after {(report.SimulationEnd - report.SimulationStart).TotalSeconds}s of simulation.");
-						WriteSimulationData(reportsDirectory, report);
+						exception = e;
 					}
+				});
+
+				console.WriteLine("Simulating...");
+				thread.Start();
+				var completed = thread.Join(timeLimit);
+
+				if (!completed)
+				{
+					thread.Abort();
+					console.WriteLine("Test timed out.");
+				}
+				else if (exception != null)
+					console.WriteLine($"Test failed with exception {exception.GetType().Name}: '{exception.Message}'.");
+				else
+				{
+					console.WriteLine($"Test succeeded after {(report.SimulationEnd - report.SimulationStart).TotalSeconds}s of simulation.");
+					WriteSimulationData(reportsDirectory, report);
 				}
 			}
+
+			// cleanup
+			Console.SetOut(console);
+			Debug.Listeners.AddRange(listeners);
 		}
 
 		private static void WriteSimulationData(string reportsDirectory, ProfileBasedSimulator.SimulationReport report)
@@ -187,6 +193,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 					agentWriter.WriteLine($"{reconfiguration.Step};{reconfiguration.Agent};{reconfiguration.NanosecondsDuration}");
 				}
 			}
+		}
+
+
+		private static IEnumerable PerformanceEvaluationConfigurations()
+		{
+			const int numRuns = 100;
+			return from modelSet in new[] {
+					   Tuple.Create(SampleModels.CreatePerformanceEvaluationConfigurationsCentralized(), "Centralized"),
+					   Tuple.Create(SampleModels.CreatePerformanceEvaluationConfigurationsCoalition(), "Coalition")
+				   }
+				   from model in modelSet.Item1
+				   from seed in Enumerable.Range(1, numRuns)
+				   select new TestCaseData(model, seed).SetName($"{model.Name} ({modelSet.Item2}) #{seed:000}").SetCategory(modelSet.Item2).SetCategory(model.Name);
 		}
 
 		private static IEnumerable PerformanceMeasurementConfigurations()

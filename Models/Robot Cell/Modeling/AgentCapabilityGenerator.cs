@@ -1,16 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// The MIT License (MIT)
+//
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
 namespace SafetySharp.CaseStudies.RobotCell.Modeling
 {
-    using System.Diagnostics;
-    using Controllers;
-    using Odp;
+	using System;
+	using System.Collections.Generic;
+	using System.Diagnostics;
+	using System.Linq;
 
-    class AgentCapabilityGenerator
+	internal class AgentCapabilityGenerator
     {
         private readonly int _capsPerAgent;
         private readonly List<DummyCapability> _task;
@@ -19,7 +36,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
         public AgentCapabilityGenerator(int capsPerAgent, HashSet<DummyAgent> agents, List<DummyCapability> task, Random rnd)
         {
-            Debug.Assert(agents.Count() == (task.Count()));
+            Debug.Assert(agents.Count == task.Count);
 
             _capsPerAgent = capsPerAgent;
             _task = task;
@@ -28,79 +45,77 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		}
 
         public HashSet<DummyAgent> Generate()
-        {
-            var capsToUsage = new Dictionary<DummyCapability, int>();
-            var capToAgent = new Dictionary<DummyCapability, DummyAgent>();
-            foreach (var cap in _task)
-                capsToUsage.Add(cap, 0);
+		{
+			var capsToUsage = _task.ToDictionary(cap => cap, cap => 0);
+			var capToAgent = new Dictionary<DummyCapability, DummyAgent>();
 
-            foreach (var anAgent in _agents)
-            {
-                anAgent.GetCapabilities().Clear();
-                var cap = _task[anAgent.GetId()];
+			// Assign each capability to at least one agent (# capabilities == # agents)
+			foreach (var anAgent in _agents)
+			{
+				var cap = _task[anAgent.GetId()];
+
+				anAgent.GetCapabilities().Clear();
                 anAgent.AddCapability(cap);
-                capsToUsage[cap] = capsToUsage[cap] + 1;
-//                capsToUsage.Add(cap, capsToUsage[cap] + 1);
+				anAgent.SetAgentTypeId(anAgent.GetId());
+
+				capsToUsage[cap]++;
                 if (capsToUsage[cap] >= _capsPerAgent)
                     capsToUsage.Remove(cap);
 
                 capToAgent.Add(cap, anAgent);
-                anAgent.SetAgentTypeId(anAgent.GetId());
             }
 
-            var remainingCaps = new HashSet<DummyCapability>(_task);
-            if (_capsPerAgent > 0)
-            {
-                var agentsSorted = new List<DummyAgent>(_agents);
-                agentsSorted.Sort((agent, dummyAgent) => (agent.GetId() < dummyAgent.GetId())
-                    ? -1
-                    : (agent.GetId() > dummyAgent.GetId())
-                        ? 1
-                        : 0);
+			// Assign further capabilities to agents.
+			if (_capsPerAgent > 0)
+                FillCapabilityRequirements(capToAgent);
 
-                while (true)
-                {
-                    var agentsToRemove = new HashSet<DummyAgent>();
+			var avg = _agents.Select(a => a.GetCapabilities().Count).Average();
+			var capAvg = _task.Select(cap => _agents.Count(ag => ag.GetCapabilities().Contains(cap))).Average();
+			Console.WriteLine($"Avg: {avg} -- capsPerAgent: {_capsPerAgent} -- agentsPerCap AVG: {capAvg}");
 
-                    var anAgent = agentsSorted[0];
-
-                    while (anAgent.GetCapCount() < _capsPerAgent)
-                    {
-                        var remainingCapsLocal = new List<DummyCapability>(remainingCaps);
-                        remainingCapsLocal.RemoveAll(capability => anAgent.GetCapabilities().Contains(capability));
-
-                        var rdm = _rnd.Next(0, remainingCapsLocal.Count() - 1);
-                        var cap = remainingCapsLocal[rdm];
-
-                        anAgent.AddCapability(cap);
-                    }
-
-                    foreach (var cap in anAgent.GetCapabilities())
-                    {
-                        var capAgent = capToAgent[cap];
-                        if (capAgent.Equals(anAgent) == false)
-                        {
-                            capAgent.GetCapabilities().Clear();
-                            foreach (var c in anAgent.GetCapabilities())
-                                capAgent.GetCapabilities().Add(c);
-                            capAgent.SetAgentTypeId(anAgent.GetAgentTypeId());
-                            agentsToRemove.Add(capAgent);
-                        }
-                    }
-
-                    agentsToRemove.Add(anAgent);
-                    foreach (var dummyCapability in anAgent.GetCapabilities())
-                    {
-                        remainingCaps.Remove(dummyCapability);
-                    }
-                    agentsSorted.RemoveAll(agent => agentsToRemove.Contains(agent));
-
-                    if (agentsSorted.Count==0)
-                        break;
-                }
-            }
 
             return _agents;
         }
+
+		private void FillCapabilityRequirements(Dictionary<DummyCapability, DummyAgent> capToAgent)
+		{
+			var remainingCaps = new HashSet<DummyCapability>(_task);
+			var agentsSorted = _agents.OrderBy(agent => agent.GetId()).ToList();
+
+			while (agentsSorted.Count > 0)
+			{
+				var anAgent = agentsSorted[0];
+				agentsSorted.RemoveAt(0);
+
+				// Assign the agent the prescribed number of capabilities, while avoiding assigning the same capability twice to the same agent.
+				var availableCapabilities = remainingCaps.Where(cap => !anAgent.GetCapabilities().Contains(cap)).ToList();
+				while (anAgent.GetCapCount() < _capsPerAgent && availableCapabilities.Count > 0)
+				{
+					var rdm = _rnd.Next(0, availableCapabilities.Count - 1);
+					var cap = availableCapabilities[rdm];
+
+					anAgent.AddCapability(cap);
+					availableCapabilities.RemoveAt(rdm);
+				}
+
+				foreach (var cap in anAgent.GetCapabilities())
+				{
+					var capAgent = capToAgent[cap];
+					if (!capAgent.Equals(anAgent)) // If anAgent has a capability for which it is not the "assigned agent":
+					{
+						// Let the "assigned agent" capAgent have the same capabilities (and type id) as anAgent.
+						capAgent.GetCapabilities().Clear();
+						capAgent.GetCapabilities().UnionWith(anAgent.GetCapabilities());
+						capAgent.SetAgentTypeId(anAgent.GetAgentTypeId());
+
+						// It is not necessary to assign further capabilities to capAgent, as it has just received all it needs.
+						agentsSorted.Remove(capAgent);
+					}
+				}
+
+				// Do not assign the capabilities assigned to anAgent to any more agents. (why?)
+				remainingCaps.ExceptWith(anAgent.GetCapabilities());
+			}
+		}
     }
 }
