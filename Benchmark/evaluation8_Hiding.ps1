@@ -55,8 +55,10 @@ AddTest -Testname "Hemodialysis_HazardContamination" -TestAssembly "SafetySharp.
 AddTest -Testname "HeightControl_Probability_HazardCollision" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.HazardProbabilityTests.Original-Original-Original" -TestNunitCategory "CollisionProbability" -TestCategories @("HeightControl","Variant-Original-Original-Original","Hazard-Collision","Unhidden")
 AddTest -Testname "HeightControl_Probability_HazardFalseAlarm" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.HazardProbabilityTests.Original-Original-Original" -TestNunitCategory "FalseAlarmProbability" -TestCategories @("HeightControl","Variant-Original-Original-Original","Hazard-FalseAlarm","Unhidden")
 AddTest -Testname "HeightControl_Probability_Prevention-Collision" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.HazardProbabilityTests.Original-Original-Original" -TestNunitCategory "PreventionProbability" -TestCategories @("HeightControl","Variant-Original-Original-Original","Prevention-Collision","Unhidden")
-AddTest -Testname "HemodialysisMachine_AllHazardsWithoutStaticPruning" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CreateMarkovChainWithBothHazardsWithoutStaticPruning" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HemodialysisMachine")
-AddTest -Testname "HeightControl_AllHazardsWithoutStaticPruning" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CreateMarkovChainWithBothHazardsWithoutStaticPruning" -TestNunitCategory "" -TestCategories @("VariousEvaluations","HeightControl")
+AddTest -Testname "HemodialysisMachine_AllHazardsWithoutStaticPruning" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CreateMarkovChainWithBothHazardsWithoutStaticPruning" -TestNunitCategory "" -TestCategories @("Unhidden","HemodialysisMachine")
+AddTest -Testname "HeightControl_AllHazardsWithoutStaticPruning" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CreateMarkovChainWithBothHazardsWithoutStaticPruning" -TestNunitCategory "" -TestCategories @("Unhidden","HeightControl")
+AddTest -Testname "HemodialysisMachine_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("Unhidden","HemodialysisMachine")
+AddTest -Testname "HeightControl_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("Unhidden","HeightControl")
 
 
 
@@ -70,13 +72,13 @@ $global_selected_tests = $global_tests | Where { $_.TestCategories.Contains("Unh
 AddTestValuation -Name "Unhidden"  -Script "copy -Force $PSScriptRoot\HeightControlNormal.json $global_compilate_directory\Analysis\heightcontrol_probabilities.json"  -ResultDir "$PSScriptRoot\Unhidden" -FilesOfTestValuation @("$global_compilate_directory\Analysis\heightcontrol_probabilities.json")
 
 
+cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControlUnhidden.dll" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControl.dll"
+cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachineUnhidden.exe" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachine.exe"
 
-cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControlHidden.dll" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControl.dll"
-cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachineHidden.exe" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachine.exe"
 
 Foreach ($testvaluation in $global_testValuations) {
     ExecuteTestValuation -TestValuation $testvaluation -Tests $global_selected_tests
 }
 
-cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControlUnhidden.dll" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControl.dll"
-cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachineUnhidden.exe" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachine.exe"
+cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControlHidden.dll" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HeightControl.dll"
+cp "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachineHidden.exe" "$PSScriptRoot\..\Binaries\Release\SafetySharp.CaseStudies.HemodialysisMachine.exe"
