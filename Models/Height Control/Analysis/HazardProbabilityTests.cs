@@ -163,7 +163,7 @@ namespace SafetySharp.CaseStudies.HeightControl.Analysis
 			{
 				StateFormula = model.Collision,
 				Bound = 50,
-				From = 000001,
+				From = 0.00001,
 				To = 0.01,
 				Steps = 25,
 				UpdateParameterInModel = updateParameterInModel
