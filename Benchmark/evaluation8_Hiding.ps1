@@ -59,6 +59,8 @@ AddTest -Testname "HemodialysisMachine_AllHazardsWithoutStaticPruning" -TestAsse
 AddTest -Testname "HeightControl_AllHazardsWithoutStaticPruning" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CreateMarkovChainWithBothHazardsWithoutStaticPruning" -TestNunitCategory "" -TestCategories @("Unhidden","HeightControl")
 AddTest -Testname "HemodialysisMachine_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("Unhidden","HemodialysisMachine")
 AddTest -Testname "HeightControl_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("Unhidden","HeightControl")
+AddTest -Testname "HemodialysisMachine_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HemodialysisMachine.exe" -TestMethod "SafetySharp.CaseStudies.HemodialysisMachine.Analysis.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("Unhidden","HemodialysisMachine")
+AddTest -Testname "HeightControl_SingleCore" -TestAssembly "SafetySharp.CaseStudies.HeightControl.dll" -TestMethod "SafetySharp.CaseStudies.HeightControl.Analysis.EvaluationTests.CalculateHazardSingleCore" -TestNunitCategory "" -TestCategories @("Unhidden","HeightControl")
 
 
 
