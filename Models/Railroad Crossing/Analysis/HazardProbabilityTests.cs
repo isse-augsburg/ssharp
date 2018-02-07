@@ -28,13 +28,15 @@ using System.Threading.Tasks;
 
 namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 {
+	using System.IO;
 	using FluentAssertions;
-	using ISSE.SafetyChecking;
+	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 	using ISSE.SafetyChecking.Modeling;
 	using Modeling;
 	using NUnit.Framework;
 	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
+	using LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker;
 
 	class HazardProbabilityTests
 	{
@@ -57,6 +59,57 @@ namespace SafetySharp.CaseStudies.RailroadCrossing.Analysis
 
 			var result = SafetySharpModelChecker.CalculateProbabilityToReachStateBounded(model, model.PossibleCollision,50);
 			Console.Write($"Probability of hazard in 50 steps: {result}");
+		}
+
+
+
+		[Test]
+		public void Parametric()
+		{
+			var tc = SafetySharpModelChecker.TraversalConfiguration;
+			tc.LtmcModelChecker = LtmcModelChecker.BuiltInLtmc;
+			//tc.UseAtomarPropositionsAsStateLabels = false;
+			SafetySharpModelChecker.TraversalConfiguration = tc;
+
+			var model = new Model();
+			model.Channel.MessageDropped.ProbabilityOfOccurrence = new Probability(0.0001);
+			model.CrossingController.Motor.BarrierMotorStuck.ProbabilityOfOccurrence = new Probability(0.001);
+			model.CrossingController.Sensor.BarrierSensorFailure.ProbabilityOfOccurrence = new Probability(0.00003);
+			model.CrossingController.TrainSensor.ErroneousTrainDetection.ProbabilityOfOccurrence = new Probability(0.0002);
+			model.TrainController.Brakes.BrakesFailure.ProbabilityOfOccurrence = new Probability(0.00002);
+			model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = new Probability(0.02);
+			model.TrainController.Odometer.OdometerSpeedOffset.ProbabilityOfOccurrence = new Probability(0.02);
+
+			Action<double> updateParameterBsInModel = value =>
+			{
+				model.CrossingController.Sensor.BarrierSensorFailure.ProbabilityOfOccurrence = new Probability(value);
+			};
+
+			Action<double> updateParameterOpInModel = value =>
+			{
+				model.TrainController.Odometer.OdometerPositionOffset.ProbabilityOfOccurrence = new Probability(value);
+			};
+
+			var parameter = new QuantitativeParametricAnalysisParameter
+			{
+				StateFormula = model.PossibleCollision,
+				Bound = 50,
+				From = 0.000001,
+				To = 0.01,
+				Steps = 25,
+				UpdateParameterInModel = updateParameterBsInModel
+			};
+
+			var result = SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
+			var fileWriter = new StreamWriter("ParametricBsPossibleCollision.csv", append: false);
+			result.ToCsv(fileWriter);
+			fileWriter.Close();
+
+			parameter.UpdateParameterInModel = updateParameterOpInModel;
+			result = SafetySharpModelChecker.ConductQuantitativeParametricAnalysis(model, parameter);
+			fileWriter = new StreamWriter("ParametricOpPossibleCollision.csv", append: false);
+			result.ToCsv(fileWriter);
+			fileWriter.Close();
 		}
 	}
 }
