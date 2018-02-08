@@ -497,8 +497,8 @@ namespace SafetySharp.CaseStudies.HemodialysisMachine.Analysis
 			markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
 			markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
 			markovChainGenerator.Configuration.EnableEarlyTermination = false;
-			var unsuccessful = new BoundedUnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally, 6);
-			var contamination = new BoundedUnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally, 6);
+			var unsuccessful = new UnaryFormula(model.BloodNotCleanedAndDialyzingFinished, UnaryOperator.Finally);
+			var contamination = new UnaryFormula(model.IncomingBloodWasNotOk, UnaryOperator.Finally);
 			markovChainGenerator.AddFormulaToCheck(unsuccessful);
 			markovChainGenerator.AddFormulaToCheck(contamination);
 			foreach (var fault in model.Faults)
