@@ -78,7 +78,25 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                 
         }
 
-        public static IEnumerable<Model> CreatePerformanceEvaluationConfigurationsCentralized()
+		public static Model CreateFaultKindComparisonModelCentralized()
+		{
+			return new ModelBuilder(nameof(FaultKindComparison))
+				.DisablePlants()
+				.FaultKindComparison()
+				.ChooseController<CentralizedController>(new FastConfigurationFinder()).UseControllerReconfigurationAgents().EnablePerformanceMeasurement().DisableIntolerableFaults()
+				.Build();
+		}
+
+		public static Model CreateFaultKindComparisonModelCoalition()
+		{
+			return new ModelBuilder(nameof(FaultKindComparison))
+				.DisablePlants()
+				.FaultKindComparison()
+				.UseCoalitionFormation(new FastConfigurationFinder()).EnablePerformanceMeasurement().DisableIntolerableFaults()
+				.Build();
+		}
+
+		public static IEnumerable<Model> CreatePerformanceEvaluationConfigurationsCentralized()
         {
             return CreateConfigurations(
                 _performanceEvaluationConfigurations,
@@ -277,7 +295,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
                     }
                 }
             }
-            
+
 			// split neededConnections in numberOfCarts approx. equal-size pieces
 			foreach (var connections in neededConnections.Split(numberOfCarts))
 			{

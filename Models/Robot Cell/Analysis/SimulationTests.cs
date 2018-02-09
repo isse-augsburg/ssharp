@@ -24,48 +24,19 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 {
 	using System;
 	using System.Collections;
+	using System.Collections.Generic;
 	using System.Diagnostics;
 	using System.IO;
 	using System.Linq;
 	using System.Threading;
 
-	using SafetySharp.Analysis;
 	using SafetySharp.Modeling;
-
 	using Modeling;
 
 	using NUnit.Framework;
 
 	public partial class SimulationTests
 	{
-	    [Test]
-	    public void TempTestSystemGeneratorTest()
-	    {
-	        var tsg = new TestSystemGenerator();
-            var result = tsg.Generate(100, 10, 40, new Random(42));
-			Console.WriteLine("end")
-	        ;
-	    }
-
-		[TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
-		public void ComputeStateVectorLayout(Model model)
-		{
-			var modelChecker = new SSharpChecker { Configuration = { StateCapacity = 1 << 12 } };
-			var result = modelChecker.CheckInvariant(model, false);
-
-			Console.WriteLine(result.StateVectorLayout);
-		}
-
-		[Test, TestCaseSource(nameof(PerformanceMeasurementConfigurations))]
-        public void Simulate(Model model)
-        {
-            model.Faults.SuppressActivations();
-            var simulator = new Simulator(model);
-            PrintTrace(simulator, model, steps: 100);
-		}
-
-		private static readonly int[] timeoutSeeds = { 0, 270310109, 270364453, 270442343, 270468015, 270544828, 270570265, 270673000, 272980687, 276191703, 276241156, 623786875, 624231578, 624556093, 624581281, 624706750, 624756593, 624807265, 624958734, 625362093, 625414296, 625466328, 625543906, 625983203, 626181156, 626521921, 626805109, 626918062, 627491484, 628411312, 629232765, 629526812, 630165046, 630505953, 630749781, 631411156, 631474984, 633358718, 635164156, 636060859, 636141031, 636552203, 637437437, 640059937, 640469234, 642011468, 643386421, 645328187, 647254250, 647507078, 648405250, 649056750, 650996734, 652048234, 655944359, 656312015, 657046593, 658462218, 660240546, 660777687, 662170750, 664218078, 665282468, 667382515, 669330796, 671611812, 672139562, 672319406, 673419296, 673627734, 673825968, 676020000, 676610375, 682097796, 682594968, 683098828, 689535390, 690608375, 693462953, 695463343, 697192656, 700195953, 706713031, 709886093, 710165234, 710719875, 711327828, 719939640, 721695937, 722428328, 729626875, 735689031, 736080500, 758092703, 758906531, 759617812, 762761984, 766407593, 768445796, 770160234, 774324000 };
-
         [Test, TestCaseSource(nameof(PerformanceMeasurementConfigurationsWithSeeds)), Timeout(2000000)]
         public void SimulateProfileBased(Model model, int seed)
         {
@@ -80,13 +51,14 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			Console.WriteLine("Simulation time: " + stSim.Elapsed.TotalSeconds + "s");
 		}
 
-		[Test, TestCaseSource(nameof(PerformanceEvaluationConfigurations))]
+		[Test, TestCaseSource(nameof(PerformanceEvaluationConfigurations)), TestCaseSource(nameof(FaultTypeEvaluationConfigurations))]
 		public void PerformanceEvaluation(Model model, int seed)
 		{
-			const int numberOfSteps = 1000;
-			var timeLimit = TimeSpan.FromMinutes(45);
 			var testNameWithoutSeed = TestContext.CurrentContext.Test.Name.Replace($" #{seed:000}", "");
 			var reportsDirectory = Path.Combine("performance-reports", testNameWithoutSeed);
+
+			const int numberOfSteps = 1000;
+			var timeLimit = TimeSpan.FromMinutes(45);
 
 			// disable output
 			var console = Console.Out;
@@ -101,7 +73,6 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			var initializationStopwatch = Stopwatch.StartNew();
 			console.WriteLine("Initializing...");
 
-			model.Faults.MakeNondeterministic();
 			using (var simulator = new ProfileBasedSimulator(model))
 			{
 				initializationStopwatch.Stop();
@@ -197,73 +168,66 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 			}
 		}
 
-
+		private const int NumRuns = 100;
 		private static IEnumerable PerformanceEvaluationConfigurations()
 		{
-			const int numRuns = 100;
-			return from modelSet in new[] {
+			return from seed in Enumerable.Range(1, NumRuns)
+				   from modelSet in new[] {
 					   Tuple.Create(SampleModels.CreatePerformanceEvaluationConfigurationsCentralized(), "Centralized"),
 					   Tuple.Create(SampleModels.CreatePerformanceEvaluationConfigurationsCoalition(), "Coalition")
 				   }
 				   from model in modelSet.Item1
-				   from seed in Enumerable.Range(1, numRuns)
 				   select new TestCaseData(model, seed).SetName($"{model.Name} ({modelSet.Item2}) #{seed:000}").SetCategory(modelSet.Item2).SetCategory(model.Name);
-		}
-
-		private static IEnumerable PerformanceMeasurementConfigurations()
-	    {
-		    return SampleModels.CreatePerformanceEvaluationConfigurationsCentralized()
-							   .Select(model => new TestCaseData(model).SetName(model.Name + " (Centralized)"))
-							   .Concat(SampleModels.CreatePerformanceEvaluationConfigurationsCoalition()
-												   .Select(model => new TestCaseData(model).SetName(model.Name + " (Coalition)")));
 		}
 
 		private static IEnumerable PerformanceMeasurementConfigurationsWithSeeds()
 		{
-			return (from model in SampleModels.CreatePerformanceEvaluationConfigurationsCoalition()
-					from seed in timeoutSeeds
-					let testCase = new TestCaseData(model, seed)
-					select testCase.SetName(model.Name + " (Coalition) -- " + seed));
+			return from seed in Enumerable.Range(1, NumRuns)
+				   from model in SampleModels.CreatePerformanceEvaluationConfigurationsCoalition()
+				   let testCase = new TestCaseData(model, seed)
+				   select testCase.SetName($"{model.Name} (Coalition) #{seed:000}");
 		}
 
-		private static void PrintTrace(Simulator simulator, Model model, int steps)
+		private static IEnumerable FaultTypeEvaluationConfigurations()
 		{
-			
-			for (var i = 0; i < steps; ++i)
-			{
-				WriteLine($"=================  Step: {i}  =====================================");
+			var modelsAndConfigs = new[] {
+				Tuple.Create<Func<Model>, string>(SampleModels.CreateFaultKindComparisonModelCentralized, "Centralized"),
+				Tuple.Create<Func<Model>, string>(SampleModels.CreateFaultKindComparisonModelCoalition, "Coalition")
+			};
+			var faultPredicates = new[] {
+				Tuple.Create<Func<Model, IEnumerable<Fault>>, string>(ToolFaults, "tools"),
+				Tuple.Create<Func<Model, IEnumerable<Fault>>, string>(m => m.RobotAgents.Select(a => a.Broken).Concat(m.CartAgents.Select(a => a.Broken)), "agents"),
+				Tuple.Create<Func<Model, IEnumerable<Fault>>, string>(m => m.RobotAgents.Select(a => a.ResourceTransportFault), "IO"),
+				Tuple.Create<Func<Model, IEnumerable<Fault>>, string>(m => m.TolerableFaults(), "tolerable")
+			};
 
-				if (model.ReconfigurationMonitor.ReconfigurationFailure)
-					WriteLine("Reconfiguration failed.");
-				else
-				{
-					foreach (var robot in model.RobotAgents)
-						WriteLine(robot);
-
-					foreach (var cart in model.CartAgents)
-						WriteLine(cart);
-
-					foreach (var workpiece in model.Workpieces)
-						WriteLine(workpiece);
-
-					foreach (var robot in model.Robots)
-						WriteLine(robot);
-
-					foreach (var cart in model.Carts)
-						WriteLine(cart);
-				}
-
-				simulator.SimulateStep();
-			}
+			return from faultPredicate in faultPredicates
+				   from modelAndConfig in modelsAndConfigs
+				   from seed in Enumerable.Range(1, NumRuns)
+				   let model = WithFaults(modelAndConfig.Item1.Invoke(), faultPredicate.Item1)
+				   let config = modelAndConfig.Item2
+				   select new TestCaseData(model, seed).SetName($"{faultPredicate.Item2} ({config}) #{seed:000}")
+													   .SetCategory(config).SetCategory(faultPredicate.Item2);
 		}
 
-		private static void WriteLine(object line)
+		private static Model WithFaults(Model model, Func<Model, IEnumerable<Fault>> faultSelector)
 		{
-			Debug.WriteLine(line.ToString());
-#if !DEBUG
-			System.Console.WriteLine(line.ToString());
-#endif
+			model.Faults.SuppressActivations();
+			faultSelector(model).MakeNondeterministic();
+			return model;
 		}
-        
+
+		private static IEnumerable<Fault> ToolFaults(Model model)
+		{
+			return from robot in model.RobotAgents
+				   from fault in new[]
+				   {
+					   robot.DrillBroken, robot.InsertBroken, robot.PolishBroken, robot.TightenBroken, robot.GenericABroken, robot.GenericBBroken,
+					   robot.GenericCBroken, robot.GenericDBroken, robot.GenericEBroken, robot.GenericFBroken, robot.GenericGBroken, robot.GenericHBroken,
+					   robot.GenericIBroken, robot.GenericJBroken, robot.GenericKBroken, robot.GenericLBroken, robot.GenericMBroken, robot.GenericNBroken,
+					   robot.GenericOBroken, robot.GenericPBroken
+				   }
+				   select fault;
+		}
     }
 }
