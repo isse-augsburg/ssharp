@@ -65,7 +65,7 @@ namespace SafetySharp.Odp.Reconfiguration
 				Debug.Assert(reconfiguration.Reason is ReconfigurationReason.InvariantsViolated || reconfiguration.Reason is ReconfigurationReason.InitialReconfiguration);
 
 				_roleCalculationAgent = new RoleCalculationAgent(_controller);
-				_roleCalculationAgent.StartCentralReconfiguration(_task, _baseAgent);
+				_roleCalculationAgent.StartCentralReconfiguration(_task, this, _baseAgent);
 			}
 			else // a reconfiguration has already been already started
 			{
@@ -107,14 +107,16 @@ namespace SafetySharp.Odp.Reconfiguration
 				_functioningAgents = _controller.Agents.Where(agent => agent.IsAlive).ToArray();
 			}
 
-			public void StartCentralReconfiguration(ITask task, BaseAgent agent)
+			public void StartCentralReconfiguration(ITask task, ControllerReconfigurationAgent agent, BaseAgent baseAgent)
 			{
+				_reconfAgents.Add(baseAgent.Id, agent);
 				_stateMachine.Transition(
 					from: State.Idle,
 					to: State.GatherGlobalKnowledge,
 					action: () => {
-						foreach (var baseAgent in _functioningAgents)
-							baseAgent.RequestReconfiguration(this, task); // The returned task represents the end of the reconfiguration -> don't await
+						foreach (var otherBaseAgent in _functioningAgents)
+							if (otherBaseAgent != baseAgent)
+								otherBaseAgent.RequestReconfiguration(this, task); // The returned task represents the end of the reconfiguration -> don't await
 					}
 				);
 			}
