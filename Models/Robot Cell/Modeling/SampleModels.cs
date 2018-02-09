@@ -165,8 +165,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		// nach Paper-Notizen, aber noch analysierbar:
 		// ===========================================
 		// FewAgentsHighRedundancy:                 6 robots,  3 capabilities,  4 carts, ~2 capabilities/robot, ioCount~=4  || redundancy: capability 66.7%
-		// ManyAgentsLowRedundancy*:               10 robots, 10 capabilities,  7 carts,  4 capabilities/robot, ioCount=4   || redundancy: capability 40.0%
-		// ManyAgentsHighRedundancy*:              10 robots, 10 capabilities,  7 carts,  7 capabilities/robot, ioCount=7   || redundancy: capability 70.0%
+		// ManyAgentsLowRedundancy*:               10 robots, 10 capabilities,  4 carts,  4 capabilities/robot, ioCount=4   || redundancy: capability 40.0%
+		// ManyAgentsHighRedundancy*:              10 robots, 10 capabilities,  4 carts,  7 capabilities/robot, ioCount=7   || redundancy: capability 70.0%
 		//
 		// FaultKindComparison:                     8 robots,  8 capabilities,  4 carts,  4 capabilities/robot, ioCount=4   || redundancy: capability 50.0%
 		//
@@ -212,12 +212,12 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 
 		public static ModelBuilder ManyAgentsLowRedundancy2(this ModelBuilder builder)
 		{
-			return GenerateSystem(builder, capsPerAgent: 4, sysSize: 10, ioCount: 4, numberOfCarts: 7, numWorkpieces: 1000, rnd: new Random(42));
+			return GenerateSystem(builder, capsPerAgent: 4, sysSize: 10, ioCount: 4, numberOfCarts: 4, numWorkpieces: 1000, rnd: new Random(42));
 		}
 
 		public static ModelBuilder ManyAgentsHighRedundancy2(this ModelBuilder builder)
 		{
-			return GenerateSystem(builder, capsPerAgent: 7, sysSize: 10, ioCount: 7, numberOfCarts: 7, numWorkpieces: 1000, rnd: new Random(42));
+			return GenerateSystem(builder, capsPerAgent: 7, sysSize: 10, ioCount: 7, numberOfCarts: 4, numWorkpieces: 1000, rnd: new Random(42));
 		}
 
 		public static ModelBuilder FaultKindComparison(this ModelBuilder builder)
