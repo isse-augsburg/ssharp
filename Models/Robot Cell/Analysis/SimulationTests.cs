@@ -85,7 +85,8 @@ namespace SafetySharp.CaseStudies.RobotCell.Analysis
 		{
 			const int numberOfSteps = 1000;
 			var timeLimit = TimeSpan.FromMinutes(45);
-			var reportsDirectory = Path.Combine("performance-reports", TestContext.CurrentContext.Test.Name);
+			var testNameWithoutSeed = TestContext.CurrentContext.Test.Name.Replace($" #{seed:000}", "");
+			var reportsDirectory = Path.Combine("performance-reports", testNameWithoutSeed);
 
 			// disable output
 			var console = Console.Out;
