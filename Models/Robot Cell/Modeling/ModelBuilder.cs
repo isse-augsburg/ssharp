@@ -194,7 +194,7 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 	    public ModelBuilder DisableIntolerableFaults()
 	    {
 	        _model.Faults.MakeNondeterministic();
-	        IntolerableFaults().SuppressActivations();
+	        _model.IntolerableFaults().SuppressActivations();
 	        return this;
         }
 
@@ -208,25 +208,9 @@ namespace SafetySharp.CaseStudies.RobotCell.Modeling
 		{
 			_model.Controller = new IntolerableAnalysisController(_model.Controller);
 			_model.Faults.MakeNondeterministic();
-			TolerableFaults().SuppressActivations();
+			_model.TolerableFaults().SuppressActivations();
 			_model.AdditionalComponents.Add((IComponent)_model.Controller);
 			return this;
-		}
-
-		private IEnumerable<Fault> TolerableFaults()
-		{
-			return _model.Faults.Except(IntolerableFaults());
-		}
-
-		private IEnumerable<Fault> IntolerableFaults()
-		{
-			var agents = _model.CartAgents.Cast<Agent>().Concat(_model.RobotAgents);
-
-			return agents.Select(ag => ag.ConfigurationUpdateFailed)
-						 .Concat(_model.Workpieces.Select(w => w.IncorrectlyPositionedFault))
-						 .Concat(_model.Workpieces.Select(w => w.ToolApplicationFailed))
-						 .Concat(_model.Robots.Select(r => r.SwitchToWrongToolFault))
-						 .Concat(_model.Carts.Select(c => c.Lost));
 		}
 
 		public ModelBuilder CentralReconfiguration()

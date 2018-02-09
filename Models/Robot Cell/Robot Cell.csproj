@@ -106,6 +106,7 @@
     <Compile Include="Modeling\ModelBuilder.cs" />
     <Compile Include="Modeling\ModelBuilder.RouteHelper.cs" />
     <Compile Include="Modeling\ModelBuilderHelper.cs" />
+    <Compile Include="Modeling\ModelExtensions.cs" />
     <Compile Include="Modeling\Plants\Cart.cs" />
     <Compile Include="Modeling\Controllers\CartAgent.cs" />
     <Compile Include="Modeling\Plants\ReliabilityAttribute.cs" />
