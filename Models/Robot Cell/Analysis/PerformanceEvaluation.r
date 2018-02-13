@@ -24,14 +24,15 @@ library(data.table)
 TestRun.readData <- function(folder) {
   # Read all 3 files.
   simulation            <- fread(file.path(folder, "simulation.csv"))
-  reconfigurations      <- fread(file.path(folder, "reconfigurations.csv"), colClasses=list(integer64=c("Duration (Ticks)"))) #, "Duration"
+  reconfigurations      <- fread(file.path(folder, "reconfigurations.csv"), colClasses=list(integer64=c("Duration"))) #, "Duration"
   agentReconfigurations <- fread(file.path(folder, "agent-reconfigurations.csv"), colClasses=list(integer64=c("Duration")))
 
   # Split lists of agents and convert agent IDs to integers.
   reconfigurations[, InvolvedAgents := map(strsplit(InvolvedAgents, " ", fixed=TRUE), strtoi)]
   reconfigurations[, AffectedAgents := map(strsplit(AffectedAgents, " ", fixed=TRUE), strtoi)]
 
-  reconfigurations[, ':='(Duration = `Duration (Ticks)`, `Duration (Ticks)` = NULL)]
+  #reconfigurations[, ':='(Duration = `Duration (Ticks)`, `Duration (Ticks)` = NULL)]
+  simulation[, Model := gsub("2", "", Model)]
 
   # Add seed to reconfigurations and agentReconfigurations tables.
   seed <- simulation[,Seed]
@@ -81,7 +82,7 @@ Performance.readData <- function(models, configs, rootFolder) {
   setkey(agentReconfigurations, Model, Config, Seed, Agent, Step)
   
   # TODO: temporary, remove
-  agentReconfigurations <- unique(agentReconfigurations)
+  #agentReconfigurations <- unique(agentReconfigurations)
 
   list(simulations=simulations, reconfigurations=reconfigurations, agentReconfigurations=agentReconfigurations)
 }
@@ -130,7 +131,7 @@ Performance.timePerformance <- function(simulations, agentReconfigurations) {
 
 ##################### Main Program ####################
 
-models  <- c("FewAgentsHighRedundancy", "MediumSizePerformanceMeasurementModel", "ManyAgentsLowRedundancy")
+models  <- c("FewAgentsHighRedundancy", "ManyAgentsHighRedundancy", "ManyAgentsLowRedundancy")
 configs <- c("Centralized", "Coalition")
 
 # Select root folder.
