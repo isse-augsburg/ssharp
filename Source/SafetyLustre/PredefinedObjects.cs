@@ -32,7 +32,23 @@ using System.Threading.Tasks;
 
 namespace SafetyLustre
 {
-    static class PredefinedObjects {
+    static class PredefinedObjects
+    {
+
+        enum Action
+        {
+            present, if_, dsz, output_a, reset, act, goto_, call, combine
+        }
+
+        enum Nature
+        {
+            input, output_s, ret, local
+        }
+
+        enum Channel
+        {
+            pure, signle, multiple
+        }
 
         //actions
         public const int present = 0;
@@ -56,7 +72,8 @@ namespace SafetyLustre
         public const int single = 1;
         public const int multiple = 2;
 
-        public static Object executeFunction(int id, Object x, Object y, Object z) {
+        public static Object executeFunction(int id, Object x, Object y, Object z)
+        {
             try
             {
                 switch (id)
@@ -82,11 +99,11 @@ namespace SafetyLustre
                     case 2:
                         if (x.Equals(true))
                         {
-                            return (bool) y;
+                            return (bool)y;
                         }
                         else
                         {
-                            return (bool) z;
+                            return (bool)z;
                         }
                     case 3:
                         if (x.Equals(true) || y.Equals(true))
@@ -116,7 +133,7 @@ namespace SafetyLustre
                             return true;
                         }
                     case 6:
-                        if ((int) x == (int) y)
+                        if ((int)x == (int)y)
                         {
                             return true;
                         }
@@ -125,7 +142,7 @@ namespace SafetyLustre
                             return false;
                         }
                     case 7:
-                        if ((int) x != (int) y)
+                        if ((int)x != (int)y)
                         {
                             return true;
                         }
@@ -136,14 +153,14 @@ namespace SafetyLustre
                     case 8:
                         if (x.Equals(true))
                         {
-                            return (int) y;
+                            return (int)y;
                         }
                         else
                         {
-                            return (int) z;
+                            return (int)z;
                         }
                     case 9:
-                        if ((int) x < (int) y)
+                        if ((int)x < (int)y)
                         {
                             return true;
                         }
@@ -152,7 +169,7 @@ namespace SafetyLustre
                             return false;
                         }
                     case 10:
-                        if ((int) x <= (int) y)
+                        if ((int)x <= (int)y)
                         {
                             return true;
                         }
@@ -161,7 +178,7 @@ namespace SafetyLustre
                             return false;
                         }
                     case 11:
-                        if ((int) x > (int) y)
+                        if ((int)x > (int)y)
                         {
                             return true;
                         }
@@ -170,7 +187,7 @@ namespace SafetyLustre
                             return false;
                         }
                     case 12:
-                        if ((int) x >= (int) y)
+                        if ((int)x >= (int)y)
                         {
                             return true;
                         }
@@ -179,23 +196,23 @@ namespace SafetyLustre
                             return false;
                         }
                     case 13:
-                        return (int) x + (int) y;
+                        return (int)x + (int)y;
                     case 14:
-                        return (int) x - (int) y;
+                        return (int)x - (int)y;
                     case 15:
-                        return (int) x * (int) y;
+                        return (int)x * (int)y;
                     case 16:
-                        return (int) x % (int) y;
+                        return (int)x % (int)y;
                     case 17:
-                        return (int) ((int) x / (int) y);
+                        return (int)((int)x / (int)y);
                     case 18:
-                        return -(int) x;
+                        return -(int)x;
                     case 19:
-                        return (int) x | (int) y;
+                        return (int)x | (int)y;
                     case 20:
-                        return ~(int) x & ~(int) y;
+                        return ~(int)x & ~(int)y;
                     case 21:
-                        return ~(int) x;
+                        return ~(int)x;
                     case 22:
                         if (x.ToString().Equals(y.ToString()))
                         {

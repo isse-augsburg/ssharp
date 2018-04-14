@@ -29,7 +29,8 @@ using System.Threading.Tasks;
 
 namespace SafetyLustre
 {
-    public class Node {
+    public class Node
+    {
 
         private Node left;
         private Node right;
@@ -37,79 +38,97 @@ namespace SafetyLustre
         private int state;
         private Program program;
 
-        public Node(Action action, Program program) {
+        public Node(Action action, Program program)
+        {
             this.action = action;
-            this.state = -1;
+            state = -1;
             this.program = program;
         }
 
-        public Node(int state, Program program) {
+        public Node(int state, Program program)
+        {
             this.state = state;
             this.program = program;
         }
 
-        public bool setLeft(Node left) {
-            if (this.left != null) {
+        public bool setLeft(Node left)
+        {
+            if (this.left != null)
+            {
                 return false;
             }
             this.left = left;
             return true;
         }
 
-        public bool setRight(Node right) {
-            if (this.right != null) {
+        public bool setRight(Node right)
+        {
+            if (this.right != null)
+            {
                 return false;
             }
             this.right = right;
             return true;
         }
 
-        public Node getLeft() {
-            return this.left;
+        public Node getLeft()
+        {
+            return left;
         }
 
-        public Node getRight() {
-            return this.right;
+        public Node getRight()
+        {
+            return right;
         }
 
-        public Action getAction() {
-            return this.action;
+        public Action getAction()
+        {
+            return action;
         }
 
-        public int getState() {
-            return this.state;
+        public int getState()
+        {
+            return state;
         }
 
-        public bool executeAction() {
-            switch (action.getAction()) {
+        public bool executeAction()
+        {
+            switch (action.getAction())
+            {
                 case 0:
                     return true;
                 case 1:
-                    return (bool)program.executeExpression(this.getAction().getExpression());
+                    return (bool)program.executeExpression(getAction().getExpression());
                 case 2:
-                    if (this.getAction().getIndex() < program.variables.Count) {
-                        if (program.variables[this.getAction().getIndex()].getType() == 1) {
-                            program.variables[this.getAction().getIndex()]
-                                .setValue((int)program.variables[this.getAction().getIndex()].getValue() - 1);
-                            return ((int)program.variables[this.getAction().getIndex()].getValue() <= 0);
+                    if (getAction().getIndex() < program.variables.Count)
+                    {
+                        if (program.variables[getAction().getIndex()].getType() == 1)
+                        {
+                            program.variables[getAction().getIndex()]
+                                .setValue((int)program.variables[getAction().getIndex()].getValue() - 1);
+                            return ((int)program.variables[getAction().getIndex()].getValue() <= 0);
                         }
-                        else {
+                        else
+                        {
                             throw new SyntaxException("The variable to be decremented is not of type integer");
                         }
                     }
-                    else {
+                    else
+                    {
                         throw new SyntaxException("The variable to be decremented can not be referenced");
                     }
-					// Note: no break!
+                // Note: no break!
                 case 3:
-                    if (this.getAction().getIndex() < program.signals.Count) {
+                    if (getAction().getIndex() < program.signals.Count)
+                    {
                         if (!Program.modelChecking)
                         {
-							Program.outputTextWriter.WriteLine("Signal " + program.signals[this.getAction().getIndex()].getName() + " returns: " + program.signals[this.getAction().getIndex()].getVariable().getValue().ToString());
+                            Program.outputTextWriter.WriteLine("Signal " + program.signals[getAction().getIndex()].getName() + " returns: " + program.signals[getAction().getIndex()].getVariable().getValue().ToString());
                         }
-                        program.output.Add(program.signals[this.getAction().getIndex()].getVariable().getValue());
+                        program.output.Add(program.signals[getAction().getIndex()].getVariable().getValue());
                     }
-                    else {
+                    else
+                    {
                         throw new SyntaxException("The signal to be put out can not be referenced");
                     }
                     return true;
@@ -120,15 +139,19 @@ namespace SafetyLustre
                 case 6:
                     return true;
                 case 7:
-                    if (this.getAction().getIndex() < program.variables.Count) {
-                        if (this.getAction().getAllocationAction() == program.variables[this.getAction().getIndex()].getType()) {
-                            program.variables[this.getAction().getIndex()].setValue(program.executeExpression(this.getAction().getExpression()));
+                    if (getAction().getIndex() < program.variables.Count)
+                    {
+                        if (getAction().getAllocationAction() == program.variables[getAction().getIndex()].getType())
+                        {
+                            program.variables[getAction().getIndex()].setValue(program.executeExpression(getAction().getExpression()));
                         }
-                        else {
-                            throw new SyntaxException("Variable of type $" + program.variables[this.getAction().getIndex()].getType() + " can not be assigned value of type $" + this.getAction().getAllocationAction());
+                        else
+                        {
+                            throw new SyntaxException("Variable of type $" + program.variables[getAction().getIndex()].getType() + " can not be assigned value of type $" + getAction().getAllocationAction());
                         }
                     }
-                    else {
+                    else
+                    {
                         throw new SyntaxException("The variable to be assigned can not be referenced");
                     }
                     return true;

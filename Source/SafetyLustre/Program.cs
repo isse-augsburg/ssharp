@@ -67,35 +67,35 @@ namespace SafetyLustre
 
 		public Program(string fileName, string mainNode) {
             //Compiling Lustre-Program
-            if (mainNode != null) {
-                Process p = new Process();
-                ProcessStartInfo info = new ProcessStartInfo();
-                info.FileName = "cmd.exe";
-                info.RedirectStandardInput = true;
-                info.UseShellExecute = false;
+    //        if (mainNode != null) {
+    //            Process p = new Process();
+    //            ProcessStartInfo info = new ProcessStartInfo();
+    //            info.FileName = "cmd.exe";
+    //            info.RedirectStandardInput = true;
+    //            info.UseShellExecute = false;
 
-                p.StartInfo = info;
-                p.Start();
+    //            p.StartInfo = info;
+    //            p.Start();
 
-                using (StreamWriter sw = p.StandardInput) {
-                    if (sw.BaseStream.CanWrite) {
-                        sw.WriteLine("c:");
-                        sw.WriteLine("cd " + cygwinPath);
-                        sw.WriteLine("sh lus2oc " + ocExaplesPath + fileName + ".lus " + mainNode + " -o " + ocExaplesPath + fileName + ".oc");
-                    }
-                }
-				outputTextWriter.WriteLine("Compiling your .lus file to .oc file.\nPress any key to continue...");
-                Console.ReadKey();
-            }
+    //            using (StreamWriter sw = p.StandardInput) {
+    //                if (sw.BaseStream.CanWrite) {
+    //                    sw.WriteLine("c:");
+    //                    sw.WriteLine("cd " + cygwinPath);
+    //                    sw.WriteLine("sh lus2oc " + ocExaplesPath + fileName + ".lus " + mainNode + " -o " + ocExaplesPath + fileName + ".oc");
+    //                }
+    //            }
+				//outputTextWriter.WriteLine("Compiling your .lus file to .oc file.\nPress any key to continue...");
+    //            Console.ReadKey();
+    //        }
 
-            output = new List<object>();
-            constants = new List<Constant>();
-            variables = new List<Variable>();
-            signals = new List<Signal>();
-            actions = new List<Action>();
-            states = new List<State>();
+    //        output = new List<object>();
+    //        constants = new List<Constant>();
+    //        variables = new List<Variable>();
+    //        signals = new List<Signal>();
+    //        actions = new List<Action>();
+    //        states = new List<State>();
 
-            new Parser(ocExaplesPath + fileName + ".oc", this);
+    //        new Parser(ocExaplesPath + fileName + ".oc", this);
         }
 
         private void executeProgram() {
@@ -289,57 +289,62 @@ namespace SafetyLustre
 
         static void Main(string[] args)
 		{
-			ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
-			Console.WriteLine("Select Mode:\n(1)Model Checking\n(2)Run Pressure Tank\n(3)Create OC-file");
-            var key = Console.ReadKey();
-            Console.WriteLine("");
-            if (key.Key.Equals(ConsoleKey.D1) || key.Key.Equals(ConsoleKey.NumPad1)) {
-                Formula invariant = new LustrePressureBelowThreshold();
-				var faults = new Fault[0];
-                var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
-                var result = modelChecker.CheckInvariant(invariant, 100);
-                Console.WriteLine("Checked formula: pressure < " + LustrePressureBelowThreshold.threshold);
-                Console.WriteLine("Formula holds: " + result.FormulaHolds);
-                if (result.CounterExample != null) {
-                    Console.WriteLine("\nStates until the formula is violated:");
-                    for (int i = 0; i < result.CounterExample.States.Length; i++) {
-                        for (int x = 0; x < result.CounterExample.States[i].Length; x++) {
-                            if (x != 0)
-                            {
-                                Console.Write("|");
-                            }
-                            if (result.CounterExample.States[i][x] < 10)
-                            {
-                                Console.Write(" " + result.CounterExample.States[i][x]);
-                            }
-                            else
-                            {
-                                Console.Write(result.CounterExample.States[i][x]);
-                            }
-                        }
-                        Console.Write("\n");
-                    }
-                }
+            string fileName = @"..\..\SafetyLustreTest\Examples\pressureTank.oc";
+            var parser = new Parser(new Program("",""));
+            var x = parser.Parse(fileName);
+            Console.WriteLine(x);
 
-                Console.WriteLine("\nPress any key to end...");
-                Console.ReadKey();
-            }
-            else if (key.Key.Equals(ConsoleKey.D2) || key.Key.Equals(ConsoleKey.NumPad2)) {
-                const string fileName = "pressureTank";
-                const string mainNode = "TANK";
+			//ocExaplesPath = Directory.GetCurrentDirectory() + "\\Examples\\";
+			//Console.WriteLine("Select Mode:\n(1)Model Checking\n(2)Run Pressure Tank\n(3)Create OC-file");
+   //         var key = Console.ReadKey();
+   //         Console.WriteLine("");
+   //         if (key.Key.Equals(ConsoleKey.D1) || key.Key.Equals(ConsoleKey.NumPad1)) {
+   //             Formula invariant = new LustrePressureBelowThreshold();
+			//	var faults = new Fault[0];
+   //             var modelChecker = new LustreQualitativeChecker("pressureTank", faults, invariant);
+   //             var result = modelChecker.CheckInvariant(invariant, 100);
+   //             Console.WriteLine("Checked formula: pressure < " + LustrePressureBelowThreshold.threshold);
+   //             Console.WriteLine("Formula holds: " + result.FormulaHolds);
+   //             if (result.CounterExample != null) {
+   //                 Console.WriteLine("\nStates until the formula is violated:");
+   //                 for (int i = 0; i < result.CounterExample.States.Length; i++) {
+   //                     for (int x = 0; x < result.CounterExample.States[i].Length; x++) {
+   //                         if (x != 0)
+   //                         {
+   //                             Console.Write("|");
+   //                         }
+   //                         if (result.CounterExample.States[i][x] < 10)
+   //                         {
+   //                             Console.Write(" " + result.CounterExample.States[i][x]);
+   //                         }
+   //                         else
+   //                         {
+   //                             Console.Write(result.CounterExample.States[i][x]);
+   //                         }
+   //                     }
+   //                     Console.Write("\n");
+   //                 }
+   //             }
 
-                var p = new Program(fileName, mainNode);
-                p.input = new Queue<Object>[] { new Queue<Object>(new Object[] { false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }) };
+   //             Console.WriteLine("\nPress any key to end...");
+   //             Console.ReadKey();
+   //         }
+   //         else if (key.Key.Equals(ConsoleKey.D2) || key.Key.Equals(ConsoleKey.NumPad2)) {
+   //             const string fileName = "pressureTank";
+   //             const string mainNode = "TANK";
+
+   //             var p = new Program(fileName, mainNode);
+   //             p.input = new Queue<Object>[] { new Queue<Object>(new Object[] { false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false }) };
 
 
-                p.executeProgram();
-            }
-            else if (key.Key.Equals(ConsoleKey.D3) || key.Key.Equals(ConsoleKey.NumPad3)) {
-                const string fileName = "ex2";
-                const string mainNode = "EDGE";
+   //             p.executeProgram();
+   //         }
+   //         else if (key.Key.Equals(ConsoleKey.D3) || key.Key.Equals(ConsoleKey.NumPad3)) {
+   //             const string fileName = "ex2";
+   //             const string mainNode = "EDGE";
 
-                var p = new Program(fileName, mainNode);
-            }
+   //             var p = new Program(fileName, mainNode);
+   //         }
         }
     }
 }

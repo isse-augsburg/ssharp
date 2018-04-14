@@ -55,6 +55,38 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Action.cs" />
+    <Compile Include="AST\AbstractSyntaxTree.cs" />
+    <Compile Include="AST\Automaton\AutomatonElement.cs" />
+    <Compile Include="AST\Automaton\StateElement.cs" />
+    <Compile Include="AST\Automaton\CallsElement.cs" />
+    <Compile Include="AST\Automaton\StartpointElement.cs" />
+    <Compile Include="AST\Automaton\StatesElement.cs" />
+    <Compile Include="AST\ModuleElement.cs" />
+    <Compile Include="AST\RootElement.cs" />
+    <Compile Include="AST\Element.cs" />
+    <Compile Include="AST\Tables\Actions\ActionElement.cs" />
+    <Compile Include="AST\Tables\Actions\ActionElementCall.cs" />
+    <Compile Include="AST\Tables\Actions\ActionElementDsz.cs" />
+    <Compile Include="AST\Tables\Actions\ActionElementIf.cs" />
+    <Compile Include="AST\Tables\Actions\ActionElementOutput.cs" />
+    <Compile Include="AST\Tables\Actions\ActionElementPresent.cs" />
+    <Compile Include="AST\Tables\Actions\ActionsElement.cs" />
+    <Compile Include="AST\Tables\Signals\SignalBools\SignalBool.cs" />
+    <Compile Include="AST\Tables\Signals\SignalChannels\SignalChannel.cs" />
+    <Compile Include="AST\Tables\Signals\SignalChannels\SignalChannelMultiple.cs" />
+    <Compile Include="AST\Tables\Signals\SignalChannels\SignalChannelPure.cs" />
+    <Compile Include="AST\Tables\Signals\SignalChannels\SignalChannelSingle.cs" />
+    <Compile Include="AST\Tables\Signals\SignalElement.cs" />
+    <Compile Include="AST\Tables\Constants\ConstantElement.cs" />
+    <Compile Include="AST\Tables\Constants\ConstantsElement.cs" />
+    <Compile Include="AST\Tables\Signals\SignalNatures\SignalNature.cs" />
+    <Compile Include="AST\Tables\Signals\SignalNatures\SignalNatureInput.cs" />
+    <Compile Include="AST\Tables\Signals\SignalNatures\SignalNatureOutput.cs" />
+    <Compile Include="AST\Tables\Signals\SignalsElement.cs" />
+    <Compile Include="AST\Tables\TablesElement.cs" />
+    <Compile Include="AST\Tables\Variables\VariableElement.cs" />
+    <Compile Include="AST\Tables\Variables\VariablesElement.cs" />
+    <Compile Include="AST\VersionElement.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="ModelChecking\LustreAtomarProposition.cs" />
     <Compile Include="ModelChecking\LustreCounterExampleSerialization.cs" />
@@ -100,6 +132,7 @@
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

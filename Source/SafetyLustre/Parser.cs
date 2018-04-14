@@ -30,10 +30,21 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SafetyLustre.AST;
+using SafetyLustre.AST.Tables.Constants;
+using SafetyLustre.AST.Tables.Signals;
+using SafetyLustre.AST.Tables.Signals.SignalChannels;
+using SafetyLustre.AST.Tables.Signals.SignalBools;
+using SafetyLustre.AST.Tables.Signals.SignalNatures;
+using SafetyLustre.AST.Tables.Variables;
+using SafetyLustre.AST.Tables;
+using SafetyLustre.AST.Tables.Actions;
+using SafetyLustre.AST.Automaton;
 
 namespace SafetyLustre
 {
-    public class Parser {
+    public class Parser
+    {
 
         static Regex id = new Regex("^[1-9]*[0-9]:$");
         static Regex type = new Regex("^\\$[0-4]$");
@@ -49,90 +60,111 @@ namespace SafetyLustre
         static Regex state_number = new Regex("^[1-9]*[0-9]$");
         static Regex state_number_bracket = new Regex("^[1-9]*[0-9]");
 
-        private Program program;
+        private Program program = null;
 
-        public Parser(string fileName, Program program)
+        public Parser(Program program)
         {
-            this.program = program;
-            readFile(fileName);
         }
 
-        private void readFile(string fileName) {
-            try {
-                using (StreamReader sr = new StreamReader(fileName)) {
+        private void readFile(string fileName)
+        {
+            try
+            {
+                using (StreamReader sr = new StreamReader(fileName))
+                {
                     int linecounter = 1;
                     string line;
                     string[] splitline;
 
                     //oc5
                     line = sr.ReadLine();
-                    if (line == null || !line.Equals("oc5:")) {
+                    if (line == null || !line.Equals("oc5:"))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"oc5:\" expected");
                     }
                     //module: foo
                     linecounter++;
                     line = sr.ReadLine();
-                    if (line == null || !line.Split(' ')[0].Equals("module:")) {
+                    if (line == null || !line.Split(' ')[0].Equals("module:"))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"module:\" expected");
                     }
-                    if (line.Split(' ').Length != 2) {
+                    if (line.Split(' ').Length != 2)
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": Wrong module name");
                     }
                     bool tables = true;
                     int x;
                     int count;
-                    while (tables) {
+                    while (tables)
+                    {
                         //newline
                         linecounter++;
                         line = sr.ReadLine();
-                        if (line == null || !line.Equals("")) {
+                        if (line == null || !line.Equals(""))
+                        {
                             throw new SyntaxException("Syntax error in line " + linecounter + ": newline expected");
                         }
                         //tables
                         linecounter++;
                         line = sr.ReadLine();
-                        if (line == null || line.Split(' ').Length != 2) {
+                        if (line == null || line.Split(' ').Length != 2)
+                        {
                             throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                         }
-                        else {
-                            switch (line.Split(' ')[0]) {
+                        else
+                        {
+                            switch (line.Split(' ')[0])
+                            {
                                 case "types:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
                                     throw new SyntaxException("Error: table \"types\" is not supported");
                                 case "constants:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
-                                    for (int i = 0; i < count; i++) {
+                                    for (int i = 0; i < count; i++)
+                                    {
                                         linecounter++;
                                         line = sr.ReadLine();
-                                        if (line == null) {
+                                        if (line == null)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
                                         }
                                         splitline = line.TrimStart().Split(' ');
-                                        if (splitline.Length != 3 && splitline.Length != 5) {
+                                        if (splitline.Length != 3 && splitline.Length != 5)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": constant definition expected");
                                         }
-                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i) {
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong constant index. \"<id>:\" expected");
                                         }
-                                        if (!type.IsMatch(splitline[2])) {
+                                        if (!type.IsMatch(splitline[2]))
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong type index. \"$<type>\" expected");
                                         }
-                                        if (splitline.Length == 3) {
+                                        if (splitline.Length == 3)
+                                        {
                                             program.constants.Add(new Constant(x, splitline[1], Int32.Parse(splitline[2].Last().ToString())));
                                         }
-                                        else if (splitline[3].Equals("value:")) {
-                                            try {
+                                        else if (splitline[3].Equals("value:"))
+                                        {
+                                            try
+                                            {
                                                 program.constants.Add(new Constant(x, splitline[1], Int32.Parse(splitline[2].Last().ToString()), splitline[4]));
                                             }
-                                            catch (Exception) {
+                                            catch (Exception)
+                                            {
                                                 throw new SyntaxException("Syntax error in line " + linecounter + ": value is not from same type as constant");
                                             }
                                         }
-                                        else {
+                                        else
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": \"value:\" expected");
                                         }
 
@@ -140,51 +172,64 @@ namespace SafetyLustre
                                     //end:
                                     linecounter++;
                                     line = sr.ReadLine();
-                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:"))) {
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
                                     }
                                     break;
                                 case "functions:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
                                     throw new SyntaxException("Error: table \"functions\" is not supported");
                                 case "procedures:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
                                     throw new SyntaxException("Error: table \"procedures\" is not supported");
                                 case "signals:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
-                                    for (int i = 0; i < count; i++) {
+                                    for (int i = 0; i < count; i++)
+                                    {
                                         linecounter++;
                                         line = sr.ReadLine();
-                                        if (line == null) {
+                                        if (line == null)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
                                         }
                                         splitline = line.TrimStart().Split(' ');
-                                        if (splitline.Length != 4 && splitline.Length != 5) {
+                                        if (splitline.Length != 4 && splitline.Length != 5)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": signal definition expected");
                                         }
-                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i) {
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal index. \"<id>:\" expected");
                                         }
-                                        if (!signal_nature_name.IsMatch(splitline[1])) {
+                                        if (!signal_nature_name.IsMatch(splitline[1]))
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal nature or name");
                                         }
-                                        if (!signal_actionindex.IsMatch(splitline[2])) {
+                                        if (!signal_actionindex.IsMatch(splitline[2]))
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action index");
                                         }
-                                        if (!signal_channel.IsMatch(splitline[3])) {
+                                        if (!signal_channel.IsMatch(splitline[3]))
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal channel");
                                         }
-                                        if (splitline.Length == 5 && !signal_bool.IsMatch(splitline[4])) {
+                                        if (splitline.Length == 5 && !signal_bool.IsMatch(splitline[4]))
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal Boolean variable");
                                         }
                                         int nature = -1;
-                                        switch (splitline[1].Split(':')[0]) {
+                                        switch (splitline[1].Split(':')[0])
+                                        {
                                             case "input":
                                                 nature = PredefinedObjects.input;
                                                 break;
@@ -193,7 +238,8 @@ namespace SafetyLustre
                                                 break;
                                         }
                                         int channel;
-                                        switch (splitline[3].Split(':')[0]) {
+                                        switch (splitline[3].Split(':')[0])
+                                        {
                                             case "pure":
                                                 channel = PredefinedObjects.pure;
                                                 break;
@@ -212,38 +258,47 @@ namespace SafetyLustre
                                     //end:
                                     linecounter++;
                                     line = sr.ReadLine();
-                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:"))) {
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
                                     }
                                     break;
                                 case "implications:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
                                     throw new SyntaxException("Error: table \"implications\" is not supported");
                                 case "exclusions:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
                                     throw new SyntaxException("Error: table \"exclusions\" is not supported!");
                                 case "variables:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
-                                    for (int i = 0; i < count; i++) {
+                                    for (int i = 0; i < count; i++)
+                                    {
                                         linecounter++;
                                         line = sr.ReadLine();
-                                        if (line == null) {
+                                        if (line == null)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
                                         }
                                         splitline = line.TrimStart().Split(' ');
-                                        if (splitline.Length != 2 && splitline.Length != 4) {
+                                        if (splitline.Length != 2 && splitline.Length != 4)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": variable definition expected");
                                         }
-                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i) {
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong variable index. \"<id>:\" expected");
                                         }
-                                        if (!type.IsMatch(splitline[1])) {
+                                        if (!type.IsMatch(splitline[1]))
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong type index. \"$<type>\" expected");
                                         }
                                         if (splitline.Length == 4)
@@ -256,31 +311,39 @@ namespace SafetyLustre
                                     //end:
                                     linecounter++;
                                     line = sr.ReadLine();
-                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:"))) {
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
                                     }
                                     break;
                                 case "actions:":
-                                    if (!Int32.TryParse(line.Split(' ')[1], out count)) {
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
                                     }
-                                    for (int i = 0; i < count; i++) {
+                                    for (int i = 0; i < count; i++)
+                                    {
                                         linecounter++;
                                         line = sr.ReadLine();
-                                        if (line == null) {
+                                        if (line == null)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
                                         }
                                         splitline = line.TrimStart().Split(' ');
-                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i) {
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action index. \"<id>:\" expected");
                                         }
                                         //simple actions
-                                        if (action_a.IsMatch(splitline[1])) {
-                                            if (splitline.Length != 3 || !Int32.TryParse(splitline[2], out x)) {
+                                        if (action_a.IsMatch(splitline[1]))
+                                        {
+                                            if (splitline.Length != 3 || !Int32.TryParse(splitline[2], out x))
+                                            {
                                                 throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>: <index>\" expected");
                                             }
                                             int action = -1;
-                                            switch (splitline[1].Remove(splitline[1].Length - 1)) {
+                                            switch (splitline[1].Remove(splitline[1].Length - 1))
+                                            {
                                                 case "present":
                                                     action = PredefinedObjects.present;
                                                     break;
@@ -300,22 +363,28 @@ namespace SafetyLustre
                                             program.actions.Add(new Action(i, action, x));
                                         }
                                         //if action
-                                        else if (action_b.IsMatch(splitline[1])) {
-                                            if (splitline.Length != 3) {
+                                        else if (action_b.IsMatch(splitline[1]))
+                                        {
+                                            if (splitline.Length != 3)
+                                            {
                                                 throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>: <expression>\" expected");
                                             }
                                             program.actions.Add(new Action(i, PredefinedObjects.if_, splitline[2]));
                                         }
                                         //call and combine action
-                                        else if (action_c.IsMatch(splitline[1])) {
-                                            if (splitline.Length != 4) {
+                                        else if (action_c.IsMatch(splitline[1]))
+                                        {
+                                            if (splitline.Length != 4)
+                                            {
                                                 throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>:$<procedure index> (<variable index>) <expression>\" expected");
                                             }
-                                            if (!action_variable_index.IsMatch(splitline[2])) {
+                                            if (!action_variable_index.IsMatch(splitline[2]))
+                                            {
                                                 throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>:$<procedure index> (<variable index>) <expression>\" expected");
                                             }
                                             int action = -1;
-                                            switch (splitline[1].Split(':')[0]) {
+                                            switch (splitline[1].Split(':')[0])
+                                            {
                                                 case "call":
                                                     action = PredefinedObjects.call;
                                                     break;
@@ -324,14 +393,16 @@ namespace SafetyLustre
                                             }
                                             program.actions.Add(new Action(i, action, Int32.Parse(splitline[2].Replace("(", "").Replace(")", "")), splitline[3], Int32.Parse(splitline[1].Substring(splitline[1].Length - 1))));
                                         }
-                                        else {
+                                        else
+                                        {
                                             throw new SyntaxException("Syntax error in line " + linecounter + ": unknown action");
                                         }
                                     }
                                     //end:
                                     linecounter++;
                                     line = sr.ReadLine();
-                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:"))) {
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
                                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
                                     }
                                     break;
@@ -346,55 +417,68 @@ namespace SafetyLustre
                     }
                     //states:
                     splitline = line.Split(' ');
-                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out count)) {
+                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out count))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": wrong state count. \"state: <count>\" expected");
                     }
                     //startpoint:
                     linecounter++;
                     line = sr.ReadLine();
-                    if (line == null) {
+                    if (line == null)
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
                     }
                     splitline = line.Split(' ');
-                    if (!splitline[0].Equals("startpoint:")) {
+                    if (!splitline[0].Equals("startpoint:"))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": startpoint expected");
                     }
                     int startpoint;
-                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out startpoint) || count <= startpoint) {
+                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out startpoint) || count <= startpoint)
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": wrong startpoint. \"startpoint: <nodeId>\" expected");
                     }
                     //calls:
                     linecounter++;
                     line = sr.ReadLine();
-                    if (line == null) {
+                    if (line == null)
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
                     }
                     splitline = line.Split(' ');
-                    if (!splitline[0].Equals("calls:")) {
+                    if (!splitline[0].Equals("calls:"))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": call count expected");
                     }
-                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out x)) {
+                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out x))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": wrong call count. \"calls: <count>\" expected");
                     }
                     //states
-                    for (int i = 0; i < count; i++) {
+                    for (int i = 0; i < count; i++)
+                    {
                         linecounter++;
                         line = sr.ReadLine();
-                        if (line == null) {
+                        if (line == null)
+                        {
                             throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
                         }
                         splitline = line.Split(' ');
-                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || i != x) {
+                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || i != x)
+                        {
                             throw new SyntaxException("Syntax error in line " + linecounter + ": specification of node " + i + " expected");
                         }
                         string newline;
-                        while (true) {
+                        while (true)
+                        {
                             linecounter++;
                             newline = sr.ReadLine();
-                            if (newline == null) {
+                            if (newline == null)
+                            {
                                 throw new SyntaxException("Syntax error in line " + linecounter + ": unexpected end of file");
                             }
-                            if (newline.Equals("")) {
+                            if (newline.Equals(""))
+                            {
                                 break;
                             }
                             line = line + newline;
@@ -403,18 +487,23 @@ namespace SafetyLustre
                         splitline = line.Split(' ');
                         Node root = null;
                         string dag = "";
-                        for (int j = 1; j < splitline.Length; j++) {
-                            if (splitline[j].Equals("")) {
+                        for (int j = 1; j < splitline.Length; j++)
+                        {
+                            if (splitline[j].Equals(""))
+                            {
                                 continue;
                             }
 
-                            if (state_number.IsMatch(splitline[j])) {
+                            if (state_number.IsMatch(splitline[j]))
+                            {
                                 dag = dag + splitline[j];
-                                if (j + 1 < splitline.Length && state_number_bracket.IsMatch(splitline[j + 1])) {
+                                if (j + 1 < splitline.Length && state_number_bracket.IsMatch(splitline[j + 1]))
+                                {
                                     dag = dag + "|";
                                 }
                             }
-                            else {
+                            else
+                            {
                                 dag = dag + splitline[j];
                             }
                         }
@@ -425,120 +514,703 @@ namespace SafetyLustre
                     //end:
                     linecounter++;
                     line = sr.ReadLine();
-                    if (line == null || !(line.Equals("end: ") || line.Equals("end:"))) {
+                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
                     }
                     //newline
                     linecounter++;
                     line = sr.ReadLine();
-                    if (line == null || !line.Equals("")) {
+                    if (line == null || !line.Equals(""))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": newline expected");
                     }
                     //endmodule:
                     linecounter++;
                     line = sr.ReadLine();
-                    if (line == null || !(line.Equals("endmodule: ") || line.Equals("endmodule:"))) {
+                    if (line == null || !(line.Equals("endmodule: ") || line.Equals("endmodule:")))
+                    {
                         throw new SyntaxException("Syntax error in line " + linecounter + ": \"endmodule:\" expected");
                     }
                     referenceObjects();
-					program.startState = startpoint;
-					program.state = startpoint;
-				}
+                    program.startState = startpoint;
+                    program.state = startpoint;
+                }
             }
-            catch (Exception e) {
-				Program.outputTextWriter.WriteLine("Error reading the file:");
-				Program.outputTextWriter.WriteLine(e.Message);
+            catch (Exception e)
+            {
+                Program.outputTextWriter.WriteLine("Error reading the file:");
+                Program.outputTextWriter.WriteLine(e.Message);
             }
         }
 
-        private void checkDagSpec(string dag, int state) {
+        internal AbstractSyntaxTree Parse(string fileName)
+        {
+            var rootElement = new RootElement();
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(fileName))
+                {
+                    int linecounter = 1;
+                    string line;
+                    string[] splitline;
+
+                    //oc5
+                    line = sr.ReadLine();
+                    if (line == null || !line.Equals("oc5:"))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"oc5:\" expected");
+                    }
+                    else
+                    {
+                        var versionElement = new VersionElement { Version = 5 };
+                        rootElement.Version = versionElement;
+                    }
+                    //module: foo
+                    linecounter++;
+                    line = sr.ReadLine();
+                    if (line == null || !line.Split(' ')[0].Equals("module:"))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"module:\" expected");
+                    }
+                    if (line.Split(' ').Length != 2)
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": Wrong module name");
+                    }
+
+                    var moduleElement = new ModuleElement { Name = line.Split(' ')[1] };
+                    rootElement.Module = moduleElement;
+
+                    bool tables = true;
+                    int x;
+                    int count;
+
+                    var tablesElement = new TablesElement();
+                    moduleElement.Tables = tablesElement;
+
+                    while (tables)
+                    {
+                        //newline
+                        linecounter++;
+                        line = sr.ReadLine();
+                        if (line == null || !line.Equals(""))
+                        {
+                            throw new SyntaxException("Syntax error in line " + linecounter + ": newline expected");
+                        }
+                        //tables
+                        linecounter++;
+                        line = sr.ReadLine();
+                        if (line == null || line.Split(' ').Length != 2)
+                        {
+                            throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                        }
+                        else
+                        {
+                            switch (line.Split(' ')[0])
+                            {
+                                case "types:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+                                    throw new SyntaxException("Error: table \"types\" is not supported");
+                                case "constants:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+
+                                    var constantsElement = new ConstantsElement();
+                                    tablesElement.Constants = constantsElement;
+
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        linecounter++;
+                                        line = sr.ReadLine();
+                                        if (line == null)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
+                                        }
+                                        splitline = line.TrimStart().Split(' ');
+                                        if (splitline.Length != 3 && splitline.Length != 5)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": constant definition expected");
+                                        }
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong constant index. \"<id>:\" expected");
+                                        }
+                                        if (!type.IsMatch(splitline[2]))
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong type index. \"$<type>\" expected");
+                                        }
+
+                                        var name = splitline[1];
+                                        var typeIndex = splitline[2].Last().ToString();
+
+                                        ConstantElement constantElement = null;
+
+                                        if (splitline.Length == 3)
+                                        {
+
+                                            constantElement = new ConstantElement { Name = name, TypeIndex = typeIndex };
+                                        }
+                                        else if (splitline[3].Equals("value:"))
+                                        {
+                                            var value = splitline[4];
+
+                                            constantElement = new ConstantElement { Name = name, TypeIndex = typeIndex, Value = value };
+                                        }
+                                        else
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": \"value:\" expected");
+                                        }
+
+                                        constantsElement.Children.Add(constantElement);
+                                    }
+                                    //end:
+                                    linecounter++;
+                                    line = sr.ReadLine();
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
+                                    }
+                                    break;
+                                case "functions:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+                                    throw new SyntaxException("Error: table \"functions\" is not supported");
+                                case "procedures:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+                                    throw new SyntaxException("Error: table \"procedures\" is not supported");
+                                case "signals:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+
+                                    var signalsElement = new SignalsElement();
+                                    tablesElement.Signals = signalsElement;
+
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        linecounter++;
+                                        line = sr.ReadLine();
+                                        if (line == null)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
+                                        }
+                                        splitline = line.TrimStart().Split(' ');
+                                        if (splitline.Length != 4 && splitline.Length != 5)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": signal definition expected");
+                                        }
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal index. \"<id>:\" expected");
+                                        }
+                                        if (!signal_nature_name.IsMatch(splitline[1]))
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal nature or name");
+                                        }
+                                        if (!signal_actionindex.IsMatch(splitline[2]))
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action index");
+                                        }
+                                        if (!signal_channel.IsMatch(splitline[3]))
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal channel");
+                                        }
+                                        if (splitline.Length == 5 && !signal_bool.IsMatch(splitline[4]))
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong signal Boolean variable");
+                                        }
+
+                                        var signalElement = new SignalElement();
+
+                                        var name = splitline[1].Split(':')[1];
+                                        var action = splitline[2];
+
+                                        switch (splitline[1].Split(':')[0])
+                                        {
+                                            case "input":
+                                                signalElement.Nature = new SignalNatureInput { Name = name, PresentAction = action };
+                                                break;
+                                            case "output":
+                                                signalElement.Nature = new SignalNatureOutput { Name = name, OutAction = action };
+                                                break;
+                                        }
+
+                                        switch (splitline[3].Split(':')[0])
+                                        {
+                                            case "pure":
+                                                signalElement.Channel = new SignalChannelPure();
+                                                break;
+                                            case "single":
+                                                var varIndexSingle = splitline[3].Split(':')[1];
+                                                signalElement.Channel = new SignalChannelSingle { VarIndex = varIndexSingle };
+                                                break;
+                                            case "multiple":
+                                                var varIndexMultiple = splitline[3].Split(':')[1];
+                                                var combFunIndex = "<PLACEHOLDER>"; //TODO combFunIndex - was this even parsed before?
+                                                signalElement.Channel = new SignalChannelMultiple { VarIndex = varIndexMultiple, CombFunIndex = combFunIndex };
+                                                break;
+                                        }
+
+                                        if (splitline.Length == 5)
+                                        {
+                                            var boolVarIndex = splitline[4].Split(':')[1];
+                                            signalElement.Bool = new SignalBool { BoolVarIndex = boolVarIndex };
+                                        }
+
+                                        signalsElement.Children.Add(signalElement);
+                                    }
+                                    //end:
+                                    linecounter++;
+                                    line = sr.ReadLine();
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
+                                    }
+                                    break;
+                                case "implications:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+                                    throw new SyntaxException("Error: table \"implications\" is not supported");
+                                case "exclusions:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+                                    throw new SyntaxException("Error: table \"exclusions\" is not supported!");
+                                case "variables:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+
+                                    var variablesElement = new VariablesElement();
+                                    tablesElement.Variables = variablesElement;
+
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        linecounter++;
+                                        line = sr.ReadLine();
+                                        if (line == null)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
+                                        }
+                                        splitline = line.TrimStart().Split(' ');
+                                        if (splitline.Length != 2 && splitline.Length != 4)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": variable definition expected");
+                                        }
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong variable index. \"<id>:\" expected");
+                                        }
+                                        if (!type.IsMatch(splitline[1]))
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong type index. \"$<type>\" expected");
+                                        }
+                                        if (splitline.Length == 4)
+                                        {
+                                            throw new SyntaxException("Error: initial variable allocation is not supported");
+                                            //TODO InitialValue
+                                        }
+
+                                        var typeIndex = splitline[1].Last().ToString();
+
+                                        var variableElement = new VariableElement { TypeIndex = typeIndex };
+                                        variablesElement.Children.Add(variableElement);
+                                    }
+                                    //end:
+                                    linecounter++;
+                                    line = sr.ReadLine();
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
+                                    }
+                                    break;
+                                case "actions:":
+                                    if (!Int32.TryParse(line.Split(' ')[1], out count))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"<table>: <count>\" expected");
+                                    }
+
+                                    var actionsElement = new ActionsElement();
+                                    tablesElement.Actions = actionsElement;
+
+                                    for (int i = 0; i < count; i++)
+                                    {
+                                        ActionElement actionElement = null;
+
+                                        linecounter++;
+                                        line = sr.ReadLine();
+                                        if (line == null)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
+                                        }
+                                        splitline = line.TrimStart().Split(' ');
+                                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || x != i)
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action index. \"<id>:\" expected");
+                                        }
+                                        //simple actions
+                                        if (action_a.IsMatch(splitline[1]))
+                                        {
+                                            if (splitline.Length != 3 || !Int32.TryParse(splitline[2], out x))
+                                            {
+                                                throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>: <index>\" expected");
+                                            }
+
+                                            var index = splitline[2];
+
+                                            switch (splitline[1].Remove(splitline[1].Length - 1))
+                                            {
+                                                case "present":
+                                                    actionElement = new ActionElementPresent { SignalIndex = index };
+                                                    break;
+                                                case "dsz":
+                                                    actionElement = new ActionElementDsz { VariableIndex = index };
+                                                    break;
+                                                case "output":
+                                                    actionElement = new ActionElementOutput { SignalIndex = index };
+                                                    break;
+                                                case "reset":
+                                                    throw new Exception("Error in line " + linecounter + ": action \"reset\" is not supported");
+                                                case "act":
+                                                    throw new Exception("Error in line " + linecounter + ": action \"act\" is not supported");
+                                                case "goto":
+                                                    throw new Exception("Error in line " + linecounter + ": action \"goto\" is not supported");
+                                            }
+                                        }
+                                        //if action
+                                        else if (action_b.IsMatch(splitline[1]))
+                                        {
+                                            if (splitline.Length != 3)
+                                            {
+                                                throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>: <expression>\" expected");
+                                            }
+
+                                            var expression = splitline[2];
+                                            actionElement = new ActionElementIf { Expression = expression };
+                                        }
+                                        //call and combine action
+                                        else if (action_c.IsMatch(splitline[1]))
+                                        {
+                                            if (splitline.Length != 4)
+                                            {
+                                                throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>:$<procedure index> (<variable index>) <expression>\" expected");
+                                            }
+                                            if (!action_variable_index.IsMatch(splitline[2]))
+                                            {
+                                                throw new SyntaxException("Syntax error in line " + linecounter + ": wrong action syntax. \"<action>:$<procedure index> (<variable index>) <expression>\" expected");
+                                            }
+                                            switch (splitline[1].Split(':')[0])
+                                            {
+                                                case "call":
+                                                    actionElement = new ActionElementCall { ProcedureIndex = splitline[1].Split(':')[1], VariableIndexList = splitline[2], ExpressionList = splitline[3] };
+                                                    //program.actions.Add(new Action(i, action, Int32.Parse(splitline[2].Replace("(", "").Replace(")", "")), splitline[3], Int32.Parse(splitline[1].Substring(splitline[1].Length - 1))));
+                                                    break;
+                                                case "combine":
+                                                    throw new Exception("Error in line " + linecounter + ": action \"combine\" is not supported");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            throw new SyntaxException("Syntax error in line " + linecounter + ": unknown action");
+                                        }
+
+                                        actionsElement.Children.Add(actionElement);
+                                    }
+                                    //end:
+                                    linecounter++;
+                                    line = sr.ReadLine();
+                                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                                    {
+                                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
+                                    }
+                                    break;
+                                case "states:":
+                                    tables = false;
+                                    break;
+                                default:
+                                    throw new SyntaxException("Syntax error in line " + linecounter + ": table description expected");
+
+                            }
+                        }
+                    }
+
+                    var automatonElement = new AutomatonElement();
+                    moduleElement.Automaton = automatonElement;
+
+                    //states:
+                    splitline = line.Split(' ');
+                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out count))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": wrong state count. \"state: <count>\" expected");
+                    }
+                    //startpoint:
+                    linecounter++;
+                    line = sr.ReadLine();
+                    if (line == null)
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
+                    }
+                    splitline = line.Split(' ');
+                    if (!splitline[0].Equals("startpoint:"))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": startpoint expected");
+                    }
+                    int startpoint;
+                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out startpoint) || count <= startpoint)
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": wrong startpoint. \"startpoint: <nodeId>\" expected");
+                    }
+
+                    var startpointElement = new StartpointElement { Value = splitline[1] };
+                    automatonElement.Startpoint = startpointElement;
+
+                    //calls:
+                    linecounter++;
+                    line = sr.ReadLine();
+                    if (line == null)
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
+                    }
+                    splitline = line.Split(' ');
+                    if (!splitline[0].Equals("calls:"))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": call count expected");
+                    }
+                    if (splitline.Length != 2 || !Int32.TryParse(splitline[1], out x))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": wrong call count. \"calls: <count>\" expected");
+                    }
+
+                    var callsElement = new CallsElement { Count = splitline[1] };
+                    automatonElement.Calls = callsElement;
+
+                    var statesElement = new StatesElement();
+                    automatonElement.States = statesElement;
+
+                    //states
+                    for (int i = 0; i < count; i++)
+                    {
+                        linecounter++;
+                        line = sr.ReadLine();
+                        if (line == null)
+                        {
+                            throw new SyntaxException("Syntax error in line " + linecounter + ": Unexpected end of file");
+                        }
+                        splitline = line.Split(' ');
+                        if (!id.IsMatch(splitline[0]) || !Int32.TryParse(splitline[0].Remove(splitline[0].Length - 1), out x) || i != x)
+                        {
+                            throw new SyntaxException("Syntax error in line " + linecounter + ": specification of node " + i + " expected");
+                        }
+                        string newline;
+                        while (true)
+                        {
+                            linecounter++;
+                            newline = sr.ReadLine();
+                            if (newline == null)
+                            {
+                                throw new SyntaxException("Syntax error in line " + linecounter + ": unexpected end of file");
+                            }
+                            if (newline.Equals(""))
+                            {
+                                break;
+                            }
+                            line = line + newline;
+                        }
+
+                        var stateElement = new StateElement { CallString = line };
+                        statesElement.Children.Add(stateElement);
+
+                        //checkDagSpec(line, i);
+                        //splitline = line.Split(' ');
+                        //Node root = null;
+                        //string dag = "";
+                        //for (int j = 1; j < splitline.Length; j++)
+                        //{
+                        //    if (splitline[j].Equals(""))
+                        //    {
+                        //        continue;
+                        //    }
+
+                        //    if (state_number.IsMatch(splitline[j]))
+                        //    {
+                        //        dag = dag + splitline[j];
+                        //        if (j + 1 < splitline.Length && state_number_bracket.IsMatch(splitline[j + 1]))
+                        //        {
+                        //            dag = dag + "|";
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        dag = dag + splitline[j];
+                        //    }
+                        //}
+                        //List<Node> nodes = new List<Node>();
+                        //root = parseDagSpec(dag, i, nodes);
+                        //program.states.Add(new State(i, new Dag(root)));
+                    }
+                    //end:
+                    linecounter++;
+                    line = sr.ReadLine();
+                    if (line == null || !(line.Equals("end: ") || line.Equals("end:")))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"end:\" expected");
+                    }
+                    //newline
+                    linecounter++;
+                    line = sr.ReadLine();
+                    if (line == null || !line.Equals(""))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": newline expected");
+                    }
+                    //endmodule:
+                    linecounter++;
+                    line = sr.ReadLine();
+                    if (line == null || !(line.Equals("endmodule: ") || line.Equals("endmodule:")))
+                    {
+                        throw new SyntaxException("Syntax error in line " + linecounter + ": \"endmodule:\" expected");
+                    }
+
+                    return new AbstractSyntaxTree { Root = rootElement };
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        private void checkDagSpec(string dag, int state)
+        {
             int openBracket = 0;
             int closeBracket = 0;
             int countBracket = 0;
-            for (int i = dag.Split(' ')[0].Length; i < dag.Length; i++) {
-                if (dag.ElementAt(i) == '(') {
+            for (int i = dag.Split(' ')[0].Length; i < dag.Length; i++)
+            {
+                if (dag.ElementAt(i) == '(')
+                {
                     openBracket++;
                     countBracket++;
                 }
-                else if (dag.ElementAt(i) == ')') {
+                else if (dag.ElementAt(i) == ')')
+                {
                     closeBracket++;
                     countBracket--;
                 }
                 else if (dag.ElementAt(i) == ' ' || dag.ElementAt(i) == '0' || dag.ElementAt(i) == '1' || dag.ElementAt(i) == '2' || dag.ElementAt(i) == '3' || dag.ElementAt(i) == '4' || dag.ElementAt(i) == '5'
-                     || dag.ElementAt(i) == '6' || dag.ElementAt(i) == '7' || dag.ElementAt(i) == '8' || dag.ElementAt(i) == '9' || dag.ElementAt(i) == '<' || dag.ElementAt(i) == '>') {
+                     || dag.ElementAt(i) == '6' || dag.ElementAt(i) == '7' || dag.ElementAt(i) == '8' || dag.ElementAt(i) == '9' || dag.ElementAt(i) == '<' || dag.ElementAt(i) == '>')
+                {
                     continue;
                 }
-                else {
+                else
+                {
                     throw new SyntaxException("Syntax error: specification of state " + state + " contains unexpected character \'" + dag.ElementAt(i) + "\'");
                 }
-                if (countBracket < 0) {
+                if (countBracket < 0)
+                {
                     throw new SyntaxException("Syntax error: specification of state " + state + " contains bracket syntax error");
                 }
             }
-            if (openBracket != closeBracket) {
+            if (openBracket != closeBracket)
+            {
                 throw new SyntaxException("Syntax error: specification of state " + state + " contains bracket syntax error");
             }
         }
 
-        private void referenceObjects() {
-            for (int i = 0; i < program.signals.Count; i++) {
-                if (program.signals[i].getVariableId() >= program.variables.Count) {
+        private void referenceObjects()
+        {
+            for (int i = 0; i < program.signals.Count; i++)
+            {
+                if (program.signals[i].getVariableId() >= program.variables.Count)
+                {
                     throw new SyntaxException("Syntax error: the variable " + program.signals[i].getVariableId() + " referenced at signal " + i + " does not exist");
                 }
                 program.signals[i].setVariable(program.variables[program.signals[i].getVariableId()]);
             }
         }
 
-        private Action getAction(int node, int index) {
-            if (program.actions.Count <= index) {
+        private Action getAction(int node, int index)
+        {
+            if (program.actions.Count <= index)
+            {
                 throw new SyntaxException("Syntax error: the action " + index + " referenced in nodedescription of node " + node + " doesn´t exist");
             }
             return program.actions[index];
         }
 
-        private Node parseDagSpec(string dag, int i, List<Node> cont) {
+        private Node parseDagSpec(string dag, int i, List<Node> cont)
+        {
             Node root = null;
             Node last = null;
-            while (true) {
-                if (dag.Equals("")) {
+            while (true)
+            {
+                if (dag.Equals(""))
+                {
                     break;
                 }
-                if (dag.StartsWith("|")) {
+                if (dag.StartsWith("|"))
+                {
                     dag = dag.Substring(1);
                     continue;
                 }
-                if (dag.StartsWith("(")) {
-                    if (last == null) {
+                if (dag.StartsWith("("))
+                {
+                    if (last == null)
+                    {
                         throw new SyntaxException("Syntax error: syntax error in dag specification of state " + i);
                     }
                     int left = 0;
                     int right = 0;
                     int bracket = 0;
-                    for (int a = 1; a < dag.Length; a++) {
-                        if (dag.ElementAt(a) == ')' && bracket == 0) {
+                    for (int a = 1; a < dag.Length; a++)
+                    {
+                        if (dag.ElementAt(a) == ')' && bracket == 0)
+                        {
                             left = a - 1;
-                            for (int b = a + 2; b < dag.Length; b++) {
-                                if (dag.ElementAt(b) == ')' && bracket == 0) {
+                            for (int b = a + 2; b < dag.Length; b++)
+                            {
+                                if (dag.ElementAt(b) == ')' && bracket == 0)
+                                {
                                     right = b - 1;
                                     break;
                                 }
-                                else if (dag.ElementAt(b) == ')' && bracket > 0) {
+                                else if (dag.ElementAt(b) == ')' && bracket > 0)
+                                {
                                     bracket--;
                                 }
-                                else if (dag.ElementAt(b) == '(') {
+                                else if (dag.ElementAt(b) == '(')
+                                {
                                     bracket++;
                                 }
                             }
                             break;
                         }
-                        else if (dag.ElementAt(a) == ')' && bracket > 0) {
+                        else if (dag.ElementAt(a) == ')' && bracket > 0)
+                        {
                             bracket--;
                         }
-                        else if (dag.ElementAt(a) == '(') {
+                        else if (dag.ElementAt(a) == '(')
+                        {
                             bracket++;
                         }
                     }
-                    if (left == 0 || right == 0) {
+                    if (left == 0 || right == 0)
+                    {
                         throw new SyntaxException("Syntax error: syntax error in dag specification of state " + i);
                     }
                     List<Node> cont_left = new List<Node>();
@@ -547,7 +1219,8 @@ namespace SafetyLustre
                     last.setRight(parseDagSpec(dag.Substring(left + 3, right - left - 2), i, cont_right));
                     cont.AddRange(cont_left);
                     cont.AddRange(cont_right);
-                    if (last.getLeft() == null || last.getRight() == null) {
+                    if (last.getLeft() == null || last.getRight() == null)
+                    {
                         cont.Add(last);
                     }
                     dag = dag.Substring(right + 2);
@@ -560,23 +1233,31 @@ namespace SafetyLustre
                 index = (Math.Min(dag.IndexOf("<"), index) == -1)
                     ? (Math.Max(dag.IndexOf("<"), index))
                     : (Math.Min(dag.IndexOf("<"), index));
-                if (index == -1) {
+                if (index == -1)
+                {
                     index = dag.Length;
                 }
                 int x;
-                if (Int32.TryParse(dag.Substring(0, index), out x)) {
-                    if (cont.Count > 0) {
+                if (Int32.TryParse(dag.Substring(0, index), out x))
+                {
+                    if (cont.Count > 0)
+                    {
                         Node temp = new Node(getAction(i, x), program);
-                        foreach (Node n in cont) {
-                            if (n.getAction().getAction() == 1) {
-                                if (n.getLeft() == null) {
+                        foreach (Node n in cont)
+                        {
+                            if (n.getAction().getAction() == 1)
+                            {
+                                if (n.getLeft() == null)
+                                {
                                     n.setLeft(temp);
                                 }
-                                if (n.getRight() == null) {
+                                if (n.getRight() == null)
+                                {
                                     n.setRight(temp);
                                 }
                             }
-                            else {
+                            else
+                            {
                                 n.setLeft(temp);
                             }
                         }
@@ -584,50 +1265,65 @@ namespace SafetyLustre
                         last = temp;
                         dag = dag.Substring(index);
                     }
-                    else {
-                        if (root == null) {
+                    else
+                    {
+                        if (root == null)
+                        {
                             root = new Node(getAction(i, x), program);
                             last = root;
-                            if (Int32.TryParse(dag, out x)) {
+                            if (Int32.TryParse(dag, out x))
+                            {
                                 cont.Add(last);
                             }
                             dag = dag.Substring(index);
                         }
-                        else {
+                        else
+                        {
                             last.setLeft(new Node(getAction(i, x), program));
                             last = last.getLeft();
-                            if (Int32.TryParse(dag, out x)) {
+                            if (Int32.TryParse(dag, out x))
+                            {
                                 cont.Add(last);
                             }
                             dag = dag.Substring(index);
                         }
                     }
                 }
-                else if (state_jump.IsMatch(dag)) {
+                else if (state_jump.IsMatch(dag))
+                {
                     index = (Math.Min(dag.IndexOf("|"), dag.IndexOf("(")) == -1)
                         ? (Math.Max(dag.IndexOf("|"), dag.IndexOf("(")))
                         : (Math.Min(dag.IndexOf("|"), dag.IndexOf("(")));
-                    if (index == -1) {
+                    if (index == -1)
+                    {
                         index = dag.Length;
                     }
-                    if (cont.Count > 0) {
+                    if (cont.Count > 0)
+                    {
                         Node temp;
-                        try {
+                        try
+                        {
                             temp = new Node(Int32.Parse(dag.Substring(0, index).TrimStart('<').TrimEnd('>')), program);
                         }
-                        catch (Exception) {
+                        catch (Exception)
+                        {
                             throw new SyntaxException("Syntax error: syntax error in dag specification of state " + i);
                         }
-                        foreach (Node n in cont) {
-                            if (n.getAction().getAction() == 1) {
-                                if (n.getLeft() == null) {
+                        foreach (Node n in cont)
+                        {
+                            if (n.getAction().getAction() == 1)
+                            {
+                                if (n.getLeft() == null)
+                                {
                                     n.setLeft(temp);
                                 }
-                                if (n.getRight() == null) {
+                                if (n.getRight() == null)
+                                {
                                     n.setRight(temp);
                                 }
                             }
-                            else {
+                            else
+                            {
                                 n.setLeft(temp);
                             }
                         }
@@ -635,20 +1331,24 @@ namespace SafetyLustre
                         last = temp;
                         dag = dag.Substring(index);
                     }
-                    else {
-                        if (root == null) {
+                    else
+                    {
+                        if (root == null)
+                        {
                             root = new Node(Int32.Parse(dag.Substring(0, index).TrimStart('<').TrimEnd('>')), program);
                             last = root;
                             dag = dag.Substring(index);
                         }
-                        else {
+                        else
+                        {
                             last.setLeft(new Node(Int32.Parse(dag.Substring(0, index).TrimStart('<').TrimEnd('>')), program));
                             last = last.getLeft();
                             dag = dag.Substring(index);
                         }
                     }
                 }
-                else {
+                else
+                {
                     throw new SyntaxException("Syntax error: syntax error in dag specification of state " + i);
                 }
 

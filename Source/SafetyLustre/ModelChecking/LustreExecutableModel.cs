@@ -120,8 +120,8 @@ namespace SafetyLustre
 			Action<TextWriter> writeOptimizedStateVectorLayout = (textWriter) =>
 			{
 				throw new NotImplementedException();
-				textWriter.WriteLine("bytes[0-4] state: int");
-				textWriter.WriteLine("bytes[5-12] permanent faults: long");
+				//textWriter.WriteLine("bytes[0-4] state: int");
+				//textWriter.WriteLine("bytes[5-12] permanent faults: long");
 			};
 			var flatFaults = faults.OrderBy(fault => fault.Identifier).ToArray();
 			return new CoupledExecutableModelCreator<LustreExecutableModel>(creatorFunc, writeOptimizedStateVectorLayout, ocFileName, formulasToCheckInBaseModel, flatFaults);
@@ -154,8 +154,8 @@ namespace SafetyLustre
 		public override void WriteOptimizedStateVectorLayout(TextWriter textWriter)
 		{
 			throw new NotImplementedException();
-			textWriter.WriteLine("bytes[0-4] state: int");
-			textWriter.WriteLine("bytes[5-12] permanent faults: long");
+			//textWriter.WriteLine("bytes[0-4] state: int");
+			//textWriter.WriteLine("bytes[5-12] permanent faults: long");
 		}
 	}
 }
