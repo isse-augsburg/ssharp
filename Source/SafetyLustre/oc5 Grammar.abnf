@@ -1,0 +1,215 @@
+; no oc rules but ocfile begin or end with elimiter, do this in higher level rule
+
+;;; OC RULES
+ocfile =                    delimiter version-keyword delimiter module delimiter
+
+module =                    module-keyword delimiter name delimiter
+                            ;; TABLES
+                            ; instances delimiter
+                            ; types delimiter
+                            constants delimiter
+                            ; functions delimiter
+                            ; procedures delimiter
+                            signals delimiter
+                            ; implications delimiter
+                            ; exclusions delimiter
+                            variables delimiter
+                            ; tasks delimiter
+                            ; execs delimiter
+                            actions delimiter
+                            ; halts delimiter
+                            ;; AUTOMATON
+                            automaton delimiter
+                            module-end-keyword
+
+constants =                 constants-keyword delimiter count delimiter
+                            *(constant delimiter)   ; count of this line should be same as count
+                            end-keyword
+
+; Initial value not supported
+constant =                  constant-index colon delimiter name delimiter type-index
+
+constant-index =            index
+
+type-index =                index
+
+signals =                   signals-keyword delimiter count delimiter
+                            *(signal delimiter) ; count of this line should be same as count
+                            end-keyword
+
+signal =                    signal-index colon delimiter nature delimiter channel delimiter [bool]
+
+signal-index =              index
+
+; Other natures unsupported
+nature =                    input / output
+
+input =                     input-keyword name delimiter present-action
+
+present-action =            action-index / hyphen
+
+action-index =              index
+
+output =                    output-keyword name delimiter out-action
+
+out-action =                action-index / hyphen
+
+channel =                   pure / single / multiple
+
+pure =                      pure-keyword
+
+single =                    single-keyword var-index
+
+var-index =                 index
+
+multiple =                  multiple-keyword var-index delimiter comb-fun-index
+
+comb-fun-index  =           index ; index of function that combines the emissions
+
+bool =                      bool-keyword bool-var-index
+
+bool-var-index =            var-index ; must be of bool variable
+
+variables =                 variables-keyword delimiter count delimiter
+                            *(variable delimiter)   ; count of this line should be same as count
+                            end-keyword
+
+; unsupported:
+; am Ende [value-keyword initial-value]
+; zudem initial-value = expression
+variable =                  index delimiter type-index 
+
+actions =                   actions-keyword delimiter count delimiter
+                            *(action delimiter) ; count of this line should be same as count
+                            end-keyword
+
+; unsupported: newstate-action
+action =                    action-index colon delimiter (test-action / linear-action)
+
+test-action =               present-action / if-action / dsz-action
+
+present-action =            present-keyword delimiter signal-index
+
+if-action =                 if-keyword delimiter expression
+
+dsz-action =                dsz-keyword  delimiter var-index ; index of integer variable
+
+linear-action =             call / output
+
+; variable-index-list expression-list actually
+call =                      call-keyword procedure-index delimiter
+                            open-parenthesis var-index close-parenthesis delimiter
+                            open-parenthesis expression close-parenthesis
+
+output =                    output-keyword delimiter signal-index
+
+automaton =                 states delimiter
+                            startpoint delimiter
+                            ; optional sink: state-index
+                            calls delimiter
+                            *(state delimiter)  ; count of this line should be same as count in states
+                            end-keyword
+
+states =                    states-keyword delimiter count
+
+startpoint =                startpoint-keyword delimiter state-index
+
+state-index =               index
+
+calls =                     calls-keyword delimiter count
+
+state =                     sate-index colon delimiter ; TODO dag stuff action-tree, Appendix D
+
+; An expression in LUSTRE or Esterel consists of atoms (integers, floats, doubles and strings), constants, variables, sensors, and function calls.
+; In LUSTRE, an expression can also be a reference to a field of a tuple.
+expression =                atom-expression / constant-expression / variable-expression
+
+; Atoms are preceded by `#'.
+atom-expression =           hashtag atom-value
+; Integers, floats, doubles and strings
+atom-value =                numeric / alphanumeric
+
+; Constants are represented by their index, preceded by `@'.
+constant-expression =       at-sign constant-index
+; Variables are represented by their index.
+variable-expression =       variable-index
+; Sensors are represented by their index, preceded by `?'.
+; sensor-expression =
+
+function-call-expression =  dollar-sign function-index delimiter open-parenthesis expression-list close-parenthesis
+
+expression-list =           expression *(delimiter comma expression)
+
+; Field references have the form expression.feld-name
+; field-reference = 
+
+function-index =            index
+
+procedure-index =           index
+
+
+;;; HELPER RULES
+delimiter = *(space / newline / tab)
+
+; with dollar sign is predefined
+index = [dollar-sign] numeric
+
+; See appendix A
+identifier = letter *(alphanumeric / underscore)
+
+name = identifier
+
+numeric = *digit
+
+positive-numeric = positive-digit *digit
+
+alphanumeric = *(digit / letter)
+
+count = numeric
+
+
+;;; TERMINALS
+version-keyword = "oc5:"
+
+module-keyword = "module:"
+module-end-keyword = "endmodule:"
+
+constants-keyword = "constants:"
+signals-keyword = "signals:"
+variables-keyword = "variables:"
+actions-keyword = "actions:"
+
+end-keyword = "end:"
+
+input-keyword = "input:"
+output-keyword = "output:"
+pure-keyword = "pure:"
+single-keyword = "single:"
+multiple-keyword = "multiple:"
+bool-keyword = "bool:"
+value-keyword = "value:"
+present-keyword = "present:"
+if-keyword = "if:"
+dsz-keyword = "dsz:"
+call-keyword = "call:"
+output-keyword = "output:"
+states-keyword = "states:"
+startpoint-keyword = "startpoint:"
+calls-keyword = "calls:"
+
+space = " "
+newline = "\n"
+tab = "\t"
+
+digit = ; 0-9
+positive-digit = ; 1-9
+letter = ; a-z, A-Z
+underscore = "_"
+dollar-sign = "$"
+hyphen = "-"
+colon = ":"
+hashtag = "#"
+at-sign = "@"
+open-parenthesis = "(" 
+close-parenthesis = ")"
+comma = ","
