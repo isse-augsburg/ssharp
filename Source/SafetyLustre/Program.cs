@@ -21,20 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Antlr4.Runtime;
+using SafetyLustre.ANTLR;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
-using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
-using ISSE.SafetyChecking;
-using ISSE.SafetyChecking.Formula;
-using System.Globalization;
-using ISSE.SafetyChecking.Modeling;
 
 namespace SafetyLustre
 {
@@ -43,6 +33,27 @@ namespace SafetyLustre
 
         static void Main(string[] args)
         {
+            var oc5 = File.ReadAllText(@"C:\Users\Pascal\Source\University\ssharp\SafetyLustreTest\Examples\example1.oc");
+
+            var inputStream = new AntlrInputStream(oc5);
+            var lexer = new Oc5Lexer(inputStream);
+            var tokenStream = new CommonTokenStream(lexer);
+            var parser = new Oc5Parser(tokenStream);
+
+            var ocfile = parser.ocfile();
+
+            //Console.WriteLine("-----------------------------------------------");
+            //foreach (var token in tokenStream.GetTokens())
+            //{
+            //    Console.WriteLine(token.ToString() + " " + token.Type);
+            //}
+            //Console.WriteLine("-----------------------------------------------");
+            //Console.WriteLine(ocfile.ToStringTree());
+            //Console.WriteLine("-----------------------------------------------");
+
+            var visitor = new ToStringVisitor();
+            Console.WriteLine(visitor.Visit(ocfile));
+            Console.ReadKey();
         }
     }
 }
