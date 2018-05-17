@@ -45,16 +45,17 @@ state: LIST_INDEX actionTree;
 actionTree: closedDag | openTestList closedDag;
 closedDag: newState | closedTest /*| newClosedDag*/;
 newState:
-	linearActionList LESS_THAN_SIGN NUMBER GREATER_THAN_SIGN
+	linearActionList LESS_THAN_SIGN index GREATER_THAN_SIGN
 	/* pragmaList */;
 closedTest:
-	linearActionList index /* what index? */ OPEN_PARENTHESIS actionTree CLOSE_PARENTHESIS
+	linearActionList index OPEN_PARENTHESIS actionTree CLOSE_PARENTHESIS
 		OPEN_PARENTHESIS actionTree CLOSE_PARENTHESIS;
 //newClosedDag: linearActionList '[' NUMBER ']' pragmaList;
 openTestList: (openTest)+;
 openTest:
-	/* linearActionList '{' NUMBER '}' pragmaList |*/ linearActionList index
-		OPEN_PARENTHESIS openDag CLOSE_PARENTHESIS OPEN_PARENTHESIS actionTree CLOSE_PARENTHESIS
+	/* linearActionList '{' NUMBER '}' pragmaList |*/
+	linearActionList index OPEN_PARENTHESIS openDag CLOSE_PARENTHESIS
+		OPEN_PARENTHESIS actionTree CLOSE_PARENTHESIS
 	| linearActionList index OPEN_PARENTHESIS actionTree CLOSE_PARENTHESIS
 		OPEN_PARENTHESIS openDag CLOSE_PARENTHESIS
 	| linearActionList index OPEN_PARENTHESIS openDag CLOSE_PARENTHESIS

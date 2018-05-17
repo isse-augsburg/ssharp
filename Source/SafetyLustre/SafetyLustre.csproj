@@ -73,9 +73,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SafetyLustre.ANTLR\SafetyLustre.ANTLR.csproj">
+    <ProjectReference Include="..\SafetyLustre.Oc5Compiler\SafetyLustre.Oc5Compiler.csproj">
       <Project>{cfaafd6c-76b7-400a-a715-2eb0b8ee0899}</Project>
-      <Name>SafetyLustre.ANTLR</Name>
+      <Name>SafetyLustre.Oc5Compiler</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

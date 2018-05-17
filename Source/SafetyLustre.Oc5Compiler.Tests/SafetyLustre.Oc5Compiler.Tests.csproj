@@ -7,8 +7,8 @@
     <ProjectGuid>{A1BF68D6-A34D-4892-9A5C-7DB3A4F2A01D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SafetyLustre.ANTLR.Tests</RootNamespace>
-    <AssemblyName>SafetyLustre.ANTLR.Tests</AssemblyName>
+    <RootNamespace>SafetyLustre.Oc5Compiler.Tests</RootNamespace>
+    <AssemblyName>SafetyLustre.Oc5Compiler.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -41,6 +41,7 @@
     <Reference Include="Antlr4.Runtime">
       <HintPath>..\..\Dependencies\Antlr4.Runtime.4.6.4\lib\net45\Antlr4.Runtime.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\Dependencies\MSTest.TestFramework.1.2.1\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
     </Reference>
@@ -51,6 +52,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Oc5StateTests.cs" />
     <Compile Include="Oc5Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -74,9 +76,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SafetyLustre.ANTLR\SafetyLustre.ANTLR.csproj">
+    <ProjectReference Include="..\SafetyLustre.Oc5Compiler\SafetyLustre.Oc5Compiler.csproj">
       <Project>{cfaafd6c-76b7-400a-a715-2eb0b8ee0899}</Project>
-      <Name>SafetyLustre.ANTLR</Name>
+      <Name>SafetyLustre.Oc5Compiler</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
