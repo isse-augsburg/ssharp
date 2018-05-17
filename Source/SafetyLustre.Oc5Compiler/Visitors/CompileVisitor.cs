@@ -10,9 +10,10 @@ namespace SafetyLustre.Oc5Compiler.Visitors
 {
     class CompileVisitor : Oc5BaseVisitor<Expression>
     {
-        private LabelTarget CurrentReturnLabelTarget { get; set; }
         public Oc5Model Oc5Model { get; set; } = new Oc5Model();
         public Oc5State Oc5State { get; set; } = new Oc5State();
+        private LabelTarget CurrentReturnLabelTarget { get; set; }
+        public ParameterExpression Oc5StateParameterExpression { get; set; } = Expression.Parameter(typeof(Oc5State), "Oc5State");
 
         public CompileVisitor([NotNull] OcfileContext context)
         {
@@ -120,10 +121,8 @@ namespace SafetyLustre.Oc5Compiler.Visitors
                 throw new UnsupportedSyntaxException("User-defined index", context.index().Start);
 
             var predefinedTypeIndex = GetIndexNumber(context.index());
-            var variableExpression = PredefinedObjects.GetVariableExpression(predefinedTypeIndex);
+            var variableExpression = PredefinedObjects.GetVariableExpression(predefinedTypeIndex, Oc5State, Oc5StateParameterExpression);
             Oc5Model.Variables.Add(variableExpression);
-
-            PredefinedObjects.AddVariableToOc5State(Oc5State, predefinedTypeIndex);
 
             return null;
         }

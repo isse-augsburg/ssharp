@@ -81,52 +81,41 @@ namespace SafetyLustre.Oc5Compiler
 
         #region Variables
 
-        internal static ParameterExpression GetVariableExpression(int typeIndex)
-        {
-            //TODO statt parametern einen listenzugriff zurückgeben
-            switch ((Types)typeIndex)
-            {
-                case Types._boolean:
-                    return Expression.Parameter(typeof(bool).MakeByRefType());
-                case Types._integer:
-                    return Expression.Parameter(typeof(int).MakeByRefType());
-                case Types._string:
-                    return Expression.Parameter(typeof(string).MakeByRefType());
-                case Types._float:
-                    return Expression.Parameter(typeof(float).MakeByRefType());
-                case Types._double:
-                    return Expression.Parameter(typeof(double).MakeByRefType());
-                default:
-                    throw new ArgumentException($"No predefined type with index {typeIndex}!");
-            }
-        }
-
-        internal static void AddVariableToOc5State(Oc5State oc5State, int typeIndex)
+        internal static Expression GetVariableExpression(int typeIndex, Oc5State oc5State, ParameterExpression oc5StateParameterExpression)
         {
             var type = (Types)typeIndex;
-            //TODO mappings
             switch (type)
             {
                 case Types._boolean:
                     oc5State.Bools.Add(default(bool));
-                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5State = oc5State.Bools.Count - 1 });
-                    break;
+                    var boolIndex = oc5State.Bools.Count - 1;
+                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5StateList = boolIndex });
+                    var boolsExpression = Expression.Property(oc5StateParameterExpression, "Bools");
+                    return Expression.Property(boolsExpression, "Item", Expression.Constant(boolIndex));
                 case Types._integer:
                     oc5State.Ints.Add(default(int));
-                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5State = oc5State.Ints.Count - 1 });
-                    break;
+                    var intIndex = oc5State.Ints.Count - 1;
+                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5StateList = intIndex });
+                    var intsExpression = Expression.Property(oc5StateParameterExpression, "Ints");
+                    return Expression.Property(intsExpression, "Item", Expression.Constant(intIndex));
                 case Types._string:
                     oc5State.Strings.Add(default(string));
-                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5State = oc5State.Strings.Count - 1 });
-                    break;
+                    var stringIndex = oc5State.Strings.Count - 1;
+                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5StateList = stringIndex });
+                    var stringsExpression = Expression.Property(oc5StateParameterExpression, "Strings");
+                    return Expression.Property(stringsExpression, "Item", Expression.Constant(stringIndex));
                 case Types._float:
                     oc5State.Floats.Add(default(float));
-                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5State = oc5State.Floats.Count - 1 });
-                    break;
+                    var floatIndex = oc5State.Floats.Count - 1;
+                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5StateList = floatIndex });
+                    var floatsExpression = Expression.Property(oc5StateParameterExpression, "Floats");
+                    return Expression.Property(floatsExpression, "Item", Expression.Constant(floatIndex));
                 case Types._double:
                     oc5State.Doubles.Add(default(double));
-                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5State = oc5State.Doubles.Count - 1 });
-                    break;
+                    var doubleIndex = oc5State.Doubles.Count - 1;
+                    oc5State.Mappings.Add(new PositionInOc5State { Type = type, IndexInOc5StateList = doubleIndex });
+                    var doublesExpression = Expression.Property(oc5StateParameterExpression, "Doubles");
+                    return Expression.Property(doublesExpression, "Item", Expression.Constant(doubleIndex));
                 default:
                     throw new ArgumentException($"No predefined type with index {typeIndex}!");
             }

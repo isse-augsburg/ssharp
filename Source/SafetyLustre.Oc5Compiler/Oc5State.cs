@@ -28,6 +28,6 @@ namespace SafetyLustre.Oc5Compiler
     struct PositionInOc5State
     {
         public PredefinedObjects.Types Type { get; set; }
-        public int IndexInOc5State { get; set; }
+        public int IndexInOc5StateList { get; set; }
     }
 }

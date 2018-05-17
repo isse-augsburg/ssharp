@@ -23,10 +23,10 @@ namespace SafetyLustre.Oc5Compiler.Tests
                 Doubles = new List<double>(),
                 Mappings = new List<PositionInOc5State>
                 {
-                    new PositionInOc5State {Type=PredefinedObjects.Types._boolean, IndexInOc5State=0 },
-                    new PositionInOc5State {Type=PredefinedObjects.Types._integer, IndexInOc5State=0 },
-                    new PositionInOc5State {Type=PredefinedObjects.Types._integer, IndexInOc5State=1 },
-                    new PositionInOc5State {Type=PredefinedObjects.Types._integer, IndexInOc5State=2 },
+                    new PositionInOc5State {Type=PredefinedObjects.Types._boolean, IndexInOc5StateList=0 },
+                    new PositionInOc5State {Type=PredefinedObjects.Types._integer, IndexInOc5StateList=0 },
+                    new PositionInOc5State {Type=PredefinedObjects.Types._integer, IndexInOc5StateList=1 },
+                    new PositionInOc5State {Type=PredefinedObjects.Types._integer, IndexInOc5StateList=2 },
                 }
             };
 

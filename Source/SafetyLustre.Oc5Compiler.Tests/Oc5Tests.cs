@@ -185,55 +185,5 @@ namespace SafetyLustre.Oc5Compiler.Tests
             Expression.Lambda<Func<int>>(ex).Compile().Invoke();
             Console.WriteLine(myObj.MyProperty);
         }
-
-        [TestMethod]
-        public void TestDynamicList()
-        {
-            var dynList = new List<dynamic> { 1, 1.5, "hello", new MyClass() };
-            foreach (var item in dynList)
-            {
-                int i = item;
-                Console.WriteLine($"{item} is {item.GetType()}");
-            }
-
-            Console.WriteLine("-----------");
-
-            var objList = new List<object> { 1, 1.5, "hello", new MyClass() };
-            foreach (var item in objList)
-            {
-                Console.WriteLine($"{item} is {item.GetType()}");
-            }
-
-        }
-
-        [TestMethod]
-        public void MiscTest()
-        {
-
-        }
-
-        static object DynamicCast(object source, Type type)
-        {
-            var parameter = Expression.Parameter(typeof(object), "input");
-
-            var cast = Expression.TypeAs(Expression.Convert(parameter, type), typeof(object));
-
-            var lambda = Expression.Lambda<Func<object, object>>(cast, parameter);
-
-            var func = lambda.Compile();
-
-            return func(source);
-        }
-    }
-
-    public class count
-    {
-        bool var0;
-        int var1;
-        /* ... */
-
-        int currentState;
-
-
     }
 }

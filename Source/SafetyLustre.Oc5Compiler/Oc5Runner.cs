@@ -16,6 +16,10 @@ namespace SafetyLustre.Oc5Compiler
         private Oc5Model Oc5Model { get; set; }
         private Oc5State Oc5State { get; set; }
 
+
+
+        private ParameterExpression Oc5StateParameterExpression { get; set; }
+
         /// <summary>
         /// Creates an instance of Oc5Runner
         /// </summary>
@@ -34,32 +38,32 @@ namespace SafetyLustre.Oc5Compiler
             var visitor = new CompileVisitor(ocfileContext);
             Oc5Model = visitor.Oc5Model;
             Oc5State = visitor.Oc5State;
+            Oc5StateParameterExpression = visitor.Oc5StateParameterExpression;
             Console.WriteLine();
         }
 
-        public void Tick<T1, T2>(T1 input1, T2 input2)
+        public void Tick(params object[] inputs)
         {
-            int i = -1;
-            foreach (var signal in Oc5Model.Signals.OfType<SingleInputSignal>())
-            {
-                i++;
-                var index = signal.VarIndex;
-            }
+            //int i = -1;
+            //foreach (var signal in Oc5Model.Signals.OfType<SingleInputSignal>())
+            //{
+            //    i++;
+            //    var index = signal.VarIndex;
+            //}
+
+            //HACK
+            Oc5State.Ints[0] = 1;
+            Oc5State.Ints[1] = 2;
 
             var state = Oc5Model.States[Oc5State.CurrentState];
 
-            switch (Oc5Model.Variables.Count)
-            {
-                case 4:
-                    var arg1 = false;
-                    var arg2 = input1;
-                    var arg3 = input2;
-                    var arg4 = 0;
-                    Oc5State.CurrentState = CompileAndInvoke(state, Oc5Model.Variables, ref arg1, ref arg2, ref arg3, ref arg4);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
+            var le = Expression.Lambda<Func<Oc5State, int>>(state, Oc5StateParameterExpression);
+            var compiled = le.Compile();
+            var result = compiled.Invoke(Oc5State);
+
+            Console.WriteLine($"result: {result}");
+            Console.WriteLine($"output: {Oc5State.Ints[2]}");
+            Console.ReadKey();
         }
 
         #region Delegates
