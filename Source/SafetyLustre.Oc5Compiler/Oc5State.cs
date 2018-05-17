@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace SafetyLustre.Oc5Compiler
 {
@@ -20,7 +16,7 @@ namespace SafetyLustre.Oc5Compiler
         /// </summary>
         public List<PositionInOc5State> Mappings { get; set; } = new List<PositionInOc5State>();
         /// <summary>
-        /// Represents the cureent oc5 state the model is in.
+        /// Represents the current oc5 state the model is in.
         /// </summary>
         public int CurrentState { get; set; }
     }

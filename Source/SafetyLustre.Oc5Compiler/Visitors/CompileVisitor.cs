@@ -12,8 +12,13 @@ namespace SafetyLustre.Oc5Compiler.Visitors
     {
         public Oc5Model Oc5Model { get; set; } = new Oc5Model();
         public Oc5State Oc5State { get; set; } = new Oc5State();
+
+        private List<ConstantExpression> Constants { get; set; } = new List<ConstantExpression>();
+        private List<Expression> Variables { get; set; } = new List<Expression>();
+        private List<Expression> Actions { get; set; } = new List<Expression>();
+        public List<Expression> States { get; set; } = new List<Expression>();
+        private ParameterExpression Oc5StateParameterExpression { get; set; } = Expression.Parameter(typeof(Oc5State), "Oc5State");
         private LabelTarget CurrentReturnLabelTarget { get; set; }
-        public ParameterExpression Oc5StateParameterExpression { get; set; } = Expression.Parameter(typeof(Oc5State), "Oc5State");
 
         public CompileVisitor([NotNull] OcfileContext context)
         {
@@ -23,6 +28,12 @@ namespace SafetyLustre.Oc5Compiler.Visitors
         public override Expression VisitOcfile([NotNull] OcfileContext context)
         {
             base.VisitOcfile(context);
+
+            //Compile each state
+            States.ForEach(
+                state =>
+                Oc5Model.States.Add(Expression.Lambda<Func<Oc5State, int>>(state, Oc5StateParameterExpression).Compile())
+            );
 
             return null;
         }
@@ -46,7 +57,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
 
             var predefinedTypeIndex = int.Parse(context.index().NUMBER().ToString());
             var constantExpression = PredefinedObjects.GetConstantExpressionOfType(predefinedTypeIndex);
-            Oc5Model.Constants.Add(constantExpression);
+            Constants.Add(constantExpression);
 
             return null;
         }
@@ -122,7 +133,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
 
             var predefinedTypeIndex = GetIndexNumber(context.index());
             var variableExpression = PredefinedObjects.GetVariableExpression(predefinedTypeIndex, Oc5State, Oc5StateParameterExpression);
-            Oc5Model.Variables.Add(variableExpression);
+            Variables.Add(variableExpression);
 
             return null;
         }
@@ -145,9 +156,9 @@ namespace SafetyLustre.Oc5Compiler.Visitors
         {
             var signalIndex = GetIndexNumber(context.index());
             var signal = Oc5Model.Signals[signalIndex];
-            var variable = Oc5Model.Variables[signal.VarIndex];
+            var variable = Variables[signal.VarIndex];
             var action = PredefinedObjects.GetPresentAction(variable);
-            Oc5Model.Actions.Add(action);
+            Actions.Add(action);
 
             return null;
         }
@@ -156,7 +167,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
         {
             var action = VisitExpression(context.expression());
             action = PredefinedObjects.GetIfAction(action);
-            Oc5Model.Actions.Add(action);
+            Actions.Add(action);
 
             return null;
         }
@@ -164,9 +175,9 @@ namespace SafetyLustre.Oc5Compiler.Visitors
         public override Expression VisitDszAction([NotNull] DszActionContext context)
         {
             var index = GetIndexNumber(context.index());
-            var variable = Oc5Model.Variables[index];
+            var variable = Variables[index];
             var action = PredefinedObjects.GetDszAction(variable);
-            Oc5Model.Actions.Add(action);
+            Actions.Add(action);
 
             return null;
         }
@@ -211,14 +222,14 @@ namespace SafetyLustre.Oc5Compiler.Visitors
             else
             {
                 var index = GetIndexNumber(context.index());
-                return Oc5Model.Constants[index];
+                return Constants[index];
             }
         }
 
         public override Expression VisitVariableExpression([NotNull] VariableExpressionContext context)
         {
             var index = GetIndexNumber(context.index());
-            return Oc5Model.Variables[index];
+            return Variables[index];
         }
 
         public override Expression VisitFunctionCallExpression([NotNull] FunctionCallExpressionContext context)
@@ -244,11 +255,11 @@ namespace SafetyLustre.Oc5Compiler.Visitors
             var procedureIndex = GetIndexNumber(context.index()[0]);
             var variableIndex = GetIndexNumber(context.index()[1]);
 
-            var variable = Oc5Model.Variables[variableIndex];
+            var variable = Variables[variableIndex];
             var expression = VisitExpression(context.expression());
 
             var action = PredefinedObjects.GetProcedure(procedureIndex, variable, expression);
-            Oc5Model.Actions.Add(action);
+            Actions.Add(action);
 
             return null;
         }
@@ -258,7 +269,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
             var index = GetIndexNumber(context.index());
             var signal = Oc5Model.Signals[index];
             var variableindex = signal.VarIndex;
-            var variable = Oc5Model.Variables[variableindex];
+            var variable = Variables[variableindex];
             var variableAsObject = Expression.Convert(variable, typeof(object));
 
             var action = Expression.Call(
@@ -266,7 +277,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
                 variableAsObject
             );
 
-            Oc5Model.Actions.Add(action);
+            Actions.Add(action);
             return null;
         }
 
@@ -296,7 +307,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
             var actiontreeExpression = VisitActionTree(context.actionTree());
 
             Expression state = Expression.Block(actiontreeExpression, returnLabelExpression);
-            Oc5Model.States.Add(state);
+            States.Add(state);
 
             return null;
         }
@@ -325,7 +336,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
             var lalExpression = VisitLinearActionList(context.linearActionList());
 
             var index = GetIndexNumber(context.index());
-            var test = Expression.Convert(Oc5Model.Actions[index], typeof(bool));
+            var test = Expression.Convert(Actions[index], typeof(bool));
             var ifTrue = VisitActionTree(context.actionTree()[0]);
             var ifFalse = VisitActionTree(context.actionTree()[1]);
 
@@ -353,7 +364,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
 
             int testActionIndex = GetIndexNumber(context.index());
 
-            var test = Oc5Model.Actions[testActionIndex];
+            var test = Actions[testActionIndex];
 
             var ifTrue = default(Expression);
             var ifFalse = default(Expression);
@@ -410,7 +421,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
             foreach (var num in context.NUMBER())
             {
                 var index = int.Parse(num.ToString());
-                var action = Oc5Model.Actions[index];
+                var action = Actions[index];
                 expressions.Add(action);
             }
 
