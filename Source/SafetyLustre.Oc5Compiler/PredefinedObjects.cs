@@ -78,7 +78,7 @@ namespace SafetyLustre.Oc5Compiler
 
         #region Variables
 
-        internal static Expression GetVariableExpression(int typeIndex, Oc5State oc5State, ParameterExpression oc5StateParameterExpression)
+        internal static Expression GetVariableExpression(int typeIndex, Oc5ModelState oc5State, ParameterExpression oc5StateParameterExpression)
         {
             var type = (Types)typeIndex;
             switch (type)
@@ -338,7 +338,7 @@ namespace SafetyLustre.Oc5Compiler
         {
             //var nullExpression = Expression.Constant(null, expression.Type);
             //return Expression.NotEqual(expression, nullExpression);
-            //TODO
+            //TODO actually evaluate if signal is present
             return Expression.Constant(true);
         }
 

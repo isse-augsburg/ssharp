@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace SafetyLustre
@@ -30,25 +31,29 @@ namespace SafetyLustre
     {
         static void Main(string[] args)
         {
-            var oc5 = File.ReadAllText(@"C:\Users\Pascal\Source\University\ssharp\SafetyLustreTest\Examples\Example1.oc");
+            var oc5 = File.ReadAllText(@"C:\Users\Pascal\Source\University\ssharp\SafetyLustreTest\Examples\PressureTank.oc");
 
+            var stopwatch = Stopwatch.StartNew();
             var runner = new Oc5Compiler.Oc5Runner(oc5);
+            stopwatch.Stop();
+            Console.WriteLine($"Compilation finished after {stopwatch.Elapsed.Minutes}:{stopwatch.Elapsed.Seconds:00}");
 
-            for (int i = 0; ; i++)
+
+            var ticksCount = 1000000;
+            var rand = new Random();
+            stopwatch = Stopwatch.StartNew();
+
+            for (int i = 0; i < ticksCount; i++)
             {
-                try
-                {
-                    Console.WriteLine($"Tick {i}:");
-                    runner.Tick(1, 2);
-                    Console.ReadKey(true);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    break;
-                }
+                bool randomBool = rand.NextDouble() > 0.5;
+                runner.Tick(randomBool);
             }
-            Console.ReadKey();
+
+            stopwatch.Stop();
+
+            Console.WriteLine($"{ticksCount} ticks finished after {stopwatch.Elapsed.Minutes}:{stopwatch.Elapsed.Seconds:00}");
+
+            Console.ReadKey(true);
         }
     }
 }

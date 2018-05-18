@@ -54,6 +54,14 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ModelChecking\LustreAtomarProposition.cs" />
+    <Compile Include="ModelChecking\LustreCounterExampleSerialization.cs" />
+    <Compile Include="ModelChecking\LustreExecutableModel.cs" />
+    <Compile Include="ModelChecking\LustreModelBase.cs" />
+    <Compile Include="ModelChecking\LustreModelChecker.cs" />
+    <Compile Include="ModelChecking\LustreModelChecking.cs" />
+    <Compile Include="ModelChecking\LustreModelSerializer.cs" />
+    <Compile Include="ModelChecking\LustreSimulator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -73,6 +81,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SafetyChecking\SafetyChecking.csproj">
+      <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
+      <Name>SafetyChecking</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SafetyLustre.Oc5Compiler\SafetyLustre.Oc5Compiler.csproj">
       <Project>{cfaafd6c-76b7-400a-a715-2eb0b8ee0899}</Project>
       <Name>SafetyLustre.Oc5Compiler</Name>

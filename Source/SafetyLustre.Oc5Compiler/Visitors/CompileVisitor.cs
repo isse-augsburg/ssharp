@@ -11,14 +11,16 @@ namespace SafetyLustre.Oc5Compiler.Visitors
     class CompileVisitor : Oc5BaseVisitor<Expression>
     {
         public Oc5Model Oc5Model { get; set; } = new Oc5Model();
-        public Oc5State Oc5State { get; set; } = new Oc5State();
+        public Oc5ModelState Oc5ModelState { get; set; } = new Oc5ModelState();
 
         private List<ConstantExpression> Constants { get; set; } = new List<ConstantExpression>();
         private List<Expression> Variables { get; set; } = new List<Expression>();
         private List<Expression> Actions { get; set; } = new List<Expression>();
         public List<Expression> States { get; set; } = new List<Expression>();
-        private ParameterExpression Oc5StateParameterExpression { get; set; } = Expression.Parameter(typeof(Oc5State), "Oc5State");
+        private ParameterExpression Oc5StateParameterExpression { get; set; } = Expression.Parameter(typeof(Oc5ModelState), "Oc5State");
         private LabelTarget CurrentReturnLabelTarget { get; set; }
+
+        //TODO? Debug output of states expression syntax
 
         public CompileVisitor([NotNull] OcfileContext context)
         {
@@ -32,8 +34,11 @@ namespace SafetyLustre.Oc5Compiler.Visitors
             //Compile each state
             States.ForEach(
                 state =>
-                Oc5Model.States.Add(Expression.Lambda<Func<Oc5State, int>>(state, Oc5StateParameterExpression).Compile())
+                Oc5Model.Oc5States.Add(Expression.Lambda<Func<Oc5ModelState, int>>(state, Oc5StateParameterExpression).Compile())
             );
+
+            //Setup mappings for input assignments
+            Oc5ModelState.SetupInputOutputMappings(Oc5Model.Signals);
 
             return null;
         }
@@ -132,7 +137,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
                 throw new UnsupportedSyntaxException("User-defined index", context.index().Start);
 
             var predefinedTypeIndex = GetIndexNumber(context.index());
-            var variableExpression = PredefinedObjects.GetVariableExpression(predefinedTypeIndex, Oc5State, Oc5StateParameterExpression);
+            var variableExpression = PredefinedObjects.GetVariableExpression(predefinedTypeIndex, Oc5ModelState, Oc5StateParameterExpression);
             Variables.Add(variableExpression);
 
             return null;
@@ -266,16 +271,21 @@ namespace SafetyLustre.Oc5Compiler.Visitors
 
         public override Expression VisitOutputAction([NotNull] OutputActionContext context)
         {
-            var index = GetIndexNumber(context.index());
-            var signal = Oc5Model.Signals[index];
-            var variableindex = signal.VarIndex;
-            var variable = Variables[variableindex];
-            var variableAsObject = Expression.Convert(variable, typeof(object));
+            //TODO param TextWriter
+            // if tw == null, dont do anything
 
-            var action = Expression.Call(
-                typeof(Console).GetMethod("WriteLine", new Type[] { typeof(object) }),
-                variableAsObject
-            );
+            //var signalIndex = GetIndexNumber(context.index());
+            //var signal = Oc5Model.Signals[signalIndex];
+
+            //var variableindex = signal.VarIndex;
+            //var variable = Variables[variableindex];
+            //var variableAsObject = Expression.Convert(variable, typeof(object));
+            //var action = Expression.Call(
+            //    typeof(Console).GetMethod("WriteLine", new Type[] { typeof(object) }),
+            //    variableAsObject
+            //);
+
+            var action = Expression.Empty();
 
             Actions.Add(action);
             return null;
@@ -295,7 +305,7 @@ namespace SafetyLustre.Oc5Compiler.Visitors
 
         public override Expression VisitStartpoint([NotNull] StartpointContext context)
         {
-            Oc5State.CurrentState = GetIndexNumber(context.index());
+            Oc5ModelState.CurrentState = GetIndexNumber(context.index());
 
             return null;
         }

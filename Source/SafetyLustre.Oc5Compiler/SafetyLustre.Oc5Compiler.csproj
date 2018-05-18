@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -50,12 +51,8 @@
     <Compile Include="Exceptions\UnsupportedSyntaxException.cs" />
     <Compile Include="Oc5Model.cs" />
     <Compile Include="Oc5Runner.cs" />
-    <Compile Include="Oc5State.cs" />
+    <Compile Include="Oc5ModelState.cs" />
     <Compile Include="Visitors\CompileVisitor.cs" />
-    <Compile Include="obj\Debug\Oc5BaseVisitor.cs" />
-    <Compile Include="obj\Debug\Oc5Lexer.cs" />
-    <Compile Include="obj\Debug\Oc5Parser.cs" />
-    <Compile Include="obj\Debug\Oc5Visitor.cs" />
     <Compile Include="Oc5ErrorListener.cs" />
     <Compile Include="Oc5Objects\Signal.cs" />
     <Compile Include="Oc5Objects\SingleInputSignal.cs" />
@@ -74,11 +71,8 @@
     </Antlr4>
   </ItemGroup>
   <ItemGroup>
-    <None Include="obj\Debug\Oc5.tokens" />
-    <None Include="obj\Debug\Oc5Lexer.tokens" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
   <!-- Use this if you don't want to depend on the Java tool -->
   <PropertyGroup>
     <Antlr4UseCSharpGenerator>True</Antlr4UseCSharpGenerator>

@@ -7,10 +7,6 @@ namespace SafetyLustre.Oc5Compiler
     class Oc5Model
     {
         public List<Signal> Signals { get; set; } = new List<Signal>();
-
-
-
-
-        public List<Func<Oc5State, int>> States { get; set; } = new List<Func<Oc5State, int>>();
+        public List<Func<Oc5ModelState, int>> Oc5States { get; set; } = new List<Func<Oc5ModelState, int>>();
     }
 }

@@ -52,24 +52,35 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Oc5StateTests.cs" />
-    <Compile Include="Oc5Tests.cs" />
+    <Compile Include="Oc5ModelStateTests.cs" />
+    <Compile Include="Oc5ModelTests.cs" />
+    <Compile Include="Oc5ParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Examples\example1.oc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="Examples\example2.oc" />
-    <None Include="Examples\example3.oc" />
-    <None Include="Examples\example4.oc" />
-    <None Include="Examples\example5.oc" />
-    <None Include="Examples\example6.oc" />
+    <None Include="Examples\example2.oc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\example3.oc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\example4.oc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\example5.oc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Examples\example6.oc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Examples\pressureTank.lus">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Examples\pressureTank.oc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Examples\pressureTank_alternative.lus" />
     <None Include="Examples\pressureTank_faulty.lus" />

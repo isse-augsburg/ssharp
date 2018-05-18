@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 namespace SafetyLustre.Oc5Compiler.Tests
 {
     [TestClass]
-    public class Oc5Tests
+    public class Oc5ParserTests
     {
         private Oc5Parser parser;
         private Oc5Lexer lexer;
@@ -43,7 +43,7 @@ namespace SafetyLustre.Oc5Compiler.Tests
         [DataRow("0: abc 5")]
         [DataRow("1: PI $3")]
         [DataRow("2: BUF_SIZE $1")]
-        public void TestConstant(string value)
+        public void TestParseConstant(string value)
         {
             Arrange(value);
 
@@ -58,7 +58,7 @@ namespace SafetyLustre.Oc5Compiler.Tests
         [DataTestMethod]
         [DataRow(@"constants: 1 0: abc 5 end:", 1)]
         [DataRow(@"constants: 2 0: PI $3 1: BUF_SIZE $1 end:", 2)]
-        public void TestConstants(string value, int constantCount)
+        public void TestParseConstants(string value, int constantCount)
         {
             Arrange(value);
 
