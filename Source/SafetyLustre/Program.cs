@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using SafetyLustre.Oc5Compiler;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -31,6 +32,13 @@ namespace SafetyLustre
     {
         static void Main(string[] args)
         {
+            var oc = LustreCompiler.Compile(File.ReadAllText(@"D:\Bibliotheken\Downloads\lustre-v4-III-db-linux64\examples\parity\parity.lus"), "parity");
+            Console.WriteLine(oc);
+            Console.WriteLine("Programmende!");
+            Console.ReadKey(true);
+
+            return;
+
             var oc5 = File.ReadAllText(@"C:\Users\Pascal\Source\University\ssharp\SafetyLustreTest\Examples\PressureTank.oc");
 
             var stopwatch = Stopwatch.StartNew();

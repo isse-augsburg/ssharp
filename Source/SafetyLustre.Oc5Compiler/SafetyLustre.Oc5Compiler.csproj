@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="Exceptions\InvalidSyntaxException.cs" />
     <Compile Include="Exceptions\UnsupportedSyntaxException.cs" />
+    <Compile Include="LustreCompiler.cs" />
     <Compile Include="Oc5Model.cs" />
     <Compile Include="Oc5Runner.cs" />
     <Compile Include="Oc5ModelState.cs" />
