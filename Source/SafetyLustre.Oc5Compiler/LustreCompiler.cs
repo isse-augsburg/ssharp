@@ -13,26 +13,41 @@ namespace SafetyLustre.Oc5Compiler
     /// To install run
     ///     lxrun.exe /install
     /// For more information visit https://docs.microsoft.com/en-us/windows/wsl/install-win10
-    /// This was tested against the Ubuntu distribution
+    /// This was tested against the Ubuntu distribution on Windows 10 Version 1803 (Build 17134.48)
     /// </summary>
     public class LustreCompiler
     {
         public static string Compile(string lustreSource, string mainNode)
         {
-            //TODO get $HOME so this will not only work for the root user
             SetupLus2Oc();
 
-            WslUtil.ExecuteCommand($"echo \"{lustreSource}\" > $HOME/{mainNode}.lus");
+            var wslHomeDirectory = WslUtil.ExecuteCommandWithResult("echo $HOME")   // Get home directory of current wsl user
+                .Trim();                                                            // Remove trailing '\n'
 
-            WslUtil.ExecuteCommand(
-                "export LUSTRE_INSTALL=/root/bin/lustre-v4-III-db-linux64;" +
-                "source $LUSTRE_INSTALL/setenv.sh;" +
-                $"lus2oc $LUSTRE_INSTALL/examples/parity/parity.lus {mainNode} -o $HOME/{mainNode}.oc"
+            var lxssHomeDirectory = Path.Combine(
+                Environment.GetEnvironmentVariable("localappdata"),                 // Wsl filesystem ist stored under
+                "lxss",                                                             // %localappdata%/lxss
+                wslHomeDirectory.Remove(0, 1)                                       // Remove leading '/'
             );
 
-            return File.ReadAllText($@"{Environment.GetEnvironmentVariable("localappdata")}\lxss\root\{mainNode}.oc");
+            // Store luste source for lus2oc to read
+            File.WriteAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.lus"), lustreSource);
+
+            // Compile .lus to wsl users home directory
+            WslUtil.ExecuteCommand(
+                "export LUSTRE_INSTALL=/root/bin/lustre-v4-III-db-linux64;" +                                               // Set environment variable
+                "source $LUSTRE_INSTALL/setenv.sh;" +                                                                       // Source setenv script
+                $"lus2oc $LUSTRE_INSTALL/examples/parity/parity.lus {mainNode} -o {wslHomeDirectory}/{mainNode}.oc"         // Compile .lus file
+            );
+
+            // Read and return compiled object code
+            return File.ReadAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.oc"));
         }
 
+        /// <summary>
+        /// Downloads and unpacks lustre-v4 to current wsl users home directory if not yet available
+        /// For more information on lus2oc visit http://www-verimag.imag.fr/DIST-TOOLS/SYNCHRONE/lustre-v4/distrib/lv4-html/index.html
+        /// </summary>
         private static void SetupLus2Oc()
         {
             if (!WslUtil.CheckDirectory("$HOME/bin/lustre-v4-III-db-linux64/"))
@@ -47,8 +62,15 @@ namespace SafetyLustre.Oc5Compiler
         }
     }
 
+    /// <summary>
+    /// Utility class for executing commands in wsl environment
+    /// </summary>
     internal static class WslUtil
     {
+        /// <summary>
+        /// Creates a <see cref="System.Diagnostics.Process"/> object referencing wsl.exe
+        /// </summary>
+        /// <returns>The Process</returns>
         public static Process GetWslProcess()
         {
             return new Process()
@@ -63,6 +85,11 @@ namespace SafetyLustre.Oc5Compiler
             };
         }
 
+        /// <summary>
+        /// Executes a command in the wsl environment.
+        /// Output of the command is written to console.
+        /// </summary>
+        /// <param name="command">The command to execute</param>
         public static void ExecuteCommand(string command)
         {
             using (var wslProcess = GetWslProcess())
@@ -75,6 +102,13 @@ namespace SafetyLustre.Oc5Compiler
             }
         }
 
+        /// <summary>
+        /// Executes a command in the wsl environment.
+        /// Output of the command is written to console.
+        /// The result of the command is returned.
+        /// </summary>
+        /// <param name="command">The command to execute</param>
+        /// <returns>The result of the command</returns>
         public static string ExecuteCommandWithResult(string command)
         {
             using (var wslProcess = GetWslProcess())
@@ -87,6 +121,11 @@ namespace SafetyLustre.Oc5Compiler
             }
         }
 
+        /// <summary>
+        /// Checks if a directory exists in the wsl environment
+        /// </summary>
+        /// <param name="path">The path of the directory to check</param>
+        /// <returns>If the directory exists</returns>
         public static bool CheckDirectory(string path)
         {
             using (var wslProcess = GetWslProcess())
