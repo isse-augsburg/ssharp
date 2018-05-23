@@ -33,11 +33,13 @@ namespace SafetyLustre.Oc5Compiler
             // Store luste source for lus2oc to read
             File.WriteAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.lus"), lustreSource);
 
+            WslUtil.ExecuteCommand($"chmod 0777 {wslHomeDirectory}/{mainNode}.lus");
+
             // Compile .lus to wsl users home directory
             WslUtil.ExecuteCommand(
-                "export LUSTRE_INSTALL=/root/bin/lustre-v4-III-db-linux64;" +                                               // Set environment variable
+                $"export LUSTRE_INSTALL={wslHomeDirectory}/bin/lustre-v4-III-db-linux64;" +                                 // Set environment variable
                 "source $LUSTRE_INSTALL/setenv.sh;" +                                                                       // Source setenv script
-                $"lus2oc $LUSTRE_INSTALL/examples/parity/parity.lus {mainNode} -o {wslHomeDirectory}/{mainNode}.oc"         // Compile .lus file
+                $"lus2oc {wslHomeDirectory}/{mainNode}.lus {mainNode} -o {wslHomeDirectory}/{mainNode}.oc"         // Compile .lus file
             );
 
             // Read and return compiled object code

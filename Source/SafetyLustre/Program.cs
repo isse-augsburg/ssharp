@@ -32,7 +32,7 @@ namespace SafetyLustre
     {
         static void Main(string[] args)
         {
-            var oc = LustreCompiler.Compile(File.ReadAllText(@"D:\Bibliotheken\Downloads\lustre-v4-III-db-linux64\examples\parity\parity.lus"), "parity");
+            var oc = LustreCompiler.Compile(File.ReadAllText(@"Examples/pressureTank.lus"), "TANK");
             Console.WriteLine(oc);
             Console.WriteLine("Programmende!");
             Console.ReadKey(true);
