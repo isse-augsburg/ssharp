@@ -4,9 +4,11 @@ using ISSE.SafetyChecking.Formula;
 using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 using ISSE.SafetyChecking.Modeling;
 using NUnit.Framework;
+using SafetyLustre;
 using System;
 using System.IO;
 using System.Linq;
+using static Lustre_Models.TestUtil;
 using LtmdpModelChecker = ISSE.SafetyChecking.LtmdpModelChecker;
 
 namespace Lustre_Models
@@ -15,25 +17,22 @@ namespace Lustre_Models
     {
         private ExecutableModelCreator<LustreExecutableModel> _createModel;
 
-        private Formula _invariant = new LustrePressureBelowThreshold();
+        private readonly Formula _invariant = new LustrePressureBelowThreshold();
 
-        private Formula _hazard = new UnaryFormula(new LustrePressureBelowThreshold(), UnaryOperator.Not);
+        private readonly Formula _hazard = new UnaryFormula(new LustrePressureBelowThreshold(), UnaryOperator.Not);
 
         private Fault[] _faults;
 
         public EvaluationTests()
         {
-            Program.ocExaplesPath = Directory.GetCurrentDirectory() + "\\";
-            Program.modelChecking = true;
             LustrePressureBelowThreshold.threshold = 60;
             var faultK1 = new PermanentFault() { Name = "fault_k1", Identifier = 1, ProbabilityOfOccurrence = new Probability(3.0E-6) };
             var faultK2 = new PermanentFault() { Name = "fault_k2", Identifier = 2, ProbabilityOfOccurrence = new Probability(3.0E-6) };
             var faultSensor = new PermanentFault() { Name = "fault_sensor", Identifier = 4, ProbabilityOfOccurrence = new Probability(1.0E-5) };
             _faults = new[] { faultK1, faultK2, faultSensor };
 
-            _createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator("pressureTank", _faults);
+            _createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", _faults);
         }
-
 
         [Test]
         public void CreateMarkovChainWithFalseFormula()
@@ -106,7 +105,6 @@ namespace Lustre_Models
             retraversalMarkovChainGenerator.GenerateLabeledMarkovChain();
         }
 
-
         [Test]
         public void CreateMarkovChainWithHazardFaultsInState()
         {
@@ -123,7 +121,6 @@ namespace Lustre_Models
             markovChainGenerator.Configuration.EnableEarlyTermination = false;
             var markovChain = markovChainGenerator.GenerateMarkovChain();
         }
-
 
         [Test]
         public void CreateFaultAwareMarkovChainAllFaults()
@@ -148,7 +145,7 @@ namespace Lustre_Models
             LustreModelChecker.TraversalConfiguration.CpuCount = 1;
             LustreModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
             LustreModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = false;
-            var result = LustreModelChecker.CalculateProbabilityToReachStateBounded("pressureTank", _faults, _hazard, 25);
+            var result = LustreModelChecker.CalculateProbabilityToReachStateBounded(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", _faults, _hazard, 25);
             LustreModelChecker.TraversalConfiguration.CpuCount = Int32.MaxValue;
             LustreModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
             LustreModelChecker.TraversalConfiguration.EnableStaticPruningOptimization = true;
@@ -206,17 +203,14 @@ namespace Lustre_Models
             }
         }
 
-
-
         [Test]
         public void CalculateHazardWithoutEarlyTermination()
         {
             LustreModelChecker.TraversalConfiguration.EnableEarlyTermination = false;
-            var result = LustreModelChecker.CalculateProbabilityToReachStateBounded("pressureTank", _faults, _hazard, 25);
+            var result = LustreModelChecker.CalculateProbabilityToReachStateBounded(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", _faults, _hazard, 25);
             LustreModelChecker.TraversalConfiguration.EnableEarlyTermination = true;
             Console.Write($"Probability of hazard: {result}");
         }
-
 
         [Test]
         public void CalculateLtmdpWithoutFaultsWithPruning()
@@ -330,7 +324,6 @@ namespace Lustre_Models
             _faults[1].ProbabilityOfOccurrence = oldProbability;
         }
 
-
         [Test]
         public void CalculateMdpFlattened()
         {
@@ -390,7 +383,6 @@ namespace Lustre_Models
             var nmdpToMpd = new NmdpToMdpByNewStates(nmdp, markovChainGenerator.Configuration.DefaultTraceOutput, true);
             _faults[1].ProbabilityOfOccurrence = oldProbability;
         }
-
 
         [Test]
         public void CalculateMdpFlattenedWithoutFaults()
