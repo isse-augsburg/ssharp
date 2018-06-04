@@ -17,6 +17,8 @@ namespace SafetyLustre.LustreCompiler
     /// </summary>
     public static class LusCompiler
     {
+        private static readonly Object fileLock = new Object();
+
         public static string Compile(string lustreSource, string mainNode)
         {
             SetupLus2Oc();
@@ -30,8 +32,12 @@ namespace SafetyLustre.LustreCompiler
                 wslHomeDirectory.Remove(0, 1)                                       // Remove leading '/'
             );
 
-            // Store luste source for lus2oc to read
-            File.WriteAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.lus"), lustreSource);
+            //HACK to make this thread safe
+            lock (fileLock)
+            {
+                // Store lustre source for lus2oc to read
+                File.WriteAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.lus"), lustreSource);
+            }
 
             WslUtil.ExecuteCommand($"chmod 0777 {wslHomeDirectory}/{mainNode}.lus");
 
