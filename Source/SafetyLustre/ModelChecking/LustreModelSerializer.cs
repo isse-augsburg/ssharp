@@ -21,24 +21,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using ISSE.SafetyChecking.ExecutableModel;
+using ISSE.SafetyChecking.Formula;
+using ISSE.SafetyChecking.Modeling;
+using ISSE.SafetyChecking.Utilities;
+using SafetyLustre.LustreCompiler;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using ISSE.SafetyChecking.Utilities;
 using System.Linq;
 using System.Reflection;
-using ISSE.SafetyChecking.ExecutableModel;
-using ISSE.SafetyChecking.Modeling;
-using ISSE.SafetyChecking.Formula;
-
+using System.Text;
+using static SafetyLustre.LustreSafetyAnalysis;
 
 namespace SafetyLustre
 {
-    /*
     public static unsafe class LustreModelSerializer
     {
-
         public static void WriteFault(BinaryWriter writer, Fault fault)
         {
             writer.Write(fault.Name);
@@ -52,7 +51,7 @@ namespace SafetyLustre
             }
             else
             {
-                throw new Exception("Not implemented yet");
+                throw new NotImplementedException();
             }
             writer.Write(fault.Identifier);
             if (fault.ProbabilityOfOccurrence.HasValue)
@@ -97,29 +96,26 @@ namespace SafetyLustre
                 writer.Write(1);
                 writer.Write(innerFormula.Label);
             }
-            else if (formula is FaultFormula)
+            else if (formula is FaultFormula faultFormula)
             {
-                var innerFormula = (FaultFormula)formula;
                 writer.Write(4);
-                writer.Write(innerFormula.Label);
-                writer.Write(faultToIndex[innerFormula.Fault]);
+                writer.Write(faultFormula.Label);
+                writer.Write(faultToIndex[faultFormula.Fault]);
             }
-            else if (formula is UnaryFormula)
+            else if (formula is UnaryFormula unaryFormula)
             {
-                var innerFormula = (UnaryFormula)formula;
                 writer.Write(5);
-                writer.Write(innerFormula.Label);
-                writer.Write((int)innerFormula.Operator);
-                WriteFormula(writer, innerFormula.Operand, faultToIndex);
+                writer.Write(unaryFormula.Label);
+                writer.Write((int)unaryFormula.Operator);
+                WriteFormula(writer, unaryFormula.Operand, faultToIndex);
             }
-            else if (formula is BinaryFormula)
+            else if (formula is BinaryFormula binaryFormula)
             {
-                var innerFormula = (BinaryFormula)formula;
                 writer.Write(6);
-                writer.Write(innerFormula.Label);
-                writer.Write((int)innerFormula.Operator);
-                WriteFormula(writer, innerFormula.LeftOperand, faultToIndex);
-                WriteFormula(writer, innerFormula.RightOperand, faultToIndex);
+                writer.Write(binaryFormula.Label);
+                writer.Write((int)binaryFormula.Operator);
+                WriteFormula(writer, binaryFormula.LeftOperand, faultToIndex);
+                WriteFormula(writer, binaryFormula.RightOperand, faultToIndex);
             }
             else
             {
@@ -160,15 +156,19 @@ namespace SafetyLustre
             }
         }
 
-        public static byte[] CreateByteArray(string ocFileName, Fault[] faults, Formula[] formulas)
+        public static byte[] CreateByteArray(string ocFileName, string mainNode, Fault[] faults, Formula[] formulas)
         {
             Requires.NotNull(ocFileName, nameof(ocFileName));
+            Requires.NotNull(mainNode, nameof(mainNode));
 
             using (var buffer = new MemoryStream())
             using (var writer = new BinaryWriter(buffer, Encoding.UTF8, leaveOpen: true))
             {
                 // write ocFileName
                 writer.Write(ocFileName);
+
+                //write mainNode
+                writer.Write(mainNode);
 
                 // write faults
                 writer.Write((uint)faults.Length);
@@ -204,6 +204,9 @@ namespace SafetyLustre
                 // read ocFileName
                 var ocFileName = reader.ReadString();
 
+                // read mainNode
+                var mainNode = reader.ReadString();
+
                 // read faults
                 var faultNumber = reader.ReadUInt32();
                 var faults = new List<Fault>();
@@ -216,7 +219,7 @@ namespace SafetyLustre
                 }
 
                 // read state and instantiate model
-                var deserializedModel = new LustreModelBase(ocFileName, faults);
+                var deserializedModel = new LustreModelBase(ocFileName, mainNode, faults);
 
                 // read formulas
                 var formulaNumber = reader.ReadUInt32();
@@ -233,72 +236,68 @@ namespace SafetyLustre
 
         public static SerializationDelegate CreateFastInPlaceDeserializer(LustreModelBase model)
         {
-            var permanentFaults = model.faults.Values.OrderBy(fault => fault.Identifier).OfType<PermanentFault>().ToArray();
+            var permanentFaults = model.Faults.Values.OrderBy(fault => fault.Identifier).OfType<PermanentFault>().ToArray();
 
             var isActiveField = typeof(PermanentFault).GetField("_isActive", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            SerializationDelegate deserialize = state =>
+            return state =>
             {
 
-                var positionInRamOfFirstInt = (int*)state;
-                model.program.state = positionInRamOfFirstInt[0];
-                int index = 1;
-                for (var i = 0; i < model.program.variables.Count; i++)
+                // Bools
+                var boolPtr = (bool*)state;
+                for (int i = 0; i < model.Runner.Oc5ModelState.Bools.Count; i++)
+                    model.Runner.Oc5ModelState.Bools[i] = *(boolPtr++);
+
+
+                // Ints
+                var intPtr = (int*)boolPtr;
+                for (int i = 0; i < model.Runner.Oc5ModelState.Ints.Count; i++)
+                    model.Runner.Oc5ModelState.Ints[i] = *(intPtr++);
+
+                // Strings
+                var charPtr = (char*)intPtr;
+                for (int i = 0; i < model.Runner.Oc5ModelState.Strings.Count; i++)
                 {
-                    if (model.program.variables[i].getType() == 1)
-                    {
-                        model.program.variables[i].setValue(positionInRamOfFirstInt[index]);
-                        index++;
-                    }
+                    string str = string.Empty;
+
+                    while (*charPtr != '\0')
+                        str += *(charPtr++);
+
+                    charPtr++; // skip '\0'
+
+                    model.Runner.Oc5ModelState.Strings[i] = str;
                 }
 
-                var positionInRamOfFirstString = (char*)(positionInRamOfFirstInt + (model.program.countVariables(1) + 1));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 2)
-                    {
-                        model.program.variables[i].setValue(positionInRamOfFirstString[index]);
-                        index++;
-                    }
-                }
+                // Floats
+                var floatPtr = (float*)charPtr;
+                for (int i = 0; i < model.Runner.Oc5ModelState.Floats.Count; i++)
+                    model.Runner.Oc5ModelState.Floats[i] = *(floatPtr++);
 
-                var positionInRamOfFirstFloat = (float*)(positionInRamOfFirstString + model.program.countVariables(2));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 3)
-                    {
-                        model.program.variables[i].setValue(positionInRamOfFirstFloat[index]);
-                        index++;
-                    }
-                }
+                // Double
+                var doublePtr = (double*)floatPtr;
+                for (int i = 0; i < model.Runner.Oc5ModelState.Doubles.Count; i++)
+                    model.Runner.Oc5ModelState.Doubles[i] = *(doublePtr++);
 
-                var positionInRamOfFirstDouble = (double*)(positionInRamOfFirstFloat + model.program.countVariables(3));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 4)
-                    {
-                        model.program.variables[i].setValue(positionInRamOfFirstDouble[index]);
-                        index++;
-                    }
-                }
+                // Mappings
+                var mappingsPtr = (PositionInOc5State*)doublePtr;
+                for (int i = 0; i < model.Runner.Oc5ModelState.Mappings.Count; i++)
+                    model.Runner.Oc5ModelState.Mappings[i] = *(mappingsPtr++);
 
-                var positionInRamOfFirstBool = (bool*)(positionInRamOfFirstDouble + model.program.countVariables(4));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 0)
-                    {
-                        model.program.variables[i].setValue(positionInRamOfFirstBool[index]);
-                        index++;
-                    }
-                }
+                // InputMappings 
+                for (int i = 0; i < model.Runner.Oc5ModelState.InputMappings.Count; i++)
+                    model.Runner.Oc5ModelState.InputMappings[i] = *(mappingsPtr++);
+
+                // OutputMappings
+                for (int i = 0; i < model.Runner.Oc5ModelState.OutputMappings.Count; i++)
+                    model.Runner.Oc5ModelState.OutputMappings[i] = *(mappingsPtr++);
+
+                // CurrentState
+                var currentStatePtr = (int*)mappingsPtr;
+                model.Runner.Oc5ModelState.CurrentState = *(currentStatePtr++);
 
                 // Faults
-                var positionInRamOfFaults = (long*)(positionInRamOfFirstBool + model.program.countVariables(0));
-                var faultsSerialized = *positionInRamOfFaults;
+                var faultPtr = (long*)currentStatePtr;
+                var faultsSerialized = *faultPtr;
                 for (var i = 0; i < permanentFaults.Length; ++i)
                 {
                     var fault = permanentFaults[i];
@@ -312,80 +311,73 @@ namespace SafetyLustre
                     }
                 }
 
-                var lastPosition = (byte*)(positionInRamOfFaults + 1);
-                var length = (lastPosition - state);
+                var lastPosition = (byte*)(faultPtr + 1);
+                var length = lastPosition - state;
                 Requires.That(model.StateVectorSize == length, "model.StateVectorSize does not match");
             };
-            return deserialize;
         }
 
         public static SerializationDelegate CreateFastInPlaceSerializer(LustreModelBase model)
         {
-            var permanentFaults = model.faults.Values.OrderBy(fault => fault.Identifier).OfType<PermanentFault>().ToArray();
+            var permanentFaults = model.Faults.Values.OrderBy(fault => fault.Identifier).OfType<PermanentFault>().ToArray();
 
             var isActiveField = typeof(PermanentFault).GetField("_isActive", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            SerializationDelegate serialize = state =>
+            return state =>
             {
+                // Bools
+                var boolPtr = (bool*)state;
+                foreach (var b in model.Runner.Oc5ModelState.Bools)
+                    *(boolPtr++) = b;
 
-                var positionInRamOfFirstInt = (int*)state;
-                positionInRamOfFirstInt[0] = model.program.state;
-                int index = 1;
-                for (var i = 0; i < model.program.variables.Count; i++)
+
+                // Ints
+                var intPtr = (int*)boolPtr;
+                foreach (var i in model.Runner.Oc5ModelState.Ints)
+                    *(intPtr++) = i > LustreQualitativeChecker.maxValue ? LustreQualitativeChecker.maxValue : i;
+
+                // Strings
+                var charPtr = (char*)intPtr;
+                foreach (var s in model.Runner.Oc5ModelState.Strings)
                 {
-                    if (model.program.variables[i].getType() == 1)
+                    var length = Math.Max(29, s.Length);
+                    foreach (var c in s.ToCharArray(0, length))
                     {
-                        positionInRamOfFirstInt[index] = (int)model.program.variables[i].getValue() > LustreQualitativeChecker.maxValue ? LustreQualitativeChecker.maxValue : (int)model.program.variables[i].getValue();
-                        index++;
+                        *(charPtr++) = c;
                     }
+                    charPtr += 30 - length;
+                    *(charPtr++) = '\0';
                 }
 
-                var positionInRamOfFirstString = (char*)(positionInRamOfFirstInt + (model.program.countVariables(1) + 1));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 2)
-                    {
-                        positionInRamOfFirstString[index] = (char)model.program.variables[i].getValue();
-                        index++;
-                    }
-                }
+                // Floats
+                var floatPtr = (float*)charPtr;
+                foreach (var f in model.Runner.Oc5ModelState.Floats)
+                    *(floatPtr++) = f > LustreQualitativeChecker.maxValue ? LustreQualitativeChecker.maxValue : f;
 
-                var positionInRamOfFirstFloat = (float*)(positionInRamOfFirstString + model.program.countVariables(2));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 3)
-                    {
-                        positionInRamOfFirstFloat[index] = (float)model.program.variables[i].getValue() > LustreQualitativeChecker.maxValue ? LustreQualitativeChecker.maxValue : (float)model.program.variables[i].getValue();
-                        index++;
-                    }
-                }
+                // Double
+                var doublePtr = (double*)floatPtr;
+                foreach (var d in model.Runner.Oc5ModelState.Doubles)
+                    *(doublePtr++) = d > LustreQualitativeChecker.maxValue ? LustreQualitativeChecker.maxValue : d;
 
-                var positionInRamOfFirstDouble = (double*)(positionInRamOfFirstFloat + model.program.countVariables(3));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 4)
-                    {
-                        positionInRamOfFirstDouble[index] = (double)model.program.variables[i].getValue() > LustreQualitativeChecker.maxValue ? LustreQualitativeChecker.maxValue : (double)model.program.variables[i].getValue();
-                        index++;
-                    }
-                }
+                // Mappings
+                var mappingsPtr = (PositionInOc5State*)doublePtr;
+                foreach (var m in model.Runner.Oc5ModelState.Mappings)
+                    *(mappingsPtr++) = m;
 
-                var positionInRamOfFirstBool = (bool*)(positionInRamOfFirstDouble + model.program.countVariables(4));
-                index = 0;
-                for (var i = 0; i < model.program.variables.Count; i++)
-                {
-                    if (model.program.variables[i].getType() == 0)
-                    {
-                        positionInRamOfFirstBool[index] = (bool)model.program.variables[i].getValue();
-                        index++;
-                    }
-                }
+                // InputMappings 
+                foreach (var im in model.Runner.Oc5ModelState.InputMappings)
+                    *(mappingsPtr++) = im;
+
+                // OutputMappings
+                foreach (var om in model.Runner.Oc5ModelState.OutputMappings)
+                    *(mappingsPtr++) = om;
+
+                // CurrentState
+                var currentStatePtr = (int*)mappingsPtr;
+                *(currentStatePtr++) = model.Runner.Oc5ModelState.CurrentState;
 
                 // Faults
-                var positionInRamOfFaults = (long*)(positionInRamOfFirstBool + model.program.countVariables(0));
+                var faultPtr = (long*)currentStatePtr;
                 var faultsSerialized = 0L;
                 for (var i = 0; i < permanentFaults.Length; ++i)
                 {
@@ -396,10 +388,8 @@ namespace SafetyLustre
                         faultsSerialized |= 1L << i;
                     }
                 }
-                *(positionInRamOfFaults) = faultsSerialized;
+                *(faultPtr) = faultsSerialized;
             };
-            return serialize;
         }
     }
-    */
 }

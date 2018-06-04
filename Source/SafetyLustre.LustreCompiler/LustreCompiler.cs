@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetyLustre.Oc5Compiler
+namespace SafetyLustre.LustreCompiler
 {
     /// <summary>
     /// This requires Windows Subsystem for Linux
@@ -15,7 +15,7 @@ namespace SafetyLustre.Oc5Compiler
     /// For more information visit https://docs.microsoft.com/en-us/windows/wsl/install-win10
     /// This was tested against the Ubuntu distribution on Windows 10 Version 1803 (Build 17134.48)
     /// </summary>
-    public class LustreCompiler
+    public static class LusCompiler
     {
         public static string Compile(string lustreSource, string mainNode)
         {
@@ -39,7 +39,7 @@ namespace SafetyLustre.Oc5Compiler
             WslUtil.ExecuteCommand(
                 $"export LUSTRE_INSTALL={wslHomeDirectory}/bin/lustre-v4-III-db-linux64;" +                                 // Set environment variable
                 "source $LUSTRE_INSTALL/setenv.sh;" +                                                                       // Source setenv script
-                $"lus2oc {wslHomeDirectory}/{mainNode}.lus {mainNode} -o {wslHomeDirectory}/{mainNode}.oc"         // Compile .lus file
+                $"lus2oc {wslHomeDirectory}/{mainNode}.lus {mainNode} -o {wslHomeDirectory}/{mainNode}.oc"                  // Compile .lus file
             );
 
             // Read and return compiled object code

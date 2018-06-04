@@ -21,23 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using ISSE.SafetyChecking.ExecutableModel;
+using ISSE.SafetyChecking.Utilities;
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using ISSE.SafetyChecking.ExecutableModel;
-using ISSE.SafetyChecking.Utilities;
-using ISSE.SafetyChecking.Modeling;
 
 namespace SafetyLustre
 {
-    /*
     public class LustreExecutableModelCounterExampleSerialization : CounterExampleSerialization<LustreExecutableModel>
     {
-        public override void WriteInternalStateStructure(ExecutableCounterExample<LustreExecutableModel> counterExample, BinaryWriter writer)
-        {
-        }
+        public override void WriteInternalStateStructure(ExecutableCounterExample<LustreExecutableModel> counterExample, BinaryWriter writer) { }
 
         /// <summary>
         ///   Loads a counter example from the <paramref name="file" />.
@@ -93,5 +88,4 @@ namespace SafetyLustre
             }
         }
     }
-    */
 }

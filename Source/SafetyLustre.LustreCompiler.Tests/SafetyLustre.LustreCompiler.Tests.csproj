@@ -7,8 +7,8 @@
     <ProjectGuid>{A1BF68D6-A34D-4892-9A5C-7DB3A4F2A01D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SafetyLustre.Oc5Compiler.Tests</RootNamespace>
-    <AssemblyName>SafetyLustre.Oc5Compiler.Tests</AssemblyName>
+    <RootNamespace>SafetyLustre.LustreCompiler.Tests</RootNamespace>
+    <AssemblyName>SafetyLustre.LustreCompiler.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -87,9 +87,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SafetyLustre.Oc5Compiler\SafetyLustre.Oc5Compiler.csproj">
+    <ProjectReference Include="..\SafetyLustre.LustreCompiler\SafetyLustre.LustreCompiler.csproj">
       <Project>{cfaafd6c-76b7-400a-a715-2eb0b8ee0899}</Project>
-      <Name>SafetyLustre.Oc5Compiler</Name>
+      <Name>SafetyLustre.LustreCompiler</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

@@ -20,19 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 using ISSE.SafetyChecking.ExecutableModel;
-using System.Linq.Expressions;
 using ISSE.SafetyChecking.Formula;
 using ISSE.SafetyChecking.Modeling;
 using ISSE.SafetyChecking.Utilities;
+using System;
+using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
 
 namespace SafetyLustre
 {
-    /*
     public unsafe class LustreExecutableModel : ExecutableModel<LustreExecutableModel>
     {
         internal LustreModelBase Model { get; private set; }
@@ -55,7 +53,7 @@ namespace SafetyLustre
         {
             var modelWithFormula = LustreModelSerializer.DeserializeFromByteArray(SerializedModel);
             Model = modelWithFormula.Item1;
-            Faults = Model.faults.Values.OrderBy(fault => fault.Identifier).ToArray();
+            Faults = Model.Faults.Values.OrderBy(fault => fault.Identifier).ToArray();
             Formulas = modelWithFormula.Item2;
 
             var atomarPropositionVisitor = new CollectAtomarPropositionFormulasVisitor();
@@ -96,53 +94,54 @@ namespace SafetyLustre
         public override void SetChoiceResolver(ChoiceResolver choiceResolver)
         {
             Model.Choice.Resolver = choiceResolver;
-            foreach (var faultsValue in Model.faults.Values)
+            foreach (var faultsValue in Model.Faults.Values)
             {
                 faultsValue.Choice.Resolver = choiceResolver;
             }
         }
 
-        public static CoupledExecutableModelCreator<LustreExecutableModel> CreateExecutedModelCreator(string ocFileName, Fault[] faults, params Formula[] formulasToCheckInBaseModel)
+        public static CoupledExecutableModelCreator<LustreExecutableModel> CreateExecutedModelCreator(string ocFileName, string mainNode, Fault[] faults, params Formula[] formulasToCheckInBaseModel)
         {
             Requires.NotNull(ocFileName, nameof(ocFileName));
+            Requires.NotNull(mainNode, nameof(mainNode));
             Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
 
-
-            Func<int, LustreExecutableModel> creatorFunc = (reservedBytes) =>
+            LustreExecutableModel creatorFunc(int reservedBytes)
             {
                 // Each model checking thread gets its own SimpleExecutableModel.
                 // Thus, we serialize the C# model and load this file again.
                 // The serialization can also be used for saving counter examples
-                var serializedModelWithFormulas = LustreModelSerializer.CreateByteArray(ocFileName, faults, formulasToCheckInBaseModel);
+                var serializedModelWithFormulas = LustreModelSerializer.CreateByteArray(ocFileName, mainNode, faults, formulasToCheckInBaseModel);
                 var simpleExecutableModel = new LustreExecutableModel(serializedModelWithFormulas);
                 return simpleExecutableModel;
-            };
-            Action<TextWriter> writeOptimizedStateVectorLayout = (textWriter) =>
+            }
+
+            void writeOptimizedStateVectorLayout(TextWriter textWriter)
             {
                 throw new NotImplementedException();
-                textWriter.WriteLine("bytes[0-4] state: int");
-                textWriter.WriteLine("bytes[5-12] permanent faults: long");
-            };
+            }
+
             var flatFaults = faults.OrderBy(fault => fault.Identifier).ToArray();
             return new CoupledExecutableModelCreator<LustreExecutableModel>(creatorFunc, writeOptimizedStateVectorLayout, ocFileName, formulasToCheckInBaseModel, flatFaults);
         }
 
-        public static ExecutableModelCreator<LustreExecutableModel> CreateExecutedModelFromFormulasCreator(string ocFileName, Fault[] faults)
+        public static ExecutableModelCreator<LustreExecutableModel> CreateExecutedModelFromFormulasCreator(string ocFileName, string mainNode, Fault[] faults)
         {
             Requires.NotNull(ocFileName, nameof(ocFileName));
+            Requires.NotNull(mainNode, nameof(mainNode));
 
-            Func<Formula[], CoupledExecutableModelCreator<LustreExecutableModel>> creator = formulasToCheckInBaseModel =>
+            CoupledExecutableModelCreator<LustreExecutableModel> creator(Formula[] formulasToCheckInBaseModel)
             {
                 Requires.NotNull(formulasToCheckInBaseModel, nameof(formulasToCheckInBaseModel));
-                return CreateExecutedModelCreator(ocFileName, faults, formulasToCheckInBaseModel);
-            };
+                return CreateExecutedModelCreator(ocFileName, mainNode, faults, formulasToCheckInBaseModel);
+            }
+
             return new ExecutableModelCreator<LustreExecutableModel>(creator, ocFileName);
         }
 
         public override Expression CreateExecutableExpressionFromAtomarPropositionFormula(AtomarPropositionFormula formula)
         {
-            var atomarProposition = formula as LustreAtomarProposition;
-            if (atomarProposition != null)
+            if (formula is LustreAtomarProposition atomarProposition)
             {
                 Func<bool> formulaEvaluatesToTrue = () => atomarProposition.Evaluate(Model);
                 return Expression.Invoke(Expression.Constant(formulaEvaluatesToTrue));
@@ -154,9 +153,6 @@ namespace SafetyLustre
         public override void WriteOptimizedStateVectorLayout(TextWriter textWriter)
         {
             throw new NotImplementedException();
-            textWriter.WriteLine("bytes[0-4] state: int");
-            textWriter.WriteLine("bytes[5-12] permanent faults: long");
-        }  
+        }
     }
-    */
 }

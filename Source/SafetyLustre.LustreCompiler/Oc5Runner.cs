@@ -1,8 +1,8 @@
 ﻿using Antlr4.Runtime;
-using SafetyLustre.Oc5Compiler.Visitors;
+using SafetyLustre.LustreCompiler.Visitors;
 using System;
 
-namespace SafetyLustre.Oc5Compiler
+namespace SafetyLustre.LustreCompiler
 {
     public class Oc5Runner
     {
@@ -32,9 +32,6 @@ namespace SafetyLustre.Oc5Compiler
 
         public void Tick(params object[] inputs)
         {
-            //DEBUG
-            // Console.WriteLine($"Running State: {Oc5State.CurrentState}");
-
             Oc5ModelState.AssignInputs(inputs);
 
             Oc5ModelState.CurrentState = Oc5Model.Oc5States[Oc5ModelState.CurrentState].Invoke(Oc5ModelState);

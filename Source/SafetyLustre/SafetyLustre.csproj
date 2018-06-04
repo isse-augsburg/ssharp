@@ -85,9 +85,9 @@
       <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
       <Name>SafetyChecking</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SafetyLustre.Oc5Compiler\SafetyLustre.Oc5Compiler.csproj">
-      <Project>{cfaafd6c-76b7-400a-a715-2eb0b8ee0899}</Project>
-      <Name>SafetyLustre.Oc5Compiler</Name>
+    <ProjectReference Include="..\SafetyLustre.LustreCompiler\SafetyLustre.LustreCompiler.csproj">
+      <Project>{CFAAFD6C-76B7-400A-A715-2EB0B8EE0899}</Project>
+      <Name>SafetyLustre.LustreCompiler</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

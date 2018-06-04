@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace SafetyLustre.Oc5Compiler
+namespace SafetyLustre.LustreCompiler
 {
     internal static class PredefinedObjects
     {

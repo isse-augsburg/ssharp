@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
-namespace SafetyLustre.Oc5Compiler.Tests
+namespace SafetyLustre.LustreCompiler.Tests
 {
     [TestClass]
     public class Oc5ModelStateTests

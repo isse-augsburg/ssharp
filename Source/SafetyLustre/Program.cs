@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using SafetyLustre.Oc5Compiler;
+using SafetyLustre.LustreCompiler;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -32,20 +32,15 @@ namespace SafetyLustre
     {
         static void Main(string[] args)
         {
-            var oc = LustreCompiler.Compile(File.ReadAllText(@"Examples/pressureTank.lus"), "TANK");
-            Console.WriteLine(oc);
-            Console.WriteLine("Programmende!");
-            Console.ReadKey(true);
-
-            return;
-
-            var oc5 = File.ReadAllText(@"C:\Users\Pascal\Source\University\ssharp\SafetyLustreTest\Examples\PressureTank.oc");
-
             var stopwatch = Stopwatch.StartNew();
-            var runner = new Oc5Compiler.Oc5Runner(oc5);
+            var oc5 = LusCompiler.Compile(File.ReadAllText(@"Examples/pressureTank.lus"), "TANK");
             stopwatch.Stop();
-            Console.WriteLine($"Compilation finished after {stopwatch.Elapsed.Minutes}:{stopwatch.Elapsed.Seconds:00}");
+            Console.WriteLine($"Lustre compilation finished after {stopwatch.Elapsed.Minutes}:{stopwatch.Elapsed.Seconds:00}");
 
+            stopwatch = Stopwatch.StartNew();
+            var runner = new Oc5Runner(oc5);
+            stopwatch.Stop();
+            Console.WriteLine($"Oc5 compilation finished after {stopwatch.Elapsed.Minutes}:{stopwatch.Elapsed.Seconds:00}");
 
             var ticksCount = 1000000;
             var rand = new Random();

@@ -1,8 +1,8 @@
-﻿using SafetyLustre.Oc5Compiler.Oc5Objects;
+﻿using SafetyLustre.LustreCompiler.Oc5Objects;
 using System;
 using System.Collections.Generic;
 
-namespace SafetyLustre.Oc5Compiler
+namespace SafetyLustre.LustreCompiler
 {
     class Oc5Model
     {

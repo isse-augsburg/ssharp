@@ -20,32 +20,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using ISSE.SafetyChecking.Formula;
+using System.Linq;
 
 namespace SafetyLustre
 {
-    /*
     public abstract class LustreAtomarProposition : AtomarPropositionFormula
     {
-        protected LustreAtomarProposition(string label)
-            : base(label)
-        {
-
-        }
+        protected LustreAtomarProposition(string label) : base(label) { }
 
         public abstract bool Evaluate(LustreModelBase model);
     }
 
     public class LustreFirstOutputIsTrue : LustreAtomarProposition
     {
-        public LustreFirstOutputIsTrue(string label = null) : base(label)
-        {
-        }
+        public LustreFirstOutputIsTrue(string label = null) : base(label) { }
 
         public override bool Evaluate(LustreModelBase model)
         {
-            return (bool)model.output;
+            return (bool)model.Outputs.FirstOrDefault(); ;
         }
     }
 
@@ -60,10 +53,9 @@ namespace SafetyLustre
 
         public override bool Evaluate(LustreModelBase model)
         {
-            return (int)model.output < threshold;
+            return (int)model.Outputs.FirstOrDefault() < threshold;
         }
     }
-    */
 
     /*
 	public class LustreLocalVarIsTrue : LustreAtomarProposition

@@ -21,77 +21,56 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ISSE.SafetyChecking.Modeling;
+using SafetyLustre.LustreCompiler;
 
 namespace SafetyLustre
 {
-    /*
-    public class LustreModelBase
+    public unsafe class LustreModelBase
     {
-        public LustreModelBase(string ocFileName, IEnumerable<Fault> faults)
-        {
-            program = new Program(ocFileName, null);
-            var numberOfInputQueuesNeeded =
-                program.signals.Count(signal => signal.IsFaultInput || signal.IsRealInput);
-            program.input = new Queue<Object>[numberOfInputQueuesNeeded];
-            for (var i = 0; i < numberOfInputQueuesNeeded; i++)
-            {
-                program.input[i] = new Queue<Object>();
-            }
-
-            StateVectorSize =
-                program.countVariables(0) * sizeof(bool) +
-                program.countVariables(1) * sizeof(int) +
-                program.countVariables(2) * sizeof(char) +
-                program.countVariables(3) * sizeof(float) +
-                program.countVariables(4) * sizeof(double) +
-                sizeof(int) + // variable containing the current state
-                sizeof(long); // variable containing the permanent faults
-
-            output = 0;
-
-            this.faults = faults.ToDictionary(fault => fault.Name, fault => fault);
-        }
-
-        public Program program;
-
-        public Dictionary<string, Fault> faults;
+        public Dictionary<string, Fault> Faults { get; set; }
 
         public int StateVectorSize { get; }
 
-        public Object output;
-
         public Choice Choice { get; set; } = new Choice();
+
+        public List<object> Outputs = new List<object>();
+
+        public Oc5Runner Runner { get; set; }
+
+        public LustreModelBase(string lustrePath, string mainNode, IEnumerable<Fault> faults)
+        {
+            var oc5 = LusCompiler.Compile(File.ReadAllText(lustrePath), mainNode);
+            Runner = new Oc5Runner(oc5);
+
+            StateVectorSize =
+                Runner.Oc5ModelState.Bools.Count * sizeof(bool) +
+                Runner.Oc5ModelState.Ints.Count * sizeof(int) +
+                Runner.Oc5ModelState.Strings.Count * sizeof(char) * 30 +                    //HACK max. legth of string is 30 chars (29 + '\0')
+                Runner.Oc5ModelState.Floats.Count * sizeof(float) +
+                Runner.Oc5ModelState.Doubles.Count * sizeof(double) +
+                Runner.Oc5ModelState.Mappings.Count * sizeof(PositionInOc5State) +
+                Runner.Oc5ModelState.InputMappings.Count * sizeof(PositionInOc5State) +
+                Runner.Oc5ModelState.OutputMappings.Count * sizeof(PositionInOc5State) +
+                sizeof(int) +                                                               // variable containing the current state
+                sizeof(long);                                                               // variable containing the permanent faults
+            Faults = faults.ToDictionary(fault => fault.Name, fault => fault);
+        }
 
         public virtual void SetInitialState()
         {
-            output = 0;
+            Outputs.Clear();
         }
 
         public void Update()
         {
-            for (var i = 0; i < program.signals.Count; i++)
-            {
-                var signal = program.signals[i];
-                if (signal.IsRealInput)
-                {
-                    // TODO: Different types
-                    var value = Choice.Choose(true, false);
-                    program.input[i].Enqueue(value);
-                }
-                if (signal.IsFaultInput)
-                {
-                    var activated = ISSE.SafetyChecking.ExecutedModel.FaultHelper.Activate(faults[signal.getName()]);
-                    program.input[i].Enqueue(activated);
-                }
-            }
+            var value = Choice.Choose(true, false);
+            Runner.Tick(value);
 
-            program.executeProcedure();
-            output = program.output[0];
+            Outputs = Runner.Oc5ModelState.GetOutputs().ToList();
         }
     }
-    */
 }

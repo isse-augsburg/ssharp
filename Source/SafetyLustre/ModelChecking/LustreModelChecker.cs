@@ -20,26 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using ISSE.SafetyChecking;
+using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+using ISSE.SafetyChecking.Formula;
+using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
+using ISSE.SafetyChecking.Modeling;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using ISSE.SafetyChecking;
-using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
-using ISSE.SafetyChecking.AnalysisModel;
-using ISSE.SafetyChecking.AnalysisModelTraverser;
-using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
-using ISSE.SafetyChecking.ExecutableModel;
-using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
-using ISSE.SafetyChecking.Formula;
-using ISSE.SafetyChecking.MarkovDecisionProcess;
-using ISSE.SafetyChecking.Modeling;
-using ISSE.SafetyChecking.Utilities;
-using LtmcModelChecker = ISSE.SafetyChecking.LtmcModelChecker;
 
 namespace SafetyLustre
 {
-    /*
     /// <summary>
     ///   Provides convienent methods for model checking S# models.
     /// </summary>
@@ -53,18 +44,16 @@ namespace SafetyLustre
             TraversalConfiguration.EnableEarlyTermination = true;
         }
 
-
-
         /// <summary>
         ///   Calculates the probability to reach a state where <paramref name="stateFormula" /> holds.
         /// </summary>
         /// <param name="model">The model that should be checked.</param>
         /// <param name="stateFormula">The state formula to be checked.</param>
-        public static Probability CalculateProbabilityToReachState(string ocFileName, IEnumerable<Fault> faults, Formula stateFormula)
+        public static Probability CalculateProbabilityToReachState(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula stateFormula)
         {
             var finallyStateFormula = new UnaryFormula(stateFormula, UnaryOperator.Finally);
 
-            return CalculateProbabilityOfFormula(ocFileName, faults, finallyStateFormula);
+            return CalculateProbabilityOfFormula(ocFileName, mainNode, faults, finallyStateFormula);
         }
 
         /// <summary>
@@ -72,13 +61,11 @@ namespace SafetyLustre
         /// </summary>
         /// <param name="model">The model that should be checked.</param>
         /// <param name="formula">The state formula to be checked.</param>
-        public static Probability CalculateProbabilityOfFormula(string ocFileName, IEnumerable<Fault> faults, Formula formula)
+        public static Probability CalculateProbabilityOfFormula(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula formula)
         {
-            Program.modelChecking = true;
-
             Probability probability;
 
-            var createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults.ToArray());
+            var createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, mainNode, faults.ToArray());
 
             var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(createModel) { Configuration = TraversalConfiguration };
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
@@ -91,7 +78,7 @@ namespace SafetyLustre
                 probability = modelChecker.CalculateProbability(formula);
             }
 
-            System.GC.Collect();
+            GC.Collect();
             return probability;
         }
 
@@ -101,11 +88,11 @@ namespace SafetyLustre
         /// <param name="model">The model that should be checked.</param>
         /// <param name="stateFormula">The state formula to be checked.</param>
         /// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
-        public static Probability CalculateProbabilityToReachStateBounded(string ocFileName, IEnumerable<Fault> faults, Formula stateFormula, int bound)
+        public static Probability CalculateProbabilityToReachStateBounded(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula stateFormula, int bound)
         {
             var formula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
 
-            return CalculateProbabilityOfFormula(ocFileName, faults, formula);
+            return CalculateProbabilityOfFormula(ocFileName, mainNode, faults, formula);
         }
 
         /// <summary>
@@ -116,11 +103,11 @@ namespace SafetyLustre
         /// <param name="stateFormula">The state formula which _must_ finally be true.</param>
         /// <param name="invariantFormula">The state formulas which must hold until stateFormula is satisfied.</param>
         /// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
-        public static Probability CalculateProbabilityToReachStateBounded(string ocFileName, IEnumerable<Fault> faults, Formula stateFormula, Formula invariantFormula, int bound)
+        public static Probability CalculateProbabilityToReachStateBounded(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula stateFormula, Formula invariantFormula, int bound)
         {
             var formula = new BoundedBinaryFormula(invariantFormula, BinaryOperator.Until, stateFormula, bound);
 
-            return CalculateProbabilityOfFormula(ocFileName, faults, formula);
+            return CalculateProbabilityOfFormula(ocFileName, mainNode, faults, formula);
         }
 
         /// <summary>
@@ -128,25 +115,23 @@ namespace SafetyLustre
         /// </summary>
         /// <param name="model">The model that should be checked.</param>
         /// <param name="stateFormula">The state formula which _must_ finally be true.</param>
-        public static ProbabilityRange CalculateProbabilityRangeToReachState(string ocFileName, IEnumerable<Fault> faults, Formula stateFormula)
+        public static ProbabilityRange CalculateProbabilityRangeToReachState(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula stateFormula)
         {
             var finallyStateFormula = new UnaryFormula(stateFormula, UnaryOperator.Finally);
 
-            return CalculateProbabilityRangeOfFormula(ocFileName, faults, finallyStateFormula);
+            return CalculateProbabilityRangeOfFormula(ocFileName, mainNode, faults, finallyStateFormula);
         }
-
-
 
         /// <summary>
         ///   Calculates the probability of formula.
         /// </summary>
         /// <param name="model">The model that should be checked.</param>
         /// <param name="formula">The state formula to be checked.</param>
-        public static ProbabilityRange CalculateProbabilityRangeOfFormula(string ocFileName, IEnumerable<Fault> faults, Formula formula)
+        public static ProbabilityRange CalculateProbabilityRangeOfFormula(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula formula)
         {
             ProbabilityRange probabilityRangeToReachState;
 
-            var createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults.ToArray());
+            var createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, mainNode, faults.ToArray());
 
             var ltmdpGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(createModel) { Configuration = TraversalConfiguration };
             ltmdpGenerator.AddFormulaToCheck(formula);
@@ -159,7 +144,7 @@ namespace SafetyLustre
                 probabilityRangeToReachState = modelChecker.CalculateProbabilityRange(formula);
             }
 
-            System.GC.Collect();
+            GC.Collect();
             return probabilityRangeToReachState;
         }
 
@@ -169,13 +154,11 @@ namespace SafetyLustre
         /// <param name="model">The model that should be checked.</param>
         /// <param name="stateFormula">The state formula which _must_ finally be true.</param>
         /// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
-        public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(string ocFileName, IEnumerable<Fault> faults, Formula stateFormula, int bound)
+        public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula stateFormula, int bound)
         {
             var formula = new BoundedUnaryFormula(stateFormula, UnaryOperator.Finally, bound);
-            return CalculateProbabilityRangeOfFormula(ocFileName, faults, formula);
+            return CalculateProbabilityRangeOfFormula(ocFileName, mainNode, faults, formula);
         }
-
-
 
         /// <summary>
         ///   Calculates the probability to reach a state where <paramref name="stateFormula" /> holds and on its way
@@ -185,20 +168,19 @@ namespace SafetyLustre
         /// <param name="stateFormula">The state formula which _must_ finally be true.</param>
         /// <param name="invariantFormula">The state formulas which must hold until stateFormula is satisfied.</param>
         /// <param name="bound">The maximal number of steps. If stateFormula is satisfied the first time any step later than bound, this probability does not count into the end result.</param>
-        public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(string ocFileName, IEnumerable<Fault> faults, Formula stateFormula, Formula invariantFormula, int bound)
+        public static ProbabilityRange CalculateProbabilityRangeToReachStateBounded(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula stateFormula, Formula invariantFormula, int bound)
         {
             var formula = new BoundedBinaryFormula(invariantFormula, BinaryOperator.Until, stateFormula, bound);
 
-            return CalculateProbabilityRangeOfFormula(ocFileName, faults, formula);
+            return CalculateProbabilityRangeOfFormula(ocFileName, mainNode, faults, formula);
         }
-
 
         /// <summary>
         ///   Conduct a quantitative analysis where parameters may vary
         /// </summary>
         /// <param name="model">The model that should be checked.</param>
         /// <param name="parameter">The parameters of the parametric analysis.</param>
-        public static QuantitativeParametricAnalysisResults ConductQuantitativeParametricAnalysis(string ocFileName, IEnumerable<Fault> faults, QuantitativeParametricAnalysisParameter parameter)
+        public static QuantitativeParametricAnalysisResults ConductQuantitativeParametricAnalysis(string ocFileName, string mainNode, IEnumerable<Fault> faults, QuantitativeParametricAnalysisParameter parameter)
         {
             var stepSize = (parameter.To - parameter.From) / (parameter.Steps - 1);
 
@@ -215,15 +197,15 @@ namespace SafetyLustre
 
                 double currentResult;
                 if (parameter.Bound.HasValue)
-                    currentResult = CalculateProbabilityToReachStateBounded(ocFileName, faultsFlat, parameter.StateFormula, parameter.Bound.Value).Value;
+                    currentResult = CalculateProbabilityToReachStateBounded(ocFileName, mainNode, faultsFlat, parameter.StateFormula, parameter.Bound.Value).Value;
                 else
-                    currentResult = CalculateProbabilityToReachState(ocFileName, faultsFlat, parameter.StateFormula).Value;
-                System.GC.Collect();
+                    currentResult = CalculateProbabilityToReachState(ocFileName, mainNode, faultsFlat, parameter.StateFormula).Value;
+                GC.Collect();
                 resultValues[i] = currentResult;
 
             }
 
-            var result = new QuantitativeParametricAnalysisResults
+            return new QuantitativeParametricAnalysisResults
             {
                 From = parameter.From,
                 To = parameter.To,
@@ -231,8 +213,6 @@ namespace SafetyLustre
                 SourceValues = sourceValues,
                 ResultValues = resultValues
             };
-            return result;
         }
     }
-    */
 }

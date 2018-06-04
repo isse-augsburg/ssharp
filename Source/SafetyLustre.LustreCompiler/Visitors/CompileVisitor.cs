@@ -1,12 +1,12 @@
 ﻿using Antlr4.Runtime.Misc;
-using SafetyLustre.Oc5Compiler.Exceptions;
-using SafetyLustre.Oc5Compiler.Oc5Objects;
+using SafetyLustre.LustreCompiler.Exceptions;
+using SafetyLustre.LustreCompiler.Oc5Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using static SafetyLustre.Oc5Compiler.Oc5Parser;
+using static SafetyLustre.LustreCompiler.Oc5Parser;
 
-namespace SafetyLustre.Oc5Compiler.Visitors
+namespace SafetyLustre.LustreCompiler.Visitors
 {
     class CompileVisitor : Oc5BaseVisitor<Expression>
     {

@@ -1,9 +1,9 @@
-﻿using SafetyLustre.Oc5Compiler.Oc5Objects;
+﻿using SafetyLustre.LustreCompiler.Oc5Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SafetyLustre.Oc5Compiler
+namespace SafetyLustre.LustreCompiler
 {
     class Oc5ModelState
     {
@@ -23,13 +23,13 @@ namespace SafetyLustre.Oc5Compiler
         /// <see cref="Ints"/>, <see cref="Strings"/>, <see cref="Floats"/>
         /// or <see cref="Doubles"/> list.
         /// </summary>
-        private List<PositionInOc5State> InputMappings { get; set; }
+        internal List<PositionInOc5State> InputMappings { get; set; }
         /// <summary>
         /// This List maps input index to a type and the index in the <see cref="Bools"/>,
         /// <see cref="Ints"/>, <see cref="Strings"/>, <see cref="Floats"/>
         /// or <see cref="Doubles"/> list.
         /// </summary>
-        private List<PositionInOc5State> OutputMappings { get; set; }
+        internal List<PositionInOc5State> OutputMappings { get; set; }
         /// <summary>
         /// Represents the current oc5 state the model is in.
         /// </summary>

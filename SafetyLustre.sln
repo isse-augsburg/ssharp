@@ -7,9 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{64793805-8
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyLustre", "Source\SafetyLustre\SafetyLustre.csproj", "{CC928659-8CCF-4357-BD4F-224F80C5C79A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyLustre.Oc5Compiler", "Source\SafetyLustre.Oc5Compiler\SafetyLustre.Oc5Compiler.csproj", "{CFAAFD6C-76B7-400A-A715-2EB0B8EE0899}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyLustre.LustreCompiler", "Source\SafetyLustre.LustreCompiler\SafetyLustre.LustreCompiler.csproj", "{CFAAFD6C-76B7-400A-A715-2EB0B8EE0899}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyLustre.Oc5Compiler.Tests", "Source\SafetyLustre.Oc5Compiler.Tests\SafetyLustre.Oc5Compiler.Tests.csproj", "{A1BF68D6-A34D-4892-9A5C-7DB3A4F2A01D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyLustre.LustreCompiler.Tests", "Source\SafetyLustre.LustreCompiler.Tests\SafetyLustre.LustreCompiler.Tests.csproj", "{A1BF68D6-A34D-4892-9A5C-7DB3A4F2A01D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyChecking", "Source\SafetyChecking\SafetyChecking.csproj", "{A91CB8AF-8A4C-4F69-848E-B3962F9A94F9}"
 EndProject

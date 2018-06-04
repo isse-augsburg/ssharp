@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace SafetyLustre.Oc5Compiler.Tests
+namespace SafetyLustre.LustreCompiler.Tests
 {
     [TestClass]
     public class Oc5ParserTests

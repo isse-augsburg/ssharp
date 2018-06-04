@@ -8,8 +8,8 @@
     <ProjectGuid>{CFAAFD6C-76B7-400A-A715-2EB0B8EE0899}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SafetyLustre.Oc5Compiler</RootNamespace>
-    <AssemblyName>SafetyLustre.Oc5Compiler</AssemblyName>
+    <RootNamespace>SafetyLustre.LustreCompiler</RootNamespace>
+    <AssemblyName>SafetyLustre.LustreCompiler</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
@@ -56,9 +56,6 @@
     <Compile Include="Visitors\CompileVisitor.cs" />
     <Compile Include="Oc5ErrorListener.cs" />
     <Compile Include="Oc5Objects\Signal.cs" />
-    <Compile Include="Oc5Objects\SingleInputSignal.cs" />
-    <Compile Include="Oc5Objects\SingleOutputSignal.cs" />
-    <Compile Include="Oc5Objects\SingleSignal.cs" />
     <Compile Include="PredefinedObjects.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Visitors\ToStringVisitor.cs" />
@@ -66,7 +63,7 @@
   <ItemGroup>
     <Antlr4 Include="Oc5.g4">
       <Generator>MSBuild:Compile</Generator>
-      <CustomToolNamespace>SafetyLustre.Oc5Compiler</CustomToolNamespace>
+      <CustomToolNamespace>SafetyLustre.LustreCompiler</CustomToolNamespace>
       <Listener>False</Listener>
       <Visitor>True</Visitor>
     </Antlr4>

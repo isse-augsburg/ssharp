@@ -2,7 +2,7 @@
 using System.IO;
 using System.Linq;
 
-namespace SafetyLustre.Oc5Compiler.Tests
+namespace SafetyLustre.LustreCompiler.Tests
 {
     [TestClass]
     public class Oc5ModelTests

@@ -20,21 +20,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using ISSE.SafetyChecking;
 using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
 using ISSE.SafetyChecking.ExecutableModel;
 using ISSE.SafetyChecking.Formula;
-using ISSE.SafetyChecking.Simulator;
 using ISSE.SafetyChecking.Modeling;
+using ISSE.SafetyChecking.Simulator;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SafetyLustre
 {
-    /*
     public sealed class LustreSimulator : Simulator<LustreExecutableModel>
     {
         /// <summary>
@@ -45,15 +41,11 @@ namespace SafetyLustre
         /// <summary>
         ///   Initializes a new instance.
         /// </summary>
-        public LustreSimulator(string ocFileName, IEnumerable<Fault> faults, params Formula[] formulas)
-            : base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults.ToArray()).Create(0))
-        {
-        }
+        public LustreSimulator(string ocFileName, string mainNode, IEnumerable<Fault> faults, params Formula[] formulas)
+        : base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, mainNode, faults.ToArray()).Create(0)) { }
 
         public LustreSimulator(ExecutableCounterExample<LustreExecutableModel> counterExample)
-            : base(counterExample)
-        {
-        }
+        : base(counterExample) { }
     }
 
     public sealed class LustreProbabilisticSimulator : ProbabilisticSimulator<LustreExecutableModel>
@@ -68,10 +60,7 @@ namespace SafetyLustre
         /// <summary>
         ///   Initializes a new instance.
         /// </summary>
-        public LustreProbabilisticSimulator(string ocFileName, IEnumerable<Fault> faults, params Formula[] formulas)
-            : base(LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults.ToArray()), formulas, Configuration)
-        {
-        }
+        public LustreProbabilisticSimulator(string ocFileName, string mainNode, IEnumerable<Fault> faults, params Formula[] formulas)
+        : base(LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, mainNode, faults.ToArray()), formulas, Configuration) { }
     }
-    */
 }

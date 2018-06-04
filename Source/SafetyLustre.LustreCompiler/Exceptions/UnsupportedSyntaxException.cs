@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetyLustre.Oc5Compiler.Exceptions
+namespace SafetyLustre.LustreCompiler.Exceptions
 {
     class UnsupportedSyntaxException : Exception
     {
