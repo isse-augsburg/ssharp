@@ -17,6 +17,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Models", "Models", "{95E3B5
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lustre Models", "Models\Lustre Models\Lustre Models.csproj", "{7454E37B-B75D-4B8C-8169-0D1F6DD02FCE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafetyLustre.Tests", "Source\SafetyLustre.Tests\SafetyLustre.Tests.csproj", "{2C749D61-8A55-4C9D-9DA7-5181CB692569}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{7454E37B-B75D-4B8C-8169-0D1F6DD02FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7454E37B-B75D-4B8C-8169-0D1F6DD02FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7454E37B-B75D-4B8C-8169-0D1F6DD02FCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C749D61-8A55-4C9D-9DA7-5181CB692569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C749D61-8A55-4C9D-9DA7-5181CB692569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C749D61-8A55-4C9D-9DA7-5181CB692569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C749D61-8A55-4C9D-9DA7-5181CB692569}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{A1BF68D6-A34D-4892-9A5C-7DB3A4F2A01D} = {64793805-8DC9-4A61-B41B-3369490319CD}
 		{A91CB8AF-8A4C-4F69-848E-B3962F9A94F9} = {64793805-8DC9-4A61-B41B-3369490319CD}
 		{7454E37B-B75D-4B8C-8169-0D1F6DD02FCE} = {95E3B5AE-1A7F-45AA-AA66-1C9D599A47E0}
+		{2C749D61-8A55-4C9D-9DA7-5181CB692569} = {64793805-8DC9-4A61-B41B-3369490319CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AA5452D7-CDA9-4CD9-B4F9-D1CADC735BF9}

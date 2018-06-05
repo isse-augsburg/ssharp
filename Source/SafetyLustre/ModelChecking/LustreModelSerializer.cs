@@ -90,11 +90,10 @@ namespace SafetyLustre
 
         public static void WriteFormula(BinaryWriter writer, Formula formula, Dictionary<Fault, int> faultToIndex)
         {
-            if (formula is LustrePressureBelowThreshold)
+            if (formula is LustrePressureBelowThreshold lustrePressureBelowThreshold)
             {
-                var innerFormula = (LustrePressureBelowThreshold)formula;
                 writer.Write(1);
-                writer.Write(innerFormula.Label);
+                writer.Write(lustrePressureBelowThreshold.Label);
             }
             else if (formula is FaultFormula faultFormula)
             {

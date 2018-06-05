@@ -49,7 +49,7 @@ namespace SafetyLustre
             StateVectorSize =
                 Runner.Oc5ModelState.Bools.Count * sizeof(bool) +
                 Runner.Oc5ModelState.Ints.Count * sizeof(int) +
-                Runner.Oc5ModelState.Strings.Count * sizeof(char) * 30 +                    //HACK max. legth of string is 30 chars (29 + '\0')
+                Runner.Oc5ModelState.Strings.Count * sizeof(char) * 30 +                    //HACK max. length of string is 30 chars (29 + '\0')
                 Runner.Oc5ModelState.Floats.Count * sizeof(float) +
                 Runner.Oc5ModelState.Doubles.Count * sizeof(double) +
                 Runner.Oc5ModelState.Mappings.Count * sizeof(PositionInOc5State) +
