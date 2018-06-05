@@ -68,8 +68,13 @@ namespace SafetyLustre
 
         public void Update()
         {
-            var value = Choice.Choose(true, false);
-            Runner.Tick(value);
+            var inputs = new List<object>();
+            for (int i = 0; i < Runner.Oc5ModelState.InputMappings.Count; i++)
+            {
+                inputs.Add(Choice.Choose(true, false));
+            }
+            
+            Runner.Tick(inputs.ToArray());
 
             Outputs = Runner.Oc5ModelState.GetOutputs().ToList();
         }

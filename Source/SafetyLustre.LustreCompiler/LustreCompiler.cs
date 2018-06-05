@@ -40,39 +40,41 @@ namespace SafetyLustre.LustreCompiler
     /// </summary>
     public static class LusCompiler
     {
-        private static readonly Object fileLock = new Object();
+        private static readonly Object mutex = new Object();
 
         public static string Compile(string lustreSource, string mainNode)
         {
-            SetupLus2Oc();
-
-            var wslHomeDirectory = WslUtil.ExecuteCommandWithResult("echo $HOME")   // Get home directory of current wsl user
-                .Trim();                                                            // Remove trailing '\n'
-
-            var lxssHomeDirectory = Path.Combine(
-                Environment.GetEnvironmentVariable("localappdata"),                 // Wsl filesystem ist stored under
-                "lxss",                                                             // %localappdata%/lxss
-                wslHomeDirectory.Remove(0, 1)                                       // Remove leading '/'
-            );
-
             //HACK to make this thread safe
-            lock (fileLock)
-            {
-                // Store lustre source for lus2oc to read
-                File.WriteAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.lus"), lustreSource);
-            }
+            lock (mutex)
+                {
+                    SetupLus2Oc();
 
-            WslUtil.ExecuteCommand($"chmod 0777 {wslHomeDirectory}/{mainNode}.lus");
+                    var wslHomeDirectory = WslUtil.ExecuteCommandWithResult("echo $HOME")   // Get home directory of current wsl user
+                        .Trim();                                                            // Remove trailing '\n'
 
-            // Compile .lus to wsl users home directory
-            WslUtil.ExecuteCommand(
-                $"export LUSTRE_INSTALL={wslHomeDirectory}/bin/lustre-v4-III-db-linux64;" +                                 // Set environment variable
-                "source $LUSTRE_INSTALL/setenv.sh;" +                                                                       // Source setenv script
-                $"lus2oc {wslHomeDirectory}/{mainNode}.lus {mainNode} -o {wslHomeDirectory}/{mainNode}.oc"                  // Compile .lus file
-            );
+                    var lxssHomeDirectory = Path.Combine(
+                        Environment.GetEnvironmentVariable("localappdata"),                 // Wsl filesystem is stored under
+                        "lxss",                                                             // %localappdata%/lxss
+                        wslHomeDirectory.Remove(0, 1)                                       // Remove leading '/'
+                    );
 
-            // Read and return compiled object code
-            return File.ReadAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.oc"));
+
+                    // Store lustre source for lus2oc to read
+                    File.WriteAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.lus"), lustreSource);
+
+
+                    WslUtil.ExecuteCommand($"chmod 0777 {wslHomeDirectory}/{mainNode}.lus");
+
+                    // Compile .lus to wsl users home directory
+                    WslUtil.ExecuteCommand(
+                        $"export LUSTRE_INSTALL={wslHomeDirectory}/bin/lustre-v4-III-db-linux64;" +                                 // Set environment variable
+                        "source $LUSTRE_INSTALL/setenv.sh;" +                                                                       // Source setenv script
+                        $"lus2oc {wslHomeDirectory}/{mainNode}.lus {mainNode} -o {wslHomeDirectory}/{mainNode}.oc"                  // Compile .lus file
+                    );
+
+                    // Read and return compiled object code
+                    return File.ReadAllText(Path.Combine(lxssHomeDirectory, $"{mainNode}.oc"));
+                }
         }
 
         /// <summary>

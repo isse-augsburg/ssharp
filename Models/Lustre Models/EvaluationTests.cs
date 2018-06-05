@@ -51,7 +51,7 @@ namespace Lustre_Models
         public void CreateMarkovChainWithHazards()
         {
             var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.AddFormulaToCheck(_hazard);
             markovChainGenerator.Configuration.UseCompactStateStorage = true;
@@ -63,7 +63,7 @@ namespace Lustre_Models
         public void CreateMarkovChainWithHazardsWithoutStaticPruning()
         {
             var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.AddFormulaToCheck(_hazard);
@@ -76,7 +76,7 @@ namespace Lustre_Models
         public void CreateMarkovChainWithHazardRetraversal1()
         {
             var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.AddFormulaToCheck(_hazard);
             markovChainGenerator.Configuration.UseCompactStateStorage = true;
@@ -95,7 +95,7 @@ namespace Lustre_Models
         public void CreateMarkovChainWithHazardsRetraversal2()
         {
             var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.AddFormulaToCheck(_hazard);
             markovChainGenerator.Configuration.UseCompactStateStorage = true;
@@ -114,7 +114,7 @@ namespace Lustre_Models
         public void CreateMarkovChainWithHazardFaultsInState()
         {
             var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.AddFormulaToCheck(_hazard);
             foreach (var fault in _faults)
@@ -132,7 +132,7 @@ namespace Lustre_Models
         public void CreateFaultAwareMarkovChainAllFaults()
         {
             var markovChainGenerator = new MarkovChainFromExecutableModelGenerator<LustreExecutableModel>(_createModel) { Configuration = LustreModelChecker.TraversalConfiguration };
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.AddFormulaToCheck(_hazard);
@@ -262,7 +262,7 @@ namespace Lustre_Models
             var oldProbability = _faults[1].ProbabilityOfOccurrence;
             _faults[1].ProbabilityOfOccurrence = null;
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
@@ -292,7 +292,7 @@ namespace Lustre_Models
             var oldProbability = _faults[1].ProbabilityOfOccurrence;
             _faults[1].ProbabilityOfOccurrence = null;
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
@@ -316,7 +316,7 @@ namespace Lustre_Models
             var oldProbability = _faults[1].ProbabilityOfOccurrence;
             _faults[1].ProbabilityOfOccurrence = null;
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStatesConstantDistance;
@@ -340,7 +340,7 @@ namespace Lustre_Models
             var oldProbability = _faults[1].ProbabilityOfOccurrence;
             _faults[1].ProbabilityOfOccurrence = null;
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithFlattening;
@@ -365,7 +365,7 @@ namespace Lustre_Models
             var oldProbability = _faults[1].ProbabilityOfOccurrence;
             _faults[1].ProbabilityOfOccurrence = null;
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStates;
@@ -384,7 +384,7 @@ namespace Lustre_Models
             var oldProbability = _faults[1].ProbabilityOfOccurrence;
             _faults[1].ProbabilityOfOccurrence = null;
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithNewStatesConstantDistance;
@@ -403,7 +403,7 @@ namespace Lustre_Models
             var oldProbability = _faults[1].ProbabilityOfOccurrence;
             _faults[1].ProbabilityOfOccurrence = null;
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(_createModel);
-            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 1000000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = false;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuildInMdpWithFlattening;
