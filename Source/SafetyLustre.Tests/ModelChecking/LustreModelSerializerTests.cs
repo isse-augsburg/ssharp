@@ -1,5 +1,6 @@
 ﻿using ISSE.SafetyChecking.Modeling;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SafetyLustre.LustreCompiler;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,23 +16,24 @@ namespace SafetyLustre.Tests
             //Arrange
             var model = new LustreModelBase(@"Examples\pressureTank.lus", "TANK", new List<Fault>());
             var memory = stackalloc byte[model.StateVectorSize];
-            Console.WriteLine($"Allocated {model.StateVectorSize} bytes of memory.");
 
-            var bools = model.Runner.Oc5ModelState.Bools;
-            var ints = model.Runner.Oc5ModelState.Ints;
-            var strings = model.Runner.Oc5ModelState.Strings;
-            var floats = model.Runner.Oc5ModelState.Floats;
-            var doubles = model.Runner.Oc5ModelState.Doubles;
-            var mappings = model.Runner.Oc5ModelState.Mappings;
-            var inputMappings = model.Runner.Oc5ModelState.InputMappings;
-            var outputMappings = model.Runner.Oc5ModelState.OutputMappings;
+            // Use toArray for a deep copy
+            var bools = model.Runner.Oc5ModelState.Bools.ToArray();
+            var ints = model.Runner.Oc5ModelState.Ints.ToArray();
+            var strings = model.Runner.Oc5ModelState.Strings.ToArray();
+            var floats = model.Runner.Oc5ModelState.Floats.ToArray();
+            var doubles = model.Runner.Oc5ModelState.Doubles.ToArray();
+            var mappings = model.Runner.Oc5ModelState.Mappings.ToArray();
+            var inputMappings = model.Runner.Oc5ModelState.InputMappings.ToArray();
+            var outputMappings = model.Runner.Oc5ModelState.OutputMappings.ToArray();
+            var state = model.Runner.Oc5ModelState.CurrentState;
 
             //Act
-            var deserializer = LustreModelSerializer.CreateFastInPlaceDeserializer(model);
             var serializer = LustreModelSerializer.CreateFastInPlaceSerializer(model);
+            var deserializer = LustreModelSerializer.CreateFastInPlaceDeserializer(model);
 
-            deserializer(memory);
             serializer(memory);
+            deserializer(memory);
 
             //Assert
             Assert.IsTrue(model.Runner.Oc5ModelState.Bools.SequenceEqual(bools));
@@ -42,6 +44,7 @@ namespace SafetyLustre.Tests
             Assert.IsTrue(model.Runner.Oc5ModelState.Mappings.SequenceEqual(mappings));
             Assert.IsTrue(model.Runner.Oc5ModelState.InputMappings.SequenceEqual(inputMappings));
             Assert.IsTrue(model.Runner.Oc5ModelState.OutputMappings.SequenceEqual(outputMappings));
+            Assert.IsTrue(model.Runner.Oc5ModelState.CurrentState == state);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace SafetyLustre.LustreCompiler
 {
@@ -108,6 +109,7 @@ namespace SafetyLustre.LustreCompiler
         }
     }
 
+    [StructLayout(LayoutKind.Auto)]
     struct PositionInOc5State
     {
         public PredefinedObjects.Types Type { get; set; }

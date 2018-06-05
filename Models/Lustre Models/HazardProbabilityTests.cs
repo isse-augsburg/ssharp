@@ -57,24 +57,28 @@ namespace Lustre_Models
                 From = 3.0E-7,
                 To = 3.0E-5,
                 Steps = 25,
-                UpdateParameterInModel = value => { faultK1.ProbabilityOfOccurrence = new Probability(value); }
             };
-            var result = LustreModelChecker.ConductQuantitativeParametricAnalysis(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", faults, parameter);
-            var fileWriter = new StreamWriter("pressureTank_varyK1.csv", append: false);
-            result.ToCsv(fileWriter);
-            fileWriter.Close();
 
-            parameter.UpdateParameterInModel = value => { faultK2.ProbabilityOfOccurrence = new Probability(value); };
-            result = LustreModelChecker.ConductQuantitativeParametricAnalysis(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", faults, parameter);
-            fileWriter = new StreamWriter("pressureTank_varyK2.csv", append: false);
-            result.ToCsv(fileWriter);
-            fileWriter.Close();
+            using (var fileWriter = new StreamWriter(Path.Combine(AssemblyDirectory, "pressureTank_varyK1.csv"), append: false))
+            {
+                parameter.UpdateParameterInModel = value => { faultK1.ProbabilityOfOccurrence = new Probability(value); };
+                var result = LustreModelChecker.ConductQuantitativeParametricAnalysis(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", faults, parameter);
+                result.ToCsv(fileWriter);
+            }
 
-            parameter.UpdateParameterInModel = value => { faultSensor.ProbabilityOfOccurrence = new Probability(value); };
-            result = LustreModelChecker.ConductQuantitativeParametricAnalysis(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", faults, parameter);
-            fileWriter = new StreamWriter("pressureTank_varySensor.csv", append: false);
-            result.ToCsv(fileWriter);
-            fileWriter.Close();
+            using (var fileWriter = new StreamWriter(Path.Combine(AssemblyDirectory, "pressureTank_varyK2.csv"), append: false))
+            {
+                parameter.UpdateParameterInModel = value => { faultK2.ProbabilityOfOccurrence = new Probability(value); };
+                var result = LustreModelChecker.ConductQuantitativeParametricAnalysis(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", faults, parameter);
+                result.ToCsv(fileWriter);
+            }
+
+            using (var fileWriter = new StreamWriter(Path.Combine(AssemblyDirectory, "pressureTank_varySensor.csv"), append: false))
+            {
+                parameter.UpdateParameterInModel = value => { faultSensor.ProbabilityOfOccurrence = new Probability(value); };
+                var result = LustreModelChecker.ConductQuantitativeParametricAnalysis(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", faults, parameter);
+                result.ToCsv(fileWriter);
+            }
         }
     }
 }

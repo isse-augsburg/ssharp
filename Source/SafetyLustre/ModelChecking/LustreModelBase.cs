@@ -63,6 +63,7 @@ namespace SafetyLustre
         public virtual void SetInitialState()
         {
             Outputs.Clear();
+            Outputs.Add(0);
         }
 
         public void Update()

@@ -1,4 +1,5 @@
-﻿using ISSE.SafetyChecking.Formula;
+﻿using ISSE.SafetyChecking.ExecutedModel;
+using ISSE.SafetyChecking.Formula;
 using ISSE.SafetyChecking.MarkovDecisionProcess.Unoptimized;
 using ISSE.SafetyChecking.Modeling;
 using NUnit.Framework;
@@ -31,6 +32,7 @@ namespace Lustre_Models
             var createModel = LustreExecutableModel.CreateExecutedModelFromFormulasCreator(Path.Combine(AssemblyDirectory, "pressureTank.lus"), "TANK", faults.ToArray());
 
             var markovChainGenerator = new MarkovDecisionProcessFromExecutableModelGenerator<LustreExecutableModel>(createModel);
+            markovChainGenerator.Configuration.ModelCapacity = new ModelCapacityByModelSize(10000, 100000);
             markovChainGenerator.Configuration.SuccessorCapacity *= 2;
             markovChainGenerator.Configuration.EnableStaticPruningOptimization = true;
             markovChainGenerator.Configuration.LtmdpModelChecker = LtmdpModelChecker.BuiltInLtmdp;
