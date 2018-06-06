@@ -1,7 +1,7 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
-// Copyright (c) 2017, Manuel Götz
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
+// Copyright (c) 2018, Pascal Pfeil
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,39 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Antlr4.Runtime;
+using SafetyLustre.LustreCompiler.Visitors;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetyLustre
+namespace SafetyLustre.LustreCompiler
 {
-    public class State {
+    public class Oc5Runner
+    {
+        public string Oc5Source { get; set; }
+        internal Oc5Model Oc5Model { get; set; }
+        internal Oc5ModelState Oc5ModelState { get; set; }
 
-        private int id;
-        private Dag dag;
+        public Oc5Runner(string oc5Source)
+        {
+            Oc5Source = oc5Source;
 
-        public State(int id, Dag dag) {
-            this.id = id;
-            this.dag = dag;
+            var inputStream = new AntlrInputStream(oc5Source);
+            var lexer = new Oc5Lexer(inputStream);
+            var tokenStream = new CommonTokenStream(lexer);
+            var parser = new Oc5Parser(tokenStream);
+
+            var ocfileContext = parser.ocfile();
+
+            var visitor = new CompileVisitor(ocfileContext);
+            Oc5Model = visitor.Oc5Model;
+            Oc5ModelState = visitor.Oc5ModelState;
         }
 
-        public Node getRoot() {
-            return this.dag.getRoot();
-        }
+        public void Tick(params object[] inputs)
+        {
+            Oc5ModelState.AssignInputs(inputs);
 
+            Oc5ModelState.CurrentState = Oc5Model.Oc5States[Oc5ModelState.CurrentState].Invoke(Oc5ModelState);
+        }
     }
 }

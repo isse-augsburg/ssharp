@@ -1,7 +1,7 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
-// Copyright (c) 2017, Manuel Götz
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
+// Copyright (c) 2018, Pascal Pfeil
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,25 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using SafetyLustre.LustreCompiler.Oc5Objects;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SafetyLustre
+namespace SafetyLustre.LustreCompiler
 {
-    public class Dag {
-
-        private Node root;
-
-        public Dag(Node root) {
-            this.root = root;
-        }
-
-        public Node getRoot() {
-            return root;
-        }
-
+    class Oc5Model
+    {
+        public List<Signal> Signals { get; set; } = new List<Signal>();
+        public List<Func<Oc5ModelState, int>> Oc5States { get; set; } = new List<Func<Oc5ModelState, int>>();
     }
 }

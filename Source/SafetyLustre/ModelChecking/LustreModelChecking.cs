@@ -1,6 +1,7 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
+// Copyright (c) 2018, Pascal Pfeil
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,62 +21,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using ISSE.SafetyChecking.AnalysisModel;
+using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
+using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
+using ISSE.SafetyChecking.Formula;
+using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
+using ISSE.SafetyChecking.Modeling;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using ISSE.SafetyChecking.Modeling;
 
 namespace SafetyLustre
 {
-	using System;
-	using ISSE.SafetyChecking.AnalysisModel;
-	using ISSE.SafetyChecking.AnalysisModelTraverser;
-	using ISSE.SafetyChecking.DiscreteTimeMarkovChain;
-	using ISSE.SafetyChecking.FaultMinimalKripkeStructure;
-	using ISSE.SafetyChecking.Formula;
-	using ISSE.SafetyChecking.MinimalCriticalSetAnalysis;
-	using ISSE.SafetyChecking.MarkovDecisionProcess;
-	using ISSE.SafetyChecking.ExecutableModel;
-	
-	public sealed class LustreSafetyAnalysis : SafetyAnalysis<LustreExecutableModel>
-	{
-		public SafetyAnalysisResults<LustreExecutableModel> ComputeMinimalCriticalSets(string ocFileName, IEnumerable<Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue)
-		{
-			Program.modelChecking = true;
-			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults.ToArray(), hazard);
-			return ComputeMinimalCriticalSets(modelCreator, hazard, maxCardinality);
-		}
 
-		public static SafetyAnalysisResults<LustreExecutableModel> AnalyzeHazard(string ocFileName, IEnumerable<Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue,
-														  SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
-		{
-			Program.modelChecking = true;
-			var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults.ToArray(), hazard);
-			return AnalyzeHazard(modelCreator, hazard, maxCardinality, backend);
-		}
-	}
+    public sealed class LustreSafetyAnalysis : SafetyAnalysis<LustreExecutableModel>
+    {
+        public SafetyAnalysisResults<LustreExecutableModel> ComputeMinimalCriticalSets(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue)
+        {
+            var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, mainNode, faults.ToArray(), hazard);
+            return ComputeMinimalCriticalSets(modelCreator, hazard, maxCardinality);
+        }
 
-	public sealed class LustreQualitativeChecker : QualitativeChecker<LustreExecutableModel>
-	{
-		public static int maxValue = 1000;
+        public static SafetyAnalysisResults<LustreExecutableModel> AnalyzeHazard(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula hazard, int maxCardinality = Int32.MaxValue,
+                                                          SafetyAnalysisBackend backend = SafetyAnalysisBackend.FaultOptimizedOnTheFly)
+        {
+            var modelCreator = LustreExecutableModel.CreateExecutedModelCreator(ocFileName, mainNode, faults.ToArray(), hazard);
+            return AnalyzeHazard(modelCreator, hazard, maxCardinality, backend);
+        }
 
-		public LustreQualitativeChecker(string ocFileName, IEnumerable<Fault> faults, Formula invariant)
-			: base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, faults.ToArray(), invariant))
-		{
-			Program.modelChecking = true;
-		}
+        public sealed class LustreQualitativeChecker : QualitativeChecker<LustreExecutableModel>
+        {
+            public static int maxValue = 1000;
 
-		public InvariantAnalysisResult CheckInvariant(Formula invariant, int max)
-		{
-			maxValue = max;
-			return CheckInvariant(invariant);
-		}
-	}
+            public LustreQualitativeChecker(string ocFileName, string mainNode, IEnumerable<Fault> faults, Formula invariant)
+            : base(LustreExecutableModel.CreateExecutedModelCreator(ocFileName, mainNode, faults.ToArray(), invariant))
+            {
+            }
 
-	public sealed class LustreMarkovChainFromExecutableModelGenerator : MarkovChainFromExecutableModelGenerator<LustreExecutableModel>
-	{
-		public LustreMarkovChainFromExecutableModelGenerator(string ocFileName, IEnumerable<Fault> faults) : base(LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, faults.ToArray()))
-		{
-			Program.modelChecking = true;
-		}
-	}
+            public InvariantAnalysisResult CheckInvariant(Formula invariant, int max)
+            {
+                maxValue = max;
+                return CheckInvariant(invariant);
+            }
+        }
+
+        public sealed class LustreMarkovChainFromExecutableModelGenerator : MarkovChainFromExecutableModelGenerator<LustreExecutableModel>
+        {
+            public LustreMarkovChainFromExecutableModelGenerator(string ocFileName, string mainNode, IEnumerable<Fault> faults) : base(LustreExecutableModel.CreateExecutedModelFromFormulasCreator(ocFileName, mainNode, faults.ToArray())) { }
+        }
+    }
 }

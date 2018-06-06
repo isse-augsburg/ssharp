@@ -164,12 +164,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Source\SafetyChecking\SafetyChecking.csproj">
-      <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
-      <Name>SafetyChecking</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup />

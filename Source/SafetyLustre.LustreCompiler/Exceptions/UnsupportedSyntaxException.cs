@@ -1,7 +1,7 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
-// Copyright (c) 2017, Manuel Götz
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
+// Copyright (c) 2018, Pascal Pfeil
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,18 +21,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Antlr4.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SafetyLustre
+namespace SafetyLustre.LustreCompiler.Exceptions
 {
-    class SyntaxException : Exception {
-
-        public SyntaxException(string message) : base(message) {
-
-        }
+    class UnsupportedSyntaxException : Exception
+    {
+        public UnsupportedSyntaxException(string unsupportedSyntax, IToken token)
+        : base(unsupportedSyntax + $" currently not supported (Line {token.Line}: Character {token.Column}).") { }
     }
 }

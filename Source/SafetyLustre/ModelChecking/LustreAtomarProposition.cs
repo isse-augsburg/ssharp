@@ -1,6 +1,7 @@
 ﻿// The MIT License (MIT)
 // 
-// Copyright (c) 2014-2017, Institute for Software & Systems Engineering
+// Copyright (c) 2014-2018, Institute for Software & Systems Engineering
+// Copyright (c) 2018, Pascal Pfeil
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,35 +21,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-
-using System;
+using ISSE.SafetyChecking.Formula;
+using System.Linq;
 
 namespace SafetyLustre
 {
-	using ISSE.SafetyChecking.Formula;
+    public abstract class LustreAtomarProposition : AtomarPropositionFormula
+    {
+        protected LustreAtomarProposition(string label) : base(label) { }
 
-	public abstract class LustreAtomarProposition : AtomarPropositionFormula
-	{
-		protected LustreAtomarProposition(string label)
-			: base(label)
-		{
-			
-		}
+        public abstract bool Evaluate(LustreModelBase model);
+    }
 
-		public abstract bool Evaluate(LustreModelBase model);
-	}
+    public class LustreFirstOutputIsTrue : LustreAtomarProposition
+    {
+        public LustreFirstOutputIsTrue(string label = null) : base(label) { }
 
-	public class LustreFirstOutputIsTrue : LustreAtomarProposition
-	{
-		public LustreFirstOutputIsTrue(string label = null) : base(label)
-		{
-		}
-
-		public override bool Evaluate(LustreModelBase model)
-		{
-		    return (bool)model.output;
-		}
-	}
+        public override bool Evaluate(LustreModelBase model)
+        {
+            return (bool)model.Outputs.FirstOrDefault(); ;
+        }
+    }
 
     public class LustrePressureBelowThreshold : LustreAtomarProposition
     {
@@ -59,8 +52,9 @@ namespace SafetyLustre
         {
         }
 
-        public override bool Evaluate(LustreModelBase model) {
-            return (int)model.output < threshold;
+        public override bool Evaluate(LustreModelBase model)
+        {
+            return (int)model.Outputs.FirstOrDefault() < threshold;
         }
     }
 

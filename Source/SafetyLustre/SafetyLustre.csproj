@@ -32,7 +32,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -54,8 +54,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Action.cs" />
-    <Compile Include="Constant.cs" />
     <Compile Include="ModelChecking\LustreAtomarProposition.cs" />
     <Compile Include="ModelChecking\LustreCounterExampleSerialization.cs" />
     <Compile Include="ModelChecking\LustreExecutableModel.cs" />
@@ -64,20 +62,11 @@
     <Compile Include="ModelChecking\LustreModelChecking.cs" />
     <Compile Include="ModelChecking\LustreModelSerializer.cs" />
     <Compile Include="ModelChecking\LustreSimulator.cs" />
-    <Compile Include="Node.cs" />
-    <Compile Include="Parser.cs" />
-    <Compile Include="PredefinedObjects.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Signal.cs" />
-    <Compile Include="State.cs" />
-    <Compile Include="SyntaxException.cs" />
-    <Compile Include="Dag.cs" />
-    <Compile Include="Variable.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -96,16 +85,19 @@
       <Project>{a91cb8af-8a4c-4f69-848e-b3962f9a94f9}</Project>
       <Name>SafetyChecking</Name>
     </ProjectReference>
+    <ProjectReference Include="..\SafetyLustre.LustreCompiler\SafetyLustre.LustreCompiler.csproj">
+      <Project>{CFAAFD6C-76B7-400A-A715-2EB0B8EE0899}</Project>
+      <Name>SafetyLustre.LustreCompiler</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="Antlr4.Runtime">
+      <HintPath>..\..\Dependencies\Antlr4.Runtime.4.6.4\lib\net45\Antlr4.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
-    </PropertyGroup>
-  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
