@@ -24,7 +24,7 @@ the case studies are available under the
 Links
 -------------------------
 
-- [Partial reimplementation in C++ (Probabilistic Executable Model Checker)](https://github.com/joleuger/pemc/)
+- [(Partial) reimplementation in C++](https://github.com/joleuger/pemc/)
 
 - [Wiki page with our S# related publications](https://github.com/isse-augsburg/ssharp/wiki/Publications)
 
